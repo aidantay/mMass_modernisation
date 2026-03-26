@@ -93,7 +93,7 @@ class canvas(wx.Window):
         self.viewMemory = [[],[]]
         
         self.cursorPosition = [0, 0, 0, 0]
-        self.cursorImage = wx.StockCursor(wx.CURSOR_ARROW)
+        self.cursorImage = wx.Cursor(wx.CURSOR_ARROW)
         self.draggingStart = False
         self.mouseEvent = False
         self.lastDraw = None
@@ -142,7 +142,7 @@ class canvas(wx.Window):
         height = max(1, height)
             
         # make new offscreen bitmap
-        self.plotBuffer = wx.EmptyBitmap(width, height)
+        self.plotBuffer = wx.Bitmap(width, height)
         self.setSize()
         
         # redraw plot or clear area
@@ -180,7 +180,7 @@ class canvas(wx.Window):
         self.escMouseEvents()
         
         # set mouse cursor
-        self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+        self.SetCursor(wx.Cursor(wx.CURSOR_ARROW))
     # ----
     
     
@@ -802,7 +802,7 @@ class canvas(wx.Window):
             width, height = self.GetClientSize()
         
         # create empty bitmap
-        tmpBitmap = wx.EmptyBitmap(width, height)
+        tmpBitmap = wx.Bitmap(width, height)
         tmpDC = wx.MemoryDC()
         tmpDC.SelectObject(tmpBitmap)
         tmpDC.Clear()
@@ -1057,15 +1057,15 @@ class canvas(wx.Window):
         
         location = self.getCursorLocation()
         if location == 'xAxis':
-            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZEWE))
+            self.SetCursor(wx.Cursor(wx.CURSOR_SIZEWE))
         elif location == 'yAxis':
-            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENS))
+            self.SetCursor(wx.Cursor(wx.CURSOR_SIZENS))
         elif location == 'plot' and self.properties['showCurImage']:
             self.SetCursor(self.cursorImage)
         elif location == 'plot' and self.mouseFn:
-            self.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
+            self.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
         else:
-            self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+            self.SetCursor(wx.Cursor(wx.CURSOR_ARROW))
     # ----
     
     
@@ -1206,7 +1206,6 @@ class canvas(wx.Window):
         plotX2 += penWidth
         plotY2 += penWidth
         
-        dc.BeginDrawing()
         
         # fill background
         dc.SetBrush(wx.Brush(self.properties['plotColour'], wx.SOLID))
@@ -1275,7 +1274,6 @@ class canvas(wx.Window):
         # draw plot outline
         dc.DrawRectangle(plotX1, plotY1, plotX2 - plotX1, plotY2 - plotY1)
         
-        dc.EndDrawing()
     # ----
     
     
@@ -1288,7 +1286,6 @@ class canvas(wx.Window):
         # set font
         dc.SetFont(_scaleFont(self.properties['axisFont'], self.printerScale['fonts']))
         
-        dc.BeginDrawing()
         
         # draw legend
         y = self.plotCoords[1] + 5 * self.printerScale['drawings']
@@ -1314,7 +1311,6 @@ class canvas(wx.Window):
             # set y for next name
             y += dc.GetTextExtent(name[0])[1]/2 + 2 * self.printerScale['drawings']
         
-        dc.EndDrawing()
     # ----
     
     
@@ -1348,7 +1344,6 @@ class canvas(wx.Window):
         penWidth = self.printerScale['drawings']
         dc.SetPen(wx.Pen(self.properties['axisColour'], penWidth))
         
-        dc.BeginDrawing()
         
         # draw outline
         dc.SetBrush(wx.Brush(self.properties['plotColour'], wx.SOLID))
@@ -1369,7 +1364,6 @@ class canvas(wx.Window):
             x = x2 + 2*self.printerScale['drawings']
             dc.DrawPolygon([(x, y1), (x, y1+height), (x+size, y1+height/2)])
         
-        dc.EndDrawing()
     # ----
     
     
@@ -1406,7 +1400,6 @@ class canvas(wx.Window):
         penWidth = self.printerScale['drawings']
         dc.SetPen(wx.Pen(self.properties['axisColour'], penWidth))
         
-        dc.BeginDrawing()
         
         # draw outline
         dc.SetBrush(wx.Brush(self.properties['plotColour'], wx.SOLID))
@@ -1427,7 +1420,6 @@ class canvas(wx.Window):
             y = y2 + 2*self.printerScale['drawings']
             dc.DrawPolygon([(x1, y), (x1+width, y), (x1+width/2, y+size)])
         
-        dc.EndDrawing()
     # ----
     
     
@@ -1517,7 +1509,6 @@ class canvas(wx.Window):
         
         # draw tracker lines
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetPen(wx.Pen(wx.BLACK))
         dc.SetLogicalFunction(wx.INVERT)
         
@@ -1564,7 +1555,6 @@ class canvas(wx.Window):
             elif self.properties['showCurYPos']:
                 self.drawInvertedText(dc, yText, x, y1, self.properties['axisFont'])
         
-        dc.EndDrawing()
     # ----
     
     
@@ -1576,7 +1566,7 @@ class canvas(wx.Window):
             return
         
         # hide cursor
-        self.SetCursor(wx.StockCursor(wx.CURSOR_BLANK))
+        self.SetCursor(wx.Cursor(wx.CURSOR_BLANK))
         
         # get screen coordinations
         x1 = self.draggingStart[2]
@@ -1601,7 +1591,6 @@ class canvas(wx.Window):
         
         # draw tracker
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetLogicalFunction(wx.INVERT)
         dc.SetPen(wx.Pen(wx.BLACK))
         
@@ -1618,7 +1607,6 @@ class canvas(wx.Window):
                 dc.DrawLine(x2, y1, x2, y2)
         
         dc.SetLogicalFunction(wx.COPY)
-        dc.EndDrawing()
         
         # draw diff text
         if self.properties['showCurDistance']:
@@ -1667,7 +1655,7 @@ class canvas(wx.Window):
             return
         
         # hide cursor
-        self.SetCursor(wx.StockCursor(wx.CURSOR_BLANK))
+        self.SetCursor(wx.Cursor(wx.CURSOR_BLANK))
         
         # get X coordinations
         x = self.cursorPosition[2]
@@ -1680,7 +1668,6 @@ class canvas(wx.Window):
         
         # draw tracker lines
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetPen(wx.Pen(wx.BLACK))
         dc.SetLogicalFunction(wx.INVERT)
         if wx.Platform == '__WXMAC__':
@@ -1692,7 +1679,6 @@ class canvas(wx.Window):
                 dc.DrawLine(x, minY, x, maxY)
                 dc.DrawLine(x-5, currentY[1], x+6, currentY[1])
         dc.SetLogicalFunction(wx.COPY)
-        dc.EndDrawing()
         
         # draw x position text
         if self.properties['showCurXPos']:
@@ -1774,7 +1760,6 @@ class canvas(wx.Window):
         
         # set pen
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetLogicalFunction(wx.INVERT)
         dc.SetPen(wx.Pen(wx.BLACK))
         
@@ -1814,7 +1799,6 @@ class canvas(wx.Window):
             # draw text
             self.drawInvertedText(dc, chargeText, x, y, self.properties['axisFont'])
         
-        dc.EndDrawing()
     # ----
     
     
@@ -1849,7 +1833,6 @@ class canvas(wx.Window):
         
         # set canvas and pen
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetPen(wx.Pen(wx.BLACK))
         dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
         dc.SetLogicalFunction(wx.INVERT)
@@ -1874,7 +1857,6 @@ class canvas(wx.Window):
         
         # resset canvas and pen
         dc.SetLogicalFunction(wx.COPY)
-        dc.EndDrawing()
     # ----
     
     
@@ -1903,13 +1885,11 @@ class canvas(wx.Window):
         
         # draw tracker lines
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetLogicalFunction(wx.INVERT)
         dc.SetPen(wx.Pen(wx.BLACK))
         dc.SetBrush(wx.Brush(wx.BLACK, wx.TRANSPARENT))
         dc.DrawRectangle(x1, y1, width, height)
         dc.SetLogicalFunction(wx.COPY)
-        dc.EndDrawing()
     # ----
     
     
@@ -1932,7 +1912,6 @@ class canvas(wx.Window):
         
         # draw tracker lines
         dc = wx.ClientDC(self)
-        dc.BeginDrawing()
         dc.SetLogicalFunction(wx.INVERT)
         dc.SetPen(wx.Pen(wx.BLACK))
         dc.SetBrush(wx.Brush(wx.BLACK, wx.TRANSPARENT))
@@ -1945,7 +1924,6 @@ class canvas(wx.Window):
             dc.DrawLine(x1+1, y1, x2, y1)
             dc.DrawLine(x2, y1-3, x2, y1+3)
         dc.SetLogicalFunction(wx.COPY)
-        dc.EndDrawing()
     # ----
     
     
@@ -1977,7 +1955,6 @@ class canvas(wx.Window):
             dc.DrawPolygon([(x+7, y+2), (x, y+5), (x+7, y+8)])
         elif direction == 'right':
             dc.DrawPolygon([(x-7, y+2), (x, y+5), (x-7, y+8)])
-        dc.EndDrawing()
     # ----
     
     
@@ -1993,25 +1970,21 @@ class canvas(wx.Window):
         size = dc.GetTextExtent(text)
         
         # make tmp bitmap
-        tmpBuffer = wx.EmptyBitmap(size[0], size[1])
+        tmpBuffer = wx.Bitmap(size[0], size[1])
         textDC.SelectObject(tmpBuffer)
         
         # draw under mac
         if wx.Platform == '__WXMAC__':
             textDC.SetTextForeground(wx.WHITE)
             textDC.SetLogicalFunction(wx.INVERT)
-            textDC.BeginDrawing()
             textDC.DrawText(text, 0, 0)
-            textDC.EndDrawing()
             textDC.SetLogicalFunction(wx.COPY)
             dc.Blit(x, y, size[0], size[1], textDC, 0, 0, wx.INVERT)
         
         # draw under others
         else:
             textDC.Clear()
-            textDC.BeginDrawing()
             textDC.DrawText(text, 0, 0)
-            textDC.EndDrawing()
             dc.Blit(x, y, size[0], size[1], textDC, 0, 0, wx.EQUIV)
     # ----
     
