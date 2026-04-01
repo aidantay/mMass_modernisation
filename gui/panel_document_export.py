@@ -44,7 +44,7 @@ class panelDocumentExport(wx.MiniFrame):
         
         # make gui items
         self.makeGUI()
-        wx.EVT_CLOSE(self, self.onClose)
+        self.Bind(wx.EVT_CLOSE, self.onClose)
         
         # select default tool
         self.onToolSelected(tool=self.currentTool)
@@ -760,7 +760,7 @@ class panelDocumentExport(wx.MiniFrame):
                 if 'group' in config.export['peaklistColumns']:
                     header += "group" + separator
                 
-                buff += '%s\n' % (header.rstrip())
+                buff += '%s\n' % (header.rstrip(separator))
             
             # export data
             for peak in peaklist:
@@ -788,7 +788,7 @@ class panelDocumentExport(wx.MiniFrame):
                 if 'group' in config.export['peaklistColumns']:
                     line += str(peak.group) + separator
                 
-                buff += '%s\n' % (line.replace("None","").rstrip())
+                buff += '%s\n' % (line.replace("None","").rstrip(separator).rstrip())
         
         # export to mgf
         elif config.export['peaklistFormat'] == 'MGF':

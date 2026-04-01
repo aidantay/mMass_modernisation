@@ -144,9 +144,9 @@ class mainFrame(wx.Frame):
         
         # bind events
         self.DragAcceptFiles(True)
-        wx.EVT_CLOSE(self, self.onQuit)
-        wx.EVT_SIZE(self, self.onSize)
-        wx.EVT_DROP_FILES(self, self.onDocumentDropped)
+        self.Bind(wx.EVT_CLOSE, self.onQuit)
+        self.Bind(wx.EVT_SIZE, self.onSize)
+        self.Bind(wx.EVT_DROP_FILES, self.onDocumentDropped)
         
         # show app
         self.Layout()

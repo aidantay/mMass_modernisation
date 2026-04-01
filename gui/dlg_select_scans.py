@@ -87,6 +87,7 @@ class dlgSelectScans(wx.Dialog):
         # make items
         cancel_butt = wx.Button(self, wx.ID_CANCEL, "Cancel")
         open_butt = wx.Button(self, wx.ID_OK, "Open Selected")
+        open_butt.SetLabel("Open Selected")
         open_butt.Bind(wx.EVT_BUTTON, self.onOpen)
         
         # pack items
@@ -221,15 +222,15 @@ class dlgSelectScans(wx.Dialog):
                 try: pointsCount = str(scan['pointsCount'])
                 except: pass
             
-            self.scanList.InsertStringItem(row, str(scan['scanNumber']))
-            self.scanList.SetStringItem(row, 1, retentionTime)
-            self.scanList.SetStringItem(row, 2, msLevel)
-            self.scanList.SetStringItem(row, 3, precursorMZ)
-            self.scanList.SetStringItem(row, 4, precursorCharge)
-            self.scanList.SetStringItem(row, 5, mzRange)
-            self.scanList.SetStringItem(row, 6, totIonCurrent)
-            self.scanList.SetStringItem(row, 7, pointsCount)
-            self.scanList.SetStringItem(row, 8, scan['spectrumType'])
+            self.scanList.InsertItem(row, str(scan['scanNumber']))
+            self.scanList.SetItem(row, 1, retentionTime)
+            self.scanList.SetItem(row, 2, msLevel)
+            self.scanList.SetItem(row, 3, precursorMZ)
+            self.scanList.SetItem(row, 4, precursorCharge)
+            self.scanList.SetItem(row, 5, mzRange)
+            self.scanList.SetItem(row, 6, totIonCurrent)
+            self.scanList.SetItem(row, 7, pointsCount)
+            self.scanList.SetItem(row, 8, scan['spectrumType'])
             self.scanList.SetItemData(row, row)
             row += 1
         

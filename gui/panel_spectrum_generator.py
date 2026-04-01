@@ -47,11 +47,11 @@ class panelSpectrumGenerator(wx.MiniFrame):
         
         # init container
         self.spectrumContainer = mspy.plot.container([])
-        
+
         # make gui items
         self.makeGUI()
-        wx.EVT_CLOSE(self, self.onClose)
-    # ----
+        self.Bind(wx.EVT_CLOSE, self.onClose)
+        # ----
     
     
     def makeGUI(self):
@@ -367,7 +367,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
         self.currentDocument.backup(('spectrum'))
         
         # set profile to document
-        points = self.currentProfile.copy()
+        points = self.currentProfile[:]
         self.currentDocument.spectrum.setprofile(points)
         
         # update document
@@ -487,7 +487,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
         self.spectrumCanvas.setProperties(axisFont=axisFont)
         
         # set cursor
-        cursor = (wx.StockCursor(wx.CURSOR_ARROW), images.lib['cursorsCrossMeasure'])
+        cursor = (wx.Cursor(wx.CURSOR_ARROW), images.lib['cursorsCrossMeasure'])
         self.spectrumCanvas.setCursorImage(cursor[bool(config.spectrum['showTracker'])])
         self.spectrumCanvas.setMFunction([None, 'cross'][config.spectrum['showTracker']])
         

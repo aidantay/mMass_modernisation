@@ -214,7 +214,7 @@ class bgrPanel(wx.Panel):
         self.image = image
         
         # set paint event to tile image
-        wx.EVT_PAINT(self, self._onPaint)
+        self.Bind(wx.EVT_PAINT, self._onPaint)
     # ----
     
     
@@ -764,11 +764,11 @@ class gaugePanel(wx.Dialog):
     
 
 
-class validator(wx.PyValidator):
+class validator(wx.Validator):
     """Text validator."""
     
     def __init__(self, flag):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.flag = flag
         self.Bind(wx.EVT_CHAR, self.OnChar)
     # ----
@@ -931,6 +931,9 @@ def layout(parent, sizer):
     parent.SetSize((size[0]+1, size[1]+1))
     parent.SetSize(size)
     parent.SetMinSize(size)
+# ----
+
+
 # ----
 
 
