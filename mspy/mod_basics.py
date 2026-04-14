@@ -70,7 +70,7 @@ def delta(measuredMass, countedMass, units='ppm'):
     elif units == '%':
         return (measuredMass - countedMass) / countedMass*100
     else:
-        raise ValueError, 'Unknown units for delta! -->' + units
+        raise ValueError('Unknown units for delta! -->' + units)
 # ----
 
 
