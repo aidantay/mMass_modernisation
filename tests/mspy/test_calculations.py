@@ -40,6 +40,7 @@ class TestSmoke(object):
     def test_calculations_module_contents(self, calculations):
         """Verify that the mspy.calculations module has expected attributes."""
         expected_functions = [
+            'signal_median',
             'signal_interpolate_x', 'signal_interpolate_y',
             'signal_locate_x', 'signal_locate_max_y', 'signal_box',
             'signal_intensity', 'signal_centroid', 'signal_width',
@@ -54,6 +55,20 @@ class TestSmoke(object):
         ]
         for func in expected_functions:
             assert hasattr(calculations, func), "Missing function: {}".format(func)
+
+@pytest.mark.unit
+class TestMedian(object):
+    """Tests for signal_median function."""
+
+    def test_signal_median_standard(self, calculations):
+        arr = np.array([1, 2, 3, 4, 5], dtype=np.double)
+        assert calculations.signal_median(arr) == 3.0
+        arr2 = np.array([1, 2, 3, 4], dtype=np.double)
+        assert calculations.signal_median(arr2) == 2.5
+
+    def test_signal_median_empty(self, calculations):
+        arr = np.array([], dtype=np.double)
+        assert calculations.signal_median(arr) == 0.0
 
 @pytest.mark.unit
 class TestInterpolation(object):
@@ -294,7 +309,6 @@ class TestFormula(object):
 class TestRegression(object):
     """Regression and edge case tests."""
 
-    @pytest.mark.skip(reason="Segfaults due to lack of type checking in C extension")
     def test_invalid_inputs(self, calculations):
         with pytest.raises((TypeError, ValueError)):
             calculations.signal_locate_max_y(None)
@@ -363,6 +377,11 @@ class TestPropertyBased(object):
         res = calculations.signal_intensity(signal, x)
         assert isinstance(res, float)
 
+    @given(arr=arrays(dtype=np.double, shape=st.tuples(st.integers(min_value=0, max_value=100)), elements=st.floats(allow_nan=True, allow_infinity=True)))
+    def test_signal_median_property(self, calculations, arr):
+        res = calculations.signal_median(arr)
+        assert isinstance(res, float)
+
     @given(
         signal=signals(),
         x=st.floats(allow_nan=True, allow_infinity=True),
@@ -404,7 +423,6 @@ class TestPropertyBased(object):
         if len(res) > 0:
             assert res.shape[1] == 2
 
-    @pytest.mark.skip(reason="Segfaults when minX > maxX or with certain edge case floats")
     @given(
         signal=signals(),
         mX=st.floats(allow_nan=True, allow_infinity=True),
