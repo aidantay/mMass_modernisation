@@ -1,0 +1,17 @@
+name: mmass-modern
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.11,<3.13
+  - numpy
+  - scipy
+  - wxpython>=4.2
+  - pytest
+  - pytest-cov
+  - pytest-mock
+  - pytest-timeout
+  - pytest-xdist
+  - hypothesis
+  - ruff
+  - mypy
