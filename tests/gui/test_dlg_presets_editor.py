@@ -1,24 +1,21 @@
+import copy
+
+import gui.libs as libs
 import pytest
 import wx
-import copy
-import gui.libs as libs
-import gui.mwx as mwx
 from gui.dlg_presets_editor import dlgPresetsEditor
 
 MOCK_PRESETS = {
-    'processing': {
-        'Preset A': {'crop': True},
-        'Preset B': {'crop': False}
-    },
-    'fragments': {
-        'Preset C': ['a', 'b']
-    }
+    "processing": {"Preset A": {"crop": True}, "Preset B": {"crop": False}},
+    "fragments": {"Preset C": ["a", "b"]},
 }
+
 
 @pytest.fixture
 def gui_app(wx_app):
     """Alias for the wx_app fixture from conftest.py."""
     return wx_app
+
 
 @pytest.fixture
 def presets_editor(gui_app, mocker):
@@ -27,10 +24,10 @@ def presets_editor(gui_app, mocker):
     test_presets = copy.deepcopy(MOCK_PRESETS)
 
     # Patching gui.libs.presets because it's imported as 'libs' in dlg_presets_editor
-    mocker.patch('gui.libs.presets', test_presets)
+    mocker.patch("gui.libs.presets", test_presets)
     # Mock UI elements that could block or make noise
-    mock_dlg = mocker.patch('gui.mwx.dlgMessage')
-    mock_bell = mocker.patch('wx.Bell')
+    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_bell = mocker.patch("wx.Bell")
     parent = wx.Frame(None)
     dlg = dlgPresetsEditor(parent)
     # Store mocks for assertion in tests
@@ -40,11 +37,12 @@ def presets_editor(gui_app, mocker):
     dlg.Destroy()
     parent.Destroy()
 
+
 @pytest.mark.unit
 def test_initialization(presets_editor):
     """
     Verify dialog title and initial state.
-    
+
     Task 1 Requirements:
     - Verify dialog title is "Presets Library".
     - Verify itemsList has columns "name" and "category".
@@ -53,28 +51,30 @@ def test_initialization(presets_editor):
     """
     # Verify title
     assert presets_editor.GetTitle() == "Presets Library"
-    
+
     # Verify itemsList has columns "name" and "category"
     assert presets_editor.itemsList.GetColumn(0).GetText() == "name"
     assert presets_editor.itemsList.GetColumn(1).GetText() == "category"
-    
+
     # Verify itemsList has 3 items
     assert presets_editor.itemsList.GetItemCount() == 3
-    
+
     # Verify selectedItem is initially None
     assert presets_editor.selectedItem is None
+
 
 @pytest.mark.unit
 def test_update_list_with_data(presets_editor):
     """
     Verify list count matches libs.presets content.
-    
+
     Task 2 Requirements:
     - Verify itemsList has 3 items.
     - Verify itemsMap has 3 items.
     """
     assert presets_editor.itemsList.GetItemCount() == 3
     assert len(presets_editor.itemsMap) == 3
+
 
 @pytest.mark.unit
 def test_update_list_empty(presets_editor, mocker):
@@ -87,10 +87,11 @@ def test_update_list_empty(presets_editor, mocker):
     - Verify itemsList has 0 items.
     - Verify itemsMap has 0 items.
     """
-    mocker.patch('gui.libs.presets', {})
+    mocker.patch("gui.libs.presets", {})
     presets_editor.updateItemsList()
     assert presets_editor.itemsList.GetItemCount() == 0
     assert len(presets_editor.itemsMap) == 0
+
 
 @pytest.mark.unit
 def test_on_item_selected(presets_editor, mocker):
@@ -124,6 +125,7 @@ def test_on_item_selected(presets_editor, mocker):
     assert presets_editor.itemCategory_value.GetValue() == category
     assert presets_editor.selectedItem == index
 
+
 @pytest.mark.unit
 def test_on_rename_item_success(presets_editor, mocker):
     """
@@ -155,11 +157,12 @@ def test_on_rename_item_success(presets_editor, mocker):
     presets_editor.onRenameItem(None)
 
     # Verify that "New Preset Name" exists in libs.presets['processing'] and "Preset A" is removed
-    assert "New Preset Name" in libs.presets['processing']
-    assert "Preset A" not in libs.presets['processing']
+    assert "New Preset Name" in libs.presets["processing"]
+    assert "Preset A" not in libs.presets["processing"]
 
     # Verify itemName_value is empty (due to clearEditor)
     assert presets_editor.itemName_value.GetValue() == ""
+
 
 @pytest.mark.unit
 def test_on_rename_item_collision(presets_editor, mocker):
@@ -195,13 +198,14 @@ def test_on_rename_item_collision(presets_editor, mocker):
     presets_editor._mock_dlg.assert_called()
 
     # Verify libs.presets['processing']['Preset A'] still exists
-    assert "Preset A" in libs.presets['processing']
+    assert "Preset A" in libs.presets["processing"]
+
 
 @pytest.mark.unit
 def test_on_rename_item_no_selection(presets_editor):
     """
     Verify wx.Bell when renaming without selection.
-    
+
     Task 3 Requirements:
     - Ensure presets_editor.selectedItem is None.
     - Call presets_editor.onRenameItem(None).
@@ -209,12 +213,13 @@ def test_on_rename_item_no_selection(presets_editor):
     """
     # Ensure selectedItem is None
     presets_editor.selectedItem = None
-    
+
     # Call onRenameItem
     presets_editor.onRenameItem(None)
-    
+
     # Assert that wx.Bell was called
     presets_editor._mock_bell.assert_called()
+
 
 @pytest.mark.unit
 def test_on_rename_item_empty_name(presets_editor, mocker):
@@ -243,7 +248,8 @@ def test_on_rename_item_empty_name(presets_editor, mocker):
     presets_editor._mock_bell.assert_called()
 
     # Verify libs.presets['processing']['Preset A'] still exists
-    assert "Preset A" in libs.presets['processing']
+    assert "Preset A" in libs.presets["processing"]
+
 
 @pytest.mark.unit
 def test_on_delete_item_confirmed(presets_editor, mocker):
@@ -269,37 +275,39 @@ def test_on_delete_item_confirmed(presets_editor, mocker):
     assert index != -1
 
     # Mock getSelected to return [0] and GetItemData to return the correct index
-    mocker.patch.object(presets_editor.itemsList, 'getSelected', return_value=[0])
-    mocker.patch.object(presets_editor.itemsList, 'GetItemData', return_value=index)
+    mocker.patch.object(presets_editor.itemsList, "getSelected", return_value=[0])
+    mocker.patch.object(presets_editor.itemsList, "GetItemData", return_value=index)
     # Call onDeleteItem
     presets_editor.onDeleteItem(None)
 
     # Verify "Preset A" is removed from libs.presets['processing']
-    assert "Preset A" not in libs.presets['processing']
+    assert "Preset A" not in libs.presets["processing"]
 
     # Verify itemsList count
     assert presets_editor.itemsList.GetItemCount() == 2
+
 
 @pytest.mark.unit
 def test_on_delete_item_cancelled(presets_editor):
     """
     Verify no change when cancelled.
-    
+
     Task 4 Requirements:
     - Mock mwx.dlgMessage.return_value.ShowModal to return wx.ID_CANCEL.
     - Call presets_editor.onDeleteItem(None).
     - Verify libs.presets['processing']['Preset A'] still exists.
     """
     presets_editor._mock_dlg.return_value.ShowModal.return_value = wx.ID_CANCEL
-    
+
     # Ensure "Preset A" exists
-    assert 'Preset A' in libs.presets['processing']
-    
+    assert "Preset A" in libs.presets["processing"]
+
     # Call onDeleteItem
     presets_editor.onDeleteItem(None)
-    
+
     # Verify "Preset A" still exists
-    assert 'Preset A' in libs.presets['processing']
+    assert "Preset A" in libs.presets["processing"]
+
 
 @pytest.mark.unit
 def test_on_delete_multiple_items(presets_editor, mocker):
@@ -327,22 +335,25 @@ def test_on_delete_multiple_items(presets_editor, mocker):
     def mock_get_item_data(row):
         return indices[row]
 
-    mocker.patch.object(presets_editor.itemsList, 'getSelected', return_value=[0, 1])
-    mocker.patch.object(presets_editor.itemsList, 'GetItemData', side_effect=mock_get_item_data)
+    mocker.patch.object(presets_editor.itemsList, "getSelected", return_value=[0, 1])
+    mocker.patch.object(
+        presets_editor.itemsList, "GetItemData", side_effect=mock_get_item_data
+    )
     presets_editor.onDeleteItem(None)
 
     # Verify both are removed from libs.presets['processing']
-    assert 'Preset A' not in libs.presets['processing']
-    assert 'Preset B' not in libs.presets['processing']
+    assert "Preset A" not in libs.presets["processing"]
+    assert "Preset B" not in libs.presets["processing"]
 
     # Verify itemsList count
     assert presets_editor.itemsList.GetItemCount() == 1
+
 
 @pytest.mark.unit
 def test_clear_editor(presets_editor):
     """
     Verify text controls are cleared.
-    
+
     Task 4 Requirements:
     - Set text in itemName_value and itemCategory_value.
     - Call presets_editor.clearEditor().
@@ -350,17 +361,18 @@ def test_clear_editor(presets_editor):
     """
     presets_editor.itemName_value.SetValue("some name")
     presets_editor.itemCategory_value.SetValue("some category")
-    
+
     presets_editor.clearEditor()
-    
+
     assert presets_editor.itemName_value.GetValue() == ""
     assert presets_editor.itemCategory_value.GetValue() == ""
+
 
 @pytest.mark.unit
 def test_get_item_data(presets_editor):
     """
     Verify correct data retrieval and validation.
-    
+
     Task 4 Requirements:
     - Set values in the text controls.
     - Call presets_editor.getItemData() and assert it returns ("name", "category").
@@ -368,15 +380,14 @@ def test_get_item_data(presets_editor):
     """
     presets_editor.itemName_value.SetValue("name")
     presets_editor.itemCategory_value.SetValue("category")
-    
+
     assert presets_editor.getItemData() == ("name", "category")
-    
+
     # One value empty
     presets_editor.itemName_value.SetValue("")
     assert presets_editor.getItemData() is False
-    
+
     # Reset and other value empty
     presets_editor.itemName_value.SetValue("name")
     presets_editor.itemCategory_value.SetValue("")
     assert presets_editor.getItemData() is False
-

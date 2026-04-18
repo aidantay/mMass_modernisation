@@ -1,8 +1,7 @@
-#load libs
+# load libs
 from wx.lib.embeddedimage import PyEmbeddedImage
 
-
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Icon16 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAD2UlEQVQ4jU1TC0yTVxS+pbWI"
     "zARWCbgYrdINZ1egMCHDTf/BxAV84GiRBIabQlszLGQwNVKyOQVEoMACpQJFoFHDU7bVwBxD"
@@ -23,13 +22,14 @@ Icon16 = PyEmbeddedImage(
     "YZ8Z0Fo7ixJtDek7bfoT79javxJYf60Otvd+967ZPpAImQkbGzZv3eEiYIeEhiG/DWxq6E7Z"
     "X9g+CYQ8IMt/1MP49RPkbhFFunKDyN08IYxUisjv+j3wU/X+xxt53H2BgeJXy7SH5eu3Ca1d"
     "6+EtDtomzUiXlJSeT+jQqCijOv2t/oLj3sbs+PXfSyK81Ju80REOZ80GZhnCwsJZ/wGeWyTK"
-    "lr1tSQAAAABJRU5ErkJggg==")
+    "lr1tSQAAAABJRU5ErkJggg=="
+)
 getIcon16Data = Icon16.GetData
 getIcon16Image = Icon16.GetImage
 getIcon16Bitmap = Icon16.GetBitmap
 getIcon16Icon = Icon16.GetIcon
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Icon32 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAMxUlEQVRYhYVXB1hUVxZ+zAxF"
     "mghI0VhQkWBDURB0NRbEjsYYXNauseyqEHtWI1aUiAmJgGhE2kqNolKlioCowNCGIp0BBQWB"
@@ -92,13 +92,14 @@ Icon32 = PyEmbeddedImage(
     "aRP2bN9s/8ul046xgZ5b+DF+22ujPe3fRl+d3xbtPqv93tmJbYFH9d76HNSuPb9lBH+v/YjY"
     "lbOHXx9vqLKPcnNb6kefDqjK0nI1tWFsXfBxZSQSiRgXFxdF0cAiU1NTp/WgMmeYmgqPXZoP"
     "JR0VTTY6VCZRmUFNrahY00GsaNuCiikVY+pEmy2o1IZpKBkaGnLGjDbiGRsbcnT19Bl9fX1a"
-    "d+gwTk5OTFtbG/Nv+dNu50tIL9UAAAAASUVORK5CYII=")
+    "d+gwTk5OTFtbG/Nv+dNu50tIL9UAAAAASUVORK5CYII="
+)
 getIcon32Data = Icon32.GetData
 getIcon32Image = Icon32.GetImage
 getIcon32Bitmap = Icon32.GetBitmap
 getIcon32Icon = Icon32.GetIcon
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Icon48 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/gD+AP7rGNSCAAAA"
     "CXBIWXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAwAAAAMADO7oxXAAAWW0lEQVRo3r2aeZRn"
@@ -209,13 +210,14 @@ Icon48 = PyEmbeddedImage(
     "3/+LCbzYGtdeey233347Y2NjiAhat7sinudyzqtezzM/3ovjKOV7ju4s552OcqB9x2pMqq2x"
     "2opVIgasFREjxlhJM2uaMbYeio0zMdYijqNFoVnTUWRofvEFUff/M/4vFuIu2tG1f2cAAAAl"
     "dEVYdGNyZWF0ZS1kYXRlADIwMTAtMDQtMDdUMDE6MDQ6MzAtMDc6MDAcrxQlAAAAJXRFWHRt"
-    "b2RpZnktZGF0ZQAyMDEwLTA0LTA3VDAxOjA0OjMwLTA3OjAwQx5iEQAAAABJRU5ErkJggg==")
+    "b2RpZnktZGF0ZQAyMDEwLTA0LTA3VDAxOjA0OjMwLTA3OjAwQx5iEQAAAABJRU5ErkJggg=="
+)
 getIcon48Data = Icon48.GetData
 getIcon48Image = Icon48.GetImage
 getIcon48Bitmap = Icon48.GetBitmap
 getIcon48Icon = Icon48.GetIcon
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Icon128 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAgAElEQVR4nOy9BXQU6dY13AmE"
     "BBLc3V0Hd3d3d3d3l+AeCE6ABA0eCIQQJ4G4O3F3t+5Oav/nPN1huPK978zcd907c9dfax0q"
@@ -870,13 +872,14 @@ Icon128 = PyEmbeddedImage(
     "0GwTs43EZt/b0GzT78c/BYC8KSkpyfT27Vv1fY8eqlWsQtj3v+x/8PUjKMzA+BEcMoQ5zCAR"
     "elVAMYZ4YRZj/PQvhvl1mb97f0bjmmbj2hnjRyObDa2MbZTnLMzZVP/+/U3btm0zrV692hQS"
     "EmIKCgoyBQcH/2lDrhcaGmpauXKlKSIiQoX0T58+mRITE7+F9/8nAPx/YoB/98vC9I8B8iNQ"
-    "zGD5cdj8MP7Ra76/xo/X//H3//0H/MErxUj/yiv/l+P/AOfLCUkdQZ73AAAAAElFTkSuQmCC")
+    "zGD5cdj8MP7Ra76/xo/X//H3//0H/MErxUj/yiv/l+P/AOfLCUkdQZ73AAAAAElFTkSuQmCC"
+)
 getIcon128Data = Icon128.GetData
 getIcon128Image = Icon128.GetImage
 getIcon128Bitmap = Icon128.GetBitmap
 getIcon128Icon = Icon128.GetIcon
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Icon256 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4nOxdBXgUydadKO6y"
     "uDvBHRaWXWSxRXaX3cUdgru7Q3AIuri7u8YTPGhIIAnxEHcZ6fvfU92dDAF2973/vQf73tT3"
@@ -2887,13 +2890,14 @@ Icon256 = PyEmbeddedImage(
     "5H8F6OJE0843XirmC28zj42NlU6cOCFWsQICAkQy+59o/N75M/j7+4t8HOPNaDRmi8v/UwCf"
     "x+WvkEN2BGFKEnqiMCULPWGYEofevvhvWHbPZ/qapu9J/35NP0t2n9f0O/koyD/5hZt4SgbO"
     "/4Sn/Lfa/xHA/7/Lx07wj5HEp8jiU8SRnVn9Bfsrz/Nn7+Vjn+HPPvt//Us1IQD2/HxeZhcr"
-    "/5Pt78T5/0cA/+zLn4HlrxLH/4b93ff2v375PwXw9+z/AcBkyjWvAE8GAAAAAElFTkSuQmCC")
+    "/5Pt78T5/0cA/+zLn4HlrxLH/4b93ff2v375PwXw9+z/AcBkyjWvAE8GAAAAAElFTkSuQmCC"
+)
 getIcon256Data = Icon256.GetData
 getIcon256Image = Icon256.GetImage
 getIcon256Bitmap = Icon256.GetBitmap
 getIcon256Icon = Icon256.GetIcon
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Icon512 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAgAElEQVR4nOy9B5RVRdb+fZzR"
     "/5gVJOeclYwMWcWRnCQIgkhOklEQULLkKEHiS8bwSWgBHSV3N41EGVIThyYJtCQFYTnvvPXV"
@@ -7720,13 +7724,14 @@ Icon512 = PyEmbeddedImage(
     "Zn7vHlqr78+de2f5AtIFdnWN1cxNuioIVUmoCkNFHKoCcYdU9lm5XqPfQfW7nf3dWVar78+d"
     "e2f5AtIFdnWdW7M3+VFROCINI/JwlmBUc9aaZq/JzPU/+p0/ba2+P3funeULSBfY1XV9HQXG"
     "UWE4Qx6eOUevyZnfz61r9f25c+8sX0C6wK6u560zQfQogXjGXHHd3kStvj937p3lC0gX2NX1"
-    "uuoK+L22dDm1+v7cuXf+B8MdoY4LIndWAAAAAElFTkSuQmCC")
+    "uuoK+L22dDm1+v7cuXf+B8MdoY4LIndWAAAAAElFTkSuQmCC"
+)
 getIcon512Data = Icon512.GetData
 getIcon512Image = Icon512.GetImage
 getIcon512Bitmap = Icon512.GetBitmap
 getIcon512Icon = Icon512.GetIcon
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 IconAbout = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAgAElEQVR4nOy9BXQU6dY13AmE"
     "BBLc3V0Hd3d3d3d3l+AeCE6ABA0eCIQQJ4G4O3F3t+5Oav/nPN1huPK978zcd907c9dfax0q"
@@ -8381,12 +8386,13 @@ IconAbout = PyEmbeddedImage(
     "0GwTs43EZt/b0GzT78c/BYC8KSkpyfT27Vv1fY8eqlWsQtj3v+x/8PUjKMzA+BEcMoQ5zCAR"
     "elVAMYZ4YRZj/PQvhvl1mb97f0bjmmbj2hnjRyObDa2MbZTnLMzZVP/+/U3btm0zrV692hQS"
     "EmIKCgoyBQcH/2lDrhcaGmpauXKlKSIiQoX0T58+mRITE7+F9/8nAPx/YoB/98vC9I8B8iNQ"
-    "zGD5cdj8MP7Ra76/xo/X//H3//0H/MErxUj/yiv/l+P/AOfLCUkdQZ73AAAAAElFTkSuQmCC")
+    "zGD5cdj8MP7Ra76/xo/X//H3//0H/MErxUj/yiv/l+P/AOfLCUkdQZ73AAAAAElFTkSuQmCC"
+)
 getIconAboutData = IconAbout.GetData
 getIconAboutImage = IconAbout.GetImage
 getIconAboutBitmap = IconAbout.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 IconError = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAABz5J"
     "REFUWIWdl2lsVNcVx39vG3fGNgbvQBBJsA1G2MauscMUCcVVlQ+pGkFFaSs1IUrVqhJrEQQV"
@@ -8423,12 +8429,13 @@ IconError = PyEmbeddedImage(
     "09bNTE7u6OzqkvVMBjWRWB28rIymbdv49/S0cWtqavgt+N5NSJNb5bMLQcudritdOwkvb62o"
     "+M6+vXvLBHdptiwsd+VcYO4727K4Ewzqt2dm7v0Wjs/CLJAA4kDM0bmsADcya4AKoOLHcLIW"
     "XlrGt2RLw61LcCoB80CK3DWOsx+tJGChkC+5Qpx7j2MKuZXU7cMCDHIhzuY0kACSQGYxeLUC"
-    "SvmLjjAXLlA8QUwKtbpi+w9DKwnvvVH2bAAAAABJRU5ErkJggg==")
+    "SvmLjjAXLlA8QUwKtbpi+w9DKwnvvVH2bAAAAABJRU5ErkJggg=="
+)
 getIconErrorData = IconError.GetData
 getIconErrorImage = IconError.GetImage
 getIconErrorBitmap = IconError.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 IconDlg = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAH2NJREFUeNrUe3uwXGWV79qvfj9On/cjOScvEgIECAl5EBUR"
@@ -8580,12 +8587,13 @@ IconDlg = PyEmbeddedImage(
     "VR5B+ml/Fm4PVZE0WQ62ddr39jzxx2WBUa3AEDN4bS8bTnD/1rLRfv9N/XXe8oWW2v/hI6yA"
     "ufi7nZtvvpmWlpbezp/gLW8SvHHIy4a0bJy2tREMd9lwgtE20kFsO0Cmu/y835t5vPvd76Yv"
     "f/nLNDw8LI7pnuaA5Y+RkRHRGXoHHtKy57ONN9Yeb3TE8vF6iRqN0s9//nMaHBx8a3/QmEzy"
-    "H3Kf9t7/F2AAvVBYSGyzBHEAAAAASUVORK5CYII=")
+    "H3Kf9t7/F2AAvVBYSGyzBHEAAAAASUVORK5CYII="
+)
 getIconDlgData = IconDlg.GetData
 getIconDlgImage = IconDlg.GetImage
 getIconDlgBitmap = IconDlg.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Stopper = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -8607,12 +8615,13 @@ Stopper = PyEmbeddedImage(
     "KWRE0qQCxGpAzM+AHXwE4ltAfAdZI0iTARCzMuAHv4H4AkgzE9R5ajBNcXFxMuiqkcRYoWpB"
     "ehh0gTgShIEKSv8DwcGDBzfCxEBskBhIDiYG0gNyqjM0MMAAqDDCzs7O79ChQ5tAfBjb3t5+"
     "BZIjXoE0BgMxG7LTYJpBbCyaQOAXEwOZgAUaT3idChRjQLP1A0WBAwpaC1jEg4J+0aJFT9Cj"
-    "A0kMlBBOkJ0AKE5yJCdygAADALFea70zE1mzAAAAAElFTkSuQmCC")
+    "A0kMlBBOkJ0AKE5yJCdygAADALFea70zE1mzAAAAAElFTkSuQmCC"
+)
 getStopperData = Stopper.GetData
 getStopperImage = Stopper.GetImage
 getStopperBitmap = Stopper.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Cursors = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAGAAAAAgCAMAAADaHo1mAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -8638,12 +8647,13 @@ Cursors = PyEmbeddedImage(
     "ox/AWM6TE4nBLBXI7efJ86FZI23qk2cFxlqBsVZgrBXYeZrg0lA0ga+Pnl+yzoD2jxbNxqwe"
     "2HODuSGur+z/ROabBDmMl74C5Z/ghxJoFDOrdC4caOn8egWXPSSnUM+saDdMTtH5cQI1O+dh"
     "dp6gX7Rf3fg6QV93VrsmRuDh1vxA27sVPE7wdAZLi85uyO77jV1jses45PfiI8AANeEkeR0W"
-    "zU0AAAAASUVORK5CYII=")
+    "zU0AAAAASUVORK5CYII="
+)
 getCursorsData = Cursors.GetData
 getCursorsImage = Cursors.GetImage
 getCursorsBitmap = Cursors.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Arrows = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACwAAAALCAYAAAAELW+PAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -8665,21 +8675,23 @@ Arrows = PyEmbeddedImage(
     "eDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+pO8lywAAAJBJREFUeNrUVUEOwCAIs4v/"
     "/3KnW5YYh4qgB7kYDZS2aATJcFJEayGApJVpQVgpOuNV8fT5NpcTfPd4KDosqcrHlcwmKF67"
     "TYJK90ZkWw6zV9AhLQ5hNKQZshJhagsnmmAV2ZowLQBKN+HIFQnT6J529GUOPOLj4OK7nBUe"
-    "IiZxqXl0JrKbPqCfQJz2090CDAAcZDYU4QC5KAAAAABJRU5ErkJggg==")
+    "IiZxqXl0JrKbPqCfQJz2090CDAAcZDYU4QC5KAAAAABJRU5ErkJggg=="
+)
 getArrowsData = Arrows.GetData
 getArrowsImage = Arrows.GetImage
 getArrowsBitmap = Arrows.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrToolbar = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACMAAAAkCAYAAAAD3IPhAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAAD1JREFUeNrs0LEJACAUQ0E/OLibRytnSHGB1x+ZJKtlAwMD"
-    "AwMDAwMDAwMDAwMDAwMD8zGv04LZTc9cAQYAXRFpP7LCOH4AAAAASUVORK5CYII=")
+    "AwMDAwMDAwMDAwMDAwMD8zGv04LZTc9cAQYAXRFpP7LCOH4AAAAASUVORK5CYII="
+)
 getBgrToolbarData = BgrToolbar.GetData
 getBgrToolbarImage = BgrToolbar.GetImage
 getBgrToolbarBitmap = BgrToolbar.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrToolbarNoBorder = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACMAAAAmCAYAAABOFCLqAAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -8733,12 +8745,13 @@ BgrToolbarNoBorder = PyEmbeddedImage(
     "/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz"
     "/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAADlJ"
     "REFUeNrszgENAAAIAyC1f+dbQzdIQCepK6YOkZGRkZGRkZGRkZGRkZGRkZGRkfmVWQAAAP//"
-    "AwC5TQNJT4QhUAAAAABJRU5ErkJggg==")
+    "AwC5TQNJT4QhUAAAAABJRU5ErkJggg=="
+)
 getBgrToolbarNoBorderData = BgrToolbarNoBorder.GetData
 getBgrToolbarNoBorderImage = BgrToolbarNoBorder.GetImage
 getBgrToolbarNoBorderBitmap = BgrToolbarNoBorder.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrControlbar = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACMAAAAmCAYAAABOFCLqAAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -8792,12 +8805,13 @@ BgrControlbar = PyEmbeddedImage(
     "/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz"
     "/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAADlJ"
     "REFUeNrszgENAAAIAyC1f+dbQzdIQCepK6YOkZGRkZGRkZGRkZGRkZGRkZGRkfmVWQAAAP//"
-    "AwC5TQNJT4QhUAAAAABJRU5ErkJggg==")
+    "AwC5TQNJT4QhUAAAAABJRU5ErkJggg=="
+)
 getBgrControlbarData = BgrControlbar.GetData
 getBgrControlbarImage = BgrControlbar.GetImage
 getBgrControlbarBitmap = BgrControlbar.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrControlbarBorder = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACMAAAAgCAYAAACYTcH3AAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -8851,12 +8865,13 @@ BgrControlbarBorder = PyEmbeddedImage(
     "/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz"
     "/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAEBJ"
     "REFUeNrs2LERACAQw7DAMTibP0tQpJAnUO01M2lppygYGBgYGBgYGBgYGBgYGJi/rSS3BXOa"
-    "lsgDAAD//wMAGHwGuyee6zsAAAAASUVORK5CYII=")
+    "lsgDAAD//wMAGHwGuyee6zsAAAAASUVORK5CYII="
+)
 getBgrControlbarBorderData = BgrControlbarBorder.GetData
 getBgrControlbarBorderImage = BgrControlbarBorder.GetImage
 getBgrControlbarBorderBitmap = BgrControlbarBorder.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrControlbarDouble = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACMAAAAmCAYAAABOFCLqAAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -8910,12 +8925,13 @@ BgrControlbarDouble = PyEmbeddedImage(
     "/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz"
     "/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAADlJ"
     "REFUeNrszgENAAAIAyC1f+dbQzdIQCepK6YOkZGRkZGRkZGRkZGRkZGRkZGRkfmVWQAAAP//"
-    "AwC5TQNJT4QhUAAAAABJRU5ErkJggg==")
+    "AwC5TQNJT4QhUAAAAABJRU5ErkJggg=="
+)
 getBgrControlbarDoubleData = BgrControlbarDouble.GetData
 getBgrControlbarDoubleImage = BgrControlbarDouble.GetImage
 getBgrControlbarDoubleBitmap = BgrControlbarDouble.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrBottombar = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAGQAAAAzCAYAAABhaa0bAAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -8970,12 +8986,13 @@ BgrBottombar = PyEmbeddedImage(
     "/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAGdJ"
     "REFUeNrs0QENAAAIwzDAv+djA5JOwtpJSncaC4AICBABASIgQAQEiIAICBABASIgQAQEiIAI"
     "CBABASIgQAQEiIAICBABASIgQAQEiIAICBABASIgQAQEiIAICBABedoCAAD//wMA/FsDY7NR"
-    "5NQAAAAASUVORK5CYII=")
+    "5NQAAAAASUVORK5CYII="
+)
 getBgrBottombarData = BgrBottombar.GetData
 getBgrBottombarImage = BgrBottombar.GetImage
 getBgrBottombarBitmap = BgrBottombar.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BgrPeakEditor = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAACMAAADICAYAAABiWlgYAAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -9031,12 +9048,13 @@ BgrPeakEditor = PyEmbeddedImage(
     "REFUeNrszjEBAAAIAyC1f+fZwcsDEtBJ6oupR2RkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRk"
     "ZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRk"
     "ZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZG4WAAD//wMAvUcEjQNPYZUAAAAASUVORK5C"
-    "YII=")
+    "YII="
+)
 getBgrPeakEditorData = BgrPeakEditor.GetData
 getBgrPeakEditorImage = BgrPeakEditor.GetImage
 getBgrPeakEditorBitmap = BgrPeakEditor.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BulletsOn = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAADQAAAAMCAYAAAAtUZ4rAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -9060,12 +9078,13 @@ BulletsOn = PyEmbeddedImage(
     "ZZoJ2Vy91H3XwDUxxniygFDG3UB1a23QHW5alDBkdidseFJd8AjWlBFkIOImWmZygcQ961H+"
     "Q+BoLba9d5ExuacI97aLGv6zQlfJqD1YmQablk/4wXK7akkNgW9/WEvmYr5cUWQIBhZsI8bG"
     "YqvhFTLZWedKnKxL1RaO7Wjs8lnjjftuh6Vf36mBeNrV5yXAALCAmBce7Z1kAAAAAElFTkSu"
-    "QmCC")
+    "QmCC"
+)
 getBulletsOnData = BulletsOn.GetData
 getBulletsOnImage = BulletsOn.GetImage
 getBulletsOnBitmap = BulletsOn.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BulletsOff = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAADQAAAAMCAYAAAAtUZ4rAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -9089,12 +9108,13 @@ BulletsOff = PyEmbeddedImage(
     "Z+OP25Erc9x34SZgzpWDreomIVZjx4EyKpT0rihZFWXhqopTYiQOiwLxI3UUGKmqG3n0VxzN"
     "rrUe8V/t+w/fP9f1Kxjme+vZe62n5fi1QlYYKQZVZqJNs0Ks5W7VcHTCGaFEGKM/P1DEKaPE"
     "ETD92B5V1HoSKTA8eT+wT+eVB6s2UHtDlc4ayyxbMINMBYS3/frsAgwAO46VakCchWcAAAAA"
-    "SUVORK5CYII=")
+    "SUVORK5CYII="
+)
 getBulletsOffData = BulletsOff.GetData
 getBulletsOffImage = BulletsOff.GetImage
 getBulletsOffBitmap = BulletsOff.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 Tools = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAfoAAAAXCAYAAADjuI2hAAAACXBIWXMAAAsTAAALEwEAmpwY"
     "AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUI"
@@ -9180,12 +9200,13 @@ Tools = PyEmbeddedImage(
     "Orfzngop+oZEnZdgqv1WPwaJFcYgUK1mZd5d8EEZnBdHLesgkj0zwOt1QzauHW2NVP8bPop0"
     "yfvovQnq1XODajodSJIvOJjdVLfVSKwzZ2dPcvtriScBItt5Cp8pvimoe1sJUSv/OMBb8oIt"
     "kLSffeG709Ox4lveVx+16xlniC0JmiAIgiCIvwv+b2oJgiAIgomeIAiCIAgmeoIgCIIgmOgJ"
-    "giAIgrgH/wIAAP//AwCPTk5J9VUYhAAAAABJRU5ErkJggg==")
+    "giAIgrgH/wIAAP//AwCPTk5J9VUYhAAAAABJRU5ErkJggg=="
+)
 getToolsData = Tools.GetData
 getToolsImage = Tools.GetImage
 getToolsBitmap = Tools.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BottombarsOn = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAASIAAABYCAYAAABRcPqlAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -9232,12 +9253,13 @@ BottombarsOn = PyEmbeddedImage(
     "adNBtGWZ6WX65Ltzz5tc1s+sf5Wet2zTt/Wo4W8a5G7nE9dyROOKx6pZe2LN4qWztuq0Nd/T"
     "qsyasKsmHG5Qx7BDm/6kaYrOsytlHNFBDy66WhbPntHz/xxXy4SHW5VZciaPct6ep65hhSNK"
     "65e6k2ZtmnE7RUeU5mfniAjR3sLTxGkos215S8LBteX6PREhAgBCBIAQAQAhAkCIAGAz/ggw"
-    "AKJULqU7XoPnAAAAAElFTkSuQmCC")
+    "AKJULqU7XoPnAAAAAElFTkSuQmCC"
+)
 getBottombarsOnData = BottombarsOn.GetData
 getBottombarsOnImage = BottombarsOn.GetImage
 getBottombarsOnBitmap = BottombarsOn.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 BottombarsOff = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAASIAAABYCAYAAABRcPqlAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -9284,12 +9306,13 @@ BottombarsOff = PyEmbeddedImage(
     "3MvOf6w/Rce9BTAkBsgoi8iebRrU2kzwFiarLxjtONICPQzqiMKOr12zdmbNYjVQvGbykvN4"
     "lVkSdpWEww51lBPa9HfiUtcZEcIRpQfKKDP3K3/36vtXKl1xTngYl7n0KDPlHlN5yr3cptGm"
     "vw8Serdp5rPqMrP1hnsw1JOsHndVagX0DmU63a2q7it7y+V5IoQIAOAweOkVABAiAACECAAQ"
-    "IgCAfwIMACXR9JmMQbIUAAAAAElFTkSuQmCC")
+    "IgCAfwIMACXR9JmMQbIUAAAAAElFTkSuQmCC"
+)
 getBottombarsOffData = BottombarsOff.GetData
 getBottombarsOffImage = BottombarsOff.GetImage
 getBottombarsOffBitmap = BottombarsOff.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 ToolbarsOn = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAOsAAADyCAYAAACs0zKGAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -9376,12 +9399,13 @@ ToolbarsOn = PyEmbeddedImage(
     "sIOzJrKWFiHUgD65mBP4AXYug73MUnrcC6f0GXEyMwBg5zLYCdG6SDiaTGtwyza9oSnNQc1f"
     "fSmhe18DuIuzSsH9dVhVGpdC0lqF6pSrJ1/L/R9fKdzRWWtE/O/Jz9c+bae7+UgZHn2NFAnA"
     "WWsU9XPs9QZyaRMkUQBijYji5WcZUXp67WwDQs2V0L2vAbwVremGyUEkWQozyAOwr7O6WL+0"
-    "5KIIFWBnZwWAa/VZAQCxAgBiBUCsAIBYASDL/wIMAGnyqGGTjvBhAAAAAElFTkSuQmCC")
+    "5KIIFWBnZwWAa/VZAQCxAgBiBUCsAIBYASDL/wIMAGnyqGGTjvBhAAAAAElFTkSuQmCC"
+)
 getToolbarsOnData = ToolbarsOn.GetData
 getToolbarsOnImage = ToolbarsOn.GetImage
 getToolbarsOnBitmap = ToolbarsOn.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 ToolbarsOff = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAOsAAADyCAYAAACs0zKGAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
@@ -9469,12 +9493,13 @@ ToolbarsOff = PyEmbeddedImage(
     "qzc0VXNQ61dfUuje+wA+JbJK4f6LsCo1LhVJaxXVqaievC/3OL5S+MTIWiPxnz/2aDZYkdBH"
     "0vDofVSRACJrjVEFEQ3T0Fy1CSpRALJGpHj5WUaknl5HtgFRcyl0730Ab0VyQiZWWXDLTCLJ"
     "VJhJHoBzI6uLjUtLURRRAU6OrABwrzErACArACArALICALICQJb/CzAAGbpQ96M3zzMAAAAA"
-    "SUVORK5CYII=")
+    "SUVORK5CYII="
+)
 getToolbarsOffData = ToolbarsOff.GetData
 getToolbarsOffImage = ToolbarsOff.GetImage
 getToolbarsOffBitmap = ToolbarsOff.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 PtableOn = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAbEAAAD/CAYAAAB/9egZAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAA/i9JREFUeNrsfQd8lFX29jO9ZTLpkEboJYBIr0oTkC4oIqBi"
@@ -10682,12 +10707,13 @@ PtableOn = PyEmbeddedImage(
     "a9rj6wsoqj4DV+eZ6uYf6yCBGvmzhnNXG/2tBSqV8XMurXpeqFJFJnnC1507N2/JaKqO31I8"
     "UuP+VnsGG+8LRU3KjGVFSblFsQZCXVk+iPfaQ//6eOg6Y18obnO5gRWY9BkGWYndTGC9hJBC"
     "JA0tdKjxEJivXfpI5dLMPJZGx/8L+InRqaGbB/Ly4dcKazSXJ9LJ9JHxy/j/vvhJTv5VCkzO"
-    "idmZE5OpIIMMMsjgGNzonNj/E2AAz1XfLodM4S4AAAAASUVORK5CYII=")
+    "idmZE5OpIIMMMsjgGNzonNj/E2AAz1XfLodM4S4AAAAASUVORK5CYII="
+)
 getPtableOnData = PtableOn.GetData
 getPtableOnImage = PtableOn.GetImage
 getPtableOnBitmap = PtableOn.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 PtableOff = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAbEAAAD/CAYAAAB/9egZAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAA4bZJREFUeNrsfQegFEXyd82+QE4mMkgWFASJKuYz/AUTIiYE"
@@ -11760,12 +11786,13 @@ PtableOff = PyEmbeddedImage(
     "0hM/8h3902eLfpiagefQEBzl4Wd1pdEXfAyzRrTYff/94EeMy5Xmqjbeh+fb6tdtmma97oyj"
     "l4efCsrrcq70aeXC77b/xvrx0yxQlbiqIcE8+E1XVOHh89mVxspL4381iVQ59oX/NvkwUGIb"
     "QYm5nolCcIpe2fhbgl+eybwg+H/Cx3LD0qMBFk8PC9pOC08H+BnAH8D/D8F/1avwT11c9m9d"
-    "U1NTAwQN1mAN1mD1ucLpR69i/SnAAIDb/vS6cU0rAAAAAElFTkSuQmCC")
+    "U1NTAwQN1mAN1mD1ucLpR69i/SnAAIDb/vS6cU0rAAAAAElFTkSuQmCC"
+)
 getPtableOffData = PtableOff.GetData
 getPtableOffImage = PtableOff.GetImage
 getPtableOffBitmap = PtableOff.GetBitmap
 
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 PtableSel = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAbEAAAD/CAYAAAB/9egZAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAwPdJREFUeNrsnQncVtP2+Hdvk0ZkHi8pNNIgSpMKjTQpQzfS"
@@ -12683,8 +12710,8 @@ PtableSel = PyEmbeddedImage(
     "y/xpBo146V9Gd9wyc4kE4tmqrLiPyk5BDwJMWcyGJUdfdZVaeljxCBFCiHsRLo2QmGede9pi"
     "mTjryPbvcx2Im+0e5TyAVwRQJvpDmaUL12UD+TbnWTrNGLYyMd8lyhlnvVbbY1U2TfFBJr7L"
     "5VwznUVS7xD+uYtwbA8a2mEcCq+OPPwe4Cqy8L6wIoOelAcPHjxENsJ9TqxwsHeQefDgwYOH"
-    "GLC9c2L/J8AAm1EAoAEDbGUAAAAASUVORK5CYII=")
+    "GLC9c2L/J8AAm1EAoAEDbGUAAAAASUVORK5CYII="
+)
 getPtableSelData = PtableSel.GetData
 getPtableSelImage = PtableSel.GetImage
 getPtableSelBitmap = PtableSel.GetBitmap
-

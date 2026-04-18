@@ -1,15 +1,17 @@
-import pytest
 import os
-import tempfile
 import shutil
-from hypothesis import given, strategies as st, settings, HealthCheck
-import mspy.mod_utils as mod_utils
-import mspy.mod_stopper as mod_stopper
+import tempfile
 
+import mspy.mod_stopper as mod_stopper
+import mspy.mod_utils as mod_utils
+import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture(scope="module")
 def reset_stopper():
@@ -31,7 +33,8 @@ def tmp_dir():
 # TEST LOAD FUNCTION
 # ============================================================================
 
-class TestLoad(object):
+
+class TestLoad:
     """Tests for mod_utils.load function."""
 
     def test_load_raises_ioerror_for_missing_file(self):
@@ -79,7 +82,7 @@ class TestLoad(object):
         test_file = os.path.join(os.path.dirname(__file__), "../data/test_small.xy")
         if not os.path.exists(test_file):
             pytest.skip("Test data file not available")
-        result = mod_utils.load(test_file, dataType='continuous')
+        result = mod_utils.load(test_file, dataType="continuous")
         assert result is not None
 
     def test_load_xy_extension_discrete(self):
@@ -87,55 +90,57 @@ class TestLoad(object):
         test_file = os.path.join(os.path.dirname(__file__), "../data/test_small.xy")
         if not os.path.exists(test_file):
             pytest.skip("Test data file not available")
-        result = mod_utils.load(test_file, dataType='discrete')
+        result = mod_utils.load(test_file, dataType="discrete")
         assert result is not None
 
     def test_load_txt_extension_mocked(self, tmp_dir, mocker):
         """Test load with .txt file using mocked parser."""
         # Create a real .txt file
         txt_path = os.path.join(tmp_dir, "test.txt")
-        with open(txt_path, 'w') as f:
+        with open(txt_path, "w") as f:
             f.write("100.0\t1000.0\n")
             f.write("200.0\t2000.0\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseXY')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(txt_path, dataType='continuous')
+        result = mod_utils.load(txt_path, dataType="continuous")
 
         # Verify parser was created and scan called
         mock_parser_class.assert_called_once_with(txt_path)
-        mock_instance.scan.assert_called_once_with('continuous')
+        mock_instance.scan.assert_called_once_with("continuous")
         assert result == mock_scan
 
     def test_load_asc_extension_mocked(self, tmp_dir, mocker):
         """Test load with .asc file using mocked parser."""
         asc_path = os.path.join(tmp_dir, "test.asc")
-        with open(asc_path, 'w') as f:
+        with open(asc_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseXY')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(asc_path, dataType='discrete')
+        result = mod_utils.load(asc_path, dataType="discrete")
 
         mock_parser_class.assert_called_once_with(asc_path)
-        mock_instance.scan.assert_called_once_with('discrete')
+        mock_instance.scan.assert_called_once_with("discrete")
         assert result == mock_scan
 
     def test_load_xml_sniff_mzdata(self, tmp_dir, mocker):
         """Test load with XML file containing mzData marker."""
         xml_path = os.path.join(tmp_dir, "test.xml")
-        with open(xml_path, 'w') as f:
-            f.write('<?xml version="1.0"?>\n<mzData xmlns="http://psi.hupo.org/ms/mzdata">\n')
+        with open(xml_path, "w") as f:
+            f.write(
+                '<?xml version="1.0"?>\n<mzData xmlns="http://psi.hupo.org/ms/mzdata">\n'
+            )
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZDATA')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZDATA")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -150,10 +155,12 @@ class TestLoad(object):
     def test_load_xml_sniff_mzxml(self, tmp_dir, mocker):
         """Test load with XML file containing mzXML marker."""
         xml_path = os.path.join(tmp_dir, "test.xml")
-        with open(xml_path, 'w') as f:
-            f.write('<?xml version="1.0"?>\n<mzXML xmlns="http://sashimi.sourceforge.net/schema_revision">\n')
+        with open(xml_path, "w") as f:
+            f.write(
+                '<?xml version="1.0"?>\n<mzXML xmlns="http://sashimi.sourceforge.net/schema_revision">\n'
+            )
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZXML')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZXML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -168,10 +175,12 @@ class TestLoad(object):
     def test_load_xml_sniff_mzml(self, tmp_dir, mocker):
         """Test load with XML file containing mzML marker."""
         xml_path = os.path.join(tmp_dir, "test.xml")
-        with open(xml_path, 'w') as f:
-            f.write('<?xml version="1.0"?>\n<mzML xmlns="http://psi.hupo.org/ms/mzml">\n')
+        with open(xml_path, "w") as f:
+            f.write(
+                '<?xml version="1.0"?>\n<mzML xmlns="http://psi.hupo.org/ms/mzml">\n'
+            )
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZML')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -186,7 +195,7 @@ class TestLoad(object):
     def test_load_xml_no_marker_raises_nameerror(self, tmp_dir):
         """Test load with XML file that has no recognized marker raises NameError."""
         xml_path = os.path.join(tmp_dir, "test.xml")
-        with open(xml_path, 'w') as f:
+        with open(xml_path, "w") as f:
             f.write('<?xml version="1.0"?>\n<unknown></unknown>\n')
 
         # In Python 2, accessing undefined docType raises NameError, not ValueError
@@ -196,7 +205,7 @@ class TestLoad(object):
     def test_load_unknown_extension_raises_nameerror(self, tmp_dir):
         """Test load with unknown file extension raises NameError."""
         unknown_path = os.path.join(tmp_dir, "test.unknown")
-        with open(unknown_path, 'w') as f:
+        with open(unknown_path, "w") as f:
             f.write("dummy content")
 
         # In Python 2, accessing undefined docType raises NameError, not ValueError
@@ -206,10 +215,10 @@ class TestLoad(object):
     def test_load_extension_case_insensitive_uppercase(self, tmp_dir, mocker):
         """Test load handles uppercase extension properly."""
         xy_path = os.path.join(tmp_dir, "test.XY")
-        with open(xy_path, 'w') as f:
+        with open(xy_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseXY')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -223,10 +232,10 @@ class TestLoad(object):
     def test_load_mzdata_passes_scanid_to_parser(self, tmp_dir, mocker):
         """Test that load passes scanID to parser.scan()."""
         mzdata_path = os.path.join(tmp_dir, "test.mzdata")
-        with open(mzdata_path, 'w') as f:
+        with open(mzdata_path, "w") as f:
             f.write("<mzData></mzData>")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZDATA')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZDATA")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -239,32 +248,32 @@ class TestLoad(object):
     def test_load_xy_passes_datatype_to_parser(self, tmp_dir, mocker):
         """Test that load passes dataType to parser.scan()."""
         xy_path = os.path.join(tmp_dir, "test.xy")
-        with open(xy_path, 'w') as f:
+        with open(xy_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseXY')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(xy_path, dataType='discrete')
+        result = mod_utils.load(xy_path, dataType="discrete")
 
-        mock_instance.scan.assert_called_once_with('discrete')
+        mock_instance.scan.assert_called_once_with("discrete")
 
     def test_load_mgf_ignores_datatype(self, tmp_dir, mocker):
         """Test that load calls parser.scan(scanID) for MGF, ignoring dataType."""
         mgf_path = os.path.join(tmp_dir, "test.mgf")
-        with open(mgf_path, 'w') as f:
+        with open(mgf_path, "w") as f:
             f.write("BEGIN IONS\nEND IONS\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMGF')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMGF")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(mgf_path, scanID=5, dataType='continuous')
+        result = mod_utils.load(mgf_path, scanID=5, dataType="continuous")
 
         # MGF parser should receive scanID, not dataType
         mock_instance.scan.assert_called_once_with(5)
@@ -272,10 +281,10 @@ class TestLoad(object):
     def test_load_mzxml_parser_receives_scanid(self, tmp_dir, mocker):
         """Test that load passes scanID to mzXML parser."""
         mzxml_path = os.path.join(tmp_dir, "test.mzxml")
-        with open(mzxml_path, 'w') as f:
+        with open(mzxml_path, "w") as f:
             f.write("<mzXML></mzXML>")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZXML')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZXML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -288,10 +297,10 @@ class TestLoad(object):
     def test_load_mzml_parser_receives_scanid(self, tmp_dir, mocker):
         """Test that load passes scanID to mzML parser."""
         mzml_path = os.path.join(tmp_dir, "test.mzml")
-        with open(mzml_path, 'w') as f:
+        with open(mzml_path, "w") as f:
             f.write("<mzML></mzML>")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZML')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -304,11 +313,11 @@ class TestLoad(object):
     def test_load_returns_scan_object_from_parser(self, tmp_dir, mocker):
         """Test that load returns the scan object from the parser."""
         mzdata_path = os.path.join(tmp_dir, "test.mzdata")
-        with open(mzdata_path, 'w') as f:
+        with open(mzdata_path, "w") as f:
             f.write("<mzData></mzData>")
 
-        mock_scan_obj = {'data': 'mock_scan'}
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZDATA')
+        mock_scan_obj = {"data": "mock_scan"}
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZDATA")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_instance.scan.return_value = mock_scan_obj
@@ -320,10 +329,10 @@ class TestLoad(object):
     def test_load_parser_returns_false_propagates(self, tmp_dir, mocker):
         """Test that load returns False when parser returns False."""
         xy_path = os.path.join(tmp_dir, "test.xy")
-        with open(xy_path, 'w') as f:
+        with open(xy_path, "w") as f:
             f.write("invalid_data")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseXY')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_instance.scan.return_value = False
@@ -335,10 +344,10 @@ class TestLoad(object):
     def test_load_default_scanid_is_none(self, tmp_dir, mocker):
         """Test that load uses None as default scanID when not provided."""
         mzxml_path = os.path.join(tmp_dir, "test.mzxml")
-        with open(mzxml_path, 'w') as f:
+        with open(mzxml_path, "w") as f:
             f.write("<mzXML></mzXML>")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMZXML')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZXML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -353,10 +362,10 @@ class TestLoad(object):
     def test_load_default_datatype_is_continuous(self, tmp_dir, mocker):
         """Test that load uses 'continuous' as default dataType when not provided."""
         xy_path = os.path.join(tmp_dir, "test.xy")
-        with open(xy_path, 'w') as f:
+        with open(xy_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseXY')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -366,18 +375,18 @@ class TestLoad(object):
         result = mod_utils.load(xy_path)
 
         # Should be called with 'continuous'
-        mock_instance.scan.assert_called_once_with('continuous')
+        mock_instance.scan.assert_called_once_with("continuous")
 
     def test_load_mgf_with_scanid(self, tmp_dir, mocker):
         """Test that MGF parser receives scanID parameter."""
         mgf_path = os.path.join(tmp_dir, "test.mgf")
-        with open(mgf_path, 'w') as f:
+        with open(mgf_path, "w") as f:
             f.write("BEGIN IONS\nTITLE=Test\nEND IONS\n")
 
-        mock_parser_class = mocker.patch('mspy.mod_utils.parseMGF')
+        mock_parser_class = mocker.patch("mspy.mod_utils.parseMGF")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
-        mock_scan_obj = {'ms_level': 2}
+        mock_scan_obj = {"ms_level": 2}
         mock_instance.scan.return_value = mock_scan_obj
 
         result = mod_utils.load(mgf_path, scanID=100)
@@ -400,7 +409,8 @@ class TestLoad(object):
 # TEST SAVE FUNCTION
 # ============================================================================
 
-class TestSave(object):
+
+class TestSave:
     """Tests for mod_utils.save function."""
 
     def test_save_nonempty_data_writes_correct_content(self, tmp_dir):
@@ -412,15 +422,15 @@ class TestSave(object):
 
         # Read back and verify
         assert os.path.exists(save_path)
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 3
 
         # Check format is correct (floats with tabs)
         for i, line in enumerate(lines):
-            parts = line.split('\t')
+            parts = line.split("\t")
             assert len(parts) == 2
             # Values should be floats
             float(parts[0])
@@ -434,9 +444,9 @@ class TestSave(object):
         mod_utils.save(data, save_path)
 
         assert os.path.exists(save_path)
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
-        assert content == ''
+        assert content == ""
 
     def test_save_single_point(self, tmp_dir):
         """Test save with single data point."""
@@ -445,12 +455,12 @@ class TestSave(object):
 
         mod_utils.save(data, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 1
-        assert '\t' in lines[0]
+        assert "\t" in lines[0]
 
     def test_save_float_format_precision(self, tmp_dir):
         """Test that save preserves float precision."""
@@ -460,11 +470,11 @@ class TestSave(object):
 
         mod_utils.save(data, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
         # Python %f format defaults to 6 decimal places
-        assert '100.123456' in content or '100.123456' in content.replace('\n', '')
+        assert "100.123456" in content or "100.123456" in content.replace("\n", "")
 
     def test_save_large_numbers(self, tmp_dir):
         """Test save with large floating point numbers."""
@@ -473,10 +483,10 @@ class TestSave(object):
 
         mod_utils.save(data, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 2
 
     def test_save_zero_values(self, tmp_dir):
@@ -486,12 +496,12 @@ class TestSave(object):
 
         mod_utils.save(data, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 2
-        assert '0.' in lines[0]
+        assert "0." in lines[0]
 
     def test_save_negative_values(self, tmp_dir):
         """Test save with negative values."""
@@ -500,38 +510,50 @@ class TestSave(object):
 
         mod_utils.save(data, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
-        assert '-100.' in content
-        assert '-200.' in content
+        assert "-100." in content
+        assert "-200." in content
 
     def test_save_line_count_matches_data_length_property(self, tmp_dir):
         """Property-based test: save produces line count equal to data length."""
-        @given(st.lists(st.lists(st.floats(
-            allow_nan=False,
-            allow_infinity=False,
-            min_value=-1e10,
-            max_value=1e10
-        ), min_size=2, max_size=2), max_size=20))
-        @settings(max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+
+        @given(
+            st.lists(
+                st.lists(
+                    st.floats(
+                        allow_nan=False,
+                        allow_infinity=False,
+                        min_value=-1e10,
+                        max_value=1e10,
+                    ),
+                    min_size=2,
+                    max_size=2,
+                ),
+                max_size=20,
+            )
+        )
+        @settings(
+            max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow]
+        )
         def check_save_line_count(data):
             if not data:
                 # Empty data case
-                save_path = os.path.join(tmp_dir, "property_test_{}.txt".format(id(data)))
+                save_path = os.path.join(tmp_dir, f"property_test_{id(data)}.txt")
                 mod_utils.save(data, save_path)
-                with open(save_path, 'r') as f:
+                with open(save_path) as f:
                     content = f.read()
-                assert content == ''
+                assert content == ""
             else:
-                save_path = os.path.join(tmp_dir, "property_test_{}.txt".format(id(data)))
+                save_path = os.path.join(tmp_dir, f"property_test_{id(data)}.txt")
                 mod_utils.save(data, save_path)
-                with open(save_path, 'r') as f:
+                with open(save_path) as f:
                     content = f.read()
 
                 # Count non-empty lines
                 if content.strip():
-                    lines = content.strip().split('\n')
+                    lines = content.strip().split("\n")
                     assert len(lines) == len(data)
                 else:
                     assert len(data) == 0
@@ -550,10 +572,10 @@ class TestSave(object):
         data2 = [[50.0, 60.0]]
         mod_utils.save(data2, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 1
 
     def test_save_with_very_small_numbers(self, tmp_dir):
@@ -563,9 +585,9 @@ class TestSave(object):
 
         mod_utils.save(data, save_path)
 
-        with open(save_path, 'r') as f:
+        with open(save_path) as f:
             content = f.read()
 
         assert len(content) > 0
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
         assert len(lines) == 2

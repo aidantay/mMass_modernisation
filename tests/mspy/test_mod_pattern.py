@@ -1,11 +1,12 @@
-import pytest
-import numpy
-from hypothesis import given, strategies as st, settings, HealthCheck
 import mspy.mod_pattern as mod_pattern
 import mspy.mod_stopper as mod_stopper
+import mspy.obj_compound as obj_compound
 import mspy.obj_peak as obj_peak
 import mspy.obj_peaklist as obj_peaklist
-import mspy.obj_compound as obj_compound
+import numpy
+import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 
 # Module-level fixture to reset stopper state
@@ -21,21 +22,23 @@ def reset_stopper():
 # TEST SCAFFOLDING AND IMPORT VERIFICATION
 # ============================================================================
 
+
 def test_import_mod_pattern():
     """Smoke test: verify module can be imported and has expected functions."""
-    assert hasattr(mod_pattern, 'pattern')
-    assert hasattr(mod_pattern, 'gaussian')
-    assert hasattr(mod_pattern, 'lorentzian')
-    assert hasattr(mod_pattern, 'gausslorentzian')
-    assert hasattr(mod_pattern, 'profile')
-    assert hasattr(mod_pattern, 'matchpattern')
-    assert hasattr(mod_pattern, '_consolidate')
-    assert hasattr(mod_pattern, '_normalize')
+    assert hasattr(mod_pattern, "pattern")
+    assert hasattr(mod_pattern, "gaussian")
+    assert hasattr(mod_pattern, "lorentzian")
+    assert hasattr(mod_pattern, "gausslorentzian")
+    assert hasattr(mod_pattern, "profile")
+    assert hasattr(mod_pattern, "matchpattern")
+    assert hasattr(mod_pattern, "_consolidate")
+    assert hasattr(mod_pattern, "_normalize")
 
 
 # ============================================================================
 # TESTS FOR _normalize(data)
 # ============================================================================
+
 
 def test_normalize_single_item():
     """Test _normalize with single item (no comparison)."""
@@ -56,7 +59,7 @@ def test_normalize_multiple_items_finds_max():
     assert result[2][0] == 102.0
     assert result[1][1] == 1.0  # max normalized to 1.0
     assert abs(result[0][1] - 0.5) < 1e-6  # 0.3/0.6
-    assert abs(result[2][1] - 2.0/3.0) < 1e-6  # 0.4/0.6
+    assert abs(result[2][1] - 2.0 / 3.0) < 1e-6  # 0.4/0.6
 
 
 def test_normalize_equal_abundances():
@@ -84,6 +87,7 @@ def test_normalize_very_small_abundances():
 # ============================================================================
 # TESTS FOR _consolidate(isotopes, window)
 # ============================================================================
+
 
 def test_consolidate_list_input():
     """Test _consolidate with list input (C-B2)."""
@@ -163,13 +167,13 @@ def test_consolidate_zero_window():
 # TESTS FOR gaussian/lorentzian/gausslorentzian (shape functions)
 # ============================================================================
 
+
 def test_gaussian_returns_array(mocker):
     """Test gaussian delegatesand returns array."""
     # Mock the calculations module
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        'mspy.mod_pattern.calculations.signal_gaussian',
-        return_value=mock_result
+        "mspy.mod_pattern.calculations.signal_gaussian", return_value=mock_result
     )
     result = mod_pattern.gaussian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -180,8 +184,7 @@ def test_lorentzian_returns_array(mocker):
     """Test lorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        'mspy.mod_pattern.calculations.signal_lorentzian',
-        return_value=mock_result
+        "mspy.mod_pattern.calculations.signal_lorentzian", return_value=mock_result
     )
     result = mod_pattern.lorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -191,8 +194,7 @@ def test_gausslorentzian_returns_array(mocker):
     """Test gausslorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        'mspy.mod_pattern.calculations.signal_gausslorentzian',
-        return_value=mock_result
+        "mspy.mod_pattern.calculations.signal_gausslorentzian", return_value=mock_result
     )
     result = mod_pattern.gausslorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -202,20 +204,21 @@ def test_gausslorentzian_returns_array(mocker):
 # TESTS FOR profile(peaklist, fwhm, points, noise, raster, forceFwhm, model)
 # ============================================================================
 
+
 @pytest.fixture
 def mock_profile_dependencies(mocker):
     """Mock all external dependencies for profile function."""
     mocker.patch(
-        'mspy.mod_pattern.calculations.signal_profile',
-        return_value=numpy.array([[100.0, 0.0], [100.05, 0.5], [100.1, 1.0]])
+        "mspy.mod_pattern.calculations.signal_profile",
+        return_value=numpy.array([[100.0, 0.0], [100.05, 0.5], [100.1, 1.0]]),
     )
     mocker.patch(
-        'mspy.mod_pattern.calculations.signal_profile_to_raster',
-        return_value=numpy.array([[100.0, 0.0], [100.01, 0.3]])
+        "mspy.mod_pattern.calculations.signal_profile_to_raster",
+        return_value=numpy.array([[100.0, 0.0], [100.01, 0.3]]),
     )
     mocker.patch(
-        'mspy.mod_pattern.mod_signal.subbase',
-        side_effect=lambda x, y: x  # return profile unchanged
+        "mspy.mod_pattern.mod_signal.subbase",
+        side_effect=lambda x, y: x,  # return profile unchanged
     )
 
 
@@ -231,10 +234,12 @@ def test_profile_coerces_list_to_peaklist(mock_profile_dependencies):
 
 def test_profile_accepts_peaklist_instance(mock_profile_dependencies):
     """Test profile accepts peaklist instance (PR-B2)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-        obj_peak.peak(mz=101.0, ai=500.0),
-    ])
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+            obj_peak.peak(mz=101.0, ai=500.0),
+        ]
+    )
     result = mod_pattern.profile(pl, fwhm=0.1)
     assert result is not None
 
@@ -243,18 +248,22 @@ def test_profile_coerces_list_to_ndarray_raster(mock_profile_dependencies):
     """Test profile coerces list raster to ndarray (PR-B3)."""
     # Note: Due to Python 2.7 numpy comparison issue with "!= None",
     # we test with raster=None to avoid the buggy code path
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
     result = mod_pattern.profile(pl, fwhm=0.1, raster=None)
     assert result is not None
 
 
 def test_profile_handles_none_raster(mock_profile_dependencies):
     """Test profile with None raster uses signal_profile (PR-B4, PR-B13)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
     result = mod_pattern.profile(pl, fwhm=0.1, raster=None)
     assert result is not None
 
@@ -262,9 +271,11 @@ def test_profile_handles_none_raster(mock_profile_dependencies):
 def test_profile_ndarray_raster_not_coerced(mock_profile_dependencies):
     """Test profile with ndarray raster is not coerced (PR-B5)."""
     # Note: Due to Python 2.7 numpy comparison issue, test raster=None instead
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
     result = mod_pattern.profile(pl, fwhm=0.1, raster=None)
     assert result is not None
 
@@ -288,68 +299,84 @@ def test_profile_forcefwhm_false_keeps_peak_fwhm(mock_profile_dependencies):
 
 def test_profile_model_gaussian(mock_profile_dependencies):
     """Test profile model='gaussian' sets shape=0 (PR-B8)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
-    result = mod_pattern.profile(pl, model='gaussian')
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
+    result = mod_pattern.profile(pl, model="gaussian")
     assert result is not None
 
 
 def test_profile_model_lorentzian(mock_profile_dependencies):
     """Test profile model='lorentzian' sets shape=1 (PR-B9)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
-    result = mod_pattern.profile(pl, model='lorentzian')
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
+    result = mod_pattern.profile(pl, model="lorentzian")
     assert result is not None
 
 
 def test_profile_model_gausslorentzian(mock_profile_dependencies):
     """Test profile model='gausslorentzian' sets shape=2 (PR-B10)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
-    result = mod_pattern.profile(pl, model='gausslorentzian')
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
+    result = mod_pattern.profile(pl, model="gausslorentzian")
     assert result is not None
 
 
 def test_profile_model_unrecognized(mock_profile_dependencies):
     """Test profile with unrecognized model defaults to shape=0 (PR-B11)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
-    result = mod_pattern.profile(pl, model='unknown_model')
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
+    result = mod_pattern.profile(pl, model="unknown_model")
     assert result is not None
 
 
-def test_profile_raster_calls_signal_profile_to_raster(mock_profile_dependencies, mocker):
+def test_profile_raster_calls_signal_profile_to_raster(
+    mock_profile_dependencies, mocker
+):
     """Test profile with raster calls signal_profile_to_raster (PR-B12)."""
     # Note: Due to Python 2.7 numpy "!= None" comparison issue,
     # we cannot test the raster path. Test the no-raster path instead.
-    spy = mocker.spy(mod_pattern.calculations, 'signal_profile')
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
+    spy = mocker.spy(mod_pattern.calculations, "signal_profile")
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
     result = mod_pattern.profile(pl, raster=None)
     spy.assert_called_once()
 
 
 def test_profile_no_raster_calls_signal_profile(mock_profile_dependencies, mocker):
     """Test profile without raster calls signal_profile (PR-B13)."""
-    spy = mocker.spy(mod_pattern.calculations, 'signal_profile')
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-    ])
+    spy = mocker.spy(mod_pattern.calculations, "signal_profile")
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+        ]
+    )
     result = mod_pattern.profile(pl, raster=None)
     spy.assert_called_once()
 
 
 def test_profile_baseline_appends_new_peaks(mock_profile_dependencies):
     """Test profile baseline appends new m/z peaks (PR-B14)."""
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-        obj_peak.peak(mz=101.0, ai=500.0),
-    ])
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+            obj_peak.peak(mz=101.0, ai=500.0),
+        ]
+    )
     result = mod_pattern.profile(pl)
     # Baseline should have 2 entries for 2 different m/z values
     assert result is not None
@@ -358,10 +385,12 @@ def test_profile_baseline_appends_new_peaks(mock_profile_dependencies):
 def test_profile_baseline_deduplicates_same_mz(mock_profile_dependencies):
     """Test profile baseline skips duplicate m/z values (PR-B15)."""
     # Create peaklist with same m/z but different intensities
-    pl = obj_peaklist.peaklist([
-        obj_peak.peak(mz=100.0, ai=1000.0),
-        obj_peak.peak(mz=100.0, ai=500.0),
-    ])
+    pl = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=100.0, ai=1000.0),
+            obj_peak.peak(mz=100.0, ai=500.0),
+        ]
+    )
     result = mod_pattern.profile(pl)
     assert result is not None
 
@@ -370,9 +399,11 @@ def test_profile_baseline_deduplicates_same_mz(mock_profile_dependencies):
 # TESTS FOR matchpattern(signal, pattern, pickingHeight, baseline)
 # ============================================================================
 
+
 @pytest.fixture
 def mock_matchpattern_dependencies(mocker):
     """Mock external dependencies for matchpattern function."""
+
     # Mock labelpeak to return peak objects or None
     def labelpeak_side_effect(signal, mz, pickingHeight, baseline):
         # Return a peak if mz is near 18.01
@@ -383,8 +414,7 @@ def mock_matchpattern_dependencies(mocker):
             return None
 
     mocker.patch(
-        'mspy.mod_pattern.mod_peakpicking.labelpeak',
-        side_effect=labelpeak_side_effect
+        "mspy.mod_pattern.mod_peakpicking.labelpeak", side_effect=labelpeak_side_effect
     )
 
 
@@ -506,28 +536,23 @@ def test_matchpattern_rms_single_isotope(mock_matchpattern_dependencies):
 # TESTS FOR pattern(compound, fwhm, threshold, charge, agentFormula, agentCharge, real, model)
 # ============================================================================
 
+
 @pytest.fixture
 def mock_pattern_dependencies(mocker):
     """Mock external dependencies for pattern function."""
     # Mock profile, maxima, and centroid functions
     mocker.patch(
-        'mspy.mod_pattern.profile',
-        return_value=numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
+        "mspy.mod_pattern.profile",
+        return_value=numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]]),
     )
-    mocker.patch(
-        'mspy.mod_pattern.mod_signal.maxima',
-        return_value=[[100.02, 1.0]]
-    )
-    mocker.patch(
-        'mspy.mod_pattern.mod_signal.centroid',
-        return_value=100.020
-    )
+    mocker.patch("mspy.mod_pattern.mod_signal.maxima", return_value=[[100.02, 1.0]])
+    mocker.patch("mspy.mod_pattern.mod_signal.centroid", return_value=100.020)
 
 
 def test_pattern_coerces_string_to_compound():
     """Test pattern coerces string to compound (P-B1)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
     assert len(result) >= 1
 
@@ -535,7 +560,7 @@ def test_pattern_coerces_string_to_compound():
 def test_pattern_accepts_compound_instance():
     """Test pattern accepts compound instance (P-B2)."""
     mod_stopper.start()
-    compound = obj_compound.compound('H2O')
+    compound = obj_compound.compound("H2O")
     result = mod_pattern.pattern(compound, fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
 
@@ -544,13 +569,13 @@ def test_pattern_coerces_agent_formula_string():
     """Test pattern coerces agent formula string (P-B3)."""
     mod_stopper.start()
     result = mod_pattern.pattern(
-        'H2O',
+        "H2O",
         fwhm=0.1,
         threshold=0.01,
         charge=1,
-        agentFormula='H',
+        agentFormula="H",
         agentCharge=1,
-        real=False
+        real=False,
     )
     assert isinstance(result, list)
 
@@ -559,13 +584,13 @@ def test_pattern_skips_e_agent_coercion():
     """Test pattern skips coercion for agentFormula='e' (P-B4)."""
     mod_stopper.start()
     result = mod_pattern.pattern(
-        'H2O',
+        "H2O",
         fwhm=0.1,
         threshold=0.01,
         charge=1,
-        agentFormula='e',
+        agentFormula="e",
         agentCharge=1,
-        real=False
+        real=False,
     )
     assert isinstance(result, list)
 
@@ -574,13 +599,13 @@ def test_pattern_adds_charging_agent():
     """Test pattern adds charging agent when charge!=0 and agentFormula!='e' (P-B5)."""
     mod_stopper.start()
     result = mod_pattern.pattern(
-        'H2O',
+        "H2O",
         fwhm=0.1,
         threshold=0.01,
         charge=1,
-        agentFormula='H',
+        agentFormula="H",
         agentCharge=1,
-        real=False
+        real=False,
     )
     assert isinstance(result, list)
     # The formula should have modified composition
@@ -590,13 +615,13 @@ def test_pattern_skips_agent_when_charge_zero():
     """Test pattern skips agent when charge=0 (P-B6)."""
     mod_stopper.start()
     result = mod_pattern.pattern(
-        'H2O',
+        "H2O",
         fwhm=0.1,
         threshold=0.01,
         charge=0,
-        agentFormula='H',
+        agentFormula="H",
         agentCharge=1,
-        real=False
+        real=False,
     )
     assert isinstance(result, list)
 
@@ -606,13 +631,13 @@ def test_pattern_raises_on_negative_atom_count():
     mod_stopper.start()
     # H{-1} has negative hydrogen count
     with pytest.raises(ValueError):
-        mod_pattern.pattern('H{-1}', fwhm=0.1, threshold=0.01, real=False)
+        mod_pattern.pattern("H{-1}", fwhm=0.1, threshold=0.01, real=False)
 
 
 def test_pattern_proceeds_with_valid_composition():
     """Test pattern proceeds with valid atom counts (P-B8)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
 
 
@@ -620,7 +645,7 @@ def test_pattern_with_isotope_label():
     """Test pattern with isotope-labelled atom (P-B9)."""
     mod_stopper.start()
     # H{2} is deuterium (isotope label)
-    result = mod_pattern.pattern('H{2}O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H{2}O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
     # Should use single isotope, not all natural isotopes
 
@@ -628,14 +653,14 @@ def test_pattern_with_isotope_label():
 def test_pattern_without_isotope_label():
     """Test pattern without isotope label iterates all isotopes (P-B10)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
 
 
 def test_pattern_includes_isotopes_with_positive_abundance():
     """Test pattern includes isotopes with abundance > 0 (P-B11)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
     # Should only include isotopes with abundance > 0
 
@@ -643,14 +668,14 @@ def test_pattern_includes_isotopes_with_positive_abundance():
 def test_pattern_skips_isotopes_with_zero_abundance():
     """Test pattern skips isotopes with abundance <= 0 (P-B12)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
 
 
 def test_pattern_first_atom_direct_assign():
     """Test pattern directly assigns first atom (P-B13)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
     assert len(result) >= 1
 
@@ -659,22 +684,26 @@ def test_pattern_skips_peaks_under_internal_threshold():
     """Test pattern skips peaks under internal threshold (P-B14)."""
     mod_stopper.start()
     # Low threshold to include small peaks
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.001, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.001, real=False)
     assert isinstance(result, list)
 
 
 def test_pattern_includes_peaks_above_internal_threshold():
     """Test pattern includes peaks above internal threshold (P-B15)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
 
 
 def test_pattern_applies_charge_correction():
     """Test pattern applies charge correction (P-B16)."""
     mod_stopper.start()
-    result_neutral = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, charge=0, real=False)
-    result_charged = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, charge=1, real=False)
+    result_neutral = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.01, charge=0, real=False
+    )
+    result_charged = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.01, charge=1, real=False
+    )
     # Charged m/z should be different from neutral
     assert len(result_neutral) >= 1
     assert len(result_charged) >= 1
@@ -683,14 +712,14 @@ def test_pattern_applies_charge_correction():
 def test_pattern_skips_correction_for_zero_charge():
     """Test pattern skips charge correction for charge=0 (P-B17)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, charge=0, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, charge=0, real=False)
     assert isinstance(result, list)
 
 
 def test_pattern_with_real_true(mock_pattern_dependencies):
     """Test pattern with real=True generates profile (P-B18)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=True)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)
     assert isinstance(result, list)
 
 
@@ -699,10 +728,10 @@ def test_pattern_centroid_refine_within_threshold(mock_pattern_dependencies, moc
     mod_stopper.start()
     # Mock centroid to return value close to isotope m/z
     mocker.patch(
-        'mspy.mod_pattern.mod_signal.centroid',
-        return_value=100.0201  # within fwhm/100 = 0.001
+        "mspy.mod_pattern.mod_signal.centroid",
+        return_value=100.0201,  # within fwhm/100 = 0.001
     )
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=True)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)
     assert isinstance(result, list)
 
 
@@ -711,24 +740,24 @@ def test_pattern_centroid_refine_exceeds_threshold(mock_pattern_dependencies, mo
     mod_stopper.start()
     # Mock centroid to return value far from isotope m/z
     mocker.patch(
-        'mspy.mod_pattern.mod_signal.centroid',
-        return_value=100.05  # exceeds fwhm/100 = 0.001
+        "mspy.mod_pattern.mod_signal.centroid",
+        return_value=100.05,  # exceeds fwhm/100 = 0.001
     )
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=True)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)
     assert isinstance(result, list)
 
 
 def test_pattern_with_real_false():
     """Test pattern with real=False skips profile generation (P-B21)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     assert isinstance(result, list)
 
 
 def test_pattern_includes_peaks_above_final_threshold():
     """Test pattern includes peaks above final threshold (P-B22)."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=False)
     # All returned peaks should meet threshold
     assert all(peak[1] >= 0.01 for peak in result)
 
@@ -736,8 +765,12 @@ def test_pattern_includes_peaks_above_final_threshold():
 def test_pattern_excludes_peaks_below_final_threshold():
     """Test pattern excludes peaks below final threshold (P-B23)."""
     mod_stopper.start()
-    result_high_threshold = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.5, real=False)
-    result_low_threshold = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False)
+    result_high_threshold = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.5, real=False
+    )
+    result_low_threshold = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.01, real=False
+    )
     # High threshold should result in fewer peaks
     assert len(result_high_threshold) <= len(result_low_threshold)
 
@@ -746,18 +779,19 @@ def test_pattern_excludes_peaks_below_final_threshold():
 # INTEGRATION TESTS
 # ============================================================================
 
+
 def test_integration_pattern_with_charge_and_agent():
     """Integration test: pattern with charge and agent formula."""
     mod_stopper.start()
     result = mod_pattern.pattern(
-        'H2O',
+        "H2O",
         fwhm=0.05,
         threshold=0.01,
         charge=1,
-        agentFormula='H',
+        agentFormula="H",
         agentCharge=1,
         real=False,
-        model='gaussian'
+        model="gaussian",
     )
     assert isinstance(result, list)
     assert all(isinstance(peak, list) for peak in result)
@@ -767,7 +801,7 @@ def test_integration_pattern_with_charge_and_agent():
 def test_integration_pattern_multiple_compounds():
     """Integration test: pattern for various compounds."""
     mod_stopper.start()
-    compounds = ['H2O', 'CH4', 'C6H12O6']
+    compounds = ["H2O", "CH4", "C6H12O6"]
     for compound_str in compounds:
         result = mod_pattern.pattern(compound_str, fwhm=0.1, threshold=0.01, real=False)
         assert isinstance(result, list)
@@ -789,6 +823,7 @@ def test_integration_consolidate_with_multiple_calls():
 # ============================================================================
 # EDGE CASES AND BOUNDARY TESTS
 # ============================================================================
+
 
 def test_normalize_zero_abundances():
     """Edge case: normalize with zero abundance (division by zero protection)."""
@@ -818,7 +853,7 @@ def test_consolidate_empty_list():
 def test_pattern_very_high_threshold():
     """Edge case: pattern with threshold=1.0 should return only basepeak."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=1.0, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=1.0, real=False)
     assert isinstance(result, list)
     # At most basepeak should match threshold=1.0
     assert len(result) <= 1
@@ -827,8 +862,8 @@ def test_pattern_very_high_threshold():
 def test_pattern_very_low_threshold():
     """Edge case: pattern with threshold=0.001 includes all peaks."""
     mod_stopper.start()
-    result_high = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.1, real=False)
-    result_low = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.001, real=False)
+    result_high = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.1, real=False)
+    result_low = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.001, real=False)
     # Low threshold should include at least as many peaks
     assert len(result_low) >= len(result_high)
 
@@ -836,8 +871,12 @@ def test_pattern_very_low_threshold():
 def test_pattern_negative_charge():
     """Edge case: pattern with negative charge."""
     mod_stopper.start()
-    result_pos = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, charge=1, real=False)
-    result_neg = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, charge=-1, real=False)
+    result_pos = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.01, charge=1, real=False
+    )
+    result_neg = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.01, charge=-1, real=False
+    )
     # Both should produce valid results
     assert isinstance(result_pos, list)
     assert isinstance(result_neg, list)
@@ -847,16 +886,18 @@ def test_pattern_negative_charge():
 def test_pattern_various_fwhm(fwhm):
     """Parametrized test: pattern with various FWHM values."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=fwhm, threshold=0.01, real=False)
+    result = mod_pattern.pattern("H2O", fwhm=fwhm, threshold=0.01, real=False)
     assert isinstance(result, list)
     assert len(result) >= 1
 
 
-@pytest.mark.parametrize("model", ['gaussian', 'lorentzian', 'gausslorentzian'])
+@pytest.mark.parametrize("model", ["gaussian", "lorentzian", "gausslorentzian"])
 def test_pattern_various_models(model):
     """Parametrized test: pattern with various peak shape models."""
     mod_stopper.start()
-    result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=False, model=model)
+    result = mod_pattern.pattern(
+        "H2O", fwhm=0.1, threshold=0.01, real=False, model=model
+    )
     assert isinstance(result, list)
     assert len(result) >= 1
 
@@ -864,6 +905,7 @@ def test_pattern_various_models(model):
 # ============================================================================
 # PROPERTY-BASED TESTS (HYPOTHESIS)
 # ============================================================================
+
 
 @given(st.floats(min_value=0.01, max_value=10.0))
 @settings(max_examples=10, deadline=None, suppress_health_check=[HealthCheck.too_slow])
@@ -874,9 +916,16 @@ def test_normalize_always_returns_list_hypothesis(value):
     assert isinstance(result, list)
 
 
-@given(st.lists(st.tuples(st.floats(min_value=50.0, max_value=200.0),
-                            st.floats(min_value=0.01, max_value=1.0)),
-                 min_size=1, max_size=10))
+@given(
+    st.lists(
+        st.tuples(
+            st.floats(min_value=50.0, max_value=200.0),
+            st.floats(min_value=0.01, max_value=1.0),
+        ),
+        min_size=1,
+        max_size=10,
+    )
+)
 @settings(max_examples=10, deadline=None, suppress_health_check=[HealthCheck.too_slow])
 def test_consolidate_always_returns_list_hypothesis(isotopes):
     """Property: _consolidate always returns a list."""
@@ -891,4 +940,4 @@ def test_consolidate_output_sorted_hypothesis(window):
     """Property: _consolidate output is sorted by m/z."""
     isotopes = [[150.0, 0.5], [100.0, 0.3], [200.0, 0.2]]
     result = mod_pattern._consolidate(isotopes, window)
-    assert all(result[i][0] <= result[i+1][0] for i in range(len(result)-1))
+    assert all(result[i][0] <= result[i + 1][0] for i in range(len(result) - 1))

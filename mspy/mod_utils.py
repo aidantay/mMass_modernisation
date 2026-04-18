@@ -57,7 +57,7 @@ def load(path, scanID=None, dataType="continuous"):
     elif extension in (".xy", ".txt", ".asc"):
         docType = "XY"
     elif extension == ".xml":
-        with open(path, "r", encoding="utf-8", errors="ignore") as doc:
+        with open(path, encoding="utf-8", errors="ignore") as doc:
             data = doc.read(500)
             if "<mzData" in data:
                 docType = "mzData"

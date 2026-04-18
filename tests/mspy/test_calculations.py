@@ -1,36 +1,48 @@
-import pytest
 import numpy as np
-from hypothesis import given, strategies as st, assume
+import pytest
+from hypothesis import assume, given
+from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 from numpy.testing import assert_allclose
+
 
 @pytest.fixture(scope="session")
 def calculations():
     """Fixture to provide the mspy.calculations module."""
     try:
         import mspy.calculations
+
         return mspy.calculations
     except ImportError as e:
-        pytest.fail("Failed to import mspy.calculations: {}".format(e))
+        pytest.fail(f"Failed to import mspy.calculations: {e}")
+
 
 # Helper to generate typical mass spectrometry signals: 2D array of doubles, (n, 2)
 def signals(min_size=0, max_size=1000):
     return arrays(
         dtype=np.double,
-        shape=st.tuples(st.integers(min_value=min_size, max_value=max_size), st.just(2)),
-        elements=st.floats(allow_nan=True, allow_infinity=True)
+        shape=st.tuples(
+            st.integers(min_value=min_size, max_value=max_size), st.just(2)
+        ),
+        elements=st.floats(allow_nan=True, allow_infinity=True),
     )
+
 
 # Helper for peaklists (mz, intens, fwhm)
 def peaklists(min_size=0, max_size=50):
     return arrays(
         dtype=np.double,
-        shape=st.tuples(st.integers(min_value=min_size, max_value=max_size), st.just(3)),
-        elements=st.floats(min_value=0.1, max_value=10000.0, allow_nan=False, allow_infinity=False)
+        shape=st.tuples(
+            st.integers(min_value=min_size, max_value=max_size), st.just(3)
+        ),
+        elements=st.floats(
+            min_value=0.1, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
     )
 
+
 @pytest.mark.unit
-class TestSmoke(object):
+class TestSmoke:
     """Smoke tests for mspy.calculations module."""
 
     def test_import_calculations(self, calculations):
@@ -40,24 +52,43 @@ class TestSmoke(object):
     def test_calculations_module_contents(self, calculations):
         """Verify that the mspy.calculations module has expected attributes."""
         expected_functions = [
-            'signal_median',
-            'signal_interpolate_x', 'signal_interpolate_y',
-            'signal_locate_x', 'signal_locate_max_y', 'signal_box',
-            'signal_intensity', 'signal_centroid', 'signal_width',
-            'signal_area', 'signal_noise', 'signal_local_maxima',
-            'signal_crop', 'signal_offset', 'signal_multiply',
-            'signal_normalize', 'signal_smooth_ma', 'signal_smooth_ga',
-            'signal_combine', 'signal_overlay', 'signal_subtract',
-            'signal_subbase', 'signal_rescale', 'signal_filter',
-            'signal_gaussian', 'signal_lorentzian', 'signal_gausslorentzian',
-            'signal_profile_to_raster', 'signal_profile',
-            'formula_composition'
+            "signal_median",
+            "signal_interpolate_x",
+            "signal_interpolate_y",
+            "signal_locate_x",
+            "signal_locate_max_y",
+            "signal_box",
+            "signal_intensity",
+            "signal_centroid",
+            "signal_width",
+            "signal_area",
+            "signal_noise",
+            "signal_local_maxima",
+            "signal_crop",
+            "signal_offset",
+            "signal_multiply",
+            "signal_normalize",
+            "signal_smooth_ma",
+            "signal_smooth_ga",
+            "signal_combine",
+            "signal_overlay",
+            "signal_subtract",
+            "signal_subbase",
+            "signal_rescale",
+            "signal_filter",
+            "signal_gaussian",
+            "signal_lorentzian",
+            "signal_gausslorentzian",
+            "signal_profile_to_raster",
+            "signal_profile",
+            "formula_composition",
         ]
         for func in expected_functions:
-            assert hasattr(calculations, func), "Missing function: {}".format(func)
+            assert hasattr(calculations, func), f"Missing function: {func}"
+
 
 @pytest.mark.unit
-class TestMedian(object):
+class TestMedian:
     """Tests for signal_median function."""
 
     def test_signal_median_standard(self, calculations):
@@ -70,8 +101,9 @@ class TestMedian(object):
         arr = np.array([], dtype=np.double)
         assert calculations.signal_median(arr) == 0.0
 
+
 @pytest.mark.unit
-class TestInterpolation(object):
+class TestInterpolation:
     """Tests for signal interpolation functions."""
 
     def test_signal_interpolate_x(self, calculations):
@@ -94,8 +126,9 @@ class TestInterpolation(object):
         res = calculations.signal_interpolate_y(10, 0, 10, 10, 10)
         assert np.isnan(res) or np.isinf(res)
 
+
 @pytest.mark.unit
-class TestLocate(object):
+class TestLocate:
     """Tests for signal location functions."""
 
     def test_signal_locate_x(self, calculations):
@@ -109,17 +142,22 @@ class TestLocate(object):
         assert calculations.signal_locate_x(signal, 40) == 4
 
     def test_signal_locate_max_y(self, calculations):
-        signal = np.array([[10, 1], [20, 5], [30, 2], [40, 8], [50, 3]], dtype=np.double)
+        signal = np.array(
+            [[10, 1], [20, 5], [30, 2], [40, 8], [50, 3]], dtype=np.double
+        )
         assert calculations.signal_locate_max_y(signal) == 3
         signal2 = np.array([[10, 10], [20, 5]], dtype=np.double)
         assert calculations.signal_locate_max_y(signal2) == 0
 
+
 @pytest.mark.unit
-class TestAnalysis(object):
+class TestAnalysis:
     """Tests for signal analysis functions."""
 
     def test_signal_box(self, calculations):
-        signal = np.array([[10, 1], [20, 5], [30, 2], [40, 8], [50, 3]], dtype=np.double)
+        signal = np.array(
+            [[10, 1], [20, 5], [30, 2], [40, 8], [50, 3]], dtype=np.double
+        )
         assert calculations.signal_box(signal) == (10.0, 1.0, 50.0, 8.0)
 
     def test_signal_intensity(self, calculations):
@@ -152,8 +190,9 @@ class TestAnalysis(object):
         assert_allclose(level, 3.0)
         assert_allclose(width, 2.0)
 
+
 @pytest.mark.unit
-class TestTransformation(object):
+class TestTransformation:
     """Tests for signal transformation functions."""
 
     def test_signal_local_maxima(self, calculations):
@@ -163,9 +202,13 @@ class TestTransformation(object):
         assert_allclose(maxima, expected)
 
     def test_signal_crop(self, calculations):
-        signal = np.array([[10, 1], [20, 2], [30, 3], [40, 4], [50, 5]], dtype=np.double)
+        signal = np.array(
+            [[10, 1], [20, 2], [30, 3], [40, 4], [50, 5]], dtype=np.double
+        )
         cropped = calculations.signal_crop(signal, 25.0, 45.0)
-        expected = np.array([[25, 2.5], [30, 3.0], [40, 4.0], [45, 4.5]], dtype=np.double)
+        expected = np.array(
+            [[25, 2.5], [30, 3.0], [40, 4.0], [45, 4.5]], dtype=np.double
+        )
         assert_allclose(cropped, expected)
 
     def test_signal_offset(self, calculations):
@@ -200,22 +243,23 @@ class TestTransformation(object):
         filtered2 = calculations.signal_filter(signal2, 5.0)
         assert len(filtered2) > 0
 
+
 @pytest.mark.unit
-class TestOperation(object):
+class TestOperation:
     """Tests for signal combination and smoothing functions."""
 
     def test_signal_smooth_ma(self, calculations):
         signal = np.array([[0, 0], [1, 10], [2, 0], [3, 10], [4, 0]], dtype=np.double)
         smoothed = calculations.signal_smooth_ma(signal, 2, 1)
         assert len(smoothed) == len(signal)
-        assert_allclose(smoothed[1, 1], (0+10+0)/3.0)
+        assert_allclose(smoothed[1, 1], (0 + 10 + 0) / 3.0)
 
     def test_signal_smooth_ga(self, calculations):
         signal = np.array([[0, 0], [1, 10], [2, 0], [3, 10], [4, 0]], dtype=np.double)
         smoothed = calculations.signal_smooth_ga(signal, 2, 1)
         assert len(smoothed) == len(signal)
         ma_smoothed = calculations.signal_smooth_ma(signal, 2, 1)
-        assert not np.allclose(smoothed[:,1], ma_smoothed[:,1])
+        assert not np.allclose(smoothed[:, 1], ma_smoothed[:, 1])
 
     def test_signal_combine(self, calculations):
         signalA = np.array([[10, 10], [20, 20]], dtype=np.double)
@@ -245,39 +289,40 @@ class TestOperation(object):
         expected = np.array([[10, 5], [20, 15], [30, 25]], dtype=np.double)
         assert_allclose(subbed, expected)
 
+
 @pytest.mark.unit
-class TestGeneration(object):
+class TestGeneration:
     """Tests for signal generation and profiling functions."""
 
     def test_signal_gaussian(self, calculations):
         gaussian = calculations.signal_gaussian(100.0, 0.0, 100.0, 10.0, 100)
         assert len(gaussian) == 100
-        idx = np.argmin(np.abs(gaussian[:,0] - 100.0))
+        idx = np.argmin(np.abs(gaussian[:, 0] - 100.0))
         assert_allclose(gaussian[idx, 1], 100.0, atol=1.0)
 
     def test_signal_lorentzian(self, calculations):
         lorentzian = calculations.signal_lorentzian(100.0, 0.0, 100.0, 10.0, 100)
         assert len(lorentzian) == 100
-        idx = np.argmin(np.abs(lorentzian[:,0] - 100.0))
+        idx = np.argmin(np.abs(lorentzian[:, 0] - 100.0))
         assert_allclose(lorentzian[idx, 1], 100.0, atol=1.0)
 
     def test_signal_gausslorentzian(self, calculations):
         gl = calculations.signal_gausslorentzian(100.0, 0.0, 100.0, 10.0, 150)
         assert len(gl) == 150
-        idx = np.argmin(np.abs(gl[:,0] - 100.0))
+        idx = np.argmin(np.abs(gl[:, 0] - 100.0))
         assert_allclose(gl[idx, 1], 100.0, atol=1.0)
 
-    @pytest.mark.parametrize("shape, label", [
-        (0, "gaussian"),
-        (1, "lorentzian"),
-        (2, "gauss-lorentzian")
-    ], ids=["shape-0-gaussian", "shape-1-lorentzian", "shape-2-gausslorentzian"])
+    @pytest.mark.parametrize(
+        "shape, label",
+        [(0, "gaussian"), (1, "lorentzian"), (2, "gauss-lorentzian")],
+        ids=["shape-0-gaussian", "shape-1-lorentzian", "shape-2-gausslorentzian"],
+    )
     def test_signal_profile_to_raster(self, calculations, shape, label):
         peaks = np.array([[100, 100, 1], [200, 50, 1]], dtype=np.double)
         raster = np.linspace(50, 250, 1000, dtype=np.double)
         profile = calculations.signal_profile_to_raster(peaks, raster, 0.0, shape)
         assert len(profile) == len(raster)
-        idx1 = np.argmin(np.abs(profile[:,0] - 100))
+        idx1 = np.argmin(np.abs(profile[:, 0] - 100))
         assert_allclose(profile[idx1, 1], 100.0, rtol=1e-2)
 
     @pytest.mark.parametrize("shape", [0, 1, 2], ids=["shape-0", "shape-1", "shape-2"])
@@ -291,22 +336,28 @@ class TestGeneration(object):
         profile_noise = calculations.signal_profile(peaks, 10, 1.0, 0)
         assert len(profile_noise) > 0
 
+
 @pytest.mark.unit
-class TestFormula(object):
+class TestFormula:
     """Tests for formula-related functions."""
 
     def test_formula_composition(self, calculations):
         min_comp = (0, 0)
         max_comp = (2, 5)
         masses = (12.0, 1.007825)
-        compositions = calculations.formula_composition(min_comp, max_comp, masses, 12.9, 13.1, 100)
+        compositions = calculations.formula_composition(
+            min_comp, max_comp, masses, 12.9, 13.1, 100
+        )
         assert [1, 1] in compositions
         # Test empty result
-        empty_comp = calculations.formula_composition(min_comp, max_comp, masses, 1000.0, 1001.0, 100)
+        empty_comp = calculations.formula_composition(
+            min_comp, max_comp, masses, 1000.0, 1001.0, 100
+        )
         assert empty_comp == []
 
+
 @pytest.mark.unit
-class TestRegression(object):
+class TestRegression:
     """Regression and edge case tests."""
 
     def test_invalid_inputs(self, calculations):
@@ -315,8 +366,9 @@ class TestRegression(object):
         with pytest.raises((TypeError, ValueError)):
             calculations.signal_locate_max_y("not an array")
 
+
 @pytest.mark.slow
-class TestPropertyBased(object):
+class TestPropertyBased:
     """Property-based tests using Hypothesis."""
 
     @given(
@@ -324,7 +376,7 @@ class TestPropertyBased(object):
         y1=st.floats(allow_nan=True, allow_infinity=True),
         x2=st.floats(allow_nan=True, allow_infinity=True),
         y2=st.floats(allow_nan=True, allow_infinity=True),
-        v=st.floats(allow_nan=True, allow_infinity=True)
+        v=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_interpolate_x_property(self, calculations, x1, y1, x2, y2, v):
         res = calculations.signal_interpolate_x(x1, y1, x2, y2, v)
@@ -335,7 +387,7 @@ class TestPropertyBased(object):
         y1=st.floats(allow_nan=True, allow_infinity=True),
         x2=st.floats(allow_nan=True, allow_infinity=True),
         y2=st.floats(allow_nan=True, allow_infinity=True),
-        v=st.floats(allow_nan=True, allow_infinity=True)
+        v=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_interpolate_y_property(self, calculations, x1, y1, x2, y2, v):
         res = calculations.signal_interpolate_y(x1, y1, x2, y2, v)
@@ -377,7 +429,13 @@ class TestPropertyBased(object):
         res = calculations.signal_intensity(signal, x)
         assert isinstance(res, float)
 
-    @given(arr=arrays(dtype=np.double, shape=st.tuples(st.integers(min_value=0, max_value=100)), elements=st.floats(allow_nan=True, allow_infinity=True)))
+    @given(
+        arr=arrays(
+            dtype=np.double,
+            shape=st.tuples(st.integers(min_value=0, max_value=100)),
+            elements=st.floats(allow_nan=True, allow_infinity=True),
+        )
+    )
     def test_signal_median_property(self, calculations, arr):
         res = calculations.signal_median(arr)
         assert isinstance(res, float)
@@ -385,7 +443,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         x=st.floats(allow_nan=True, allow_infinity=True),
-        h=st.floats(allow_nan=True, allow_infinity=True)
+        h=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_centroid_property(self, calculations, signal, x, h):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -395,7 +453,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         x=st.floats(allow_nan=True, allow_infinity=True),
-        h=st.floats(allow_nan=True, allow_infinity=True)
+        h=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_width_property(self, calculations, signal, x, h):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -426,7 +484,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         mX=st.floats(allow_nan=True, allow_infinity=True),
-        MX=st.floats(allow_nan=True, allow_infinity=True)
+        MX=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_crop_property(self, calculations, signal, mX, MX):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -436,7 +494,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         v1=st.floats(allow_nan=True, allow_infinity=True),
-        v2=st.floats(allow_nan=True, allow_infinity=True)
+        v2=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_offset_property(self, calculations, signal, v1, v2):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -446,7 +504,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         v1=st.floats(allow_nan=True, allow_infinity=True),
-        v2=st.floats(allow_nan=True, allow_infinity=True)
+        v2=st.floats(allow_nan=True, allow_infinity=True),
     )
     def test_signal_multiply_property(self, calculations, signal, v1, v2):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -462,7 +520,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         window=st.integers(min_value=0, max_value=100),
-        cycles=st.integers(min_value=0, max_value=10)
+        cycles=st.integers(min_value=0, max_value=10),
     )
     def test_signal_smooth_ma_property(self, calculations, signal, window, cycles):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -472,7 +530,7 @@ class TestPropertyBased(object):
     @given(
         signal=signals(),
         window=st.integers(min_value=0, max_value=100),
-        cycles=st.integers(min_value=0, max_value=10)
+        cycles=st.integers(min_value=0, max_value=10),
     )
     def test_signal_smooth_ga_property(self, calculations, signal, window, cycles):
         signal = np.ascontiguousarray(signal, dtype=np.double)
@@ -512,16 +570,18 @@ class TestPropertyBased(object):
         scaleX=st.floats(allow_nan=True, allow_infinity=True),
         scaleY=st.floats(allow_nan=True, allow_infinity=True),
         shiftX=st.floats(allow_nan=True, allow_infinity=True),
-        shiftY=st.floats(allow_nan=True, allow_infinity=True)
+        shiftY=st.floats(allow_nan=True, allow_infinity=True),
     )
-    def test_signal_rescale_property(self, calculations, signal, scaleX, scaleY, shiftX, shiftY):
+    def test_signal_rescale_property(
+        self, calculations, signal, scaleX, scaleY, shiftX, shiftY
+    ):
         signal = np.ascontiguousarray(signal, dtype=np.double)
         res = calculations.signal_rescale(signal, scaleX, scaleY, shiftX, shiftY)
         assert isinstance(res, np.ndarray)
 
     @given(
         signal=signals(),
-        resol=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
+        resol=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
     )
     def test_signal_filter_property(self, calculations, signal, resol):
         assume(resol > 0)
@@ -533,8 +593,10 @@ class TestPropertyBased(object):
         x=st.floats(allow_nan=False, allow_infinity=False),
         minY=st.floats(allow_nan=False, allow_infinity=False),
         maxY=st.floats(allow_nan=False, allow_infinity=False),
-        fwhm=st.floats(min_value=0.0001, max_value=1000.0, allow_nan=False, allow_infinity=False),
-        points=st.integers(min_value=1, max_value=1000)
+        fwhm=st.floats(
+            min_value=0.0001, max_value=1000.0, allow_nan=False, allow_infinity=False
+        ),
+        points=st.integers(min_value=1, max_value=1000),
     )
     def test_signal_gaussian_property(self, calculations, x, minY, maxY, fwhm, points):
         res = calculations.signal_gaussian(x, minY, maxY, fwhm, points)
@@ -545,10 +607,14 @@ class TestPropertyBased(object):
         x=st.floats(allow_nan=False, allow_infinity=False),
         minY=st.floats(allow_nan=False, allow_infinity=False),
         maxY=st.floats(allow_nan=False, allow_infinity=False),
-        fwhm=st.floats(min_value=0.0001, max_value=1000.0, allow_nan=False, allow_infinity=False),
-        points=st.integers(min_value=1, max_value=1000)
+        fwhm=st.floats(
+            min_value=0.0001, max_value=1000.0, allow_nan=False, allow_infinity=False
+        ),
+        points=st.integers(min_value=1, max_value=1000),
     )
-    def test_signal_lorentzian_property(self, calculations, x, minY, maxY, fwhm, points):
+    def test_signal_lorentzian_property(
+        self, calculations, x, minY, maxY, fwhm, points
+    ):
         res = calculations.signal_lorentzian(x, minY, maxY, fwhm, points)
         assert isinstance(res, np.ndarray)
         assert len(res) == points
@@ -557,21 +623,37 @@ class TestPropertyBased(object):
         x=st.floats(allow_nan=False, allow_infinity=False),
         minY=st.floats(allow_nan=False, allow_infinity=False),
         maxY=st.floats(allow_nan=False, allow_infinity=False),
-        fwhm=st.floats(min_value=0.0001, max_value=1000.0, allow_nan=False, allow_infinity=False),
-        points=st.integers(min_value=1, max_value=1000)
+        fwhm=st.floats(
+            min_value=0.0001, max_value=1000.0, allow_nan=False, allow_infinity=False
+        ),
+        points=st.integers(min_value=1, max_value=1000),
     )
-    def test_signal_gausslorentzian_property(self, calculations, x, minY, maxY, fwhm, points):
+    def test_signal_gausslorentzian_property(
+        self, calculations, x, minY, maxY, fwhm, points
+    ):
         res = calculations.signal_gausslorentzian(x, minY, maxY, fwhm, points)
         assert isinstance(res, np.ndarray)
         assert len(res) == points
 
     @given(
         peaks=peaklists(min_size=1),
-        raster=arrays(dtype=np.double, shape=st.tuples(st.integers(min_value=1, max_value=500),), elements=st.floats(min_value=0.0, max_value=10000.0, allow_nan=False, allow_infinity=False)),
-        noise=st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False),
-        shape=st.integers(min_value=0, max_value=2)
+        raster=arrays(
+            dtype=np.double,
+            shape=st.tuples(
+                st.integers(min_value=1, max_value=500),
+            ),
+            elements=st.floats(
+                min_value=0.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+            ),
+        ),
+        noise=st.floats(
+            min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False
+        ),
+        shape=st.integers(min_value=0, max_value=2),
     )
-    def test_signal_profile_to_raster_property(self, calculations, peaks, raster, noise, shape):
+    def test_signal_profile_to_raster_property(
+        self, calculations, peaks, raster, noise, shape
+    ):
         peaks = np.ascontiguousarray(peaks, dtype=np.double)
         raster = np.ascontiguousarray(raster, dtype=np.double)
         res = calculations.signal_profile_to_raster(peaks, raster, noise, shape)
@@ -581,8 +663,10 @@ class TestPropertyBased(object):
     @given(
         peaks=peaklists(min_size=1),
         points=st.integers(min_value=1, max_value=100),
-        noise=st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False),
-        shape=st.integers(min_value=0, max_value=2)
+        noise=st.floats(
+            min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False
+        ),
+        shape=st.integers(min_value=0, max_value=2),
     )
     def test_signal_profile_property(self, calculations, peaks, points, noise, shape):
         peaks = np.ascontiguousarray(peaks, dtype=np.double)
@@ -593,15 +677,27 @@ class TestPropertyBased(object):
         assert isinstance(res, np.ndarray)
 
     @given(
-        min_comp=st.tuples(st.integers(min_value=0, max_value=5), st.integers(min_value=0, max_value=5)),
-        max_comp=st.tuples(st.integers(min_value=0, max_value=10), st.integers(min_value=0, max_value=10)),
-        masses=st.tuples(st.floats(min_value=1.0, max_value=100.0), st.floats(min_value=1.0, max_value=100.0)),
+        min_comp=st.tuples(
+            st.integers(min_value=0, max_value=5), st.integers(min_value=0, max_value=5)
+        ),
+        max_comp=st.tuples(
+            st.integers(min_value=0, max_value=10),
+            st.integers(min_value=0, max_value=10),
+        ),
+        masses=st.tuples(
+            st.floats(min_value=1.0, max_value=100.0),
+            st.floats(min_value=1.0, max_value=100.0),
+        ),
         loMass=st.floats(min_value=0.0, max_value=1000.0),
         hiMass=st.floats(min_value=0.0, max_value=1000.0),
-        limit=st.integers(min_value=1, max_value=100)
+        limit=st.integers(min_value=1, max_value=100),
     )
-    def test_formula_composition_property(self, calculations, min_comp, max_comp, masses, loMass, hiMass, limit):
+    def test_formula_composition_property(
+        self, calculations, min_comp, max_comp, masses, loMass, hiMass, limit
+    ):
         # Ensure min_comp <= max_comp for each element
         assume(all(mi <= ma for mi, ma in zip(min_comp, max_comp)))
-        res = calculations.formula_composition(min_comp, max_comp, masses, loMass, hiMass, limit)
+        res = calculations.formula_composition(
+            min_comp, max_comp, masses, loMass, hiMass, limit
+        )
         assert isinstance(res, list)

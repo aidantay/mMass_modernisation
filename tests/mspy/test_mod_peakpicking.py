@@ -1,13 +1,13 @@
-import pytest
-import numpy
-from hypothesis import given, strategies as st, settings, HealthCheck
 import mspy.mod_peakpicking as mod_peakpicking
-import mspy.mod_stopper as mod_stopper
 import mspy.mod_signal as mod_signal
+import mspy.mod_stopper as mod_stopper
+import mspy.obj_compound as obj_compound
 import mspy.obj_peak as obj_peak
 import mspy.obj_peaklist as obj_peaklist
-import mspy.obj_compound as obj_compound
-import mspy.blocks as blocks
+import numpy
+import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 
 # Module-level fixture to reset stopper state
@@ -23,10 +23,11 @@ def reset_stopper():
 # HELPER FUNCTIONS FOR TEST SIGNAL CONSTRUCTION
 # ============================================================================
 
+
 def make_gaussian_peak(center=1000.0, width=0.5, height=1000.0, num_points=100):
     """Create a Gaussian peak signal."""
-    mz_vals = numpy.linspace(center - 2*width, center + 2*width, num_points)
-    intensity = height * numpy.exp(-0.5 * ((mz_vals - center) / width)**2)
+    mz_vals = numpy.linspace(center - 2 * width, center + 2 * width, num_points)
+    intensity = height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
     signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
     return signal
 
@@ -36,13 +37,13 @@ def make_multipeak_signal(peaks, num_points=200):
 
     peaks: list of (center, width, height) tuples
     """
-    mz_min = min(p[0] - 2*p[1] for p in peaks) - 10
-    mz_max = max(p[0] + 2*p[1] for p in peaks) + 10
+    mz_min = min(p[0] - 2 * p[1] for p in peaks) - 10
+    mz_max = max(p[0] + 2 * p[1] for p in peaks) + 10
     mz_vals = numpy.linspace(mz_min, mz_max, num_points)
 
     intensity = numpy.zeros(num_points)
     for center, width, height in peaks:
-        intensity += height * numpy.exp(-0.5 * ((mz_vals - center) / width)**2)
+        intensity += height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
 
     signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
     return signal
@@ -50,11 +51,13 @@ def make_multipeak_signal(peaks, num_points=200):
 
 def make_baseline(signal, base_level=10.0, noise_level=1.0):
     """Create a baseline array from a signal."""
-    baseline = numpy.column_stack([
-        signal[:, 0],
-        numpy.ones(len(signal)) * base_level,
-        numpy.ones(len(signal)) * noise_level
-    ]).astype(numpy.float64)
+    baseline = numpy.column_stack(
+        [
+            signal[:, 0],
+            numpy.ones(len(signal)) * base_level,
+            numpy.ones(len(signal)) * noise_level,
+        ]
+    ).astype(numpy.float64)
     return baseline
 
 
@@ -62,26 +65,28 @@ def make_baseline(signal, base_level=10.0, noise_level=1.0):
 # TEST SCAFFOLDING AND IMPORT VERIFICATION
 # ============================================================================
 
+
 def test_import_mod_peakpicking():
     """Smoke test: verify module can be imported and has expected functions."""
-    assert hasattr(mod_peakpicking, 'labelpoint')
-    assert hasattr(mod_peakpicking, 'labelpeak')
-    assert hasattr(mod_peakpicking, 'labelscan')
-    assert hasattr(mod_peakpicking, 'envcentroid')
-    assert hasattr(mod_peakpicking, 'envmono')
-    assert hasattr(mod_peakpicking, 'deisotope')
-    assert hasattr(mod_peakpicking, 'deconvolute')
-    assert hasattr(mod_peakpicking, 'averagine')
-    assert hasattr(mod_peakpicking, '_gentable')
-    assert hasattr(mod_peakpicking, 'ISOTOPE_DISTANCE')
-    assert hasattr(mod_peakpicking, 'AVERAGE_AMINO')
-    assert hasattr(mod_peakpicking, 'AVERAGE_BASE')
-    assert hasattr(mod_peakpicking, 'patternLookupTable')
+    assert hasattr(mod_peakpicking, "labelpoint")
+    assert hasattr(mod_peakpicking, "labelpeak")
+    assert hasattr(mod_peakpicking, "labelscan")
+    assert hasattr(mod_peakpicking, "envcentroid")
+    assert hasattr(mod_peakpicking, "envmono")
+    assert hasattr(mod_peakpicking, "deisotope")
+    assert hasattr(mod_peakpicking, "deconvolute")
+    assert hasattr(mod_peakpicking, "averagine")
+    assert hasattr(mod_peakpicking, "_gentable")
+    assert hasattr(mod_peakpicking, "ISOTOPE_DISTANCE")
+    assert hasattr(mod_peakpicking, "AVERAGE_AMINO")
+    assert hasattr(mod_peakpicking, "AVERAGE_BASE")
+    assert hasattr(mod_peakpicking, "patternLookupTable")
 
 
 # ============================================================================
 # TESTS FOR labelpoint(signal, mz, baseline=None)
 # ============================================================================
+
 
 def test_labelpoint_simple_gaussian():
     """Test labelpoint with a simple Gaussian peak (LP-B1-B3)."""
@@ -184,6 +189,7 @@ def test_labelpoint_edge_mz_value():
 # TESTS FOR labelpeak(signal, mz, minX, maxX, pickingHeight, baseline)
 # ============================================================================
 
+
 def test_labelpeak_simple_exact_mz():
     """Test labelpeak with exact m/z (LPK-B5)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
@@ -215,7 +221,9 @@ def test_labelpeak_picking_height_075():
 def test_labelpeak_picking_height_100():
     """Test labelpeak with pickingHeight=1.0 (no centroiding) (LPK-B9)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
-    peak = mod_peakpicking.labelpeak(signal, mz=1000.0, pickingHeight=1.0, baseline=None)
+    peak = mod_peakpicking.labelpeak(
+        signal, mz=1000.0, pickingHeight=1.0, baseline=None
+    )
 
     assert peak is not None or peak is None
 
@@ -290,6 +298,7 @@ def test_labelpeak_recursive_call():
 # ============================================================================
 # TESTS FOR labelscan(signal, minX, maxX, pickingHeight, absThreshold, ...)
 # ============================================================================
+
 
 def test_labelscan_simple_single_peak():
     """Test labelscan with single peak (LS-B1-B5)."""
@@ -413,6 +422,7 @@ def test_labelscan_peak_count_vs_maxima():
 # TESTS FOR envcentroid(isotopes, pickingHeight, intensity)
 # ============================================================================
 
+
 def test_envcentroid_single_isotope():
     """Test envcentroid with single isotope (EC-B1)."""
     peak = obj_peak.peak(mz=1000.0, ai=1000.0, base=10.0, sn=99.0)
@@ -436,11 +446,11 @@ def test_envcentroid_multiple_isotopes_intensity_maximum():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=10.0),
         obj_peak.peak(mz=1001.0, ai=800.0, base=10.0),
-        obj_peak.peak(mz=1002.0, ai=400.0, base=10.0)
+        obj_peak.peak(mz=1002.0, ai=400.0, base=10.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envcentroid(peaklist, intensity='maximum')
+    result = mod_peakpicking.envcentroid(peaklist, intensity="maximum")
 
     assert result is not None
     assert result.ai == peaks[0].ai
@@ -451,15 +461,15 @@ def test_envcentroid_multiple_isotopes_intensity_sum():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=10.0),
         obj_peak.peak(mz=1001.0, ai=800.0, base=10.0),
-        obj_peak.peak(mz=1002.0, ai=400.0, base=10.0)
+        obj_peak.peak(mz=1002.0, ai=400.0, base=10.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envcentroid(peaklist, intensity='sum')
+    result = mod_peakpicking.envcentroid(peaklist, intensity="sum")
 
     assert result is not None
     # ai should be base + sum of intensities
-    expected_ai = 10.0 + ((1000.0-10.0) + (800.0-10.0) + (400.0-10.0))
+    expected_ai = 10.0 + ((1000.0 - 10.0) + (800.0 - 10.0) + (400.0 - 10.0))
     assert abs(result.ai - expected_ai) < 1.0
 
 
@@ -468,11 +478,11 @@ def test_envcentroid_multiple_isotopes_intensity_average():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=10.0),
         obj_peak.peak(mz=1001.0, ai=800.0, base=10.0),
-        obj_peak.peak(mz=1002.0, ai=400.0, base=10.0)
+        obj_peak.peak(mz=1002.0, ai=400.0, base=10.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envcentroid(peaklist, intensity='average')
+    result = mod_peakpicking.envcentroid(peaklist, intensity="average")
 
     assert result is not None
 
@@ -481,7 +491,7 @@ def test_envcentroid_list_coercion():
     """Test envcentroid coerces list to peaklist (EC-B3)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=10.0),
-        obj_peak.peak(mz=1001.0, ai=800.0, base=10.0)
+        obj_peak.peak(mz=1001.0, ai=800.0, base=10.0),
     ]
 
     result = mod_peakpicking.envcentroid(peaks)
@@ -492,7 +502,7 @@ def test_envcentroid_mz_weighted_average():
     """Test envcentroid calculates weighted average m/z (EC-B4)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1002.0, ai=1000.0, base=0.0)
+        obj_peak.peak(mz=1002.0, ai=1000.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -508,7 +518,7 @@ def test_envcentroid_picking_height():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=1001.0, ai=800.0, base=0.0),
-        obj_peak.peak(mz=1002.0, ai=400.0, base=0.0)
+        obj_peak.peak(mz=1002.0, ai=400.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -519,6 +529,7 @@ def test_envcentroid_picking_height():
 # ============================================================================
 # TESTS FOR envmono(isotopes, charge, intensity)
 # ============================================================================
+
 
 def test_envmono_single_isotope():
     """Test envmono with single isotope (EM-B1)."""
@@ -544,11 +555,11 @@ def test_envmono_multiple_isotopes_charge_2():
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0),
         obj_peak.peak(mz=500.5, ai=800.0, base=10.0),
-        obj_peak.peak(mz=501.0, ai=400.0, base=10.0)
+        obj_peak.peak(mz=501.0, ai=400.0, base=10.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envmono(peaklist, charge=2, intensity='maximum')
+    result = mod_peakpicking.envmono(peaklist, charge=2, intensity="maximum")
 
     assert result is not None
 
@@ -557,11 +568,11 @@ def test_envmono_intensity_sum():
     """Test envmono with intensity='sum' (EM-B7)."""
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0),
-        obj_peak.peak(mz=500.5, ai=800.0, base=10.0)
+        obj_peak.peak(mz=500.5, ai=800.0, base=10.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envmono(peaklist, charge=2, intensity='sum')
+    result = mod_peakpicking.envmono(peaklist, charge=2, intensity="sum")
     assert result is not None
 
 
@@ -569,11 +580,11 @@ def test_envmono_intensity_average():
     """Test envmono with intensity='average' (EM-B8)."""
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0),
-        obj_peak.peak(mz=500.5, ai=800.0, base=10.0)
+        obj_peak.peak(mz=500.5, ai=800.0, base=10.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envmono(peaklist, charge=2, intensity='average')
+    result = mod_peakpicking.envmono(peaklist, charge=2, intensity="average")
     assert result is not None
 
 
@@ -581,7 +592,7 @@ def test_envmono_list_coercion():
     """Test envmono coerces list to peaklist (EM-B3)."""
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0),
-        obj_peak.peak(mz=500.5, ai=800.0, base=10.0)
+        obj_peak.peak(mz=500.5, ai=800.0, base=10.0),
     ]
 
     result = mod_peakpicking.envmono(peaks, charge=2)
@@ -591,6 +602,7 @@ def test_envmono_list_coercion():
 # ============================================================================
 # TESTS FOR deisotope(peaklist, maxCharge, mzTolerance, intTolerance)
 # ============================================================================
+
 
 def test_deisotope_monoisotopic_peak():
     """Test deisotope with single peak (DI-B2)."""
@@ -609,7 +621,7 @@ def test_deisotope_isotope_cluster():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=1001.0, ai=800.0, base=0.0),
-        obj_peak.peak(mz=1002.0, ai=400.0, base=0.0)
+        obj_peak.peak(mz=1002.0, ai=400.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -625,7 +637,7 @@ def test_deisotope_charge_2_cluster():
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=500.5, ai=800.0, base=0.0),
-        obj_peak.peak(mz=501.0, ai=400.0, base=0.0)
+        obj_peak.peak(mz=501.0, ai=400.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -639,7 +651,7 @@ def test_deisotope_negative_charge():
     """Test deisotope with negative charges (DI-B5)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0)
+        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -652,7 +664,7 @@ def test_deisotope_clears_previous():
     """Test deisotope clears previous charge assignments (DI-B3)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=2),
-        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0, charge=2)
+        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0, charge=2),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -684,10 +696,12 @@ def test_deisotope_mz_tolerance():
     mod_peakpicking.deisotope(peaklist, maxCharge=1, mzTolerance=0.1)
 
     # With loose tolerance, might match
-    peaklist2 = obj_peaklist.peaklist([
-        obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1001.5, ai=800.0, base=0.0),
-    ])
+    peaklist2 = obj_peaklist.peaklist(
+        [
+            obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
+            obj_peak.peak(mz=1001.5, ai=800.0, base=0.0),
+        ]
+    )
     mod_peakpicking.deisotope(peaklist2, maxCharge=1, mzTolerance=1.0)
 
 
@@ -695,11 +709,10 @@ def test_deisotope_mz_tolerance():
 # TESTS FOR deconvolute(peaklist, massType)
 # ============================================================================
 
+
 def test_deconvolute_uncharged_peak():
     """Test deconvolute skips uncharged peaks (DC-B1)."""
-    peaks = [
-        obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=None)
-    ]
+    peaks = [obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=None)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     result = mod_peakpicking.deconvolute(peaklist)
@@ -709,9 +722,7 @@ def test_deconvolute_uncharged_peak():
 
 def test_deconvolute_singly_charged():
     """Test deconvolute passes through singly-charged peaks (DC-B2)."""
-    peaks = [
-        obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=1)
-    ]
+    peaks = [obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=1)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     result = mod_peakpicking.deconvolute(peaklist)
@@ -722,9 +733,7 @@ def test_deconvolute_singly_charged():
 
 def test_deconvolute_doubly_charged():
     """Test deconvolute recalculates doubly-charged peaks (DC-B3)."""
-    peaks = [
-        obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2, fwhm=0.5)
-    ]
+    peaks = [obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2, fwhm=0.5)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     result = mod_peakpicking.deconvolute(peaklist, massType=0)
@@ -737,9 +746,7 @@ def test_deconvolute_doubly_charged():
 
 def test_deconvolute_negative_charge():
     """Test deconvolute with negative charge (DC-B5)."""
-    peaks = [
-        obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=-2)
-    ]
+    peaks = [obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=-2)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     result = mod_peakpicking.deconvolute(peaklist)
@@ -750,9 +757,7 @@ def test_deconvolute_negative_charge():
 
 def test_deconvolute_removes_baseline():
     """Test deconvolute removes baseline (DC-B6)."""
-    peaks = [
-        obj_peak.peak(mz=500.0, ai=1000.0, base=100.0, sn=9.0, charge=2)
-    ]
+    peaks = [obj_peak.peak(mz=500.0, ai=1000.0, base=100.0, sn=9.0, charge=2)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     result = mod_peakpicking.deconvolute(peaklist)
@@ -765,9 +770,7 @@ def test_deconvolute_removes_baseline():
 
 def test_deconvolute_fwhm_scaling():
     """Test deconvolute scales FWHM by charge (DC-B4)."""
-    peaks = [
-        obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2, fwhm=0.5)
-    ]
+    peaks = [obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2, fwhm=0.5)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     result = mod_peakpicking.deconvolute(peaklist)
@@ -781,9 +784,12 @@ def test_deconvolute_fwhm_scaling():
 # TESTS FOR averagine(mz, charge, composition)
 # ============================================================================
 
+
 def test_averagine_default_composition():
     """Test averagine with default amino acid composition (AV-B1)."""
-    formula = mod_peakpicking.averagine(1000.0, charge=1, composition=mod_peakpicking.AVERAGE_AMINO)
+    formula = mod_peakpicking.averagine(
+        1000.0, charge=1, composition=mod_peakpicking.AVERAGE_AMINO
+    )
 
     assert formula is not None
     assert isinstance(formula, obj_compound.compound)
@@ -791,21 +797,27 @@ def test_averagine_default_composition():
 
 def test_averagine_zero_charge():
     """Test averagine with zero charge (AV-B2)."""
-    formula = mod_peakpicking.averagine(1000.0, charge=0, composition=mod_peakpicking.AVERAGE_AMINO)
+    formula = mod_peakpicking.averagine(
+        1000.0, charge=0, composition=mod_peakpicking.AVERAGE_AMINO
+    )
 
     assert formula is not None
 
 
 def test_averagine_positive_charge():
     """Test averagine with positive charge (AV-B3)."""
-    formula = mod_peakpicking.averagine(1000.0, charge=2, composition=mod_peakpicking.AVERAGE_AMINO)
+    formula = mod_peakpicking.averagine(
+        1000.0, charge=2, composition=mod_peakpicking.AVERAGE_AMINO
+    )
 
     assert formula is not None
 
 
 def test_averagine_base_composition():
     """Test averagine with nucleotide base composition (AV-B4)."""
-    formula = mod_peakpicking.averagine(2000.0, charge=1, composition=mod_peakpicking.AVERAGE_BASE)
+    formula = mod_peakpicking.averagine(
+        2000.0, charge=1, composition=mod_peakpicking.AVERAGE_BASE
+    )
 
     assert formula is not None
 
@@ -830,25 +842,31 @@ def test_averagine_consistency():
 # TESTS FOR _gentable(highmass, step, composition, table)
 # ============================================================================
 
+
 def test_gentable_tuple_format(capsys):
     """Test _gentable with tuple format (GT-B1)."""
-    mod_peakpicking._gentable(highmass=400, step=200, composition=mod_peakpicking.AVERAGE_AMINO, table='tuple')
+    mod_peakpicking._gentable(
+        highmass=400, step=200, composition=mod_peakpicking.AVERAGE_AMINO, table="tuple"
+    )
 
     captured = capsys.readouterr()
-    assert ',' in captured.out  # tuple format has commas
+    assert "," in captured.out  # tuple format has commas
 
 
 def test_gentable_dict_format(capsys):
     """Test _gentable with dict format (GT-B2)."""
-    mod_peakpicking._gentable(highmass=400, step=200, composition=mod_peakpicking.AVERAGE_AMINO, table='dict')
+    mod_peakpicking._gentable(
+        highmass=400, step=200, composition=mod_peakpicking.AVERAGE_AMINO, table="dict"
+    )
 
     captured = capsys.readouterr()
-    assert ':' in captured.out  # dict format has colons
+    assert ":" in captured.out  # dict format has colons
 
 
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 def test_labelscan_then_deisotope():
     """Test labelscan followed by deisotope (LS-DI-I1)."""
@@ -866,7 +884,7 @@ def test_labelscan_then_deconvolute():
     # Create peaks with charge
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2),
-        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=2)
+        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=2),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -881,7 +899,7 @@ def test_envcentroid_and_envmono_cascade():
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=500.5, ai=800.0, base=0.0),
-        obj_peak.peak(mz=501.0, ai=400.0, base=0.0)
+        obj_peak.peak(mz=501.0, ai=400.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -895,6 +913,7 @@ def test_envcentroid_and_envmono_cascade():
 # ============================================================================
 # PROPERTY-BASED TESTS
 # ============================================================================
+
 
 @given(st.floats(min_value=100.0, max_value=5000.0))
 @settings(max_examples=20, deadline=None, suppress_health_check=[HealthCheck.too_slow])
@@ -920,8 +939,8 @@ def test_averagine_mass_increases_with_mz(mz):
 def test_deconvolute_singly_charged(mz):
     """Test deconvolute always produces singly-charged peaks (DC-P1)."""
     peaks = [
-        obj_peak.peak(mz=mz/2, ai=1000.0, base=0.0, charge=2),
-        obj_peak.peak(mz=mz/3, ai=800.0, base=0.0, charge=3)
+        obj_peak.peak(mz=mz / 2, ai=1000.0, base=0.0, charge=2),
+        obj_peak.peak(mz=mz / 3, ai=800.0, base=0.0, charge=3),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -935,6 +954,7 @@ def test_deconvolute_singly_charged(mz):
 # ============================================================================
 # EDGE CASE AND BOUNDARY TESTS
 # ============================================================================
+
 
 def test_labelpoint_very_small_peak():
     """Test labelpoint with very small peak height (LP-E1)."""
@@ -959,7 +979,7 @@ def test_envcentroid_isotopes_with_zero_intensity():
     """Test envcentroid handles zero intensity peaks (EC-E1)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=1000.0),  # zero intensity
-        obj_peak.peak(mz=1001.0, ai=1000.0, base=0.0)
+        obj_peak.peak(mz=1001.0, ai=1000.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -983,6 +1003,7 @@ def test_averagine_very_low_mass():
 # FORCE QUIT TESTS
 # ============================================================================
 
+
 def test_labelscan_force_quit_in_centroiding(reset_stopper):
     """Test labelscan respects force quit (LS-FQ1)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
@@ -1002,7 +1023,7 @@ def test_deisotope_force_quit(reset_stopper):
     """Test deisotope respects force quit (DI-FQ1)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0)
+        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1021,7 +1042,7 @@ def test_deconvolute_force_quit(reset_stopper):
     """Test deconvolute respects force quit (DC-FQ1)."""
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2),
-        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=2)
+        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=2),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1040,6 +1061,7 @@ def test_deconvolute_force_quit(reset_stopper):
 # ADDITIONAL COVERAGE TESTS FOR MISSING BRANCHES
 # ============================================================================
 
+
 def test_labelpoint_noise_is_none():
     """Test labelpoint when noise is None (LP-B8)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
@@ -1052,7 +1074,9 @@ def test_labelpoint_noise_is_none():
 def test_labelpeak_centroid_degenerate():
     """Test labelpeak when left and right m/z are equal (degenerate case)."""
     # Create a very sharp peak
-    signal = numpy.array([[999.5, 100.0], [1000.0, 1000.0], [1000.5, 100.0]], dtype=numpy.float64)
+    signal = numpy.array(
+        [[999.5, 100.0], [1000.0, 1000.0], [1000.5, 100.0]], dtype=numpy.float64
+    )
     peak = mod_peakpicking.labelpeak(signal, mz=1000.0, pickingHeight=0.75)
     # Should handle degenerate centroid
     assert peak is None or peak.mz is not None
@@ -1069,10 +1093,9 @@ def test_labelpeak_range_mode_overlaps_boundary():
 def test_labelscan_no_maxima():
     """Test labelscan with monotonic signal (no maxima)."""
     # Create monotonically increasing signal
-    signal = numpy.column_stack([
-        numpy.linspace(1000.0, 1010.0, 50),
-        numpy.linspace(100.0, 1000.0, 50)
-    ]).astype(numpy.float64)
+    signal = numpy.column_stack(
+        [numpy.linspace(1000.0, 1010.0, 50), numpy.linspace(100.0, 1000.0, 50)]
+    ).astype(numpy.float64)
 
     peaklist = mod_peakpicking.labelscan(signal)
     assert isinstance(peaklist, obj_peaklist.peaklist)
@@ -1108,7 +1131,9 @@ def test_labelscan_peak_overlap_merging():
 
 def test_labelscan_cropped_range():
     """Test labelscan with minX and maxX (LS-B2)."""
-    signal = make_multipeak_signal([(900.0, 0.5, 800.0), (1000.0, 0.5, 1000.0), (1100.0, 0.5, 600.0)])
+    signal = make_multipeak_signal(
+        [(900.0, 0.5, 800.0), (1000.0, 0.5, 1000.0), (1100.0, 0.5, 600.0)]
+    )
     # Crop to middle peak only
     peaklist = mod_peakpicking.labelscan(signal, minX=950.0, maxX=1050.0)
     assert isinstance(peaklist, obj_peaklist.peaklist)
@@ -1121,7 +1146,7 @@ def test_envcentroid_fwhm_edge_interpolation():
     """Test envcentroid FWHM calculation at envelope edges (EC-B11)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0)
+        obj_peak.peak(mz=1001.0, ai=800.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
     result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.5)
@@ -1143,7 +1168,7 @@ def test_deisotope_no_isotope_found():
     # Single peak or peaks too far apart
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=2000.0, ai=500.0, base=0.0)  # too far apart
+        obj_peak.peak(mz=2000.0, ai=500.0, base=0.0),  # too far apart
     ]
     peaklist = obj_peaklist.peaklist(peaks)
     mod_peakpicking.deisotope(peaklist, maxCharge=1, mzTolerance=0.15)
@@ -1157,7 +1182,7 @@ def test_deisotope_intensity_higher_overlap():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=1001.0, ai=1000.0, base=0.0),  # Should be lower but is equal
-        obj_peak.peak(mz=1002.0, ai=500.0, base=0.0)
+        obj_peak.peak(mz=1002.0, ai=500.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
     mod_peakpicking.deisotope(peaklist, maxCharge=1, mzTolerance=0.15, intTolerance=1.0)
@@ -1167,8 +1192,12 @@ def test_deisotope_intensity_higher_overlap():
 def test_deisotope_intensity_too_low_first_isotope():
     """Test deisotope rejects cluster when first isotope too low (DI-B14)."""
     peaks = [
-        obj_peak.peak(mz=1000.0, ai=400.0, base=0.0),  # Lower than expected second isotope
-        obj_peak.peak(mz=1001.0, ai=600.0, base=0.0),  # Higher than first (invalid pattern)
+        obj_peak.peak(
+            mz=1000.0, ai=400.0, base=0.0
+        ),  # Lower than expected second isotope
+        obj_peak.peak(
+            mz=1001.0, ai=600.0, base=0.0
+        ),  # Higher than first (invalid pattern)
     ]
     peaklist = obj_peaklist.peaklist(peaks)
     mod_peakpicking.deisotope(peaklist, maxCharge=1, mzTolerance=0.15, intTolerance=0.3)
@@ -1179,7 +1208,7 @@ def test_deconvolute_no_charge():
     """Test deconvolute skips peaks with no charge (DC-B1)."""
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=None),
-        obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2)
+        obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
     result = mod_peakpicking.deconvolute(peaklist)
@@ -1189,9 +1218,7 @@ def test_deconvolute_no_charge():
 
 def test_deconvolute_triple_charged():
     """Test deconvolute with triple-charged peak (DC-B3)."""
-    peaks = [
-        obj_peak.peak(mz=333.33, ai=1000.0, base=0.0, charge=3, fwhm=0.3)
-    ]
+    peaks = [obj_peak.peak(mz=333.33, ai=1000.0, base=0.0, charge=3, fwhm=0.3)]
     peaklist = obj_peaklist.peaklist(peaks)
     result = mod_peakpicking.deconvolute(peaklist)
     assert len(result) == 1
@@ -1202,9 +1229,7 @@ def test_deconvolute_triple_charged():
 
 def test_deconvolute_negative_triple_charge():
     """Test deconvolute with negative triple-charged peak (DC-B5)."""
-    peaks = [
-        obj_peak.peak(mz=333.33, ai=1000.0, base=0.0, charge=-3)
-    ]
+    peaks = [obj_peak.peak(mz=333.33, ai=1000.0, base=0.0, charge=-3)]
     peaklist = obj_peaklist.peaklist(peaks)
     result = mod_peakpicking.deconvolute(peaklist)
     assert len(result) == 1
@@ -1213,9 +1238,7 @@ def test_deconvolute_negative_triple_charge():
 
 def test_deconvolute_preserves_ai_as_intensity():
     """Test deconvolute sets ai=intensity after baseline removal (DC-B6)."""
-    peaks = [
-        obj_peak.peak(mz=500.0, ai=1000.0, base=100.0, charge=2)
-    ]
+    peaks = [obj_peak.peak(mz=500.0, ai=1000.0, base=100.0, charge=2)]
     peaklist = obj_peaklist.peaklist(peaks)
     result = mod_peakpicking.deconvolute(peaklist)
     # ai should be set to intensity (ai - base)
@@ -1234,10 +1257,7 @@ def test_labelpeak_range_exceeds_boundary():
     """Test labelpeak range exceeds signal boundaries (LPK-B15)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
     peak = mod_peakpicking.labelpeak(
-        signal,
-        minX=signal[0][0] - 10,
-        maxX=signal[-1][0] + 10,
-        pickingHeight=0.75
+        signal, minX=signal[0][0] - 10, maxX=signal[-1][0] + 10, pickingHeight=0.75
     )
     # Should handle gracefully
 
@@ -1247,12 +1267,12 @@ def test_envmono_different_intensity_modes():
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0, sn=99.0),
         obj_peak.peak(mz=500.5, ai=800.0, base=10.0, sn=79.0),
-        obj_peak.peak(mz=501.0, ai=400.0, base=10.0, sn=39.0)
+        obj_peak.peak(mz=501.0, ai=400.0, base=10.0, sn=39.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Test all intensity modes
-    for intensity_mode in ['maximum', 'sum', 'average']:
+    for intensity_mode in ["maximum", "sum", "average"]:
         result = mod_peakpicking.envmono(peaklist, charge=2, intensity=intensity_mode)
         assert result is not None
         assert result.isotope == 0
@@ -1261,9 +1281,13 @@ def test_envmono_different_intensity_modes():
 def test_averagine_element_composition():
     """Test averagine with custom element composition (AV-B3-B4)."""
     # Test with amino acid composition
-    formula_amino = mod_peakpicking.averagine(1000.0, charge=2, composition=mod_peakpicking.AVERAGE_AMINO)
+    formula_amino = mod_peakpicking.averagine(
+        1000.0, charge=2, composition=mod_peakpicking.AVERAGE_AMINO
+    )
     # Test with base composition
-    formula_base = mod_peakpicking.averagine(1000.0, charge=2, composition=mod_peakpicking.AVERAGE_BASE)
+    formula_base = mod_peakpicking.averagine(
+        1000.0, charge=2, composition=mod_peakpicking.AVERAGE_BASE
+    )
 
     assert formula_amino is not None
     assert formula_base is not None
@@ -1293,16 +1317,20 @@ def test_labelscan_second_baseline_pass_filters():
 # ADDITIONAL COVERAGE TESTS FOR UNCOVERED BRANCHES
 # ============================================================================
 
+
 def test_labelpoint_intensity_equals_baseline():
     """Test labelpoint when peak intensity equals baseline (LP-B11-EXT)."""
     # Create a very flat signal where intensity would equal computed baseline
-    signal = numpy.array([
-        [999.0, 500.0],
-        [999.5, 500.0],
-        [1000.0, 500.0],
-        [1000.5, 500.0],
-        [1001.0, 500.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 500.0],
+            [999.5, 500.0],
+            [1000.0, 500.0],
+            [1000.5, 500.0],
+            [1001.0, 500.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     # Call labelpoint - should return None due to flat signal (ai <= base after noise calculation)
     peak = mod_peakpicking.labelpoint(signal, 1000.0)
@@ -1316,12 +1344,12 @@ def test_envcentroid_with_basepeak_sn_truthy():
     peaks = [
         obj_peak.peak(mz=499.0, ai=400.0, base=50.0, sn=7.5, fwhm=0.5),
         obj_peak.peak(mz=499.5, ai=900.0, base=50.0, sn=17.0, fwhm=0.5),
-        obj_peak.peak(mz=500.0, ai=600.0, base=50.0, sn=11.0, fwhm=0.5)
+        obj_peak.peak(mz=500.0, ai=600.0, base=50.0, sn=11.0, fwhm=0.5),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call envcentroid - should execute line 383 where sn is recalculated
-    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.5, intensity='sum')
+    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.5, intensity="sum")
 
     assert result is not None
     assert result.sn is not None
@@ -1334,12 +1362,14 @@ def test_envcentroid_fwhm_width_boundary():
     peaks = [
         obj_peak.peak(mz=499.0, ai=300.0, base=10.0, sn=29.0, fwhm=1.0),
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0, sn=99.0, fwhm=1.0),
-        obj_peak.peak(mz=501.0, ai=300.0, base=10.0, sn=29.0, fwhm=1.0)
+        obj_peak.peak(mz=501.0, ai=300.0, base=10.0, sn=29.0, fwhm=1.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call envcentroid with pickingHeight that triggers interpolation
-    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.5, intensity='maximum')
+    result = mod_peakpicking.envcentroid(
+        peaklist, pickingHeight=0.5, intensity="maximum"
+    )
 
     assert result is not None
     assert result.fwhm > 0
@@ -1351,12 +1381,12 @@ def test_envmono_centroid_fallback_to_basepeak():
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=50.0, sn=19.0),
         obj_peak.peak(mz=500.5, ai=700.0, base=50.0, sn=13.0),
-        obj_peak.peak(mz=501.0, ai=300.0, base=50.0, sn=5.0)
+        obj_peak.peak(mz=501.0, ai=300.0, base=50.0, sn=5.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call envmono - should fallback to basepeak if centroid fails
-    result = mod_peakpicking.envmono(peaklist, charge=2, intensity='maximum')
+    result = mod_peakpicking.envmono(peaklist, charge=2, intensity="maximum")
 
     assert result is not None
     assert result.isotope == 0
@@ -1368,7 +1398,7 @@ def test_deisotope_cluster_exceeds_mz_tolerance():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=1001.5, ai=800.0, base=0.0),  # gap > 1.00287/1 tolerance
-        obj_peak.peak(mz=1003.0, ai=600.0, base=0.0)
+        obj_peak.peak(mz=1003.0, ai=600.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1384,7 +1414,7 @@ def test_deisotope_insufficient_cluster_size():
     # Create a small cluster for charge > 1
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1000.5, ai=600.0, base=0.0)  # Only 2 peaks
+        obj_peak.peak(mz=1000.5, ai=600.0, base=0.0),  # Only 2 peaks
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1400,8 +1430,8 @@ def test_deisotope_low_first_isotope_intensity():
     # Create cluster where first isotope intensity is too low relative to theoretical
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),  # Parent
-        obj_peak.peak(mz=1000.5, ai=50.0, base=0.0),    # First isotope - too weak
-        obj_peak.peak(mz=1001.0, ai=700.0, base=0.0)    # Second isotope - strong
+        obj_peak.peak(mz=1000.5, ai=50.0, base=0.0),  # First isotope - too weak
+        obj_peak.peak(mz=1001.0, ai=700.0, base=0.0),  # Second isotope - strong
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1417,7 +1447,7 @@ def test_deconvolute_no_charge():
     # Create peaks with no charge
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=None),
-        obj_peak.peak(mz=1100.0, ai=800.0, base=0.0, charge=None)
+        obj_peak.peak(mz=1100.0, ai=800.0, base=0.0, charge=None),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1433,7 +1463,7 @@ def test_deconvolute_charge_negative():
     # Create negatively charged peaks
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=-2, fwhm=0.5),
-        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=-3, fwhm=0.6)
+        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=-3, fwhm=0.6),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1489,7 +1519,7 @@ def test_deconvolute_with_fwhm_scaling():
     # Create peaks with various charges and fwhm values
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2, fwhm=0.4),
-        obj_peak.peak(mz=400.0, ai=800.0, base=0.0, charge=3, fwhm=0.6)
+        obj_peak.peak(mz=400.0, ai=800.0, base=0.0, charge=3, fwhm=0.6),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1507,12 +1537,14 @@ def test_envcentroid_i1_at_zero_index():
     # Create peaks where first peak passes minimum intensity threshold
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0, sn=99.0, fwhm=1.0),
-        obj_peak.peak(mz=500.5, ai=700.0, base=10.0, sn=69.0, fwhm=1.0)
+        obj_peak.peak(mz=500.5, ai=700.0, base=10.0, sn=69.0, fwhm=1.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call with high picking height to ensure first peak is included
-    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.7, intensity='maximum')
+    result = mod_peakpicking.envcentroid(
+        peaklist, pickingHeight=0.7, intensity="maximum"
+    )
 
     assert result is not None
     # Tests branch at line 397 where i1 == 0
@@ -1523,12 +1555,14 @@ def test_envcentroid_i2_at_last_index():
     # Create peaks where last peak passes minimum intensity threshold
     peaks = [
         obj_peak.peak(mz=500.0, ai=700.0, base=10.0, sn=69.0, fwhm=1.0),
-        obj_peak.peak(mz=500.5, ai=1000.0, base=10.0, sn=99.0, fwhm=1.0)
+        obj_peak.peak(mz=500.5, ai=1000.0, base=10.0, sn=99.0, fwhm=1.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call with high picking height
-    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.7, intensity='maximum')
+    result = mod_peakpicking.envcentroid(
+        peaklist, pickingHeight=0.7, intensity="maximum"
+    )
 
     assert result is not None
     # Tests branch at line 399 where i2 == len(isotopes)-1
@@ -1541,7 +1575,7 @@ def test_labelscan_peak_below_threshold_filtered():
     signal = make_multipeak_signal(peaks)
 
     # Use high s/n threshold that filters weak peak
-    peaklist = mod_peakpicking.labelscan(signal, snThreshold=100.0, absThreshold=0.)
+    peaklist = mod_peakpicking.labelscan(signal, snThreshold=100.0, absThreshold=0.0)
 
     # Low intensity peak should be filtered out (line 261)
     assert isinstance(peaklist, obj_peaklist.peaklist)
@@ -1578,7 +1612,9 @@ def test_labelscan_centroid_peak_moved_outside_range():
     signal = make_multipeak_signal(peaks, num_points=100)
 
     # Use centroiding that might move peak
-    peaklist = mod_peakpicking.labelscan(signal, minX=1000.0, maxX=1001.0, pickingHeight=0.5)
+    peaklist = mod_peakpicking.labelscan(
+        signal, minX=1000.0, maxX=1001.0, pickingHeight=0.5
+    )
 
     # Should handle boundary check (line 174)
     assert isinstance(peaklist, obj_peaklist.peaklist)
@@ -1602,12 +1638,12 @@ def test_envmono_both_centroids_valid():
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=10.0, sn=99.0),
         obj_peak.peak(mz=500.5, ai=800.0, base=10.0, sn=79.0),
-        obj_peak.peak(mz=501.0, ai=500.0, base=10.0, sn=49.0)
+        obj_peak.peak(mz=501.0, ai=500.0, base=10.0, sn=49.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call envmono
-    result = mod_peakpicking.envmono(peaklist, charge=2, intensity='maximum')
+    result = mod_peakpicking.envmono(peaklist, charge=2, intensity="maximum")
 
     assert result is not None
     assert result.isotope == 0
@@ -1619,8 +1655,8 @@ def test_deisotope_gap_within_tolerance():
     # Create peaks with gap exactly within isotope tolerance
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1000.5, ai=800.0, base=0.0),   # Gap = 0.5
-        obj_peak.peak(mz=1001.0, ai=600.0, base=0.0)    # Gap = 0.5
+        obj_peak.peak(mz=1000.5, ai=800.0, base=0.0),  # Gap = 0.5
+        obj_peak.peak(mz=1001.0, ai=600.0, base=0.0),  # Gap = 0.5
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1637,7 +1673,7 @@ def test_deisotope_pattern_lookup():
     peaks = [
         obj_peak.peak(mz=300.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=300.5, ai=700.0, base=0.0),
-        obj_peak.peak(mz=301.0, ai=400.0, base=0.0)
+        obj_peak.peak(mz=301.0, ai=400.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1652,8 +1688,8 @@ def test_deisotope_intensity_within_tolerance():
     # Create cluster where isotope intensities match theoretical pattern well
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),  # Parent
-        obj_peak.peak(mz=1000.5, ai=750.0, base=0.0),   # First isotope
-        obj_peak.peak(mz=1001.0, ai=500.0, base=0.0)    # Second isotope
+        obj_peak.peak(mz=1000.5, ai=750.0, base=0.0),  # First isotope
+        obj_peak.peak(mz=1001.0, ai=500.0, base=0.0),  # Second isotope
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1668,8 +1704,8 @@ def test_deisotope_intensity_higher_than_theoretical():
     # Create cluster with higher-than-expected second isotope (overlap case)
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),  # Parent
-        obj_peak.peak(mz=1000.5, ai=700.0, base=0.0),   # First isotope - matches
-        obj_peak.peak(mz=1001.0, ai=900.0, base=0.0)    # Second isotope - too high
+        obj_peak.peak(mz=1000.5, ai=700.0, base=0.0),  # First isotope - matches
+        obj_peak.peak(mz=1001.0, ai=900.0, base=0.0),  # Second isotope - too high
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1684,8 +1720,8 @@ def test_deisotope_first_isotope_too_low():
     # Create cluster where first isotope is notably too weak
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),  # Parent - strong
-        obj_peak.peak(mz=1000.5, ai=100.0, base=0.0),   # First isotope - too weak
-        obj_peak.peak(mz=1001.0, ai=600.0, base=0.0)    # Second isotope
+        obj_peak.peak(mz=1000.5, ai=100.0, base=0.0),  # First isotope - too weak
+        obj_peak.peak(mz=1001.0, ai=600.0, base=0.0),  # Second isotope
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1701,7 +1737,7 @@ def test_deconvolute_singly_charged_mixed():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0, charge=1, fwhm=0.5),
         obj_peak.peak(mz=500.0, ai=800.0, base=0.0, charge=2, fwhm=0.4),
-        obj_peak.peak(mz=1100.0, ai=600.0, base=0.0, charge=1, fwhm=0.5)
+        obj_peak.peak(mz=1100.0, ai=600.0, base=0.0, charge=1, fwhm=0.5),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1718,7 +1754,7 @@ def test_deconvolute_no_fwhm():
     # Create peaks with None fwhm
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=0.0, charge=2, fwhm=None),
-        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=3, fwhm=None)
+        obj_peak.peak(mz=600.0, ai=800.0, base=0.0, charge=3, fwhm=None),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1749,10 +1785,7 @@ def test_labelscan_candidate_index_check():
 
     # Process with parameters that trigger all filtering conditions
     peaklist = mod_peakpicking.labelscan(
-        signal,
-        absThreshold=10.0,
-        relThreshold=0.5,
-        snThreshold=0.0
+        signal, absThreshold=10.0, relThreshold=0.5, snThreshold=0.0
     )
 
     # Tests line 261 (peak[0] > 0 and intensity check)
@@ -1789,13 +1822,16 @@ def test_labelscan_peak_at_signal_boundary_exact():
 def test_labelscan_peak_intensity_increases_after_centroid():
     """Test labelscan when centroided peak has higher intensity (LS-B29)."""
     # Create signal where centroid interpolation might increase intensity
-    signal = numpy.array([
-        [999.0, 500.0],
-        [999.5, 700.0],
-        [1000.0, 1000.0],
-        [1000.5, 700.0],
-        [1001.0, 500.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 500.0],
+            [999.5, 700.0],
+            [1000.0, 1000.0],
+            [1000.5, 700.0],
+            [1001.0, 500.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     # Centroiding at specific height
     peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.6, absThreshold=100.0)
@@ -1850,12 +1886,14 @@ def test_envcentroid_all_isotopes_below_threshold():
     # Create peaks all with low intensity relative to basepeak
     peaks = [
         obj_peak.peak(mz=500.0, ai=100.0, base=10.0, sn=9.0, fwhm=0.5),
-        obj_peak.peak(mz=500.5, ai=1000.0, base=10.0, sn=99.0, fwhm=0.5)  # Basepeak
+        obj_peak.peak(mz=500.5, ai=1000.0, base=10.0, sn=99.0, fwhm=0.5),  # Basepeak
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call with very high picking height
-    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.9, intensity='maximum')
+    result = mod_peakpicking.envcentroid(
+        peaklist, pickingHeight=0.9, intensity="maximum"
+    )
 
     assert result is not None
     # Tests edge case in lines 392-393
@@ -1866,12 +1904,12 @@ def test_envmono_labelpeak_fails_both_centroids():
     # Create sparse isotope pattern where labelpeak might struggle
     peaks = [
         obj_peak.peak(mz=500.0, ai=1000.0, base=100.0, sn=9.0),
-        obj_peak.peak(mz=501.5, ai=100.0, base=100.0, sn=0.0)
+        obj_peak.peak(mz=501.5, ai=100.0, base=100.0, sn=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call envmono - should use fallbacks
-    result = mod_peakpicking.envmono(peaklist, charge=2, intensity='maximum')
+    result = mod_peakpicking.envmono(peaklist, charge=2, intensity="maximum")
 
     assert result is not None
     # Tests fallback logic
@@ -1882,7 +1920,7 @@ def test_deisotope_two_peaks_at_boundary():
     # Create minimal cluster
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
-        obj_peak.peak(mz=1000.5, ai=600.0, base=0.0)
+        obj_peak.peak(mz=1000.5, ai=600.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1898,7 +1936,7 @@ def test_deisotope_multiple_charge_states():
     peaks = [
         obj_peak.peak(mz=1000.0, ai=1000.0, base=0.0),
         obj_peak.peak(mz=1000.51, ai=700.0, base=0.0),  # Could be z=1 or z=2
-        obj_peak.peak(mz=1001.0, ai=400.0, base=0.0)
+        obj_peak.peak(mz=1001.0, ai=400.0, base=0.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
@@ -1911,9 +1949,7 @@ def test_deisotope_multiple_charge_states():
 def test_deconvolute_charge_positive_recalc():
     """Test deconvolute with positive charge recalculation (DC-B6)."""
     # Create positively charged peak
-    peaks = [
-        obj_peak.peak(mz=500.0, ai=1000.0, base=10.0, charge=3, fwhm=0.6)
-    ]
+    peaks = [obj_peak.peak(mz=500.0, ai=1000.0, base=10.0, charge=3, fwhm=0.6)]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call deconvolute
@@ -1944,12 +1980,14 @@ def test_envcentroid_mz_equal_no_fwhm_change():
     peaks = [
         obj_peak.peak(mz=500.0, ai=500.0, base=10.0, sn=49.0, fwhm=1.0),
         obj_peak.peak(mz=500.001, ai=1000.0, base=10.0, sn=99.0, fwhm=1.0),
-        obj_peak.peak(mz=500.002, ai=500.0, base=10.0, sn=49.0, fwhm=1.0)
+        obj_peak.peak(mz=500.002, ai=500.0, base=10.0, sn=49.0, fwhm=1.0),
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
     # Call with high picking height
-    result = mod_peakpicking.envcentroid(peaklist, pickingHeight=0.5, intensity='maximum')
+    result = mod_peakpicking.envcentroid(
+        peaklist, pickingHeight=0.5, intensity="maximum"
+    )
 
     assert result is not None
     # Tests line 401 (mz1 != mz2 condition - when equal, fwhm unchanged)
@@ -1963,19 +2001,21 @@ def test_labelpoint_with_baseline_array_workaround():
     that the baseline handling logic WOULD work if the comparison were fixed to use 'is not None'.
     """
     # Create signal and baseline
-    signal = numpy.array([
-        [999.0, 100.0],
-        [999.5, 500.0],
-        [1000.0, 1000.0],
-        [1000.5, 500.0],
-        [1001.0, 100.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 100.0],
+            [999.5, 500.0],
+            [1000.0, 1000.0],
+            [1000.5, 500.0],
+            [1001.0, 100.0],
+        ],
+        dtype=numpy.float64,
+    )
 
-    baseline = numpy.array([
-        [999.0, 20.0, 2.0],
-        [1000.0, 20.0, 2.0],
-        [1001.0, 20.0, 2.0]
-    ], dtype=numpy.float64)
+    baseline = numpy.array(
+        [[999.0, 20.0, 2.0], [1000.0, 20.0, 2.0], [1001.0, 20.0, 2.0]],
+        dtype=numpy.float64,
+    )
 
     # This call should demonstrate the baseline handling path IF the source used 'is not None'
     # Currently it will fail due to the numpy bug, which is expected
@@ -1985,7 +2025,7 @@ def test_labelpoint_with_baseline_array_workaround():
         assert peak is not None
     except ValueError as e:
         # Expected due to numpy comparison bug in source code at line 63
-        assert 'ambiguous' in str(e)
+        assert "ambiguous" in str(e)
 
 
 def test_labelscan_with_baseline_array_workaround():
@@ -1993,19 +2033,21 @@ def test_labelscan_with_baseline_array_workaround():
 
     Note: Like labelpoint, labelscan has the same numpy array comparison bug at line 241.
     """
-    signal = numpy.array([
-        [999.0, 100.0],
-        [999.5, 500.0],
-        [1000.0, 1000.0],
-        [1000.5, 500.0],
-        [1001.0, 100.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 100.0],
+            [999.5, 500.0],
+            [1000.0, 1000.0],
+            [1000.5, 500.0],
+            [1001.0, 100.0],
+        ],
+        dtype=numpy.float64,
+    )
 
-    baseline = numpy.array([
-        [999.0, 20.0, 2.0],
-        [1000.0, 20.0, 2.0],
-        [1001.0, 20.0, 2.0]
-    ], dtype=numpy.float64)
+    baseline = numpy.array(
+        [[999.0, 20.0, 2.0], [1000.0, 20.0, 2.0], [1001.0, 20.0, 2.0]],
+        dtype=numpy.float64,
+    )
 
     # This demonstrates the baseline issue in labelscan
     try:
@@ -2013,7 +2055,7 @@ def test_labelscan_with_baseline_array_workaround():
         assert isinstance(peaklist, obj_peaklist.peaklist)
     except ValueError as e:
         # Expected due to numpy comparison bug at line 241
-        assert 'ambiguous' in str(e)
+        assert "ambiguous" in str(e)
 
 
 def test_labelpeak_with_baseline_array_workaround():
@@ -2021,19 +2063,21 @@ def test_labelpeak_with_baseline_array_workaround():
 
     Note: labelpeak also has the numpy array comparison bug at line 124.
     """
-    signal = numpy.array([
-        [999.0, 100.0],
-        [999.5, 500.0],
-        [1000.0, 1000.0],
-        [1000.5, 500.0],
-        [1001.0, 100.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 100.0],
+            [999.5, 500.0],
+            [1000.0, 1000.0],
+            [1000.5, 500.0],
+            [1001.0, 100.0],
+        ],
+        dtype=numpy.float64,
+    )
 
-    baseline = numpy.array([
-        [999.0, 20.0, 2.0],
-        [1000.0, 20.0, 2.0],
-        [1001.0, 20.0, 2.0]
-    ], dtype=numpy.float64)
+    baseline = numpy.array(
+        [[999.0, 20.0, 2.0], [1000.0, 20.0, 2.0], [1001.0, 20.0, 2.0]],
+        dtype=numpy.float64,
+    )
 
     # This demonstrates the baseline issue in labelpeak
     try:
@@ -2042,7 +2086,7 @@ def test_labelpeak_with_baseline_array_workaround():
         assert peak is None or isinstance(peak, obj_peak.peak)
     except ValueError as e:
         # Expected due to numpy comparison bug at line 124
-        assert 'ambiguous' in str(e)
+        assert "ambiguous" in str(e)
 
 
 # ============================================================================
@@ -2100,17 +2144,21 @@ def test_labelpeak_with_baseline_array_workaround():
 # TARGETED TESTS FOR UNCOVERED BRANCHES
 # ============================================================================
 
+
 def test_labelscan_peak_at_first_index_skip():
     """Test labelscan when a peak is located exactly at index 0 (LS-B35)."""
     # Create a signal where the maximum is at the first point
     # This is designed to trigger line 277-278 (idx == 0) continue
-    signal = numpy.array([
-        [100.0, 1000.0],  # First point is the peak
-        [100.5, 500.0],
-        [101.0, 200.0],
-        [101.5, 100.0],
-        [102.0, 50.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [100.0, 1000.0],  # First point is the peak
+            [100.5, 500.0],
+            [101.0, 200.0],
+            [101.5, 100.0],
+            [102.0, 50.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     # Use centroiding that would try to centroid this boundary peak
     peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.5, absThreshold=10.0)
@@ -2125,13 +2173,16 @@ def test_labelscan_peak_at_last_index_skip():
     """Test labelscan when a peak is located at the last index (LS-B36)."""
     # Create a signal where the maximum is at the last point
     # This is designed to trigger line 277-278 (idx == len(signal)) continue
-    signal = numpy.array([
-        [100.0, 50.0],
-        [100.5, 100.0],
-        [101.0, 200.0],
-        [101.5, 500.0],
-        [102.0, 1000.0]  # Last point is the peak
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [100.0, 50.0],
+            [100.5, 100.0],
+            [101.0, 200.0],
+            [101.5, 500.0],
+            [102.0, 1000.0],  # Last point is the peak
+        ],
+        dtype=numpy.float64,
+    )
 
     # Use centroiding that would try to centroid this boundary peak
     peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.5, absThreshold=10.0)
@@ -2147,14 +2198,17 @@ def test_labelscan_centroid_intensity_higher_after():
     # Create a signal where centroiding moves the peak to a higher intensity
     # After centroid at line 294: intens = mod_signal.intensity(signal, peak[0])
     # We need intens > peak[1] to trigger the else: continue at line 298
-    signal = numpy.array([
-        [999.0, 200.0],
-        [999.5, 600.0],
-        [1000.0, 900.0],   # Original peak here
-        [1000.5, 1000.0],  # But after centroid, might move here (higher intensity)
-        [1001.0, 700.0],
-        [1001.5, 300.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 200.0],
+            [999.5, 600.0],
+            [1000.0, 900.0],  # Original peak here
+            [1000.5, 1000.0],  # But after centroid, might move here (higher intensity)
+            [1001.0, 700.0],
+            [1001.5, 300.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     # Use centroiding with specific height that might cause intensity increase
     peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.5, absThreshold=50.0)
@@ -2172,17 +2226,20 @@ def test_labelscan_peak_replacement_stronger():
     # 2. leftMZ < previous (overlapping with previous peak)
     # 3. peak[1] > buff[-1][1] (new peak is stronger)
 
-    signal = numpy.array([
-        [999.0, 100.0],
-        [999.3, 400.0],
-        [999.6, 600.0],
-        [999.9, 700.0],   # First peak around here
-        [1000.2, 750.0],  # Overlap zone
-        [1000.5, 1000.0], # Second peak around here (stronger)
-        [1000.8, 800.0],
-        [1001.1, 400.0],
-        [1001.4, 150.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.0, 100.0],
+            [999.3, 400.0],
+            [999.6, 600.0],
+            [999.9, 700.0],  # First peak around here
+            [1000.2, 750.0],  # Overlap zone
+            [1000.5, 1000.0],  # Second peak around here (stronger)
+            [1000.8, 800.0],
+            [1001.1, 400.0],
+            [1001.4, 150.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     # Use centroiding parameters that find both peaks and potentially merge
     peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.3, absThreshold=50.0)
@@ -2196,14 +2253,17 @@ def test_labelscan_peak_at_boundary_with_centroid():
     """Test boundary peak handling during centroiding with specific geometry (LS-B39)."""
     # Create a sharp peak exactly at first point that passes initial filtering
     # but gets skipped during centroiding loop
-    signal = numpy.array([
-        [100.0, 1100.0],  # Sharp peak at start
-        [100.1, 900.0],
-        [100.2, 700.0],
-        [100.3, 500.0],
-        [100.4, 300.0],
-        [100.5, 100.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [100.0, 1100.0],  # Sharp peak at start
+            [100.1, 900.0],
+            [100.2, 700.0],
+            [100.3, 500.0],
+            [100.4, 300.0],
+            [100.5, 100.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     # Call labelscan with parameters that allow this peak through initial filter
     # but would skip it at line 278 during centroiding
@@ -2220,19 +2280,24 @@ def test_labelscan_dual_peak_overlap_merging_stronger():
     # Peak 2: center ~1000.2 (stronger, overlaps with peak 1)
     # After centroiding, peak 2 should replace peak 1
 
-    signal = numpy.array([
-        [999.8, 100.0],
-        [999.9, 500.0],
-        [1000.0, 800.0],   # First peak local max
-        [1000.1, 600.0],
-        [1000.2, 1200.0],  # Second peak (stronger) local max
-        [1000.3, 900.0],
-        [1000.4, 500.0],
-        [1000.5, 100.0]
-    ], dtype=numpy.float64)
+    signal = numpy.array(
+        [
+            [999.8, 100.0],
+            [999.9, 500.0],
+            [1000.0, 800.0],  # First peak local max
+            [1000.1, 600.0],
+            [1000.2, 1200.0],  # Second peak (stronger) local max
+            [1000.3, 900.0],
+            [1000.4, 500.0],
+            [1000.5, 100.0],
+        ],
+        dtype=numpy.float64,
+    )
 
     peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.4, absThreshold=50.0)
 
     # Tests the peak[1] > buff[-1][1] replacement at line 302-304
     assert isinstance(peaklist, obj_peaklist.peaklist)
+
+
 # ============================================================================

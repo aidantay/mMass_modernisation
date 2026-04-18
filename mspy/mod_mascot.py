@@ -138,9 +138,7 @@ class mascot:
             body_bytes = body.encode("utf-8")
             conn = http.client.HTTPConnection(self.server["host"])
             conn.putrequest("POST", self.server["path"] + self.server["search"] + "?1")
-            conn.putheader(
-                "content-type", f"multipart/form-data; boundary={boundary}"
-            )
+            conn.putheader("content-type", f"multipart/form-data; boundary={boundary}")
             conn.putheader("content-length", str(len(body_bytes)))
             conn.endheaders()
             conn.send(body_bytes)
@@ -194,7 +192,9 @@ class mascot:
 
         # set path
         if path:
-            path = '{}?file="{}"'.format(self.server["path"] + self.server["export"], path)
+            path = '{}?file="{}"'.format(
+                self.server["path"] + self.server["export"], path
+            )
         elif self.resultsPath:
             path = '{}?file="{}"'.format(
                 self.server["path"] + self.server["export"],

@@ -1,13 +1,12 @@
-import pytest
-import numpy
-from hypothesis import given, strategies as st, settings, HealthCheck
 import mspy.mod_signal as mod_signal
 import mspy.mod_stopper as mod_stopper
-
+import numpy
+import pytest
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture(scope="module")
 def reset_stopper():
@@ -21,10 +20,11 @@ def reset_stopper():
 # HELPER FUNCTIONS FOR TEST SIGNAL CONSTRUCTION
 # ============================================================================
 
+
 def make_gaussian_peak(center=1000.0, width=0.5, height=1000.0, num_points=100):
     """Create a Gaussian peak signal."""
-    mz_vals = numpy.linspace(center - 2*width, center + 2*width, num_points)
-    intensity = height * numpy.exp(-0.5 * ((mz_vals - center) / width)**2)
+    mz_vals = numpy.linspace(center - 2 * width, center + 2 * width, num_points)
+    intensity = height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
     signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
     return signal
 
@@ -33,13 +33,13 @@ def make_multipeak_signal(peaks, num_points=200):
     """Create a signal with multiple Gaussian peaks.
     peaks: list of (center, width, height) tuples
     """
-    mz_min = min(p[0] - 2*p[1] for p in peaks) - 10
-    mz_max = max(p[0] + 2*p[1] for p in peaks) + 10
+    mz_min = min(p[0] - 2 * p[1] for p in peaks) - 10
+    mz_max = max(p[0] + 2 * p[1] for p in peaks) + 10
     mz_vals = numpy.linspace(mz_min, mz_max, num_points)
 
     intensity = numpy.zeros(num_points)
     for center, width, height in peaks:
-        intensity += height * numpy.exp(-0.5 * ((mz_vals - center) / width)**2)
+        intensity += height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
 
     signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
     return signal
@@ -47,11 +47,13 @@ def make_multipeak_signal(peaks, num_points=200):
 
 def make_baseline(signal, base_level=10.0, noise_level=1.0):
     """Create a baseline array from a signal."""
-    baseline = numpy.column_stack([
-        signal[:, 0],
-        numpy.ones(len(signal)) * base_level,
-        numpy.ones(len(signal)) * noise_level
-    ]).astype(numpy.float64)
+    baseline = numpy.column_stack(
+        [
+            signal[:, 0],
+            numpy.ones(len(signal)) * base_level,
+            numpy.ones(len(signal)) * noise_level,
+        ]
+    ).astype(numpy.float64)
     return baseline
 
 
@@ -69,12 +71,13 @@ def make_wrong_dtype_signal():
 # TEST locate FUNCTION
 # ============================================================================
 
-class TestLocate(object):
+
+class TestLocate:
     """Tests for mod_signal.locate function."""
 
     def test_locate_import(self):
         """Verify locate function exists."""
-        assert hasattr(mod_signal, 'locate')
+        assert hasattr(mod_signal, "locate")
 
     def test_locate_type_error_not_ndarray(self):
         """locate raises TypeError if signal is not ndarray."""
@@ -119,12 +122,13 @@ class TestLocate(object):
 # TEST basepeak FUNCTION
 # ============================================================================
 
-class TestBasepeak(object):
+
+class TestBasepeak:
     """Tests for mod_signal.basepeak function."""
 
     def test_basepeak_import(self):
         """Verify basepeak function exists."""
-        assert hasattr(mod_signal, 'basepeak')
+        assert hasattr(mod_signal, "basepeak")
 
     def test_basepeak_type_error_not_ndarray(self):
         """basepeak raises TypeError if signal is not ndarray."""
@@ -167,12 +171,13 @@ class TestBasepeak(object):
 # TEST interpolate FUNCTION
 # ============================================================================
 
-class TestInterpolate(object):
+
+class TestInterpolate:
     """Tests for mod_signal.interpolate function."""
 
     def test_interpolate_import(self):
         """Verify interpolate function exists."""
-        assert hasattr(mod_signal, 'interpolate')
+        assert hasattr(mod_signal, "interpolate")
 
     def test_interpolate_y_provided(self):
         """interpolate interpolates y value when x is provided."""
@@ -211,12 +216,13 @@ class TestInterpolate(object):
 # TEST boundaries FUNCTION
 # ============================================================================
 
-class TestBoundaries(object):
+
+class TestBoundaries:
     """Tests for mod_signal.boundaries function."""
 
     def test_boundaries_import(self):
         """Verify boundaries function exists."""
-        assert hasattr(mod_signal, 'boundaries')
+        assert hasattr(mod_signal, "boundaries")
 
     def test_boundaries_type_error_not_ndarray(self):
         """boundaries raises TypeError if signal is not ndarray."""
@@ -250,12 +256,13 @@ class TestBoundaries(object):
 # TEST maxima FUNCTION
 # ============================================================================
 
-class TestMaxima(object):
+
+class TestMaxima:
     """Tests for mod_signal.maxima function."""
 
     def test_maxima_import(self):
         """Verify maxima function exists."""
-        assert hasattr(mod_signal, 'maxima')
+        assert hasattr(mod_signal, "maxima")
 
     def test_maxima_type_error_not_ndarray(self):
         """maxima raises TypeError if signal is not ndarray."""
@@ -295,12 +302,13 @@ class TestMaxima(object):
 # TEST intensity FUNCTION
 # ============================================================================
 
-class TestIntensity(object):
+
+class TestIntensity:
     """Tests for mod_signal.intensity function."""
 
     def test_intensity_import(self):
         """Verify intensity function exists."""
-        assert hasattr(mod_signal, 'intensity')
+        assert hasattr(mod_signal, "intensity")
 
     def test_intensity_type_error_not_ndarray(self):
         """intensity raises TypeError if signal is not ndarray."""
@@ -328,7 +336,9 @@ class TestIntensity(object):
 
     def test_intensity_at_peak(self):
         """intensity returns high value at peak center."""
-        signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0, num_points=100)
+        signal = make_gaussian_peak(
+            center=1000.0, width=0.5, height=1000.0, num_points=100
+        )
         result = mod_signal.intensity(signal, 1000.0)
         assert result >= 500.0  # Should be near the peak height
 
@@ -337,12 +347,13 @@ class TestIntensity(object):
 # TEST centroid FUNCTION
 # ============================================================================
 
-class TestCentroid(object):
+
+class TestCentroid:
     """Tests for mod_signal.centroid function."""
 
     def test_centroid_import(self):
         """Verify centroid function exists."""
-        assert hasattr(mod_signal, 'centroid')
+        assert hasattr(mod_signal, "centroid")
 
     def test_centroid_type_error_not_ndarray(self):
         """centroid raises TypeError if signal is not ndarray."""
@@ -374,12 +385,13 @@ class TestCentroid(object):
 # TEST width FUNCTION
 # ============================================================================
 
-class TestWidth(object):
+
+class TestWidth:
     """Tests for mod_signal.width function."""
 
     def test_width_import(self):
         """Verify width function exists."""
-        assert hasattr(mod_signal, 'width')
+        assert hasattr(mod_signal, "width")
 
     def test_width_type_error_not_ndarray(self):
         """width raises TypeError if signal is not ndarray."""
@@ -410,12 +422,13 @@ class TestWidth(object):
 # TEST area FUNCTION
 # ============================================================================
 
-class TestArea(object):
+
+class TestArea:
     """Tests for mod_signal.area function."""
 
     def test_area_import(self):
         """Verify area function exists."""
-        assert hasattr(mod_signal, 'area')
+        assert hasattr(mod_signal, "area")
 
     def test_area_type_error_signal_not_ndarray(self):
         """area raises TypeError if signal is not ndarray."""
@@ -472,12 +485,13 @@ class TestArea(object):
 # TEST noise FUNCTION
 # ============================================================================
 
-class TestNoise(object):
+
+class TestNoise:
     """Tests for mod_signal.noise function."""
 
     def test_noise_import(self):
         """Verify noise function exists."""
-        assert hasattr(mod_signal, 'noise')
+        assert hasattr(mod_signal, "noise")
 
     def test_noise_type_error_not_ndarray(self):
         """noise raises TypeError if signal is not ndarray."""
@@ -531,12 +545,13 @@ class TestNoise(object):
 # TEST baseline FUNCTION
 # ============================================================================
 
-class TestBaseline(object):
+
+class TestBaseline:
     """Tests for mod_signal.baseline function."""
 
     def test_baseline_import(self):
         """Verify baseline function exists."""
-        assert hasattr(mod_signal, 'baseline')
+        assert hasattr(mod_signal, "baseline")
 
     def test_baseline_type_error_not_ndarray(self):
         """baseline raises TypeError if signal is not ndarray."""
@@ -598,12 +613,13 @@ class TestBaseline(object):
 # TEST crop FUNCTION
 # ============================================================================
 
-class TestCrop(object):
+
+class TestCrop:
     """Tests for mod_signal.crop function."""
 
     def test_crop_import(self):
         """Verify crop function exists."""
-        assert hasattr(mod_signal, 'crop')
+        assert hasattr(mod_signal, "crop")
 
     def test_crop_type_error_not_ndarray(self):
         """crop raises TypeError if signal is not ndarray."""
@@ -651,12 +667,13 @@ class TestCrop(object):
 # TEST offset FUNCTION
 # ============================================================================
 
-class TestOffset(object):
+
+class TestOffset:
     """Tests for mod_signal.offset function."""
 
     def test_offset_import(self):
         """Verify offset function exists."""
-        assert hasattr(mod_signal, 'offset')
+        assert hasattr(mod_signal, "offset")
 
     def test_offset_type_error_not_ndarray(self):
         """offset raises TypeError if signal is not ndarray."""
@@ -706,12 +723,13 @@ class TestOffset(object):
 # TEST multiply FUNCTION
 # ============================================================================
 
-class TestMultiply(object):
+
+class TestMultiply:
     """Tests for mod_signal.multiply function."""
 
     def test_multiply_import(self):
         """Verify multiply function exists."""
-        assert hasattr(mod_signal, 'multiply')
+        assert hasattr(mod_signal, "multiply")
 
     def test_multiply_type_error_not_ndarray(self):
         """multiply raises TypeError if signal is not ndarray."""
@@ -761,12 +779,13 @@ class TestMultiply(object):
 # TEST normalize FUNCTION
 # ============================================================================
 
-class TestNormalize(object):
+
+class TestNormalize:
     """Tests for mod_signal.normalize function."""
 
     def test_normalize_import(self):
         """Verify normalize function exists."""
-        assert hasattr(mod_signal, 'normalize')
+        assert hasattr(mod_signal, "normalize")
 
     def test_normalize_type_error_not_ndarray(self):
         """normalize raises TypeError if signal is not ndarray."""
@@ -788,7 +807,9 @@ class TestNormalize(object):
 
     def test_normalize_normal_operation(self):
         """normalize normalizes y-values to max 1."""
-        signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0, num_points=100)
+        signal = make_gaussian_peak(
+            center=1000.0, width=0.5, height=1000.0, num_points=100
+        )
         result = mod_signal.normalize(signal)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
@@ -800,49 +821,50 @@ class TestNormalize(object):
 # TEST smooth FUNCTION
 # ============================================================================
 
-class TestSmooth(object):
+
+class TestSmooth:
     """Tests for mod_signal.smooth function."""
 
     def test_smooth_import(self):
         """Verify smooth function exists."""
-        assert hasattr(mod_signal, 'smooth')
+        assert hasattr(mod_signal, "smooth")
 
     def test_smooth_type_error_not_ndarray(self):
         """smooth raises TypeError if signal is not ndarray."""
         with pytest.raises(TypeError):
-            mod_signal.smooth([1.0, 2.0], 'MA', 10.0)
+            mod_signal.smooth([1.0, 2.0], "MA", 10.0)
 
     def test_smooth_type_error_wrong_dtype(self):
         """smooth raises TypeError if signal dtype is not float64."""
         signal = make_wrong_dtype_signal()
         with pytest.raises(TypeError):
-            mod_signal.smooth(signal, 'MA', 10.0)
+            mod_signal.smooth(signal, "MA", 10.0)
 
     def test_smooth_empty_returns_empty(self):
         """smooth returns empty array for empty signal."""
         signal = make_empty_signal()
-        result = mod_signal.smooth(signal, 'MA', 10.0)
+        result = mod_signal.smooth(signal, "MA", 10.0)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == 0
 
     def test_smooth_ma_method(self):
         """smooth with MA method applies moving average."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
-        result = mod_signal.smooth(signal, 'MA', 0.1)
+        result = mod_signal.smooth(signal, "MA", 0.1)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
     def test_smooth_ga_method(self):
         """smooth with GA method applies Gaussian filter."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
-        result = mod_signal.smooth(signal, 'GA', 0.1)
+        result = mod_signal.smooth(signal, "GA", 0.1)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
     def test_smooth_sg_method(self):
         """smooth with SG method applies Savitzky-Golay filter."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
-        result = mod_signal.smooth(signal, 'SG', 0.1)
+        result = mod_signal.smooth(signal, "SG", 0.1)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
@@ -851,19 +873,20 @@ class TestSmooth(object):
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
         # Python 2.7 raise syntax issue: raises TypeError instead of KeyError
         with pytest.raises((KeyError, TypeError)):
-            mod_signal.smooth(signal, 'UNKNOWN', 0.1)
+            mod_signal.smooth(signal, "UNKNOWN", 0.1)
 
 
 # ============================================================================
 # TEST movaver FUNCTION
 # ============================================================================
 
-class TestMovaver(object):
+
+class TestMovaver:
     """Tests for mod_signal.movaver function."""
 
     def test_movaver_import(self):
         """Verify movaver function exists."""
-        assert hasattr(mod_signal, 'movaver')
+        assert hasattr(mod_signal, "movaver")
 
     def test_movaver_window_too_small_returns_copy(self, reset_stopper):
         """movaver returns copy when window < 3."""
@@ -879,28 +902,28 @@ class TestMovaver(object):
         """movaver converts even window to odd."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
         # Use a window size that will result in an even number after calculation
-        result = mod_signal.movaver(signal, 0.06, style='flat')
+        result = mod_signal.movaver(signal, 0.06, style="flat")
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
     def test_movaver_flat_style(self, reset_stopper):
         """movaver with style=flat applies flat filter."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
-        result = mod_signal.movaver(signal, 0.1, style='flat')
+        result = mod_signal.movaver(signal, 0.1, style="flat")
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
     def test_movaver_gaussian_style(self, reset_stopper):
         """movaver with style=gaussian applies Gaussian filter."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
-        result = mod_signal.movaver(signal, 0.1, style='gaussian')
+        result = mod_signal.movaver(signal, 0.1, style="gaussian")
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
     def test_movaver_hamming_style_eval_branch(self, reset_stopper):
         """movaver with style=hamming uses eval for numpy.hamming."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
-        result = mod_signal.movaver(signal, 0.1, style='hamming')
+        result = mod_signal.movaver(signal, 0.1, style="hamming")
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
 
@@ -916,12 +939,13 @@ class TestMovaver(object):
 # TEST savgol FUNCTION
 # ============================================================================
 
-class TestSavgol(object):
+
+class TestSavgol:
     """Tests for mod_signal.savgol function."""
 
     def test_savgol_import(self):
         """Verify savgol function exists."""
-        assert hasattr(mod_signal, 'savgol')
+        assert hasattr(mod_signal, "savgol")
 
     def test_savgol_window_less_than_order_returns_copy(self, reset_stopper):
         """savgol returns copy when window <= order."""
@@ -951,12 +975,13 @@ class TestSavgol(object):
 # TEST combine FUNCTION
 # ============================================================================
 
-class TestCombine(object):
+
+class TestCombine:
     """Tests for mod_signal.combine function."""
 
     def test_combine_import(self):
         """Verify combine function exists."""
-        assert hasattr(mod_signal, 'combine')
+        assert hasattr(mod_signal, "combine")
 
     def test_combine_type_error_not_ndarray(self):
         """combine raises TypeError if signals are not ndarray."""
@@ -996,12 +1021,13 @@ class TestCombine(object):
 # TEST overlay FUNCTION
 # ============================================================================
 
-class TestOverlay(object):
+
+class TestOverlay:
     """Tests for mod_signal.overlay function."""
 
     def test_overlay_import(self):
         """Verify overlay function exists."""
-        assert hasattr(mod_signal, 'overlay')
+        assert hasattr(mod_signal, "overlay")
 
     def test_overlay_type_error_not_ndarray(self):
         """overlay raises TypeError if signals are not ndarray."""
@@ -1041,12 +1067,13 @@ class TestOverlay(object):
 # TEST subtract FUNCTION
 # ============================================================================
 
-class TestSubtract(object):
+
+class TestSubtract:
     """Tests for mod_signal.subtract function."""
 
     def test_subtract_import(self):
         """Verify subtract function exists."""
-        assert hasattr(mod_signal, 'subtract')
+        assert hasattr(mod_signal, "subtract")
 
     def test_subtract_type_error_not_ndarray(self):
         """subtract raises TypeError if signals are not ndarray."""
@@ -1086,12 +1113,13 @@ class TestSubtract(object):
 # TEST subbase FUNCTION
 # ============================================================================
 
-class TestSubbase(object):
+
+class TestSubbase:
     """Tests for mod_signal.subbase function."""
 
     def test_subbase_import(self):
         """Verify subbase function exists."""
-        assert hasattr(mod_signal, 'subbase')
+        assert hasattr(mod_signal, "subbase")
 
     def test_subbase_type_error_signal_not_ndarray(self):
         """subbase raises TypeError if signal is not ndarray."""
@@ -1141,11 +1169,13 @@ class TestSubbase(object):
         """subbase strips 3-col baseline to 2-col before subtraction."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
         # Create 3-column baseline
-        baseline = numpy.column_stack([
-            signal[:, 0],
-            numpy.ones(len(signal)) * 10.0,
-            numpy.ones(len(signal)) * 1.0
-        ]).astype(numpy.float64)
+        baseline = numpy.column_stack(
+            [
+                signal[:, 0],
+                numpy.ones(len(signal)) * 10.0,
+                numpy.ones(len(signal)) * 1.0,
+            ]
+        ).astype(numpy.float64)
         result = mod_signal.subbase(signal, baseline)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)
@@ -1154,10 +1184,9 @@ class TestSubbase(object):
         """subbase subtracts 2-col baseline normally."""
         signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
         # Create 2-column baseline
-        baseline = numpy.column_stack([
-            signal[:, 0],
-            numpy.ones(len(signal)) * 10.0
-        ]).astype(numpy.float64)
+        baseline = numpy.column_stack(
+            [signal[:, 0], numpy.ones(len(signal)) * 10.0]
+        ).astype(numpy.float64)
         result = mod_signal.subbase(signal, baseline)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == len(signal)

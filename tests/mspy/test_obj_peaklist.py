@@ -1,10 +1,9 @@
-import pytest
-from hypothesis import given, settings, HealthCheck
 import hypothesis.strategies as st
-import mspy.obj_peaklist as obj_peaklist
-import mspy.obj_peak as obj_peak
-import mspy.mod_peakpicking as mod_peakpicking
 import mspy.mod_stopper as mod_stopper
+import mspy.obj_peak as obj_peak
+import mspy.obj_peaklist as obj_peaklist
+import pytest
+from hypothesis import HealthCheck, given, settings
 
 
 # Module-level fixture to reset stopper state
@@ -20,11 +19,30 @@ def reset_stopper():
 # HELPER FUNCTIONS
 # ============================================================================
 
-def make_peak(mz, ai=100.0, base=0.0, sn=None, charge=None, isotope=None,
-              fwhm=None, group='', **kw):
+
+def make_peak(
+    mz,
+    ai=100.0,
+    base=0.0,
+    sn=None,
+    charge=None,
+    isotope=None,
+    fwhm=None,
+    group="",
+    **kw,
+):
     """Create a peak object for testing."""
-    return obj_peak.peak(mz, ai, base, sn=sn, charge=charge, isotope=isotope,
-                         fwhm=fwhm, group=group, **kw)
+    return obj_peak.peak(
+        mz,
+        ai,
+        base,
+        sn=sn,
+        charge=charge,
+        isotope=isotope,
+        fwhm=fwhm,
+        group=group,
+        **kw,
+    )
 
 
 def make_peaklist(*pairs):
@@ -35,6 +53,7 @@ def make_peaklist(*pairs):
 # ============================================================================
 # TEST: __init__
 # ============================================================================
+
 
 class TestPeaklistInit:
     """Test peaklist initialization."""
@@ -55,11 +74,9 @@ class TestPeaklistInit:
 
     def test_init_multiple_peaks_unordered(self):
         """B1-true: multiple peaks, sorted by m/z."""
-        pl = obj_peaklist.peaklist([
-            make_peak(300.0, 30.0),
-            make_peak(100.0, 100.0),
-            make_peak(200.0, 50.0)
-        ])
+        pl = obj_peaklist.peaklist(
+            [make_peak(300.0, 30.0), make_peak(100.0, 100.0), make_peak(200.0, 50.0)]
+        )
         assert len(pl) == 3
         assert pl[0].mz == 100.0
         assert pl[1].mz == 200.0
@@ -68,40 +85,30 @@ class TestPeaklistInit:
 
     def test_init_basepeak_highest_intensity(self):
         """B1-true: basepeak is peak with highest intensity."""
-        pl = obj_peaklist.peaklist([
-            make_peak(100.0, 50.0),
-            make_peak(200.0, 200.0),
-            make_peak(300.0, 100.0)
-        ])
+        pl = obj_peaklist.peaklist(
+            [make_peak(100.0, 50.0), make_peak(200.0, 200.0), make_peak(300.0, 100.0)]
+        )
         assert pl.basepeak.mz == 200.0
         assert pl.basepeak.intensity == 200.0
 
     def test_init_relative_intensities_set(self):
         """B1-true: relative intensities calculated."""
-        pl = obj_peaklist.peaklist([
-            make_peak(100.0, 50.0),
-            make_peak(200.0, 100.0),
-            make_peak(300.0, 25.0)
-        ])
+        pl = obj_peaklist.peaklist(
+            [make_peak(100.0, 50.0), make_peak(200.0, 100.0), make_peak(300.0, 25.0)]
+        )
         assert pl[0].ri == 0.5
         assert pl[1].ri == 1.0
         assert pl[2].ri == 0.25
 
     def test_init_from_list_tuples(self):
         """B1-true: init from (mz, ai) tuples."""
-        pl = obj_peaklist.peaklist([
-            [100.0, 100.0],
-            [200.0, 50.0]
-        ])
+        pl = obj_peaklist.peaklist([[100.0, 100.0], [200.0, 50.0]])
         assert len(pl) == 2
         assert pl[0].mz == 100.0
 
     def test_init_from_tuple_tuples(self):
         """B1-true: init from (mz, ai) tuples (tuple type)."""
-        pl = obj_peaklist.peaklist([
-            (100.0, 100.0),
-            (200.0, 50.0)
-        ])
+        pl = obj_peaklist.peaklist([(100.0, 100.0), (200.0, 50.0)])
         assert len(pl) == 2
         assert pl[0].mz == 100.0
 
@@ -109,6 +116,7 @@ class TestPeaklistInit:
 # ============================================================================
 # TEST: __len__
 # ============================================================================
+
 
 class TestPeaklistLen:
     """Test peaklist length."""
@@ -127,6 +135,7 @@ class TestPeaklistLen:
 # ============================================================================
 # TEST: __getitem__
 # ============================================================================
+
 
 class TestPeaklistGetItem:
     """Test peaklist indexing."""
@@ -153,6 +162,7 @@ class TestPeaklistGetItem:
 # ============================================================================
 # TEST: __setitem__
 # ============================================================================
+
 
 class TestPeaklistSetItem:
     """Test peaklist item setting."""
@@ -207,6 +217,7 @@ class TestPeaklistSetItem:
 # TEST: __delitem__
 # ============================================================================
 
+
 class TestPeaklistDelItem:
     """Test peaklist item deletion."""
 
@@ -230,6 +241,7 @@ class TestPeaklistDelItem:
 # ============================================================================
 # TEST: __iter__ and next
 # ============================================================================
+
 
 class TestPeaklistIter:
     """Test peaklist iteration."""
@@ -268,6 +280,7 @@ class TestPeaklistIter:
 # TEST: __add__
 # ============================================================================
 
+
 class TestPeaklistAdd:
     """Test peaklist addition."""
 
@@ -304,6 +317,7 @@ class TestPeaklistAdd:
 # TEST: __mul__
 # ============================================================================
 
+
 class TestPeaklistMul:
     """Test peaklist multiplication."""
 
@@ -327,6 +341,7 @@ class TestPeaklistMul:
 # ============================================================================
 # TEST: append
 # ============================================================================
+
 
 class TestPeaklistAppend:
     """Test peaklist append."""
@@ -389,6 +404,7 @@ class TestPeaklistAppend:
 # TEST: reset
 # ============================================================================
 
+
 class TestPeaklistReset:
     """Test peaklist reset."""
 
@@ -398,7 +414,7 @@ class TestPeaklistReset:
         pl.peaks = [
             make_peak(300.0, 50.0),
             make_peak(100.0, 100.0),
-            make_peak(200.0, 75.0)
+            make_peak(200.0, 75.0),
         ]
         pl.reset()
         assert pl[0].mz == 100.0
@@ -409,6 +425,7 @@ class TestPeaklistReset:
 # ============================================================================
 # TEST: duplicate
 # ============================================================================
+
 
 class TestPeaklistDuplicate:
     """Test peaklist duplicate."""
@@ -435,6 +452,7 @@ class TestPeaklistDuplicate:
 # TEST: groupname
 # ============================================================================
 
+
 class TestPeaklistGroupname:
     """Test peaklist groupname generation."""
 
@@ -442,37 +460,38 @@ class TestPeaklistGroupname:
         """B47-48-49: empty peaklist returns first name."""
         pl = obj_peaklist.peaklist()
         name = pl.groupname()
-        assert name == 'A'
+        assert name == "A"
 
     def test_groupname_no_used_groups(self):
         """B47: no used groups, returns first name."""
         pl = make_peaklist((100, 100), (200, 50))
         name = pl.groupname()
-        assert name == 'A'
+        assert name == "A"
 
     def test_groupname_with_used_groups(self):
         """B47-48: skips used group names."""
         pl = make_peaklist((100, 100), (200, 50))
-        pl[0].setgroup('A')
-        pl[1].setgroup('B')
+        pl[0].setgroup("A")
+        pl[1].setgroup("B")
         name = pl.groupname()
-        assert name == 'C'
+        assert name == "C"
 
     def test_groupname_increments_size(self):
         """B49: increments size when all names exhausted."""
         pl = obj_peaklist.peaklist()
         for i in range(26):
             p = make_peak(100.0 + i, 100.0)
-            p.setgroup(chr(ord('A') + i))
+            p.setgroup(chr(ord("A") + i))
             pl.peaks.append(p)
         pl.basepeak = pl.peaks[0]
         name = pl.groupname()
-        assert name == 'AA'
+        assert name == "AA"
 
 
 # ============================================================================
 # TEST: sort
 # ============================================================================
+
 
 class TestPeaklistSort:
     """Test peaklist sort."""
@@ -483,7 +502,7 @@ class TestPeaklistSort:
         pl.peaks = [
             make_peak(300.0, 50.0),
             make_peak(100.0, 100.0),
-            make_peak(200.0, 75.0)
+            make_peak(200.0, 75.0),
         ]
         pl.sort()
         assert pl[0].mz == 100.0
@@ -502,6 +521,7 @@ class TestPeaklistSort:
 # ============================================================================
 # TEST: delete
 # ============================================================================
+
 
 class TestPeaklistDelete:
     """Test peaklist delete."""
@@ -549,6 +569,7 @@ class TestPeaklistDelete:
 # TEST: empty
 # ============================================================================
 
+
 class TestPeaklistEmpty:
     """Test peaklist empty."""
 
@@ -569,6 +590,7 @@ class TestPeaklistEmpty:
 # ============================================================================
 # TEST: crop
 # ============================================================================
+
 
 class TestPeaklistCrop:
     """Test peaklist crop."""
@@ -606,6 +628,7 @@ class TestPeaklistCrop:
 # TEST: multiply
 # ============================================================================
 
+
 class TestPeaklistMultiply:
     """Test peaklist multiply."""
 
@@ -637,6 +660,7 @@ class TestPeaklistMultiply:
 # ============================================================================
 # TEST: combine
 # ============================================================================
+
 
 class TestPeaklistCombine:
     """Test peaklist combine."""
@@ -677,6 +701,7 @@ class TestPeaklistCombine:
 # TEST: recalibrate
 # ============================================================================
 
+
 class TestPeaklistRecalibrate:
     """Test peaklist recalibrate."""
 
@@ -705,6 +730,7 @@ class TestPeaklistRecalibrate:
 # TEST: deisotope
 # ============================================================================
 
+
 class TestPeaklistDeisotope:
     """Test peaklist deisotope."""
 
@@ -717,27 +743,27 @@ class TestPeaklistDeisotope:
     def test_deisotope_calls_mod_peakpicking(self, mocker):
         """B19-false: calls mod_peakpicking.deisotope."""
         pl = make_peaklist((100, 100), (200, 50))
-        mock_deiso = mocker.patch('mspy.mod_peakpicking.deisotope')
+        mock_deiso = mocker.patch("mspy.mod_peakpicking.deisotope")
         pl.deisotope(maxCharge=2, mzTolerance=0.1)
         mock_deiso.assert_called_once()
         call_kwargs = mock_deiso.call_args[1]
-        assert call_kwargs['maxCharge'] == 2
-        assert call_kwargs['mzTolerance'] == 0.1
+        assert call_kwargs["maxCharge"] == 2
+        assert call_kwargs["mzTolerance"] == 0.1
 
     def test_deisotope_with_custom_params(self, mocker):
         """deisotope passes custom parameters."""
         pl = make_peaklist((100, 100))
-        mock_deiso = mocker.patch('mspy.mod_peakpicking.deisotope')
-        pl.deisotope(maxCharge=3, mzTolerance=0.2,
-                    intTolerance=0.3, isotopeShift=0.5)
+        mock_deiso = mocker.patch("mspy.mod_peakpicking.deisotope")
+        pl.deisotope(maxCharge=3, mzTolerance=0.2, intTolerance=0.3, isotopeShift=0.5)
         call_kwargs = mock_deiso.call_args[1]
-        assert call_kwargs['maxCharge'] == 3
-        assert call_kwargs['mzTolerance'] == 0.2
+        assert call_kwargs["maxCharge"] == 3
+        assert call_kwargs["mzTolerance"] == 0.2
 
 
 # ============================================================================
 # TEST: deconvolute
 # ============================================================================
+
 
 class TestPeaklistDeconvolute:
     """Test peaklist deconvolute."""
@@ -752,21 +778,20 @@ class TestPeaklistDeconvolute:
         """B20-false: calls mod_peakpicking.deconvolute."""
         pl = make_peaklist((100, 100), (200, 50))
         mock_result = obj_peaklist.peaklist([make_peak(100.0, 100.0)])
-        mock_deconv = mocker.patch('mspy.mod_peakpicking.deconvolute')
+        mock_deconv = mocker.patch("mspy.mod_peakpicking.deconvolute")
         mock_deconv.return_value = mock_result
         pl.deconvolute(massType=0)
         mock_deconv.assert_called_once()
         call_kwargs = mock_deconv.call_args[1]
-        assert call_kwargs['massType'] == 0
+        assert call_kwargs["massType"] == 0
 
     def test_deconvolute_updates_peaks(self, mocker):
         """deconvolute updates peaklist peaks."""
         pl = make_peaklist((100, 100), (200, 50))
-        new_peaks = obj_peaklist.peaklist([
-            make_peak(100.0, 100.0),
-            make_peak(200.0, 50.0)
-        ])
-        mock_deconv = mocker.patch('mspy.mod_peakpicking.deconvolute')
+        new_peaks = obj_peaklist.peaklist(
+            [make_peak(100.0, 100.0), make_peak(200.0, 50.0)]
+        )
+        mock_deconv = mocker.patch("mspy.mod_peakpicking.deconvolute")
         mock_deconv.return_value = new_peaks
         pl.deconvolute()
         assert len(pl) == 2
@@ -775,6 +800,7 @@ class TestPeaklistDeconvolute:
 # ============================================================================
 # TEST: consolidate
 # ============================================================================
+
 
 class TestPeaklistConsolidate:
     """Test peaklist consolidate."""
@@ -794,10 +820,7 @@ class TestPeaklistConsolidate:
 
     def test_consolidate_merges_nearby_peaks(self):
         """B21-false B22-false B23-true: merge peaks within window."""
-        pl = obj_peaklist.peaklist([
-            make_peak(100.0, 100.0),
-            make_peak(101.0, 50.0)
-        ])
+        pl = obj_peaklist.peaklist([make_peak(100.0, 100.0), make_peak(101.0, 50.0)])
         pl.reset()
         pl.consolidate(window=2.0)
         assert len(pl) == 1
@@ -805,10 +828,7 @@ class TestPeaklistConsolidate:
 
     def test_consolidate_keeps_distant_peaks(self):
         """B21-false B23-false: keep peaks outside window."""
-        pl = obj_peaklist.peaklist([
-            make_peak(100.0, 100.0),
-            make_peak(110.0, 50.0)
-        ])
+        pl = obj_peaklist.peaklist([make_peak(100.0, 100.0), make_peak(110.0, 50.0)])
         pl.reset()
         pl.consolidate(window=2.0)
         assert len(pl) == 2
@@ -862,6 +882,7 @@ class TestPeaklistConsolidate:
 # TEST: remthreshold
 # ============================================================================
 
+
 class TestPeaklistRemthreshold:
     """Test peaklist remthreshold."""
 
@@ -911,6 +932,7 @@ class TestPeaklistRemthreshold:
 # TEST: remshoulders
 # ============================================================================
 
+
 class TestPeaklistRemshoulders:
     """Test peaklist remshoulders."""
 
@@ -922,11 +944,13 @@ class TestPeaklistRemshoulders:
 
     def test_remshoulders_no_sn_is_candidate(self):
         """B29-false: peak with no sn is candidate parent."""
-        pl = obj_peaklist.peaklist([
-            make_peak(100.0, 100.0, fwhm=0.5),
-            make_peak(100.3, 10.0),
-            make_peak(101.0, 50.0)
-        ])
+        pl = obj_peaklist.peaklist(
+            [
+                make_peak(100.0, 100.0, fwhm=0.5),
+                make_peak(100.3, 10.0),
+                make_peak(101.0, 50.0),
+            ]
+        )
         pl.reset()
         pl.remshoulders(window=2.0, relThreshold=0.1)
         # Parent at 100.0: win = 0.5*2 = 1.0, range [99, 101]
@@ -937,7 +961,9 @@ class TestPeaklistRemshoulders:
 
     def test_remshoulders_sn_threshold(self):
         """B29-true: peak with high sn is candidate parent."""
-        p1 = make_peak(100.0, 100.0, fwhm=0.5, sn=50.0)  # sn*rel = 50*0.05 = 2.5 < 3 (IS candidate)
+        p1 = make_peak(
+            100.0, 100.0, fwhm=0.5, sn=50.0
+        )  # sn*rel = 50*0.05 = 2.5 < 3 (IS candidate)
         p2 = make_peak(100.3, 5.0)
         p3 = make_peak(101.5, 50.0)
         pl = obj_peaklist.peaklist([p1, p2, p3])
@@ -985,7 +1011,7 @@ class TestPeaklistRemshoulders:
         """B33: shoulder within window and below threshold."""
         p1 = make_peak(100.0, 100.0, fwhm=0.5)
         p_shoulder = make_peak(100.3, 8.0)  # Within window, below threshold
-        p_other = make_peak(100.8, 50.0)    # Within window but above threshold
+        p_other = make_peak(100.8, 50.0)  # Within window but above threshold
         pl = obj_peaklist.peaklist([p1, p_shoulder, p_other])
         pl.reset()
         pl.remshoulders(window=2.0, relThreshold=0.1, fwhm=0.01)
@@ -998,7 +1024,7 @@ class TestPeaklistRemshoulders:
             make_peak(100.0, 100.0, fwhm=0.5),
             make_peak(101.0, 5.0),
             make_peak(102.0, 5.0),
-            make_peak(103.0, 5.0)
+            make_peak(103.0, 5.0),
         ]
         pl = obj_peaklist.peaklist(peaks)
         pl.reset()
@@ -1038,6 +1064,7 @@ class TestPeaklistRemshoulders:
 # TEST: remisotopes
 # ============================================================================
 
+
 class TestPeaklistRemisotopes:
     """Test peaklist remisotopes."""
 
@@ -1072,6 +1099,7 @@ class TestPeaklistRemisotopes:
 # TEST: remuncharged
 # ============================================================================
 
+
 class TestPeaklistRemuncharged:
     """Test peaklist remuncharged."""
 
@@ -1097,6 +1125,7 @@ class TestPeaklistRemuncharged:
 # ============================================================================
 # TEST: _checkPeak
 # ============================================================================
+
 
 class TestCheckPeak:
     """Test peaklist._checkPeak."""
@@ -1145,6 +1174,7 @@ class TestCheckPeak:
 # TEST: _setbasepeak
 # ============================================================================
 
+
 class TestSetBasepeak:
     """Test peaklist._setbasepeak."""
 
@@ -1167,7 +1197,7 @@ class TestSetBasepeak:
         pl.peaks = [
             make_peak(100.0, 50.0),
             make_peak(200.0, 200.0),
-            make_peak(300.0, 100.0)
+            make_peak(300.0, 100.0),
         ]
         pl._setbasepeak()
         assert pl.basepeak is pl.peaks[1]
@@ -1177,6 +1207,7 @@ class TestSetBasepeak:
 # ============================================================================
 # TEST: _setRelativeIntensities
 # ============================================================================
+
 
 class TestSetRelativeIntensities:
     """Test peaklist._setRelativeIntensities."""
@@ -1190,10 +1221,7 @@ class TestSetRelativeIntensities:
     def test_setrelativeintensities_maxint_zero(self):
         """B45-false: basepeak intensity=0, all ri=1.0."""
         pl = obj_peaklist.peaklist()
-        pl.peaks = [
-            make_peak(100.0, 0.0),
-            make_peak(200.0, 0.0)
-        ]
+        pl.peaks = [make_peak(100.0, 0.0), make_peak(200.0, 0.0)]
         pl.basepeak = pl.peaks[0]
         pl._setRelativeIntensities()
         assert pl[0].ri == 1.0
@@ -1205,7 +1233,7 @@ class TestSetRelativeIntensities:
         pl.peaks = [
             make_peak(100.0, 100.0),
             make_peak(200.0, 50.0),
-            make_peak(300.0, 25.0)
+            make_peak(300.0, 25.0),
         ]
         pl.basepeak = pl.peaks[0]
         pl._setRelativeIntensities()
@@ -1218,6 +1246,7 @@ class TestSetRelativeIntensities:
 # TEST: _generateGroupNames
 # ============================================================================
 
+
 class TestGenerateGroupNames:
     """Test peaklist._generateGroupNames."""
 
@@ -1226,38 +1255,44 @@ class TestGenerateGroupNames:
         pl = obj_peaklist.peaklist()
         names = list(pl._generateGroupNames(1))
         assert len(names) == 26
-        assert names[0] == 'A'
-        assert names[25] == 'Z'
+        assert names[0] == "A"
+        assert names[25] == "Z"
 
     def test_generategroupnames_size2(self):
         """B46: size=2 yields 676 names (AA-ZZ)."""
         pl = obj_peaklist.peaklist()
         names = list(pl._generateGroupNames(2))
         assert len(names) == 676
-        assert names[0] == 'AA'
-        assert names[1] == 'AB'
-        assert names[-1] == 'ZZ'
+        assert names[0] == "AA"
+        assert names[1] == "AB"
+        assert names[-1] == "ZZ"
 
     def test_generategroupnames_size3(self):
         """size=3 yields 17576 names."""
         pl = obj_peaklist.peaklist()
         names = list(pl._generateGroupNames(3))
         assert len(names) == 17576
-        assert names[0] == 'AAA'
+        assert names[0] == "AAA"
 
 
 # ============================================================================
 # PROPERTY-BASED TESTS
 # ============================================================================
 
+
 class TestPeaklistPropertyBased:
     """Property-based tests using Hypothesis."""
 
-    @given(st.lists(
-        st.tuples(st.floats(100, 1000, allow_nan=False, allow_infinity=False),
-                  st.floats(1, 1000, allow_nan=False, allow_infinity=False)),
-        min_size=0, max_size=100
-    ))
+    @given(
+        st.lists(
+            st.tuples(
+                st.floats(100, 1000, allow_nan=False, allow_infinity=False),
+                st.floats(1, 1000, allow_nan=False, allow_infinity=False),
+            ),
+            min_size=0,
+            max_size=100,
+        )
+    )
     @settings(max_examples=100, suppress_health_check=[HealthCheck.filter_too_much])
     def test_peaklist_construction_always_valid(self, peak_data):
         """Peaklist construction with any valid data succeeds."""
@@ -1266,11 +1301,16 @@ class TestPeaklistPropertyBased:
             assert len(pl) == len(peak_data)
             assert all(p.mz >= 0 for p in pl.peaks)
 
-    @given(st.lists(
-        st.tuples(st.floats(100, 1000, allow_nan=False, allow_infinity=False),
-                  st.floats(1, 1000, allow_nan=False, allow_infinity=False)),
-        min_size=1, max_size=50
-    ))
+    @given(
+        st.lists(
+            st.tuples(
+                st.floats(100, 1000, allow_nan=False, allow_infinity=False),
+                st.floats(1, 1000, allow_nan=False, allow_infinity=False),
+            ),
+            min_size=1,
+            max_size=50,
+        )
+    )
     @settings(max_examples=50, suppress_health_check=[HealthCheck.filter_too_much])
     def test_peaklist_always_sorted(self, peak_data):
         """Peaklist is always sorted by m/z."""
@@ -1278,11 +1318,16 @@ class TestPeaklistPropertyBased:
         mzs = [p.mz for p in pl.peaks]
         assert mzs == sorted(mzs)
 
-    @given(st.lists(
-        st.tuples(st.floats(100, 1000, allow_nan=False, allow_infinity=False),
-                  st.floats(1, 1000, allow_nan=False, allow_infinity=False)),
-        min_size=1, max_size=50
-    ))
+    @given(
+        st.lists(
+            st.tuples(
+                st.floats(100, 1000, allow_nan=False, allow_infinity=False),
+                st.floats(1, 1000, allow_nan=False, allow_infinity=False),
+            ),
+            min_size=1,
+            max_size=50,
+        )
+    )
     @settings(max_examples=50, suppress_health_check=[HealthCheck.filter_too_much])
     def test_peaklist_basepeak_has_max_intensity(self, peak_data):
         """Basepeak always has maximum intensity."""
@@ -1290,11 +1335,16 @@ class TestPeaklistPropertyBased:
         max_intensity = max(p.intensity for p in pl.peaks)
         assert pl.basepeak.intensity == max_intensity
 
-    @given(st.lists(
-        st.tuples(st.floats(100, 1000, allow_nan=False, allow_infinity=False),
-                  st.floats(1, 1000, allow_nan=False, allow_infinity=False)),
-        min_size=1, max_size=50
-    ))
+    @given(
+        st.lists(
+            st.tuples(
+                st.floats(100, 1000, allow_nan=False, allow_infinity=False),
+                st.floats(1, 1000, allow_nan=False, allow_infinity=False),
+            ),
+            min_size=1,
+            max_size=50,
+        )
+    )
     @settings(max_examples=50, suppress_health_check=[HealthCheck.filter_too_much])
     def test_relative_intensities_correct(self, peak_data):
         """Relative intensities are calculated correctly."""
@@ -1308,11 +1358,16 @@ class TestPeaklistPropertyBased:
             for p in pl.peaks:
                 assert p.ri == 1.0
 
-    @given(st.lists(
-        st.tuples(st.floats(100, 1000, allow_nan=False, allow_infinity=False),
-                  st.floats(1, 1000, allow_nan=False, allow_infinity=False)),
-        min_size=1, max_size=50
-    ))
+    @given(
+        st.lists(
+            st.tuples(
+                st.floats(100, 1000, allow_nan=False, allow_infinity=False),
+                st.floats(1, 1000, allow_nan=False, allow_infinity=False),
+            ),
+            min_size=1,
+            max_size=50,
+        )
+    )
     @settings(max_examples=50, suppress_health_check=[HealthCheck.filter_too_much])
     def test_append_maintains_sort(self, peak_data):
         """Appending peaks maintains sort order."""
@@ -1322,12 +1377,21 @@ class TestPeaklistPropertyBased:
         mzs = [p.mz for p in pl.peaks]
         assert mzs == sorted(mzs)
 
-    @given(st.lists(
-        st.tuples(st.floats(100, 1000, allow_nan=False, allow_infinity=False),
-                  st.floats(10, 1000, allow_nan=False, allow_infinity=False)),
-        min_size=1, max_size=50
-    ), st.floats(0.1, 10.0))
-    @settings(max_examples=20, suppress_health_check=[HealthCheck.filter_too_much, HealthCheck.too_slow])
+    @given(
+        st.lists(
+            st.tuples(
+                st.floats(100, 1000, allow_nan=False, allow_infinity=False),
+                st.floats(10, 1000, allow_nan=False, allow_infinity=False),
+            ),
+            min_size=1,
+            max_size=50,
+        ),
+        st.floats(0.1, 10.0),
+    )
+    @settings(
+        max_examples=20,
+        suppress_health_check=[HealthCheck.filter_too_much, HealthCheck.too_slow],
+    )
     def test_multiply_scales_correctly(self, peak_data, factor):
         """Multiplying scales all intensities correctly."""
         if not peak_data:
@@ -1350,12 +1414,16 @@ class TestPeaklistPropertyBased:
             expected = expected_ai * factor
             actual = pl[i].ai
             # Check within machine precision
-            assert abs(actual - expected) < abs(expected) * 1e-10 or abs(actual - expected) < 1e-10
+            assert (
+                abs(actual - expected) < abs(expected) * 1e-10
+                or abs(actual - expected) < 1e-10
+            )
 
 
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 class TestPeaklistIntegration:
     """Integration tests for complex workflows."""
@@ -1450,10 +1518,10 @@ class TestPeaklistIntegration:
         """Complex remshoulders filtering."""
         peaks = [
             make_peak(100.0, 100.0, fwhm=0.5),
-            make_peak(100.2, 15.0),      # Weak shoulder
-            make_peak(100.6, 5.0),       # Very weak
+            make_peak(100.2, 15.0),  # Weak shoulder
+            make_peak(100.6, 5.0),  # Very weak
             make_peak(105.0, 80.0, fwhm=0.5),
-            make_peak(105.3, 10.0),      # Weak shoulder
+            make_peak(105.3, 10.0),  # Weak shoulder
         ]
         pl = obj_peaklist.peaklist(peaks)
         pl.reset()

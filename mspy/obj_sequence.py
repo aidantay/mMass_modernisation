@@ -126,7 +126,9 @@ class sequence:
             start = i.start if i.start is not None else 0
             stop = i.stop if i.stop is not None else len(self)
             if i.step is not None and i.step != 1:
-                raise NotImplementedError("Sequence slicing with step is not supported.")
+                raise NotImplementedError(
+                    "Sequence slicing with step is not supported."
+                )
             return self._get_slice(start, stop)
         return self.chain[i]
 
@@ -137,7 +139,9 @@ class sequence:
             start = i.start if i.start is not None else 0
             stop = i.stop if i.stop is not None else len(self)
             if i.step is not None and i.step != 1:
-                raise NotImplementedError("Sequence slicing with step is not supported.")
+                raise NotImplementedError(
+                    "Sequence slicing with step is not supported."
+                )
             return self._set_slice(start, stop, value)
         raise TypeError("'sequence' object does not support item assignment")
 
@@ -148,7 +152,9 @@ class sequence:
             start = i.start if i.start is not None else 0
             stop = i.stop if i.stop is not None else len(self)
             if i.step is not None and i.step != 1:
-                raise NotImplementedError("Sequence slicing with step is not supported.")
+                raise NotImplementedError(
+                    "Sequence slicing with step is not supported."
+                )
             return self._del_slice(start, stop)
         raise TypeError("'sequence' object does not support item deletion")
 

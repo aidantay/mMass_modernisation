@@ -77,7 +77,7 @@ class parseXY:
 
         # open document
         try:
-            with open(self.path, 'r', encoding='utf-8') as document:
+            with open(self.path, encoding="utf-8") as document:
                 rawData = document.readlines()
         except OSError:
             return False

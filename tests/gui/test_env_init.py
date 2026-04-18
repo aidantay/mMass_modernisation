@@ -1,5 +1,6 @@
 import wx
 
+
 def test_wx_app_fixture(wx_app):
     """
     Test that the wx_app fixture provides a valid wx.App instance.

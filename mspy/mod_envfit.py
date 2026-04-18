@@ -414,7 +414,9 @@ class envfit:
                 calibrants, model="quadratic"
             )
         elif len(calibrants) > 1:
-            model, params, _chi = mod_calibration.calibration(calibrants, model="linear")
+            model, params, _chi = mod_calibration.calibration(
+                calibrants, model="linear"
+            )
         else:
             return
 

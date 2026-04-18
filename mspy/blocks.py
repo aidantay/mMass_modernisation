@@ -76,6 +76,7 @@ class monomer:
 
     def __init__(self, abbr, formula, losses=None, name="", category=""):
         from . import obj_compound
+
         if losses is None:
             losses = []
         self.abbr = abbr
@@ -124,6 +125,7 @@ class enzyme:
 
         # check formulae
         from . import obj_compound
+
         obj_compound.compound(nTermFormula)
         obj_compound.compound(cTermFormula)
 
@@ -158,6 +160,7 @@ class fragment:
 
         # check formulae
         from . import obj_compound
+
         obj_compound.compound(nTermFormula)
         obj_compound.compound(cTermFormula)
 
@@ -192,6 +195,7 @@ class modification:
 
         # init masses and composition
         from . import obj_compound
+
         lossCmpd = obj_compound.compound(self.lossFormula)
         lossComposition = lossCmpd.composition()
 

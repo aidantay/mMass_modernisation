@@ -1,11 +1,12 @@
-import pytest
-from hypothesis import given, strategies as st, settings, HealthCheck
 import mspy.mod_stopper
-
+import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 # ============================================================================
 # Module-level and function-level fixtures for state isolation
 # ============================================================================
+
 
 @pytest.fixture(scope="module", autouse=True)
 def reset_stopper_module_start():
@@ -26,19 +27,21 @@ def ensure_stopper_clean():
 # Smoke test: verify all symbols exist
 # ============================================================================
 
+
 def test_import_mod_stopper():
     """Smoke test: verify module can be imported and all symbols exist."""
-    assert hasattr(mspy.mod_stopper, 'ForceQuit')
-    assert hasattr(mspy.mod_stopper, 'stopper')
-    assert hasattr(mspy.mod_stopper, 'STOPPER')
-    assert hasattr(mspy.mod_stopper, 'CHECK_FORCE_QUIT')
-    assert hasattr(mspy.mod_stopper, 'stop')
-    assert hasattr(mspy.mod_stopper, 'start')
+    assert hasattr(mspy.mod_stopper, "ForceQuit")
+    assert hasattr(mspy.mod_stopper, "stopper")
+    assert hasattr(mspy.mod_stopper, "STOPPER")
+    assert hasattr(mspy.mod_stopper, "CHECK_FORCE_QUIT")
+    assert hasattr(mspy.mod_stopper, "stop")
+    assert hasattr(mspy.mod_stopper, "start")
 
 
 # ============================================================================
 # ForceQuit exception tests
 # ============================================================================
+
 
 def test_forcequit_is_exception():
     """Test that ForceQuit is a subclass of Exception."""
@@ -62,6 +65,7 @@ def test_forcequit_raise_with_message():
 # stopper.__init__ tests
 # ============================================================================
 
+
 def test_stopper_init_creates_instance():
     """Test that stopper() creates a stopper instance."""
     s = mspy.mod_stopper.stopper()
@@ -77,6 +81,7 @@ def test_stopper_init_value_is_false():
 # ============================================================================
 # stopper.__nonzero__ (Python 2 boolean protocol) tests
 # ============================================================================
+
 
 def test_stopper_nonzero_false_initially():
     """Test that bool(stopper) is False initially."""
@@ -106,17 +111,18 @@ def test_stopper_nonzero_false_after_disable():
 # stopper.__repr__ tests
 # ============================================================================
 
+
 def test_stopper_repr_false_initially():
     """Test that repr(stopper) is 'False' initially."""
     s = mspy.mod_stopper.stopper()
-    assert repr(s) == 'False'
+    assert repr(s) == "False"
 
 
 def test_stopper_repr_true_after_enable():
     """Test that repr(stopper) is 'True' after enable()."""
     s = mspy.mod_stopper.stopper()
     s.enable()
-    assert repr(s) == 'True'
+    assert repr(s) == "True"
 
 
 def test_stopper_repr_false_after_disable():
@@ -124,12 +130,13 @@ def test_stopper_repr_false_after_disable():
     s = mspy.mod_stopper.stopper()
     s.enable()
     s.disable()
-    assert repr(s) == 'False'
+    assert repr(s) == "False"
 
 
 # ============================================================================
 # stopper.enable() tests
 # ============================================================================
+
 
 def test_stopper_enable_sets_value_true():
     """Test that enable() sets value to True."""
@@ -149,6 +156,7 @@ def test_stopper_enable_idempotent():
 # ============================================================================
 # stopper.disable() tests
 # ============================================================================
+
 
 def test_stopper_disable_sets_value_false():
     """Test that disable() sets value to False."""
@@ -171,6 +179,7 @@ def test_stopper_disable_idempotent():
 # stopper.check() - False branch tests
 # ============================================================================
 
+
 def test_stopper_check_false_does_not_raise():
     """Test that check() does not raise when value is False."""
     s = mspy.mod_stopper.stopper()
@@ -187,6 +196,7 @@ def test_stopper_check_false_value_stays_false():
 # ============================================================================
 # stopper.check() - True branch tests
 # ============================================================================
+
 
 def test_stopper_check_true_raises_forcequit():
     """Test that check() raises ForceQuit when value is True."""
@@ -222,6 +232,7 @@ def test_stopper_check_second_call_does_not_raise():
 # STOPPER singleton tests
 # ============================================================================
 
+
 def test_stopper_singleton_is_instance():
     """Test that STOPPER is an instance of stopper class."""
     assert isinstance(mspy.mod_stopper.STOPPER, mspy.mod_stopper.stopper)
@@ -235,12 +246,13 @@ def test_stopper_singleton_initial_state():
 
 def test_check_force_quit_is_stopper_check():
     """Test that CHECK_FORCE_QUIT is a reference to STOPPER.check."""
-    assert mspy.mod_stopper.CHECK_FORCE_QUIT == mspy.mod_stopper.STOPPER.check
+    assert mspy.mod_stopper.STOPPER.check == mspy.mod_stopper.CHECK_FORCE_QUIT
 
 
 # ============================================================================
 # stop()/start() module-level function tests
 # ============================================================================
+
 
 def test_stop_sets_stopper_value_true():
     """Test that stop() sets STOPPER.value to True."""
@@ -282,6 +294,7 @@ def test_start_then_check_force_quit_does_not_raise():
 # State transition tests
 # ============================================================================
 
+
 def test_stopper_enable_disable_enable_cycle():
     """Test enable -> disable -> enable cycle maintains correct state."""
     s = mspy.mod_stopper.stopper()
@@ -319,6 +332,7 @@ def test_stopper_disable_after_check_reset():
 # ============================================================================
 # Hypothesis property-based tests
 # ============================================================================
+
 
 @given(st.booleans())
 @settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow])
@@ -372,6 +386,7 @@ def test_stopper_state_transitions_hypothesis(operations):
 # ============================================================================
 # Integration tests with singleton STOPPER
 # ============================================================================
+
 
 def test_singleton_stopper_and_stop_start_integration():
     """Test integration of singleton STOPPER with stop() and start()."""

@@ -83,6 +83,7 @@ class compound:
         # get atoms to count
         atoms = [item]
         from . import blocks
+
         if groupIsotopes and item in blocks.elements:
             for massNo in blocks.elements[item].isotopes:
                 atom = "%s{%d}" % (item, massNo)
@@ -144,6 +145,7 @@ class compound:
         # group elements
         self._composition = {}
         from . import mod_basics
+
         for symbol, isotop, count in mod_basics.ELEMENT_PATTERN.findall(
             unfoldedFormula
         ):
@@ -180,7 +182,8 @@ class compound:
             comp = self.composition()
 
             # get mass for each atom
-            from . import mod_basics, blocks
+            from . import blocks, mod_basics
+
             for atom in comp:
                 count = comp[atom]
 
@@ -221,7 +224,8 @@ class compound:
             comp = self.composition()
 
             # get mass for each atom
-            from . import mod_basics, blocks
+            from . import blocks, mod_basics
+
             for atom in comp:
                 count = comp[atom]
 
@@ -248,6 +252,7 @@ class compound:
         """Get ion m/z."""
 
         from . import mod_basics
+
         return mod_basics.mz(
             self.mass(),
             charge=charge,
@@ -269,6 +274,7 @@ class compound:
         """Get isotopic pattern."""
 
         from . import mod_pattern
+
         return mod_pattern.pattern(
             compound=self,
             fwhm=fwhm,
@@ -285,6 +291,7 @@ class compound:
         """Get RDBE (Range or Double Bonds Equivalents)."""
 
         from . import mod_basics
+
         return mod_basics.rdbe(self)
 
     # ----
@@ -322,6 +329,7 @@ class compound:
         if rules is None:
             rules = ["HC", "NOPSC", "NOPS", "RDBE"]
         from . import mod_basics
+
         return mod_basics.frules(
             compound=self, rules=rules, HC=HC, NOPSC=NOPSC, RDBE=RDBE
         )
@@ -353,7 +361,8 @@ class compound:
         """Check given formula."""
 
         # check formula
-        from . import mod_basics, blocks
+        from . import blocks, mod_basics
+
         if not mod_basics.FORMULA_PATTERN.match(formula):
             raise ValueError("Wrong formula! --> " + formula)
 

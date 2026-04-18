@@ -296,14 +296,18 @@ class container:
                     or (curY1 >= occY1 and curY2 <= occY2)
                 ):
                     return False
-            elif (curX1 > curX2) and (
-                (occX2 <= curX1 <= occX1)
-                or (occX2 <= curX2 <= occX1)
-                or (curX1 <= occX2 and curX2 >= occX1)
-            ) and (
-                (occY1 <= curY1 <= occY2)
-                or (occY1 <= curY2 <= occY2)
-                or (curY1 >= occY2 and curY2 <= occY1)
+            elif (
+                (curX1 > curX2)
+                and (
+                    (occX2 <= curX1 <= occX1)
+                    or (occX2 <= curX2 <= occX1)
+                    or (curX1 <= occX2 and curX2 >= occX1)
+                )
+                and (
+                    (occY1 <= curY1 <= occY2)
+                    or (occY1 <= curY2 <= occY2)
+                    or (curY1 >= occY2 and curY2 <= occY1)
+                )
             ):
                 return False
 

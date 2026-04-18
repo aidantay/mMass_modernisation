@@ -1,12 +1,13 @@
-import pytest
-from hypothesis import given, strategies as st
-import mspy.obj_peak as obj_peak
 import mspy.mod_basics as mod_basics
-
+import mspy.obj_peak as obj_peak
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def basic_peak():
@@ -29,27 +30,39 @@ def peak_no_charge():
 @pytest.fixture
 def peak_with_attributes():
     """Create a peak with extra attributes."""
-    return obj_peak.peak(mz=500.0, ai=100.0, base=10.0, charge=1, custom_attr='value', another=42)
+    return obj_peak.peak(
+        mz=500.0, ai=100.0, base=10.0, charge=1, custom_attr="value", another=42
+    )
 
 
 # ============================================================================
 # __init__ TESTS - Coverage of B1 and B2 branches
 # ============================================================================
 
+
 class TestPeakInit:
     """Test peak initialization."""
 
     def test_init_basic_attributes(self):
         """Test basic initialization of peak attributes."""
-        p = obj_peak.peak(mz=500.0, ai=100.0, base=10.0, sn=50.0, charge=2, isotope='M+1', fwhm=0.5, group='test')
+        p = obj_peak.peak(
+            mz=500.0,
+            ai=100.0,
+            base=10.0,
+            sn=50.0,
+            charge=2,
+            isotope="M+1",
+            fwhm=0.5,
+            group="test",
+        )
         assert p.mz == 500.0
         assert p.ai == 100.0
         assert p.base == 10.0
         assert p.sn == 50.0
         assert p.charge == 2
-        assert p.isotope == 'M+1'
+        assert p.isotope == "M+1"
         assert p.fwhm == 0.5
-        assert p.group == 'test'
+        assert p.group == "test"
 
     def test_init_converts_mz_to_float(self):
         """Test that mz is converted to float."""
@@ -112,8 +125,8 @@ class TestPeakInit:
     # Branch B2: extra kwargs - stored in attributes
     def test_init_extra_kwargs_stored_in_attributes(self):
         """Test B2-true: extra kwargs are stored in attributes dict."""
-        p = obj_peak.peak(mz=500.0, custom='value', number=42, flag=True)
-        assert p.attributes == {'custom': 'value', 'number': 42, 'flag': True}
+        p = obj_peak.peak(mz=500.0, custom="value", number=42, flag=True)
+        assert p.attributes == {"custom": "value", "number": 42, "flag": True}
 
     # Branch B2: no extra kwargs - empty attributes
     def test_init_no_extra_kwargs_empty_attributes(self):
@@ -130,12 +143,13 @@ class TestPeakInit:
         assert p.charge is None
         assert p.isotope is None
         assert p.fwhm is None
-        assert p.group == ''
+        assert p.group == ""
 
 
 # ============================================================================
 # reset() TESTS - Coverage of B3 branch
 # ============================================================================
+
 
 class TestPeakReset:
     """Test peak reset method."""
@@ -195,6 +209,7 @@ class TestPeakReset:
 # mass() TESTS - Coverage of B4 and B5 branches
 # ============================================================================
 
+
 class TestPeakMass:
     """Test peak mass getter method."""
 
@@ -248,7 +263,7 @@ class TestPeakMass:
         computed_mass = p.mass()
 
         # Verify it matches mod_basics.mz calculation
-        expected = mod_basics.mz(500.0, 0, 2, agentFormula='H', agentCharge=1)
+        expected = mod_basics.mz(500.0, 0, 2, agentFormula="H", agentCharge=1)
         assert computed_mass == expected
 
     def test_mass_caching_prevents_recomputation(self):
@@ -264,13 +279,14 @@ class TestPeakMass:
         """Test mass() calls mod_basics.mz with correct parameters."""
         p = obj_peak.peak(mz=600.0, charge=3)
         result = p.mass()
-        expected = mod_basics.mz(600.0, 0, 3, agentFormula='H', agentCharge=1)
+        expected = mod_basics.mz(600.0, 0, 3, agentFormula="H", agentCharge=1)
         assert result == expected
 
 
 # ============================================================================
 # SETTER TESTS - Coverage of B6 and B7 branches
 # ============================================================================
+
 
 class TestPeakSetMz:
     """Test setmz method."""
@@ -405,13 +421,13 @@ class TestPeakSetIsotope:
 
     def test_setisotope_updates_isotope_value(self):
         """Test setisotope updates the isotope value."""
-        p = obj_peak.peak(mz=500.0, isotope='M')
-        p.setisotope('M+1')
-        assert p.isotope == 'M+1'
+        p = obj_peak.peak(mz=500.0, isotope="M")
+        p.setisotope("M+1")
+        assert p.isotope == "M+1"
 
     def test_setisotope_with_none(self):
         """Test setisotope can set isotope to None."""
-        p = obj_peak.peak(mz=500.0, isotope='M+1')
+        p = obj_peak.peak(mz=500.0, isotope="M+1")
         p.setisotope(None)
         assert p.isotope is None
 
@@ -456,28 +472,35 @@ class TestPeakSetGroup:
 
     def test_setgroup_updates_group_value(self):
         """Test setgroup updates the group value."""
-        p = obj_peak.peak(mz=500.0, group='')
-        p.setgroup('isotope_group_1')
-        assert p.group == 'isotope_group_1'
+        p = obj_peak.peak(mz=500.0, group="")
+        p.setgroup("isotope_group_1")
+        assert p.group == "isotope_group_1"
 
     def test_setgroup_with_empty_string(self):
         """Test setgroup can set group to empty string."""
-        p = obj_peak.peak(mz=500.0, group='test')
-        p.setgroup('')
-        assert p.group == ''
+        p = obj_peak.peak(mz=500.0, group="test")
+        p.setgroup("")
+        assert p.group == ""
 
 
 # ============================================================================
 # PROPERTY-BASED TESTS using Hypothesis
 # ============================================================================
 
+
 class TestPeakPropertyBased:
     """Property-based tests using Hypothesis."""
 
     @given(
-        mz=st.floats(min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
-        ai=st.floats(min_value=0.0, max_value=100000.0, allow_nan=False, allow_infinity=False),
-        base=st.floats(min_value=0.0, max_value=100000.0, allow_nan=False, allow_infinity=False)
+        mz=st.floats(
+            min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
+        ai=st.floats(
+            min_value=0.0, max_value=100000.0, allow_nan=False, allow_infinity=False
+        ),
+        base=st.floats(
+            min_value=0.0, max_value=100000.0, allow_nan=False, allow_infinity=False
+        ),
     )
     def test_intensity_property(self, mz, ai, base):
         """Property: intensity = ai - base."""
@@ -485,8 +508,12 @@ class TestPeakPropertyBased:
         assert p.intensity == pytest.approx(ai - base)
 
     @given(
-        mz=st.floats(min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
-        fwhm=st.floats(min_value=0.01, max_value=100.0, allow_nan=False, allow_infinity=False)
+        mz=st.floats(
+            min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
+        fwhm=st.floats(
+            min_value=0.01, max_value=100.0, allow_nan=False, allow_infinity=False
+        ),
     )
     def test_resolution_property(self, mz, fwhm):
         """Property: resolution = mz / fwhm when fwhm is truthy."""
@@ -495,8 +522,10 @@ class TestPeakPropertyBased:
         assert p.resolution == pytest.approx(expected_resolution)
 
     @given(
-        mz=st.floats(min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
-        charge=st.integers(min_value=1, max_value=10)
+        mz=st.floats(
+            min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
+        charge=st.integers(min_value=1, max_value=10),
     )
     def test_mass_consistency_property(self, mz, charge):
         """Property: mass() result is consistent across calls."""
@@ -505,9 +534,7 @@ class TestPeakPropertyBased:
         second_call = p.mass()
         assert first_call == second_call
 
-    @given(
-        charge=st.integers(min_value=-10, max_value=10)
-    )
+    @given(charge=st.integers(min_value=-10, max_value=10))
     def test_setcharge_affects_mass_buffer(self, charge):
         """Property: setcharge clears the mass buffer."""
         p = obj_peak.peak(mz=500.0, charge=1)
@@ -516,9 +543,15 @@ class TestPeakPropertyBased:
         assert p._mass is None
 
     @given(
-        mz_old=st.floats(min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
-        mz_new=st.floats(min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False),
-        fwhm=st.floats(min_value=0.01, max_value=100.0, allow_nan=False, allow_infinity=False)
+        mz_old=st.floats(
+            min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
+        mz_new=st.floats(
+            min_value=1.0, max_value=10000.0, allow_nan=False, allow_infinity=False
+        ),
+        fwhm=st.floats(
+            min_value=0.01, max_value=100.0, allow_nan=False, allow_infinity=False
+        ),
     )
     def test_setmz_updates_resolution_property(self, mz_old, mz_new, fwhm):
         """Property: setmz updates resolution correctly when fwhm is set."""
@@ -531,6 +564,7 @@ class TestPeakPropertyBased:
 # ============================================================================
 # EDGE CASES AND ERROR CONDITIONS
 # ============================================================================
+
 
 class TestPeakEdgeCases:
     """Test edge cases and boundary conditions."""
@@ -592,12 +626,12 @@ class TestPeakEdgeCases:
 
     def test_peak_string_group_name(self):
         """Test peak with group name."""
-        p = obj_peak.peak(mz=500.0, group='isotope_cluster_1')
-        assert p.group == 'isotope_cluster_1'
+        p = obj_peak.peak(mz=500.0, group="isotope_cluster_1")
+        assert p.group == "isotope_cluster_1"
 
     def test_peak_isotope_patterns(self):
         """Test peak with different isotope patterns."""
-        for isotope in ['M', 'M+1', 'M+2', '13C', '15N']:
+        for isotope in ["M", "M+1", "M+2", "13C", "15N"]:
             p = obj_peak.peak(mz=500.0, isotope=isotope)
             assert p.isotope == isotope
 
@@ -605,6 +639,7 @@ class TestPeakEdgeCases:
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 class TestPeakIntegration:
     """Integration tests combining multiple methods."""
@@ -683,21 +718,18 @@ class TestPeakIntegration:
     def test_attributes_dict_storage(self):
         """Test that attributes are stored and retrieved correctly."""
         p = obj_peak.peak(
-            mz=500.0,
-            attr1='value1',
-            attr2=42,
-            attr3=3.14,
-            nested={'key': 'value'}
+            mz=500.0, attr1="value1", attr2=42, attr3=3.14, nested={"key": "value"}
         )
-        assert p.attributes['attr1'] == 'value1'
-        assert p.attributes['attr2'] == 42
-        assert p.attributes['attr3'] == 3.14
-        assert p.attributes['nested'] == {'key': 'value'}
+        assert p.attributes["attr1"] == "value1"
+        assert p.attributes["attr2"] == 42
+        assert p.attributes["attr3"] == 3.14
+        assert p.attributes["nested"] == {"key": "value"}
 
 
 # ============================================================================
 # BOUNDARY VALUE TESTS
 # ============================================================================
+
 
 class TestPeakBoundaries:
     """Test boundary values and limits."""
@@ -738,5 +770,5 @@ class TestPeakBoundaries:
         assert p.resolution is None
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

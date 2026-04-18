@@ -85,6 +85,7 @@ def mz(mass, charge, currentCharge=0, agentFormula="H", agentCharge=1, massType=
     # check agent formula
     if agentFormula != "e":
         from . import obj_compound
+
         if not isinstance(agentFormula, obj_compound.compound):
             agentFormula = obj_compound.compound(agentFormula)
 
@@ -146,6 +147,7 @@ def md(mass, mdType="standard", kendrickFormula="CH2", rounding="floor"):
     # return Kendrick mass defect
     elif mdType == "kendrick":
         from . import obj_compound
+
         if not isinstance(kendrickFormula, obj_compound.compound):
             kendrickFormula = obj_compound.compound(kendrickFormula)
 
@@ -194,7 +196,8 @@ def rdbe(compound):
     """
 
     # check compound
-    from . import obj_compound, blocks
+    from . import blocks, obj_compound
+
     if not isinstance(compound, obj_compound.compound):
         compound = obj_compound.compound(compound)
 
@@ -242,6 +245,7 @@ def frules(
     if rules is None:
         rules = ["HC", "NOPSC", "NOPS", "RDBE", "RDBEInt"]
     from . import obj_compound
+
     if not isinstance(compound, obj_compound.compound):
         compound = obj_compound.compound(compound)
 
@@ -269,11 +273,15 @@ def frules(
         return False
 
     # check NOPS rule
-    if "NOPSC" in rules and countC and (
-        ratioNC > NOPSC[0]
-        or ratioOC > NOPSC[1]
-        or ratioPC > NOPSC[2]
-        or ratioSC > NOPSC[3]
+    if (
+        "NOPSC" in rules
+        and countC
+        and (
+            ratioNC > NOPSC[0]
+            or ratioOC > NOPSC[1]
+            or ratioPC > NOPSC[2]
+            or ratioSC > NOPSC[3]
+        )
     ):
         return False
 

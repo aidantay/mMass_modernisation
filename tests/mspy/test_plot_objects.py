@@ -1,21 +1,28 @@
 import pytest
+
 wx = pytest.importorskip("wx")
 
+
 import numpy
-import copy
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
-from mspy.plot_objects import (
-    container, annotations, points, spectrum,
-    _scaleFont, _scaleAndShift, _filterPoints
-)
-from mspy.obj_scan import scan
 from mspy.obj_peak import peak
 from mspy.obj_peaklist import peaklist
-
+from mspy.obj_scan import scan
+from mspy.plot_objects import (
+    _filterPoints,
+    _scaleAndShift,
+    _scaleFont,
+    annotations,
+    container,
+    points,
+    spectrum,
+)
 
 # SESSION-SCOPED WX.APP FIXTURE
 # ==============================
+
 
 @pytest.fixture(scope="session")
 def wx_app():
@@ -26,6 +33,7 @@ def wx_app():
 
 # DATA FIXTURES
 # =============
+
 
 @pytest.fixture
 def simple_scan():
@@ -71,7 +79,7 @@ def simple_points_data():
 @pytest.fixture
 def simple_annotations_data():
     """Create simple annotations data with labels."""
-    return [[100.0, 50.0, 'Peak A'], [101.0, 100.0, 'Peak B'], [102.0, 75.0, 'Peak C']]
+    return [[100.0, 50.0, "Peak A"], [101.0, 100.0, "Peak B"], [102.0, 75.0, "Peak C"]]
 
 
 @pytest.fixture
@@ -81,31 +89,38 @@ def mock_dc(mocker):
     # GetTextExtent must return a tuple, not a Mock, to support indexing
     mock_dc.GetTextExtent.return_value = (50, 10)
     # GetFont returns a real wx.Font
-    mock_dc.GetFont.return_value = wx.Font(10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 0)
+    mock_dc.GetFont.return_value = wx.Font(
+        10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 0
+    )
     return mock_dc
 
 
 @pytest.fixture
 def default_printer_scale():
     """Create a default printer scale dict."""
-    return {'fonts': 1.0, 'drawings': 1.0}
+    return {"fonts": 1.0, "drawings": 1.0}
 
 
 # HELPER FUNCTION TESTS
 # =====================
 
-class TestScaleFont(object):
+
+class TestScaleFont:
     """Tests for _scaleFont helper function."""
 
     def test_scaleFont_identity_scale(self, wx_app):
         """Test that scale=1 returns the same font object."""
-        base_font = wx.Font(10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial")
+        base_font = wx.Font(
+            10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial"
+        )
         scaled_font = _scaleFont(base_font, 1)
         assert scaled_font is base_font
 
     def test_scaleFont_magnification(self, wx_app):
         """Test that scale > 1 creates a new larger font."""
-        base_font = wx.Font(10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial")
+        base_font = wx.Font(
+            10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial"
+        )
         scaled_font = _scaleFont(base_font, 2.0)
         # Expected: 10 * 2.0 * 1.3 = 26.0
         assert scaled_font.GetPointSize() == 26
@@ -113,7 +128,9 @@ class TestScaleFont(object):
 
     def test_scaleFont_reduction(self, wx_app):
         """Test that scale < 1 creates a smaller font."""
-        base_font = wx.Font(10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial")
+        base_font = wx.Font(
+            10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "Arial"
+        )
         scaled_font = _scaleFont(base_font, 0.5)
         # Expected: 10 * 0.5 * 1.3 = 6.5
         assert scaled_font.GetPointSize() == 6
@@ -121,7 +138,9 @@ class TestScaleFont(object):
 
     def test_scaleFont_preserves_attributes(self, wx_app):
         """Test that font attributes are preserved in scaling."""
-        base_font = wx.Font(10, wx.SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, True, "Arial")
+        base_font = wx.Font(
+            10, wx.SWISS, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, True, "Arial"
+        )
         scaled_font = _scaleFont(base_font, 2.0)
         assert scaled_font.GetFamily() in (wx.SWISS, wx.FONTFAMILY_SWISS, 70, 74)
         assert scaled_font.GetStyle() == wx.FONTSTYLE_ITALIC
@@ -131,26 +150,35 @@ class TestScaleFont(object):
 
     def test_scaleFont_no_face(self, wx_app):
         """Test _scaleFont with no face name to hit else branch."""
-        base_font = wx.Font(10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, "")
+        base_font = wx.Font(
+            10, wx.SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, ""
+        )
         scaled_font = _scaleFont(base_font, 2.0)
         assert scaled_font.GetPointSize() == 26
 
-class TestScaleAndShift(object):
+
+class TestScaleAndShift:
     """Tests for _scaleAndShift helper function."""
 
     def test_scaleAndShift_valid_array(self):
         """Test scaling and shifting with valid float64 array."""
-        points = numpy.array([[100.0, 50.0], [101.0, 100.0], [102.0, 75.0]], dtype=numpy.float64)
+        points = numpy.array(
+            [[100.0, 50.0], [101.0, 100.0], [102.0, 75.0]], dtype=numpy.float64
+        )
         result = _scaleAndShift(points, 2.0, 3.0, 10.0, 20.0)
         assert isinstance(result, numpy.ndarray)
         assert len(result) == 3
 
     @given(
-        arrays(numpy.float64, st.tuples(st.integers(1, 100), st.just(2)), elements=st.floats(min_value=-1e6, max_value=1e6)),
+        arrays(
+            numpy.float64,
+            st.tuples(st.integers(1, 100), st.just(2)),
+            elements=st.floats(min_value=-1e6, max_value=1e6),
+        ),
         st.floats(min_value=-1000, max_value=1000),
         st.floats(min_value=-1000, max_value=1000),
         st.floats(min_value=-1e6, max_value=1e6),
-        st.floats(min_value=-1e6, max_value=1e6)
+        st.floats(min_value=-1e6, max_value=1e6),
     )
     @settings(max_examples=50, deadline=1000)
     def test_scaleAndShift_hypothesis(self, points, scaleX, scaleY, shiftX, shiftY):
@@ -184,18 +212,25 @@ class TestScaleAndShift(object):
         result = _scaleAndShift(points, 0.0, 0.0, 10.0, 20.0)
         assert isinstance(result, numpy.ndarray)
 
-class TestFilterPoints(object):
+
+class TestFilterPoints:
     """Tests for _filterPoints helper function."""
 
     def test_filterPoints_valid_array(self):
         """Test filtering with valid float64 array."""
-        points = numpy.array([[100.0, 50.0], [100.5, 60.0], [101.0, 100.0]], dtype=numpy.float64)
+        points = numpy.array(
+            [[100.0, 50.0], [100.5, 60.0], [101.0, 100.0]], dtype=numpy.float64
+        )
         result = _filterPoints(points, 0.5)
         assert isinstance(result, numpy.ndarray)
 
     @given(
-        arrays(numpy.float64, st.tuples(st.integers(1, 100), st.just(2)), elements=st.floats(min_value=-1e6, max_value=1e6)),
-        st.floats(min_value=0.001, max_value=1000)
+        arrays(
+            numpy.float64,
+            st.tuples(st.integers(1, 100), st.just(2)),
+            elements=st.floats(min_value=-1e6, max_value=1e6),
+        ),
+        st.floats(min_value=0.001, max_value=1000),
     )
     @settings(max_examples=50, deadline=1000)
     def test_filterPoints_hypothesis(self, points, resolution):
@@ -229,7 +264,9 @@ class TestFilterPoints(object):
 
     def test_filterPoints_minimal_resolution(self):
         """Test _filterPoints with minimal resolution to trigger branches."""
-        pts = numpy.array([[100.0, 50.0], [100.00000001, 100.0], [101.0, 75.0]], dtype=numpy.float64)
+        pts = numpy.array(
+            [[100.0, 50.0], [100.00000001, 100.0], [101.0, 75.0]], dtype=numpy.float64
+        )
         result = _filterPoints(pts, 0.000000001)
         assert len(result) >= 3
 
@@ -237,7 +274,8 @@ class TestFilterPoints(object):
 # CONTAINER CLASS TESTS
 # =====================
 
-class TestContainer(object):
+
+class TestContainer:
     """Tests for container class."""
 
     def test_container_init(self, simple_scan):
@@ -251,21 +289,21 @@ class TestContainer(object):
         """Test various container methods for coverage."""
         spec = spectrum(simple_scan)
         cont = container([spec])
-        
+
         # Test __setitem__, __delitem__, __additem__, append, empty
         spec2 = spectrum(simple_scan)
         cont[0] = spec2
         assert cont[0] is spec2
-        
+
         cont.append(spec)
         assert len(cont) == 2
-        
+
         cont.__additem__(spec)
         assert len(cont) == 3
-        
+
         del cont[0]
         assert len(cont) == 2
-        
+
         cont.empty()
         assert len(cont) == 0
 
@@ -334,15 +372,15 @@ class TestContainer(object):
 
     def test_container_getLegend_with_objects(self, simple_scan):
         """Test getLegend with visible spectrum object."""
-        spec = spectrum(simple_scan, legend='Test Spectrum')
+        spec = spectrum(simple_scan, legend="Test Spectrum")
         cont = container([spec])
         legend = cont.getLegend()
         assert len(legend) > 0
 
     def test_container_getLegend_hidden_objects(self, simple_scan):
         """Test getLegend with hidden objects."""
-        spec = spectrum(simple_scan, legend='Test')
-        spec.properties['visible'] = False
+        spec = spectrum(simple_scan, legend="Test")
+        spec.properties["visible"] = False
         cont = container([spec])
         legend = cont.getLegend()
         assert legend == []
@@ -363,7 +401,7 @@ class TestContainer(object):
         """Test countGels ignores hidden objects."""
         spec1 = spectrum(simple_scan)
         spec2 = spectrum(simple_scan)
-        spec2.properties['visible'] = False
+        spec2.properties["visible"] = False
         cont = container([spec1, spec2])
         assert cont.countGels() == 1
 
@@ -371,7 +409,7 @@ class TestContainer(object):
         """Test countGels ignores objects with showInGel=False."""
         spec1 = spectrum(simple_scan)
         spec2 = spectrum(simple_scan)
-        spec2.properties['showInGel'] = False
+        spec2.properties["showInGel"] = False
         cont = container([spec1, spec2])
         assert cont.countGels() == 1
 
@@ -393,7 +431,7 @@ class TestContainer(object):
     def test_container_getBoundingBox_hidden_objects(self, simple_scan):
         """Test getBoundingBox ignores hidden objects."""
         spec = spectrum(simple_scan)
-        spec.properties['visible'] = False
+        spec.properties["visible"] = False
         cont = container([spec])
         bbox = cont.getBoundingBox()
         # Should return default bbox
@@ -445,38 +483,44 @@ class TestContainer(object):
     def test_container_getPoint(self, simple_scan):
         """Test getPoint delegates to child and handles boundaries."""
         spec = spectrum(simple_scan)
-        spec.spectrumScaled = numpy.array([[100.0, 50.0], [101.0, 100.0], [102.0, 75.0]])
+        spec.spectrumScaled = numpy.array(
+            [[100.0, 50.0], [101.0, 100.0], [102.0, 75.0]]
+        )
         cont = container([spec])
-        
+
         # Mid point
         result = cont.getPoint(0, 100.5)
         assert result is not None
-        
+
         # Boundary 0 (xPos exactly at start)
         result = cont.getPoint(0, 100.0)
-        
+
         # Boundary len (xPos exactly at end)
         result = cont.getPoint(0, 102.0)
-        
+
         # Beyond boundaries
         result = cont.getPoint(0, 99.0)
         assert result is None
         result = cont.getPoint(0, 103.0)
         assert result is None
-        
+
         # Test no points in child
         spec.spectrumScaled = numpy.array([], dtype=numpy.float64).reshape(0, 2)
         result = cont.getPoint(0, 100.5)
         assert result is None
 
-    def test_container_draw_no_reverse(self, simple_scan, mock_dc, default_printer_scale):
+    def test_container_draw_no_reverse(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test draw without reverse order."""
         spec = spectrum(simple_scan)
         cont = container([spec])
         cont.draw(mock_dc, default_printer_scale, False, False)
         # Should not raise
 
-    def test_container_draw_with_reverse(self, simple_scan, mock_dc, default_printer_scale):
+    def test_container_draw_with_reverse(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test draw with reverse order."""
         spec1 = spectrum(simple_scan)
         spec2 = spectrum(simple_scan)
@@ -526,7 +570,9 @@ class TestContainer(object):
         cont = container([])
         assert cont._checkFreeSpace((10, 20, 30, 25), [(10, 50, 30, 60)]) == True
 
-    def test_container_draw_reverse_logic(self, simple_scan, mock_dc, default_printer_scale):
+    def test_container_draw_reverse_logic(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test container.draw with reverse=True to cover reverse logic."""
         spec1 = spectrum(simple_scan)
         spec2 = spectrum(simple_scan)
@@ -539,19 +585,21 @@ class TestContainer(object):
     def test_container_getBoundingBox_advanced(self, simple_scan):
         """Test container.getBoundingBox with various options."""
         spec = spectrum(simple_scan)
-        spec.properties['visible'] = True
+        spec.properties["visible"] = True
         cont = container([spec])
-        
+
         # Test with minX, maxX
         bbox = cont.getBoundingBox(minX=100.5, maxX=101.5)
         assert isinstance(bbox, list)
-        
+
         # Test with infinite/invalid rect (simulated)
         # We need a real object but with a mock getBoundingBox
         class MockObj:
-            properties = {'visible': True}
+            properties = {"visible": True}
+
             def getBoundingBox(self, *args, **kwargs):
-                return [numpy.array([float('inf'), 0]), numpy.array([1, 1])]
+                return [numpy.array([float("inf"), 0]), numpy.array([1, 1])]
+
         cont.objects = [MockObj()]
         bbox = cont.getBoundingBox()
         # Should fall back to default if no valid rect found
@@ -559,17 +607,19 @@ class TestContainer(object):
 
     def test_container_getLegend_advanced(self, simple_scan):
         """Test container.getLegend with various options."""
-        spec = spectrum(simple_scan, legend='Test')
+        spec = spectrum(simple_scan, legend="Test")
         cont = container([spec])
-        assert cont.getLegend() == [('Test', (0, 0, 255))]
+        assert cont.getLegend() == [("Test", (0, 0, 255))]
 
-    def test_container_methods_with_hidden_objects(self, simple_scan, mock_dc, default_printer_scale):
+    def test_container_methods_with_hidden_objects(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test container methods with hidden objects to hit False branches."""
         spec1 = spectrum(simple_scan)
         spec2 = spectrum(simple_scan)
-        spec2.properties['visible'] = False
+        spec2.properties["visible"] = False
         cont = container([spec1, spec2])
-        
+
         # Hit branches in various methods
         cont.cropPoints(100.0, 102.0)
         cont.scaleAndShift((1.0, 1.0), (0.0, 0.0))
@@ -577,10 +627,10 @@ class TestContainer(object):
         cont.draw(mock_dc, default_printer_scale, False, False)
         cont.drawLabels(mock_dc, default_printer_scale, False)
         cont.drawGel(mock_dc, [0, 10, 10, 190, 190, 100], 50, default_printer_scale)
-        
+
         # Test drawLabels with mix of annotations and other objects
-        annot = annotations([[100.0, 50.0, 'A']])
-        annot.properties['visible'] = True
+        annot = annotations([[100.0, 50.0, "A"]])
+        annot.properties["visible"] = True
         cont.append(annot)
         cont.drawLabels(mock_dc, default_printer_scale, False)
 
@@ -589,17 +639,17 @@ class TestContainer(object):
             st.floats(min_value=-1e6, max_value=1e6),
             st.floats(min_value=-1e6, max_value=1e6),
             st.floats(min_value=-1e6, max_value=1e6),
-            st.floats(min_value=-1e6, max_value=1e6)
+            st.floats(min_value=-1e6, max_value=1e6),
         ),
         st.lists(
             st.tuples(
                 st.floats(min_value=-1e6, max_value=1e6),
                 st.floats(min_value=-1e6, max_value=1e6),
                 st.floats(min_value=-1e6, max_value=1e6),
-                st.floats(min_value=-1e6, max_value=1e6)
+                st.floats(min_value=-1e6, max_value=1e6),
             ),
-            max_size=10
-        )
+            max_size=10,
+        ),
     )
     @settings(max_examples=50, deadline=1000)
     def test_container_checkFreeSpace_hypothesis(self, coords, occupied):
@@ -613,33 +663,34 @@ class TestContainer(object):
 # ANNOTATIONS CLASS TESTS
 # =======================
 
-class TestAnnotations(object):
+
+class TestAnnotations:
     """Tests for annotations class."""
 
     def test_annotations_init(self, simple_annotations_data):
         """Test annotations initialization."""
         annot = annotations(simple_annotations_data)
         assert len(annot.points) == 3
-        assert annot.labels[0] == 'Peak A'
+        assert annot.labels[0] == "Peak A"
 
     def test_annotations_init_without_labels(self, simple_points_data):
         """Test annotations initialization without labels."""
         annot = annotations(simple_points_data)
         assert len(annot.points) == 3
-        assert annot.labels == ['', '', '']
+        assert annot.labels == ["", "", ""]
 
     def test_annotations_properties(self, simple_annotations_data):
         """Test annotations properties dictionary."""
         annot = annotations(simple_annotations_data)
-        assert 'visible' in annot.properties
-        assert annot.properties['visible'] == True
+        assert "visible" in annot.properties
+        assert annot.properties["visible"] == True
 
     def test_annotations_setProperties(self, simple_annotations_data):
         """Test setProperties method."""
         annot = annotations(simple_annotations_data)
         annot.setProperties(visible=False, showPoints=False)
-        assert annot.properties['visible'] == False
-        assert annot.properties['showPoints'] == False
+        assert annot.properties["visible"] == False
+        assert annot.properties["showPoints"] == False
 
     def test_annotations_setNormalization(self, simple_annotations_data):
         """Test setNormalization method."""
@@ -664,10 +715,12 @@ class TestAnnotations(object):
     def test_annotations_getBoundingBox_angles(self, simple_annotations_data):
         """Test getBoundingBox with different angles to hit branches."""
         for angle in [0, 90, 45]:
-            annot = annotations(simple_annotations_data, labelAngle=angle, showLabels=True)
+            annot = annotations(
+                simple_annotations_data, labelAngle=angle, showLabels=True
+            )
             bbox = annot.getBoundingBox()
             assert bbox != False
-        
+
         # Test showLabels=False
         annot = annotations(simple_annotations_data, showLabels=False)
         bbox = annot.getBoundingBox()
@@ -675,11 +728,14 @@ class TestAnnotations(object):
 
     def test_annotations_getBoundingBox_with_offset(self, simple_annotations_data):
         """Test getBoundingBox applies xOffset and yOffset."""
-        annot = annotations(simple_annotations_data, xOffset=10, yOffset=5, exactFit=True)
+        annot = annotations(
+            simple_annotations_data, xOffset=10, yOffset=5, exactFit=True
+        )
         bbox = annot.getBoundingBox()
         # Offsets should be applied
         # Original minX=100.0, xOffset=10.0 -> 110.0
         assert bbox[0][0] == 110.0
+
     def test_annotations_getBoundingBox_normalized(self, simple_annotations_data):
         """Test getBoundingBox with normalized=True."""
         annot = annotations(simple_annotations_data, normalized=True)
@@ -691,14 +747,14 @@ class TestAnnotations(object):
     def test_annotations_getBoundingBox_no_cropped(self, simple_annotations_data):
         """Test getBoundingBox when no points are cropped."""
         annot = annotations(simple_annotations_data)
-        annot.cropPoints(0, 1) # No points in this range
+        annot.cropPoints(0, 1)  # No points in this range
         # It still returns full bbox because self.points is not empty
         assert annot.getBoundingBox() != False
 
     def test_annotations_getBoundingBox_hidden(self, simple_annotations_data):
         """Test getBoundingBox when visible is False."""
         annot = annotations(simple_annotations_data)
-        annot.properties['visible'] = False
+        annot.properties["visible"] = False
         # It still returns bbox because getBoundingBox doesn't check visible
         assert annot.getBoundingBox() != False
 
@@ -739,24 +795,28 @@ class TestAnnotations(object):
         # Should not change points
         assert numpy.array_equal(annot.points, original)
 
-    def test_annotations_draw(self, simple_annotations_data, mock_dc, default_printer_scale):
+    def test_annotations_draw(
+        self, simple_annotations_data, mock_dc, default_printer_scale
+    ):
         """Test draw method with branches."""
         # Hidden
         annot = annotations(simple_annotations_data)
-        annot.properties['visible'] = False
-        annot.draw(mock_dc, default_printer_scale)
-        
-        # Visible, no points
-        annot.properties['visible'] = True
-        annot.properties['showPoints'] = False
-        annot.scaleAndShift((1.0, 1.0), (0.0, 0.0))
-        annot.draw(mock_dc, default_printer_scale)
-        
-        # Visible, with points
-        annot.properties['showPoints'] = True
+        annot.properties["visible"] = False
         annot.draw(mock_dc, default_printer_scale)
 
-    def test_annotations_makeLabels_disabled(self, simple_annotations_data, mock_dc, default_printer_scale):
+        # Visible, no points
+        annot.properties["visible"] = True
+        annot.properties["showPoints"] = False
+        annot.scaleAndShift((1.0, 1.0), (0.0, 0.0))
+        annot.draw(mock_dc, default_printer_scale)
+
+        # Visible, with points
+        annot.properties["showPoints"] = True
+        annot.draw(mock_dc, default_printer_scale)
+
+    def test_annotations_makeLabels_disabled(
+        self, simple_annotations_data, mock_dc, default_printer_scale
+    ):
         """Test makeLabels with showLabels=False."""
         annot = annotations(simple_annotations_data, showLabels=False)
         annot.scaleAndShift((1.0, 1.0), (0.0, 0.0))
@@ -769,16 +829,22 @@ class TestAnnotations(object):
         labels = annot.makeLabels(mock_dc, default_printer_scale)
         assert labels == []
 
-    def test_annotations_makeLabels_variants(self, simple_annotations_data, mock_dc, default_printer_scale):
+    def test_annotations_makeLabels_variants(
+        self, simple_annotations_data, mock_dc, default_printer_scale
+    ):
         """Test makeLabels with various settings."""
         for angle in [0, 90]:
             for flipped in [True, False]:
-                annot = annotations(simple_annotations_data, labelAngle=angle, flipped=flipped)
+                annot = annotations(
+                    simple_annotations_data, labelAngle=angle, flipped=flipped
+                )
                 annot.scaleAndShift((1.0, 1.0), (0.0, 0.0))
                 labels = annot.makeLabels(mock_dc, default_printer_scale)
                 assert isinstance(labels, list)
 
-    def test_annotations_makeLabels_invalid_angle(self, simple_annotations_data, mock_dc, default_printer_scale):
+    def test_annotations_makeLabels_invalid_angle(
+        self, simple_annotations_data, mock_dc, default_printer_scale
+    ):
         """Test makeLabels with invalid labelAngle raises UnboundLocalError."""
         annot = annotations(simple_annotations_data, labelAngle=45)  # Invalid angle
         annot.scaleAndShift((1.0, 1.0), (0.0, 0.0))
@@ -786,9 +852,11 @@ class TestAnnotations(object):
         with pytest.raises(UnboundLocalError):
             annot.makeLabels(mock_dc, default_printer_scale)
 
-    def test_annotations_makeLabels_long_label_truncation(self, mock_dc, default_printer_scale):
+    def test_annotations_makeLabels_long_label_truncation(
+        self, mock_dc, default_printer_scale
+    ):
         """Test makeLabels truncates long labels."""
-        long_label = 'A' * 30
+        long_label = "A" * 30
         data = [[100.0, 50.0, long_label]]
         annot = annotations(data, labelMaxLength=20, showXPos=False)
         annot.scaleAndShift((1.0, 1.0), (0.0, 0.0))
@@ -799,7 +867,8 @@ class TestAnnotations(object):
 # POINTS CLASS TESTS
 # ==================
 
-class TestPoints(object):
+
+class TestPoints:
     """Tests for points class."""
 
     def test_points_init(self, simple_points_data):
@@ -809,16 +878,16 @@ class TestPoints(object):
 
     def test_points_properties(self, simple_points_data):
         """Test points properties."""
-        pts = points(simple_points_data, legend='Test Series')
-        assert pts.properties['legend'] == 'Test Series'
-        assert pts.properties['showLines'] == True
+        pts = points(simple_points_data, legend="Test Series")
+        assert pts.properties["legend"] == "Test Series"
+        assert pts.properties["showLines"] == True
 
     def test_points_setProperties(self, simple_points_data):
         """Test setProperties method."""
         pts = points(simple_points_data)
-        pts.setProperties(legend='Updated', showLines=False)
-        assert pts.properties['legend'] == 'Updated'
-        assert pts.properties['showLines'] == False
+        pts.setProperties(legend="Updated", showLines=False)
+        assert pts.properties["legend"] == "Updated"
+        assert pts.properties["showLines"] == False
 
     def test_points_normalization(self, simple_points_data):
         """Test normalization calculation."""
@@ -841,51 +910,51 @@ class TestPoints(object):
         # exactFit=True
         pts = points(simple_points_data, exactFit=True)
         assert pts.getBoundingBox() != False
-        
+
         # absolute=True
         pts = points(simple_points_data)
         assert pts.getBoundingBox(absolute=True) != False
-        
+
         # normalized=True
         pts = points(simple_points_data, normalized=True)
         assert pts.getBoundingBox() != False
-        
+
         # flipped=True
         pts = points(simple_points_data, flipped=True)
         assert pts.getBoundingBox() != False
 
     def test_points_getLegend(self, simple_points_data):
         """Test getLegend returns legend with colour."""
-        pts = points(simple_points_data, legend='Test', pointColour=(255, 0, 0))
+        pts = points(simple_points_data, legend="Test", pointColour=(255, 0, 0))
         legend = pts.getLegend()
-        assert legend[0] == 'Test'
+        assert legend[0] == "Test"
         assert legend[1] == (255, 0, 0)
 
     def test_points_getLegend_with_offset(self, simple_points_data):
         """Test getLegend includes offset info."""
-        pts = points(simple_points_data, legend='Test', xOffset=10.5, yOffset=5.5)
+        pts = points(simple_points_data, legend="Test", xOffset=10.5, yOffset=5.5)
         legend = pts.getLegend()
-        assert 'Offset' in legend[0]
+        assert "Offset" in legend[0]
 
     def test_points_getLegend_advanced(self, simple_points_data):
         """Test points.getLegend with various options."""
-        pts = points(simple_points_data, legend='Test')
-        
+        pts = points(simple_points_data, legend="Test")
+
         # normalized
-        pts.properties['normalized'] = True
-        assert pts.getLegend()[0] == 'Test'
-        
+        pts.properties["normalized"] = True
+        assert pts.getLegend()[0] == "Test"
+
         # not normalized with offsets
-        pts.properties['normalized'] = False
-        pts.properties['xOffset'] = 10.0
-        pts.properties['yOffset'] = 20.0
-        assert 'Offset' in pts.getLegend()[0]
-        
+        pts.properties["normalized"] = False
+        pts.properties["xOffset"] = 10.0
+        pts.properties["yOffset"] = 20.0
+        assert "Offset" in pts.getLegend()[0]
+
         # showPoints vs showLines
-        pts.properties['showPoints'] = True
-        assert pts.getLegend()[1] == pts.properties['pointColour']
-        pts.properties['showPoints'] = False
-        assert pts.getLegend()[1] == pts.properties['lineColour']
+        pts.properties["showPoints"] = True
+        assert pts.getLegend()[1] == pts.properties["pointColour"]
+        pts.properties["showPoints"] = False
+        assert pts.getLegend()[1] == pts.properties["lineColour"]
 
     def test_points_cropPoints(self, simple_points_data):
         """Test cropPoints method."""
@@ -929,14 +998,14 @@ class TestPoints(object):
         pts = points(simple_points_data, showLines=True, showPoints=True)
         pts.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         pts.draw(mock_dc, default_printer_scale)
-        
+
         # Hidden
-        pts.properties['visible'] = False
+        pts.properties["visible"] = False
         pts.draw(mock_dc, default_printer_scale)
-        
+
         # showLines=False, showPoints=True
-        pts.properties['visible'] = True
-        pts.properties['showLines'] = False
+        pts.properties["visible"] = True
+        pts.properties["showLines"] = False
         pts.draw(mock_dc, default_printer_scale)
 
     def test_points_draw_empty(self, mock_dc, default_printer_scale):
@@ -945,7 +1014,9 @@ class TestPoints(object):
         pts.draw(mock_dc, default_printer_scale)
         # Should not raise
 
-    def test_points_makeLabels(self, simple_points_data, mock_dc, default_printer_scale):
+    def test_points_makeLabels(
+        self, simple_points_data, mock_dc, default_printer_scale
+    ):
         """Test makeLabels always returns empty list."""
         pts = points(simple_points_data)
         labels = pts.makeLabels(mock_dc, default_printer_scale)
@@ -955,7 +1026,8 @@ class TestPoints(object):
 # SPECTRUM CLASS TESTS
 # ====================
 
-class TestSpectrum(object):
+
+class TestSpectrum:
     """Tests for spectrum class."""
 
     def test_spectrum_init(self, simple_scan):
@@ -971,18 +1043,20 @@ class TestSpectrum(object):
 
     def test_spectrum_properties(self, simple_scan):
         """Test spectrum properties."""
-        spec = spectrum(simple_scan, legend='Test MS')
-        assert spec.properties['legend'] == 'Test MS'
-        assert spec.properties['showSpectrum'] == True
+        spec = spectrum(simple_scan, legend="Test MS")
+        assert spec.properties["legend"] == "Test MS"
+        assert spec.properties["showSpectrum"] == True
 
     def test_spectrum_setProperties(self, simple_scan):
         """Test setProperties method."""
         spec = spectrum(simple_scan)
-        spec.setProperties(legend='Updated', visible=False)
-        assert spec.properties['legend'] == 'Updated'
-        assert spec.properties['visible'] == False
+        spec.setProperties(legend="Updated", visible=False)
+        assert spec.properties["legend"] == "Updated"
+        assert spec.properties["visible"] == False
 
-    def test_spectrum_normalization(self, simple_scan, profile_only_scan, peaklist_only_scan, empty_scan):
+    def test_spectrum_normalization(
+        self, simple_scan, profile_only_scan, peaklist_only_scan, empty_scan
+    ):
         """Test normalization calculation."""
         # Both
         assert spectrum(simple_scan).normalization == 1.0
@@ -1023,26 +1097,32 @@ class TestSpectrum(object):
         """Test spectrum.getBoundingBox showLabels branches."""
         spec = spectrum(simple_scan, showLabels=True)
         # angle 0
-        spec.properties['labelAngle'] = 0
+        spec.properties["labelAngle"] = 0
         assert spec.getBoundingBox() != False
         # angle 90
-        spec.properties['labelAngle'] = 90
+        spec.properties["labelAngle"] = 90
         assert spec.getBoundingBox() != False
 
     def test_spectrum_getBoundingBox_combinations(self, simple_scan):
         """Test combinations of showSpectrum, showLabels, showTicks."""
         # showSpectrum=True, others False
-        spec = spectrum(simple_scan, showSpectrum=True, showLabels=False, showTicks=False)
+        spec = spectrum(
+            simple_scan, showSpectrum=True, showLabels=False, showTicks=False
+        )
         assert spec.getBoundingBox() != False
-        
+
         # showSpectrum=False, others True
-        spec = spectrum(simple_scan, showSpectrum=False, showLabels=True, showTicks=True)
+        spec = spectrum(
+            simple_scan, showSpectrum=False, showLabels=True, showTicks=True
+        )
         assert spec.getBoundingBox() != False
-        
+
         # All False
-        spec = spectrum(simple_scan, showSpectrum=False, showLabels=False, showTicks=False)
+        spec = spectrum(
+            simple_scan, showSpectrum=False, showLabels=False, showTicks=False
+        )
         assert spec.getBoundingBox() == False
-        
+
         # Absolute=True
         spec = spectrum(simple_scan, showSpectrum=True)
         assert spec.getBoundingBox(absolute=True) != False
@@ -1053,38 +1133,38 @@ class TestSpectrum(object):
         spec = spectrum(simple_scan)
         cont = container([spec])
         assert cont.getBoundingBox() != False
-        
+
         # 0 visible objects (already tested but being sure)
-        spec.properties['visible'] = False
+        spec.properties["visible"] = False
         assert cont.getBoundingBox() != False
 
     def test_spectrum_getLegend_spectrum(self, simple_scan):
         """Test getLegend returns spectrum colour when showSpectrum=True."""
-        spec = spectrum(simple_scan, legend='Test')
+        spec = spectrum(simple_scan, legend="Test")
         legend = spec.getLegend()
-        assert legend[0] == 'Test'
+        assert legend[0] == "Test"
 
     def test_spectrum_getLegend_empty_spectrum(self, peaklist_only_scan):
         """Test getLegend returns tick colour when spectrum is empty."""
-        spec = spectrum(peaklist_only_scan, legend='Test')
+        spec = spectrum(peaklist_only_scan, legend="Test")
         legend = spec.getLegend()
         # Should return tick colour
-        assert legend[0] == 'Test'
+        assert legend[0] == "Test"
 
     def test_spectrum_getPoint_boundary(self, simple_scan):
         """Test getPoint returns value or None for boundary."""
         spec = spectrum(simple_scan)
         spec.spectrumScaled = numpy.array([[100.0, 50.0], [101.0, 100.0]])
-        
+
         # At start
         result = spec.getPoint(100.0)
         if result is not None:
             assert result[1] == 50.0
-            
+
         # At end
         result = spec.getPoint(101.0)
         assert result is None or result[1] == 100.0
-        
+
         # Beyond
         assert spec.getPoint(102.0) is None
 
@@ -1120,89 +1200,99 @@ class TestSpectrum(object):
         """Test draw method with showPoints and enough points."""
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
-        
+
         # showSpectrum and showPoints
-        spec.properties['showSpectrum'] = True
-        spec.properties['showPoints'] = True
+        spec.properties["showSpectrum"] = True
+        spec.properties["showPoints"] = True
         # Ensure we have enough points for showPoints logic
         # need (pts[2].x - pts[1].x) > 6 and (totalX / count) > 6
-        spec.spectrumScaled = numpy.array([[100.0, 50.0], [110.0, 100.0], [120.0, 75.0], [130.0, 50.0]])
+        spec.spectrumScaled = numpy.array(
+            [[100.0, 50.0], [110.0, 100.0], [120.0, 75.0], [130.0, 50.0]]
+        )
         spec.draw(mock_dc, default_printer_scale)
 
-    def test_spectrum_drawPeaklist_features(self, simple_scan, mock_dc, default_printer_scale):
+    def test_spectrum_drawPeaklist_features(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test _drawPeaklist features like fragmentation marks and isotope colours."""
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
-        
+
         # Fragmentation mark (childScanNumber is set in fixture)
-        spec.properties['showSpectrum'] = False
-        spec.draw(mock_dc, default_printer_scale)
-        
-        # Isotope colour
-        spec.properties['isotopeColour'] = (255, 0, 0)
+        spec.properties["showSpectrum"] = False
         spec.draw(mock_dc, default_printer_scale)
 
-    def test_spectrum_makeLabels_variants(self, simple_scan, mock_dc, default_printer_scale):
+        # Isotope colour
+        spec.properties["isotopeColour"] = (255, 0, 0)
+        spec.draw(mock_dc, default_printer_scale)
+
+    def test_spectrum_makeLabels_variants(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test makeLabels with various label settings."""
         spec = spectrum(simple_scan, labelAngle=90, labelCharge=True, labelGroup=True)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         labels = spec.makeLabels(mock_dc, default_printer_scale)
         assert len(labels) > 0
-        
+
         # angle 0
-        spec.properties['labelAngle'] = 0
+        spec.properties["labelAngle"] = 0
         labels = spec.makeLabels(mock_dc, default_printer_scale)
         assert len(labels) > 0
 
     def test_spectrum_getBoundingBox_advanced(self, simple_scan):
         """Test spectrum.getBoundingBox with various combinations."""
         spec = spectrum(simple_scan)
-        
+
         # showSpectrum=True, showLabels=False
-        spec.properties['showSpectrum'] = True
-        spec.properties['showLabels'] = False
+        spec.properties["showSpectrum"] = True
+        spec.properties["showLabels"] = False
         bbox = spec.getBoundingBox()
-        
+
         # showSpectrum=False, showLabels=True
-        spec.properties['showSpectrum'] = False
-        spec.properties['showLabels'] = True
-        spec.properties['labelAngle'] = 0
+        spec.properties["showSpectrum"] = False
+        spec.properties["showLabels"] = True
+        spec.properties["labelAngle"] = 0
         bbox = spec.getBoundingBox()
-        spec.properties['labelAngle'] = 90
+        spec.properties["labelAngle"] = 90
         bbox = spec.getBoundingBox()
-        
+
         # flipped and normalized
-        spec.properties['flipped'] = True
-        spec.properties['normalized'] = True
+        spec.properties["flipped"] = True
+        spec.properties["normalized"] = True
         bbox = spec.getBoundingBox()
-        
+
         # minX, maxX
         bbox = spec.getBoundingBox(minX=100.5, maxX=101.5)
 
     def test_spectrum_getLegend_advanced(self, simple_scan):
         """Test spectrum.getLegend with various options."""
-        spec = spectrum(simple_scan, legend='Test')
-        
-        # spectrum vs ticks
-        spec.properties['showSpectrum'] = True
-        assert spec.getLegend()[1] == spec.properties['spectrumColour']
-        spec.properties['showSpectrum'] = False
-        assert spec.getLegend()[1] == spec.properties['tickColour']
-        
-        # offsets
-        spec.properties['normalized'] = False
-        spec.properties['xOffset'] = 10.0
-        assert 'Offset' in spec.getLegend()[0]
+        spec = spectrum(simple_scan, legend="Test")
 
-    def test_spectrum_drawPeaklist_advanced(self, simple_scan, mock_dc, default_printer_scale):
+        # spectrum vs ticks
+        spec.properties["showSpectrum"] = True
+        assert spec.getLegend()[1] == spec.properties["spectrumColour"]
+        spec.properties["showSpectrum"] = False
+        assert spec.getLegend()[1] == spec.properties["tickColour"]
+
+        # offsets
+        spec.properties["normalized"] = False
+        spec.properties["xOffset"] = 10.0
+        assert "Offset" in spec.getLegend()[0]
+
+    def test_spectrum_drawPeaklist_advanced(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test _drawPeaklist with isotope and msms colours."""
         spec = spectrum(simple_scan)
-        spec.properties['isotopeColour'] = (255, 0, 0)
-        spec.properties['msmsColour'] = (0, 255, 0)
+        spec.properties["isotopeColour"] = (255, 0, 0)
+        spec.properties["msmsColour"] = (0, 255, 0)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         spec.draw(mock_dc, default_printer_scale)
 
-    def test_spectrum_makeLabels_variants(self, simple_scan, mock_dc, default_printer_scale):
+    def test_spectrum_makeLabels_variants(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test spectrum.makeLabels with angle 0 and flipped branches."""
         for angle in [0, 90]:
             for flipped in [True, False]:
@@ -1211,104 +1301,120 @@ class TestSpectrum(object):
                 labels = spec.makeLabels(mock_dc, default_printer_scale)
                 assert isinstance(labels, list)
 
-    def test_spectrum_drawSpectrumGel_variants(self, simple_scan, mock_dc, default_printer_scale):
+    def test_spectrum_drawSpectrumGel_variants(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test _drawSpectrumGel branches."""
         # Use LARGE range to avoid step=0
-        gelCoords = [0, 10, 0, 1000, 1000, 500] # plotY2 - plotY1 = 1000
-        
+        gelCoords = [0, 10, 0, 1000, 1000, 500]  # plotY2 - plotY1 = 1000
+
         # Flipped
         spec = spectrum(simple_scan, flipped=True)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         # Points to trigger maxY < previousY and space logic
-        spec.spectrumScaled = numpy.array([
-            [100.0, 500.0], # baseline
-            [110.0, 100.0], # peak (high intensity = low Y)
-            [120.0, 500.0], # baseline
-            [150.0, 500.0]  # space
-        ])
-        spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
-        
-        # Zero region
-        spec.properties['flipped'] = False
-        spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
-        spec.properties['flipped'] = True
+        spec.spectrumScaled = numpy.array(
+            [
+                [100.0, 500.0],  # baseline
+                [110.0, 100.0],  # peak (high intensity = low Y)
+                [120.0, 500.0],  # baseline
+                [150.0, 500.0],  # space
+            ]
+        )
         spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
 
-    def test_spectrum_drawPeaklistGel_variants(self, simple_scan, mock_dc, default_printer_scale):
+        # Zero region
+        spec.properties["flipped"] = False
+        spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
+        spec.properties["flipped"] = True
+        spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
+
+    def test_spectrum_drawPeaklistGel_variants(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test _drawPeaklistGel branches."""
         # Use LARGE range to avoid step=0
         gelCoords = [0, 10, 0, 1000, 1000, 500]
-        
+
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
-        spec.peaklistScaled = numpy.array([
-            [100.0, 100.0, 100.0],
-            [110.0, 500.0, 500.0]
-        ])
-        spec._drawPeaklistGel(mock_dc, gelCoords, 50, default_printer_scale)
-        
-        # Zero region
-        spec.properties['flipped'] = True
+        spec.peaklistScaled = numpy.array(
+            [[100.0, 100.0, 100.0], [110.0, 500.0, 500.0]]
+        )
         spec._drawPeaklistGel(mock_dc, gelCoords, 50, default_printer_scale)
 
-    def test_spectrum_drawGel_extra_variants(self, simple_scan, mock_dc, default_printer_scale):
+        # Zero region
+        spec.properties["flipped"] = True
+        spec._drawPeaklistGel(mock_dc, gelCoords, 50, default_printer_scale)
+
+    def test_spectrum_drawGel_extra_variants(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test spectrum gel drawing with specific point configurations."""
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         gelCoords = [0, 10, 0, 1000, 1000, 500]
-        
+
         # Points to trigger intensity=0 and maxY < previousY
-        spec.spectrumScaled = numpy.array([
-            [100.0, 500.0], # baseline (intensity 0 at zeroY=500)
-            [110.0, 500.0], # baseline
-            [120.0, 490.0], # small peak
-            [130.0, 495.0], # falling
-            [200.0, 500.0]  # space
-        ])
-        spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
-        
-        # Flipped with intensity=0
-        spec.properties['flipped'] = True
+        spec.spectrumScaled = numpy.array(
+            [
+                [100.0, 500.0],  # baseline (intensity 0 at zeroY=500)
+                [110.0, 500.0],  # baseline
+                [120.0, 490.0],  # small peak
+                [130.0, 495.0],  # falling
+                [200.0, 500.0],  # space
+            ]
+        )
         spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
 
-    def test_spectrum_drawPeaklistGel_extra_variants(self, simple_scan, mock_dc, default_printer_scale):
+        # Flipped with intensity=0
+        spec.properties["flipped"] = True
+        spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
+
+    def test_spectrum_drawPeaklistGel_extra_variants(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test spectrum peaklist gel drawing with flipped branch."""
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         gelCoords = [0, 10, 0, 1000, 1000, 500]
-        spec.peaklistScaled = numpy.array([
-            [100.0, 400.0, 400.0],
-            [110.0, 500.0, 500.0]
-        ])
-        spec.properties['flipped'] = True
+        spec.peaklistScaled = numpy.array(
+            [[100.0, 400.0, 400.0], [110.0, 500.0, 500.0]]
+        )
+        spec.properties["flipped"] = True
         spec._drawPeaklistGel(mock_dc, gelCoords, 50, default_printer_scale)
 
-    def test_spectrum_drawSpectrumGel_zero_step(self, simple_scan, mock_dc, default_printer_scale):
+    def test_spectrum_drawSpectrumGel_zero_step(
+        self, simple_scan, mock_dc, default_printer_scale
+    ):
         """Test _drawSpectrumGel when step == 0 (returns False)."""
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
-        gelCoords = [0, 10, 100, 100, 100, 100] # plotY1 == plotY2 (indices 2 and 4)
+        gelCoords = [0, 10, 100, 100, 100, 100]  # plotY1 == plotY2 (indices 2 and 4)
         result = spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
         assert result == False
 
-    def test_spectrum_overflow_handling(self, simple_scan, mocker, default_printer_scale):
+    def test_spectrum_overflow_handling(
+        self, simple_scan, mocker, default_printer_scale
+    ):
         """Test handled exception branches (OverflowError)."""
         spec = spectrum(simple_scan)
-        spec.spectrumScaled = numpy.array([[100.0, 50.0], [110.0, 100.0], [120.0, 75.0], [130.0, 50.0]])
-        spec.properties['showPoints'] = True
-        
+        spec.spectrumScaled = numpy.array(
+            [[100.0, 50.0], [110.0, 100.0], [120.0, 75.0], [130.0, 50.0]]
+        )
+        spec.properties["showPoints"] = True
+
         mock_dc = mocker.Mock(spec=wx.DC)
         mock_dc.DrawCircle.side_effect = OverflowError("Overflow")
         mock_dc.DrawLine.side_effect = OverflowError("Overflow")
         mock_dc.DrawRectangle.side_effect = OverflowError("Overflow")
-        
+
         # Spectrum overflow
         spec._drawSpectrum(mock_dc, default_printer_scale)
-        
+
         # Peaklist overflow
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         spec._drawPeaklist(mock_dc, default_printer_scale)
-        
+
         # Gel overflow
         gelCoords = [0, 10, 0, 1000, 1000, 500]
         spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
@@ -1318,13 +1424,14 @@ class TestSpectrum(object):
 # INTEGRATION TESTS
 # =================
 
-class TestIntegration(object):
+
+class TestIntegration:
     """Integration tests for multiple components."""
 
     def test_container_with_multiple_spectrum(self, simple_scan):
         """Test container with multiple spectrum objects."""
-        spec1 = spectrum(simple_scan, legend='Spectrum 1')
-        spec2 = spectrum(simple_scan, legend='Spectrum 2')
+        spec1 = spectrum(simple_scan, legend="Spectrum 1")
+        spec2 = spectrum(simple_scan, legend="Spectrum 2")
         cont = container([spec1, spec2])
 
         assert len(cont) == 2
@@ -1332,7 +1439,9 @@ class TestIntegration(object):
         cont.scaleAndShift((2.0, 2.0), (0.0, 0.0))
         assert cont.countGels() == 2
 
-    def test_container_with_annotations_and_spectrum(self, simple_scan, simple_annotations_data):
+    def test_container_with_annotations_and_spectrum(
+        self, simple_scan, simple_annotations_data
+    ):
         """Test container with both annotations and spectrum."""
         spec = spectrum(simple_scan)
         annot = annotations(simple_annotations_data)
@@ -1342,7 +1451,9 @@ class TestIntegration(object):
         bbox = cont.getBoundingBox()
         assert isinstance(bbox, list)
 
-    def test_container_drawing_mixed_objects(self, simple_scan, simple_annotations_data, mock_dc, default_printer_scale):
+    def test_container_drawing_mixed_objects(
+        self, simple_scan, simple_annotations_data, mock_dc, default_printer_scale
+    ):
         """Test drawing container with mixed object types."""
         spec = spectrum(simple_scan)
         annot = annotations(simple_annotations_data)
@@ -1353,10 +1464,12 @@ class TestIntegration(object):
         cont.draw(mock_dc, default_printer_scale, False, False)
         # Should draw without raising
 
-    def test_full_workflow(self, simple_scan, simple_annotations_data, mock_dc, default_printer_scale):
+    def test_full_workflow(
+        self, simple_scan, simple_annotations_data, mock_dc, default_printer_scale
+    ):
         """Test full workflow: create, crop, scale, draw."""
-        spec = spectrum(simple_scan, legend='Test Spectrum')
-        annot = annotations(simple_annotations_data, legend='Test Annotations')
+        spec = spectrum(simple_scan, legend="Test Spectrum")
+        annot = annotations(simple_annotations_data, legend="Test Annotations")
         cont = container([spec, annot])
 
         # Get bounding box
@@ -1376,5 +1489,5 @@ class TestIntegration(object):
         cont.draw(mock_dc, default_printer_scale, False, False)
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
