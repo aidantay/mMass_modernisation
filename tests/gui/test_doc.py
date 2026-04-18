@@ -16,7 +16,7 @@ def mock_config(mocker):
     mocker.patch.dict('gui.config.replacements', {
         'sequences': {
             'sp': {
-                'pattern': '^sp\|?([A-Z][A-Z0-9]+)$',
+                'pattern': r'^sp\|?([A-Z][A-Z0-9]+)$',
                 'url': 'http://www.uniprot.org/uniprot/%s',
             }
         },
@@ -404,7 +404,7 @@ def test_parseMSD_integration(tmp_path, mock_config, sample_spectrum, mocker):
     
     # Write to temp file
     file_path = tmp_path / "test.msd"
-    file_path.write_text(unicode(xml_data))
+    file_path.write_text(str(xml_data))
     
     # Deserialize
     parser = gui.doc.parseMSD(str(file_path))
@@ -444,7 +444,7 @@ def test_parseMSD_errors(tmp_path):
     # getDocument returns a doc always if the XML is valid, but handleSpectrum fails silently.
     xml_missing = '<mSD version="2.2"><spectrum points="10"></spectrum></mSD>'
     file_path = tmp_path / "missing.msd"
-    file_path.write_text(unicode(xml_missing))
+    file_path.write_text(str(xml_missing))
     parser = gui.doc.parseMSD(str(file_path))
     doc = parser.getDocument()
     assert len(doc.spectrum.profile) == 0
@@ -452,7 +452,7 @@ def test_parseMSD_errors(tmp_path):
     # Test corrupted data
     xml_corrupt = '<mSD version="2.2"><spectrum points="1"><mzArray compression="zlib">!!!</mzArray><intArray compression="zlib">!!!</intArray></spectrum></mSD>'
     file_path = tmp_path / "corrupt.msd"
-    file_path.write_text(unicode(xml_corrupt))
+    file_path.write_text(str(xml_corrupt))
     parser = gui.doc.parseMSD(str(file_path))
     doc = parser.getDocument()
     assert len(doc.spectrum.profile) == 0
@@ -465,7 +465,7 @@ def test_parseMSD_errors(tmp_path):
   <sequences><sequence><seq>PEPTIDE</seq><match peakMZ="ghi">Match</match></sequence></sequences>
 </mSD>"""
     file_path = tmp_path / "bad_attr.msd"
-    file_path.write_text(unicode(xml_bad_attr))
+    file_path.write_text(str(xml_bad_attr))
     parser = gui.doc.parseMSD(str(file_path))
     doc = parser.getDocument()
     assert 'Incorrect peak data.' in parser.errors
@@ -475,7 +475,7 @@ def test_parseMSD_errors(tmp_path):
     # Test unknown monomer
     xml_bad_monomer = '<mSD version="2.2"><sequences><sequence><seq>UNKNOWN</seq></sequence></sequences></mSD>'
     file_path = tmp_path / "bad_monomer.msd"
-    file_path.write_text(unicode(xml_bad_monomer))
+    file_path.write_text(str(xml_bad_monomer))
     parser = gui.doc.parseMSD(str(file_path))
     doc = parser.getDocument()
     assert 'Unknown monomers in sequence data.' in parser.errors
@@ -489,7 +489,7 @@ def test_parseMSD_helpers(tmp_path, mocker):
     # Test _getVersion with mMassDoc tag
     xml_mmassdoc = '<mMassDoc version="1.0"></mMassDoc>'
     file_path = tmp_path / "legacy.msd"
-    file_path.write_text(unicode(xml_mmassdoc))
+    file_path.write_text(str(xml_mmassdoc))
     parser = gui.doc.parseMSD(str(file_path))
     parser._parsedData = xml.dom.minidom.parseString(xml_mmassdoc)
     assert parser._getVersion() == "1.0"
@@ -522,7 +522,7 @@ def test_parseMSD_version10(tmp_path):
   </sequences>
 </mSD>"""
     file_path = tmp_path / "v10.msd"
-    file_path.write_text(unicode(xml_v10))
+    file_path.write_text(str(xml_v10))
     parser = gui.doc.parseMSD(str(file_path))
     doc = parser.getDocument()
     

@@ -66,3 +66,19 @@ def test_dlg_clipboard_editor_replace_double_newline(wx_app):
     assert dlg.data == expected
     assert dlg.data_value.GetValue() == expected
     dlg.Destroy()
+
+def test_dlg_clipboard_editor_sizer_flags(dialog):
+    """Test that the TextCtrl has the correct sizer flags (no wx.CENTER)."""
+    sizer = dialog.GetSizer()
+    # The first item in the mainSizer is the data_value TextCtrl
+    item = sizer.GetItem(0)
+    flags = item.GetFlag()
+    
+    # Check that wx.EXPAND is present
+    assert flags & wx.EXPAND
+    
+    # Check that wx.CENTER (wx.ALIGN_CENTER) is NOT present
+    # wx.CENTER is a combination of wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL
+    # In wx.BoxSizer(wx.VERTICAL), wx.CENTER is wx.ALIGN_CENTER_HORIZONTAL
+    assert not (flags & wx.ALIGN_CENTER_HORIZONTAL)
+    assert not (flags & wx.ALIGN_CENTER_VERTICAL)

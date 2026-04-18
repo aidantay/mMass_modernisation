@@ -1,26 +1,27 @@
 import pytest
 import wx
 import gui.ids
+from importlib import reload
 
 def test_ids_defined(wx_app):
     """
     Verify that expected IDs are defined as integers or wx.WindowID.
     """
     # Check common IDs
-    assert isinstance(gui.ids.ID_quit, int)
-    assert isinstance(gui.ids.ID_about, int)
-    assert isinstance(gui.ids.ID_preferences, int)
+    assert isinstance(gui.ids.ID_quit, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_about, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_preferences, (int, wx.WindowIDRef))
     
     # Check some generated IDs
-    assert isinstance(gui.ids.ID_documentNew, int)
-    assert isinstance(gui.ids.ID_viewGrid, int)
-    assert isinstance(gui.ids.ID_processingUndo, int)
-    assert isinstance(gui.ids.ID_sequenceNew, int)
-    assert isinstance(gui.ids.ID_toolsProcessing, int)
-    assert isinstance(gui.ids.ID_libraryCompounds, int)
-    assert isinstance(gui.ids.ID_linksBiomedMSTools, int)
-    assert isinstance(gui.ids.ID_windowMaximize, int)
-    assert isinstance(gui.ids.ID_helpAbout, int)
+    assert isinstance(gui.ids.ID_documentNew, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_viewGrid, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_processingUndo, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_sequenceNew, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_toolsProcessing, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_libraryCompounds, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_linksBiomedMSTools, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_windowMaximize, (int, wx.WindowIDRef))
+    assert isinstance(gui.ids.ID_helpAbout, (int, wx.WindowIDRef))
 
 def test_hotkeys_defined():
     """

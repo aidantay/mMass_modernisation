@@ -95,9 +95,8 @@ def monkeypatch_config(monkeypatch):
 def export_panel(wx_app, mock_parent, mock_images, monkeypatch_config, mocker):
     # Mock Slider.SetTickFreq because it might have incompatible signature in some wx versions
     mocker.patch('wx.Slider.SetTickFreq')
-    # Mock MakeModal as it's missing in wxPython 4 but used in mMass
-    if not hasattr(wx.MiniFrame, 'MakeModal'):
-        mocker.patch.object(wx.MiniFrame, 'MakeModal', create=True)
+    # Mock WindowDisabler as it's used instead of MakeModal
+    mocker.patch('wx.WindowDisabler')
     
     panel = panelDocumentExport(mock_parent)
     yield panel
@@ -117,9 +116,8 @@ def test_init_specific_tool(mock_parent, mock_images, monkeypatch_config, mocker
     """Verify instantiating with specific tools works."""
     # Mock Slider.SetTickFreq because it might have incompatible signature in some wx versions
     mocker.patch('wx.Slider.SetTickFreq')
-    # Mock MakeModal as it's missing in wxPython 4 but used in mMass
-    if not hasattr(wx.MiniFrame, 'MakeModal'):
-        mocker.patch.object(wx.MiniFrame, 'MakeModal', create=True)
+    # Mock WindowDisabler
+    mocker.patch('wx.WindowDisabler')
 
     # Test peaklist
     panel = panelDocumentExport(mock_parent, tool='peaklist')
@@ -225,8 +223,7 @@ def test_onImageResolutionChanged(export_panel):
 def test_init_invalid_resolution(wx_app, mock_parent, mock_images, monkeypatch_config, mocker):
     """Verify initialization when config resolution is not in choices."""
     mocker.patch('wx.Slider.SetTickFreq')
-    if not hasattr(wx.MiniFrame, 'MakeModal'):
-        mocker.patch.object(wx.MiniFrame, 'MakeModal', create=True)
+    mocker.patch('wx.WindowDisabler')
     
     mock_export, _ = monkeypatch_config
     mock_export['imageResolution'] = 999 # Not in ['72', '150', '200', '300', '600']
@@ -404,7 +401,7 @@ def test_onExportPeaklist_success(export_panel, mocker):
     # Mock threading.Thread
     mock_thread = mocker.patch('threading.Thread')
     thread_instance = mock_thread.return_value
-    thread_instance.isAlive.side_effect = [True, False] # To exit the while loop
+    thread_instance.is_alive.side_effect = [True, False] # To exit the while loop
     
     mock_on_processing = mocker.patch.object(export_panel, 'onProcessing')
     
@@ -440,7 +437,7 @@ def test_onExportSpectrum_success(export_panel, mocker):
     # Mock threading.Thread
     mock_thread = mocker.patch('threading.Thread')
     thread_instance = mock_thread.return_value
-    thread_instance.isAlive.side_effect = [True, False]
+    thread_instance.is_alive.side_effect = [True, False]
     
     mock_on_processing = mocker.patch.object(export_panel, 'onProcessing')
     

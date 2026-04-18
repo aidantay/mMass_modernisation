@@ -63,12 +63,12 @@ def test_loadImages_msw(wx_app, clean_images_lib, mocker):
 def test_convertImages(mocker):
     """Test convertImages function."""
     mock_img2py = mocker.patch('gui.images.img2py.main')
-    # Mock 'file' which is built-in in Python 2
-    mock_file = mocker.patch('__builtin__.file', mocker.mock_open())
+    # Mock 'open' for Python 3
+    mock_open = mocker.patch('builtins.open', mocker.mock_open())
     images.convertImages()
     
     # Check if it tried to create files for all platforms
-    assert mock_file.call_count >= 3
+    assert mock_open.call_count >= 3
     # Check if img2py.main was called many times
     assert mock_img2py.call_count > 0
     

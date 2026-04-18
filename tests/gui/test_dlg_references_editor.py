@@ -2,10 +2,10 @@ import pytest
 import wx
 import os
 import xml.dom.minidom
-from StringIO import StringIO
+from io import StringIO
 
 from gui.dlg_references_editor import dlgReferencesEditor, dlgGroupName, dlgSelectItemsToImport
-from gui.ids import *
+from gui.ids import ID_dlgReplace, ID_dlgReplaceAll, ID_dlgSkip
 
 @pytest.fixture
 def editor_dialog(wx_app, mocker):

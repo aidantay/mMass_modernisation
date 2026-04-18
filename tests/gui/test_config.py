@@ -72,7 +72,7 @@ def test_getParams():
         'intVal': 0,
         'floatVal': 0.0,
         'strVal': '',
-        'unicodeVal': u'',
+        'unicodeVal': '',
         'exists': True
     }
     
@@ -81,7 +81,7 @@ def test_getParams():
     assert section['intVal'] == 123
     assert section['floatVal'] == 1.23
     assert section['strVal'] == 'hello'
-    assert section['unicodeVal'] == u'world'
+    assert section['unicodeVal'] == 'world'
     assert section['exists'] is True
 
 def test_getParams_exceptions():
@@ -106,16 +106,16 @@ def test_save_and_load_config(tmpdir, backup_config):
     
     # Modify some values of different types
     config.main['appWidth'] = 2000
-    config.main['lastDir'] = u"/home/test/directory"
+    config.main['lastDir'] = "/home/test/directory"
     config.main['cursorInfo'] = ['mz', 'z']
-    config.recent = [u"/home/test/file1.mzML", u"/home/test/file2.mzML"]
+    config.recent = ["/home/test/file1.mzML", "/home/test/file2.mzML"]
     config.colours = [[255, 0, 0], [0, 255, 0]]
     config.spectrum['showGrid'] = 0
     config.spectrum['tickColour'] = [0, 0, 255]
     config.processing['crop']['lowMass'] = 100
     config.processing['crop']['highMass'] = 10000
-    config.mascot['common']['userName'] = u"Test User"
-    config.mascot['pmf']['fixedMods'] = [u"Mod1", u"Mod2"]
+    config.mascot['common']['userName'] = "Test User"
+    config.mascot['pmf']['fixedMods'] = ["Mod1", "Mod2"]
     
     # Save config
     assert config.saveConfig(temp_file) is True
@@ -123,7 +123,7 @@ def test_save_and_load_config(tmpdir, backup_config):
     
     # Reset some values to different ones to verify load
     config.main['appWidth'] = 1050
-    config.main['lastDir'] = u""
+    config.main['lastDir'] = ""
     config.main['cursorInfo'] = []
     config.recent = []
     config.colours = []
@@ -131,7 +131,7 @@ def test_save_and_load_config(tmpdir, backup_config):
     config.spectrum['tickColour'] = [255, 75, 75]
     config.processing['crop']['lowMass'] = 500
     config.processing['crop']['highMass'] = 5000
-    config.mascot['common']['userName'] = u""
+    config.mascot['common']['userName'] = ""
     config.mascot['pmf']['fixedMods'] = []
     
     # Load config
@@ -139,16 +139,16 @@ def test_save_and_load_config(tmpdir, backup_config):
     
     # Verify values match modified ones
     assert config.main['appWidth'] == 2000
-    assert config.main['lastDir'] == u"/home/test/directory"
+    assert config.main['lastDir'] == "/home/test/directory"
     assert config.main['cursorInfo'] == ['mz', 'z']
-    assert config.recent == [u"/home/test/file1.mzML", u"/home/test/file2.mzML"]
+    assert config.recent == ["/home/test/file1.mzML", "/home/test/file2.mzML"]
     assert config.colours == [[255, 0, 0], [0, 255, 0]]
     assert config.spectrum['showGrid'] == 0
     assert config.spectrum['tickColour'] == [0, 0, 255]
     assert config.processing['crop']['lowMass'] == 100
     assert config.processing['crop']['highMass'] == 10000
-    assert config.mascot['common']['userName'] == u"Test User"
-    assert config.mascot['pmf']['fixedMods'] == [u"Mod1", u"Mod2"]
+    assert config.mascot['common']['userName'] == "Test User"
+    assert config.mascot['pmf']['fixedMods'] == ["Mod1", "Mod2"]
 
 def test_load_config_missing_file():
     """Verify behavior when loading from a non-existent file."""
@@ -158,7 +158,7 @@ def test_load_config_missing_file():
 def test_save_config_error(tmpdir, mocker):
     """Mock file writing to test error handling in saveConfig."""
     # Use mock to simulate IOError during file open
-    mocker.patch("gui.config.file", side_effect=IOError, create=True)
+    mocker.patch("gui.config.open", side_effect=IOError, create=True)
     assert config.saveConfig("/any/path/config.xml") is False
 
 def test_load_config_malformed_xml(tmpdir):

@@ -183,7 +183,7 @@ def test_on_stop(panel, mocker):
     
     # Case 1: Processing active and alive
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     panel.onStop(None)
     mock_stop.assert_called_once()
     mock_bell.assert_not_called()
@@ -199,7 +199,7 @@ def test_on_stop(panel, mocker):
     mock_stop.reset_mock()
     mock_bell.reset_mock()
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = False
+    panel.processing.is_alive.return_value = False
     panel.onStop(None)
     mock_bell.assert_called_once()
     mock_stop.assert_not_called()
@@ -363,7 +363,7 @@ def test_update_results_list(panel, mocker):
 
 def test_on_processing(panel, mocker):
     """Verify onProcessing behavior."""
-    panel.MakeModal = mocker.Mock()
+    mock_disabler = mocker.patch('wx.WindowDisabler')
     mock_show = mocker.patch.object(panel.mainSizer, 'Show')
     mock_hide = mocker.patch.object(panel.mainSizer, 'Hide')
     mocker.patch.object(panel, 'Layout')
@@ -371,12 +371,12 @@ def test_on_processing(panel, mocker):
     
     # Status True
     panel.onProcessing(True)
-    panel.MakeModal.assert_called_with(True)
+    mock_disabler.assert_called_with(panel)
     mock_show.assert_called_with(3)
     
     # Status False
     panel.onProcessing(False)
-    panel.MakeModal.assert_called_with(False)
+    assert not hasattr(panel, '_disabler')
     mock_hide.assert_called_with(3)
     mock_mspy_start.assert_called_once()
     assert panel.processing is None
@@ -420,7 +420,7 @@ def test_on_calculate_success(panel, mocker):
     
     # Mock thread to be finished immediately
     thread_instance = mock_thread.return_value
-    thread_instance.isAlive.return_value = False
+    thread_instance.is_alive.return_value = False
     
     panel.currentFit = mocker.Mock()
     

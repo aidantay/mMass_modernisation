@@ -460,12 +460,16 @@ def test_getFreeColour_from_config(dlg):
     assert result == [0, 255, 0]
     assert [0, 255, 0] in dlg.usedColours
 
-def test_getFreeColour_raises_NameError(dlg):
-    """Test getFreeColour raises NameError due to missing 'random' import (Step 6)."""
+def test_getFreeColour_random(dlg, mocker):
+    """Test getFreeColour generates random colour when config is exhausted (Step 6)."""
     # Filling up config.colours to trigger the random part
     # config.colours is mocked as [[255, 0, 0], [0, 255, 0]] in fixture
     dlg.usedColours = [[255, 0, 0], [0, 255, 0]]
     
-    with pytest.raises(NameError) as excinfo:
-        dlg.getFreeColour()
-    assert "global name 'random' is not defined" in str(excinfo.value)
+    # Mock random.randrange to return specific values
+    # Each call to getFreeColour will call it 3 times
+    mocker.patch('gui.dlg_select_scans.random.randrange', side_effect=[100, 150, 200])
+    
+    result = dlg.getFreeColour()
+    assert result == [100, 150, 200]
+    assert [100, 150, 200] in dlg.usedColours

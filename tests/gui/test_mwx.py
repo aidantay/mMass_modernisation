@@ -69,7 +69,7 @@ def test_sortListCtrl_sorting(mocker, frame):
     mocker.patch.object(list_ctrl, 'Refresh')
     
     # Test OnGetItemText and OnGetItemImage
-    assert list_ctrl.OnGetItemText(0, 0) == u'2'
+    assert list_ctrl.OnGetItemText(0, 0) == '2'
     assert list_ctrl.OnGetItemImage(0) == -1
     
     # Sort by col 1 (alphabetical)
@@ -136,7 +136,7 @@ def test_sortListCtrl_attributes(frame):
 
     # Custom attributes
     def get_attr(row):
-        a = wx.ListItemAttr()
+        a = wx.ItemAttr()
         a.SetBackgroundColour(wx.RED)
         a.SetTextColour(wx.BLUE)
         a.SetFont(wx.ITALIC_FONT)

@@ -270,7 +270,7 @@ def test_dlgCompoundsEditor_readLibraryXML(dlg_editor_instance):
   </group>
 </mMassCompounds>"""
     
-    with tempfile.NamedTemporaryFile(delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
         f.write(xml_content)
         path = f.name
     
@@ -371,7 +371,7 @@ def test_dlgCompoundsEditor_readLibraryXML_errors(dlg_editor_instance):
     assert dlg_editor_instance.readLibraryXML('non_existent.xml') is False
     
     # Case: Invalid root tag
-    with tempfile.NamedTemporaryFile(delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
         f.write("<wrong></wrong>")
         path = f.name
     try:
