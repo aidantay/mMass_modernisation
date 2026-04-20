@@ -42,7 +42,7 @@ def test_parseScanNumber_exception_handling(mocker):
     assert parser_mzml._parseScanNumber("scan=something") is None
     mock_pattern.search.assert_called_once_with("scan=something")
 
-@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much], max_examples=100)
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much, HealthCheck.function_scoped_fixture], max_examples=100)
 @given(
     mz_data=arrays(np.float64, st.integers(0, 50), elements=st.floats(min_value=0.1, max_value=10000.0, allow_nan=False, allow_infinity=False)),
     int_data=arrays(np.float64, st.integers(0, 50), elements=st.floats(min_value=0.1, max_value=10000.0, allow_nan=False, allow_infinity=False)),
@@ -377,8 +377,8 @@ def test_parseMZML_sax_exception(mocker):
     mocker.patch('os.path.exists', return_value=True)
     parser = parser_mzml.parseMZML('dummy_path')
     
-    # Mock file and sax parser
-    mocker.patch('mspy.parser_mzml.file', mocker.mock_open())
+    # Mock open and sax parser
+    mocker.patch('mspy.parser_mzml.open', mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = xml.sax.SAXException("Test Exception")
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
@@ -407,8 +407,8 @@ def test_parseMZML_info_stopParsing(mocker):
     mock_handler.data = mock_data
     mocker.patch('mspy.parser_mzml.infoHandler', return_value=mock_handler)
     
-    # Mock file and sax parser to raise stopParsing
-    mocker.patch('mspy.parser_mzml.file', mocker.mock_open())
+    # Mock open and sax parser to raise stopParsing
+    mocker.patch('mspy.parser_mzml.open', mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = parser_mzml.stopParsing()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
@@ -427,8 +427,8 @@ def test_parseMZML_scanlist_success(mocker):
     mock_handler.data = mock_data
     mocker.patch('mspy.parser_mzml.scanlistHandler', return_value=mock_handler)
     
-    # Mock file and sax parser
-    mocker.patch('mspy.parser_mzml.file', mocker.mock_open())
+    # Mock open and sax parser
+    mocker.patch('mspy.parser_mzml.open', mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
     
@@ -454,8 +454,8 @@ def test_parseMZML_load_success(mocker):
     mock_handler.data = mock_scans
     mocker.patch('mspy.parser_mzml.runHandler', return_value=mock_handler)
     
-    # Mock file and sax parser
-    mocker.patch('mspy.parser_mzml.file', mocker.mock_open())
+    # Mock open and sax parser
+    mocker.patch('mspy.parser_mzml.open', mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
     
@@ -476,8 +476,8 @@ def test_parseMZML_scan_not_found(mocker):
     mock_handler.data = False
     mocker.patch('mspy.parser_mzml.scanHandler', return_value=mock_handler)
     
-    # Mock file and sax parser
-    mocker.patch('mspy.parser_mzml.file', mocker.mock_open())
+    # Mock open and sax parser
+    mocker.patch('mspy.parser_mzml.open', mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
     
@@ -494,8 +494,8 @@ def test_parseMZML_scan_stopParsing(mocker):
     mock_handler.data = mock_data
     mocker.patch('mspy.parser_mzml.scanHandler', return_value=mock_handler)
     
-    # Mock file and sax parser to raise stopParsing
-    mocker.patch('mspy.parser_mzml.file', mocker.mock_open())
+    # Mock open and sax parser to raise stopParsing
+    mocker.patch('mspy.parser_mzml.open', mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = parser_mzml.stopParsing()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)

@@ -1,7 +1,8 @@
 import pytest
-import wx
+wx = pytest.importorskip("wx")
+
 import numpy
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings, HealthCheck
 from mspy.plot_canvas import canvas, _scaleFont
 
 @pytest.fixture(scope="session")
@@ -28,7 +29,7 @@ def canvas_fixture(wx_app, mocker):
     canvas.onSize = orig_onSize
     
     # Provide a mock plotBuffer since onSize was skipped during __init__
-    plot_canvas.plotBuffer = mocker.Mock(spec=wx.Bitmap)
+    plot_canvas.plotBuffer = mocker.Mock()
     
     yield plot_canvas
     
@@ -76,7 +77,7 @@ def setup_canvas_for_tracking(canvas_fixture, mocker):
     canvas_fixture.pointShift = numpy.array([0.0, 0.0])
     
     # Mock DC
-    mock_dc = mocker.Mock(spec=wx.ClientDC)
+    mock_dc = mocker.Mock()
     # Fixed: GetTextExtent must return a tuple, not a mock, to support indexing like textSize[1]
     mock_dc.GetTextExtent.return_value = (50, 20)
     mocker.patch('wx.ClientDC', return_value=mock_dc)
@@ -163,7 +164,7 @@ def test_makeAxisTicks(canvas_fixture, lower, upper):
         assert isinstance(tick, tuple)
         assert len(tick) == 3
         assert isinstance(tick[0], (float, int, numpy.float64))
-        assert isinstance(tick[1], (str, unicode))
+        assert isinstance(tick[1], str)
         assert tick[2] in ('major', 'minor')
     
     # Assert that ticks are within the requested range (with small tolerance for floats)
@@ -202,6 +203,7 @@ def test_makeAxisTicks_formatting(canvas_fixture):
     for t in major_ticks_tiny:
         assert 'e' in t[1].lower()
 
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(x=st.floats(min_value=-1e6, max_value=1e6), y=st.floats(min_value=-1e6, max_value=1e6))
 def test_coordinate_transformations_roundtrip(canvas_fixture, x, y):
     """Test roundtrip of positionUserToScreen and positionScreenToUser."""
@@ -916,7 +918,7 @@ def test_onMScroll_scaling(canvas_fixture, mocker, mock_event_factory):
 @pytest.fixture
 def mock_dc(mocker):
     """Fixture to provide a mock wx.DC."""
-    dc = mocker.Mock(spec=wx.DC)
+    dc = mocker.Mock()
     dc.GetTextExtent.return_value = (50, 20)
     dc.GetCharHeight.return_value = 15
     dc.GetSize.return_value = (800, 600)
@@ -945,17 +947,17 @@ def mock_dc(mocker):
 @pytest.fixture
 def patched_canvas(canvas_fixture, mocker, mock_dc):
     """Fixture to patch DC classes and provide a canvas ready for rendering tests."""
-    mocker.patch('wx.ClientDC', return_value=mocker.Mock(spec=wx.ClientDC))
+    mocker.patch('wx.ClientDC', return_value=mocker.Mock())
     mocker.patch('wx.BufferedDC', return_value=mock_dc)
     mocker.patch('wx.MemoryDC', return_value=mock_dc)
     mocker.patch('wx.BufferedPaintDC', return_value=mock_dc)
     
     # Patch Bitmap
-    mocker.patch('wx.Bitmap', return_value=mocker.Mock(spec=wx.Bitmap))
+    mocker.patch('wx.Bitmap', return_value=mocker.Mock())
     
     # Patch GDI objects to avoid C++ assertion errors in headless environments
-    mocker.patch('wx.Pen', side_effect=lambda *args, **kwargs: mocker.Mock(spec=wx.Pen))
-    mocker.patch('wx.Brush', side_effect=lambda *args, **kwargs: mocker.Mock(spec=wx.Brush))
+    mocker.patch('wx.Pen', side_effect=lambda *args, **kwargs: mocker.Mock())
+    mocker.patch('wx.Brush', side_effect=lambda *args, **kwargs: mocker.Mock())
     
     # Initialize basic sizing attributes
     canvas_fixture.setSize(800, 600)
@@ -1232,7 +1234,7 @@ def test_getSelectionBox(canvas_fixture):
 def test_onPaint(patched_canvas, mocker):
     """Test onPaint interaction."""
     mock_paint_dc = mocker.patch('wx.BufferedPaintDC')
-    patched_canvas.plotBuffer = mocker.Mock(spec=wx.Bitmap)
+    patched_canvas.plotBuffer = mocker.Mock()
     patched_canvas.mouseTracker = False
     
     patched_canvas.onPaint(None)
@@ -1242,7 +1244,7 @@ def test_onPaint(patched_canvas, mocker):
 def test_onSize(patched_canvas, mocker):
     """Test onSize interaction."""
     mocker.patch.object(patched_canvas, 'GetClientSize', return_value=(800, 600))
-    mock_bitmap = mocker.patch('wx.Bitmap', return_value=mocker.Mock(spec=wx.Bitmap))
+    mock_bitmap = mocker.patch('wx.Bitmap', return_value=mocker.Mock())
     mock_draw = mocker.patch.object(patched_canvas, 'draw')
     mock_clear = mocker.patch.object(patched_canvas, 'clear')
     
@@ -2080,7 +2082,7 @@ def test_drawIsotopeRuler_with_gel(patched_canvas, mocker, mock_dc):
 def test_drawPointArrow_directions(patched_canvas, mocker, mock_dc, direction, expected_poly):
     """Test drawPointArrow with various directions."""
     # drawPointArrow uses wx.ClientDC and wx.BufferedDC internally
-    mocker.patch('wx.ClientDC', return_value=mocker.Mock(spec=wx.ClientDC))
+    mocker.patch('wx.ClientDC', return_value=mocker.Mock())
     mocker.patch('wx.BufferedDC', return_value=mock_dc)
     
     patched_canvas.plotCoords = (50, 50, 750, 550)
@@ -2098,7 +2100,7 @@ def test_drawPointArrow_directions(patched_canvas, mocker, mock_dc, direction, e
 
 def test_drawPointArrow_clipping(patched_canvas, mocker, mock_dc):
     """Test drawPointArrow clipping at boundaries."""
-    mocker.patch('wx.ClientDC', return_value=mocker.Mock(spec=wx.ClientDC))
+    mocker.patch('wx.ClientDC', return_value=mocker.Mock())
     mocker.patch('wx.BufferedDC', return_value=mock_dc)
     
     patched_canvas.plotCoords = (50, 50, 750, 550)

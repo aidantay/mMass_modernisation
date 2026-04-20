@@ -12,16 +12,16 @@ def test_init_success():
 def test_init_failure():
     """Test parseFASTA.__init__ with non-existent file."""
     path = 'non_existent_file.fasta'
-    with pytest.raises(IOError):
+    with pytest.raises(OSError):
         mspy.parser_fasta.parseFASTA(path)
 
 def test_sequences_io_error(mocker):
-    """Test parseFASTA.sequences() handling IOError on file open."""
+    """Test parseFASTA.sequences() handling OSError on file open."""
     path = 'tests/data/test_small.fasta'
     parser = mspy.parser_fasta.parseFASTA(path)
     
-    # In Python 2, file() is a built-in.
-    mocker.patch('__builtin__.file', side_effect=IOError)
+    # Use builtins.open for Python 3
+    mocker.patch('builtins.open', side_effect=OSError)
     
     assert parser.sequences() is False
 

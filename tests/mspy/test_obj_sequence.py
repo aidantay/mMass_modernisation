@@ -52,10 +52,10 @@ def test_getitem():
 def test_iter():
     s = sequence('AC')
     it = iter(s)
-    assert it.next() == 'A'
-    assert it.next() == 'C'
+    assert next(it) == 'A'
+    assert next(it) == 'C'
     with pytest.raises(StopIteration):
-        it.next()
+        next(it)
 
 # Step 3: State Management (reset, duplicate, count, cyclize)
 
@@ -247,7 +247,7 @@ def test_setslice():
 def test_setslice_errors():
     s = sequence('ACDEF')
     with pytest.raises(ValueError):
-        s.__setslice__(3, 1, sequence('A'))
+        s[3:1] = sequence('A')
     
     with pytest.raises(TypeError):
         s[1:2] = "ABC" # Not a sequence object

@@ -185,11 +185,9 @@ def test_derivvar_div_bug():
     assert res.value == 2.0
     assert res.deriv == [0.2, -0.4]
 
-    # dv / scalar
-    # This should raise NameError because 'value' is not defined in __div__ when other is NOT a _DerivVar
-    with pytest.raises(NameError) as excinfo:
-        _ = dv / 2.0
-    assert "global name 'value' is not defined" in str(excinfo.value)
+    # # dv / scalar
+    res = dv / 2.0
+    assert res == 5.0
 
 def test_derivvar_pow():
     """Test _DerivVar __pow__."""

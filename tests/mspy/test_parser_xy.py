@@ -1,8 +1,7 @@
 import pytest
 import os
 import tempfile
-import mock
-from hypothesis import given, strategies as st, settings
+from hypothesis import given, strategies as st, settings, HealthCheck
 from mspy.parser_xy import parseXY
 from mspy.obj_scan import scan
 from mspy.obj_peak import peak
@@ -21,7 +20,7 @@ def test_init_success(temp_xy_file):
     assert parser.path == temp_xy_file
 
 def test_init_failure():
-    with pytest.raises(IOError) as excinfo:
+    with pytest.raises(OSError) as excinfo:
         parseXY("non_existent_file.xy")
     assert "File not found!" in str(excinfo.value)
 
@@ -77,12 +76,11 @@ def test_parseData_single_value(temp_xy_file):
     parser = parseXY(temp_xy_file)
     assert parser._parseData() is False
 
-def test_parseData_ioerror(temp_xy_file):
-    # In Python 2, open() and file() are both used. parseXY uses file().
-    # We mock __builtin__.file
+def test_parseData_ioerror(temp_xy_file, mocker):
+    # In Python 3, we mock builtins.open
     parser = parseXY(temp_xy_file)
-    with mock.patch("__builtin__.file", side_effect=IOError):
-        assert parser._parseData() is False
+    mocker.patch("builtins.open", side_effect=OSError)
+    assert parser._parseData() is False
 
 def test_makeScan_continuous(temp_xy_file):
     parser = parseXY(temp_xy_file)
@@ -131,7 +129,7 @@ def test_integration(small_xy_path):
     numpy.testing.assert_array_equal(s.profile[0], [100.0, 1000.0])
 
 # Hypothesis test for _parseData robustness
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(
     mz=st.floats(allow_nan=False, allow_infinity=False, min_value=-1e10, max_value=1e10),
     intensity=st.floats(allow_nan=False, allow_infinity=False, min_value=-1e10, max_value=1e10),

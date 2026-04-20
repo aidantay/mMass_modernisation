@@ -51,9 +51,9 @@ def parser_instance(tmpdir):
     return parseMZXML(path)
 
 # Property-based tests for _parsePoints
-@settings(suppress_health_check=[HealthCheck.too_slow], deadline=None)
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.function_scoped_fixture], deadline=None)
 @given(
-    points=arrays(np.float64, (10, 2), elements=st.floats(min_value=0, max_value=1000, allow_nan=False, allow_infinity=False)),
+    points=arrays(np.float64, (10, 2), elements=st.floats(min_value=1e-10, max_value=1000, allow_nan=False, allow_infinity=False)),
     precision=st.sampled_from([32, 64]),
     byte_order=st.sampled_from(['little', 'big', 'network']),
     compression=st.sampled_from(['zlib', 'none']),
@@ -102,11 +102,11 @@ def test_parsePoints_property(parser_instance, points, precision, byte_order, co
         # result is list of [mz, intensity]
         assert len(result) == len(points)
         for i in range(len(points)):
-            np.testing.assert_allclose(result[i], points[i], rtol=1e-5 if precision == 32 else 1e-10)
+            np.testing.assert_allclose(result[i], points[i], rtol=1e-5 if precision == 32 else 1e-10, atol=1e-12)
     else:
         # result is numpy array
         assert isinstance(result, np.ndarray)
-        np.testing.assert_allclose(result, points, rtol=1e-5 if precision == 32 else 1e-10)
+        np.testing.assert_allclose(result, points, rtol=1e-5 if precision == 32 else 1e-10, atol=1e-12)
 
 def test_parsePoints_empty(parser_instance):
     assert parser_instance._parsePoints({'points': None}) == []

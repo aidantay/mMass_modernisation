@@ -169,12 +169,12 @@ class TestMascotSearch(object):
         # Mock HTTPConnection
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE
+        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.search('test query')
 
@@ -188,7 +188,7 @@ class TestMascotSearch(object):
         m = mspy.mod_mascot.mascot('testhost.com')
 
         # Mock HTTPConnection to raise exception
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', side_effect=Exception('Connection refused'))
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', side_effect=Exception('Connection refused'))
 
         result = m.search('test query')
 
@@ -203,12 +203,12 @@ class TestMascotSearch(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 500
-        mock_response.read.return_value = 'Server error'
+        mock_response.read.return_value = b'Server error'
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.search('test query')
 
@@ -220,12 +220,12 @@ class TestMascotSearch(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE_NO_MATCH
+        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE_NO_MATCH.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.search('test query')
 
@@ -243,12 +243,12 @@ class TestMascotSearch(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE
+        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         m.search('test query')
 
@@ -262,12 +262,12 @@ class TestMascotSearch(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE
+        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         query_data = 'BEGIN IONS\nTITLE=test\nEND IONS'
         m.search(query_data)
@@ -275,8 +275,8 @@ class TestMascotSearch(object):
         # Verify send was called with proper format
         mock_conn.send.assert_called_once()
         sent_body = mock_conn.send.call_args[0][0]
-        assert 'Content-Disposition: form-data; name="QUE"' in sent_body
-        assert query_data in sent_body
+        assert b'Content-Disposition: form-data; name="QUE"' in sent_body
+        assert query_data.encode('utf-8') in sent_body
 
     def test_search_http_method_and_path(self, mocker):
         """Test that search uses correct HTTP method and path."""
@@ -284,12 +284,12 @@ class TestMascotSearch(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE
+        mock_response.read.return_value = SAMPLE_SEARCH_RESPONSE.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         m.search('test')
 
@@ -379,17 +379,17 @@ class TestMascotFetchall(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT
+        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.fetchall(path='F001234567')
 
         assert result is True
-        assert m.resultsXML == SAMPLE_XML_SINGLE_HIT
+        assert m.resultsXML == SAMPLE_XML_SINGLE_HIT.encode('utf-8')
         assert len(m.hits) > 0
 
     def test_fetchall_with_self_results_path(self, mocker):
@@ -399,17 +399,17 @@ class TestMascotFetchall(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT
+        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.fetchall()
 
         assert result is True
-        assert m.resultsXML == SAMPLE_XML_SINGLE_HIT
+        assert m.resultsXML == SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
     def test_fetchall_clears_previous_results(self, mocker):
         """Test fetchall clears previous results."""
@@ -421,17 +421,17 @@ class TestMascotFetchall(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_XML_NO_HITS
+        mock_response.read.return_value = SAMPLE_XML_NO_HITS.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         m.fetchall(path='F001234567')
 
         # Should have new XML but empty hits
-        assert m.resultsXML == SAMPLE_XML_NO_HITS
+        assert m.resultsXML == SAMPLE_XML_NO_HITS.encode('utf-8')
         assert m.hits == {}
 
     def test_fetchall_network_exception(self, mocker):
@@ -439,7 +439,7 @@ class TestMascotFetchall(object):
         m = mspy.mod_mascot.mascot('testhost.com')
         m.resultsPath = 'F001234567'
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', side_effect=Exception('Connection failed'))
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', side_effect=Exception('Connection failed'))
 
         result = m.fetchall()
 
@@ -452,12 +452,12 @@ class TestMascotFetchall(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 404
-        mock_response.read.return_value = 'Not found'
+        mock_response.read.return_value = b'Not found'
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.fetchall()
 
@@ -470,12 +470,12 @@ class TestMascotFetchall(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT
+        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.fetchall()
 
@@ -490,12 +490,12 @@ class TestMascotFetchall(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT
+        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         m.fetchall()
 
@@ -783,7 +783,7 @@ class TestMascotSave(object):
         m.resultsXML = SAMPLE_XML_SINGLE_HIT
 
         # Mock file() to raise IOError
-        mocker.patch('__builtin__.open', side_effect=IOError('Permission denied'))
+        mocker.patch('builtins.open', side_effect=IOError('Permission denied'))
 
         result = m.save('/some/path/file.xml')
 
@@ -795,7 +795,7 @@ class TestMascotSave(object):
         m.resultsXML = SAMPLE_XML_SINGLE_HIT
 
         # Mock the file builtin (which save() uses)
-        mocker.patch('__builtin__.open', side_effect=IOError('Disk full'))
+        mocker.patch('builtins.open', side_effect=IOError('Disk full'))
 
         result = m.save('/nonexistent/path/file.xml')
 
@@ -813,12 +813,12 @@ class TestMascotParameters(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_PARAMETERS
+        mock_response.read.return_value = SAMPLE_PARAMETERS.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.parameters()
 
@@ -833,7 +833,7 @@ class TestMascotParameters(object):
         """Test parameters returns False on network exception."""
         m = mspy.mod_mascot.mascot('testhost.com')
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', side_effect=Exception('Connection error'))
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', side_effect=Exception('Connection error'))
 
         result = m.parameters()
 
@@ -846,12 +846,12 @@ class TestMascotParameters(object):
         # Empty response - should still have defaults
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = ''
+        mock_response.read.return_value = b''
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.parameters()
 
@@ -870,12 +870,12 @@ class TestMascotParameters(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_PARAMETERS_WITH_EMPTY_LINES
+        mock_response.read.return_value = SAMPLE_PARAMETERS_WITH_EMPTY_LINES.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.parameters()
 
@@ -890,12 +890,12 @@ class TestMascotParameters(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_PARAMETERS
+        mock_response.read.return_value = SAMPLE_PARAMETERS.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.parameters()
 
@@ -921,12 +921,12 @@ Entry3'''
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = param_text
+        mock_response.read.return_value = param_text.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         result = m.parameters()
 
@@ -941,12 +941,12 @@ Entry3'''
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_PARAMETERS
+        mock_response.read.return_value = SAMPLE_PARAMETERS.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         m.parameters()
 
@@ -960,12 +960,12 @@ Entry3'''
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_PARAMETERS
+        mock_response.read.return_value = SAMPLE_PARAMETERS.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         m.parameters()
 
@@ -987,17 +987,17 @@ class TestMascotIntegration(object):
         # Mock search response
         search_response = mocker.MagicMock()
         search_response.status = 200
-        search_response.read.return_value = SAMPLE_SEARCH_RESPONSE
+        search_response.read.return_value = SAMPLE_SEARCH_RESPONSE.encode('utf-8')
 
         # Mock fetchall response
         fetchall_response = mocker.MagicMock()
         fetchall_response.status = 200
-        fetchall_response.read.return_value = SAMPLE_XML_SINGLE_HIT
+        fetchall_response.read.return_value = SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.side_effect = [search_response, fetchall_response]
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         # Perform search
         search_result = m.search('test query')
@@ -1017,12 +1017,12 @@ class TestMascotIntegration(object):
 
         mock_response = mocker.MagicMock()
         mock_response.status = 200
-        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT
+        mock_response.read.return_value = SAMPLE_XML_SINGLE_HIT.encode('utf-8')
 
         mock_conn = mocker.MagicMock()
         mock_conn.getresponse.return_value = mock_response
 
-        mocker.patch('mspy.mod_mascot.httplib.HTTPConnection', return_value=mock_conn)
+        mocker.patch('mspy.mod_mascot.http.client.HTTPConnection', return_value=mock_conn)
 
         # Fetch results
         fetchall_result = m.fetchall()
