@@ -14,19 +14,19 @@ def test_init_valid_file():
     assert parser._scanlist is None
 
 def test_init_invalid_file():
-    """Verify IOError when the instantiated path does not exist."""
+    """Verify OSError when the instantiated path does not exist."""
     path = 'non_existent_file.mgf'
-    with pytest.raises(IOError) as excinfo:
+    with pytest.raises(OSError) as excinfo:
         parseMGF(path)
     assert 'File not found!' in str(excinfo.value)
 
 def test_parseData_ioerror(mocker):
-    """Verify that _parseData() returns False on IOError during file read."""
+    """Verify that _parseData() returns False on OSError during file read."""
     path = os.path.join(os.path.dirname(__file__), '../data/test_tiny.mgf')
     parser = parseMGF(path)
     
-    # Mocking 'file' built-in to raise IOError as per implementation plan
-    mocker.patch('__builtin__.file', side_effect=IOError("Mocked IO Error"))
+    # Mocking 'builtins.open' to raise OSError
+    mocker.patch('builtins.open', side_effect=OSError("Mocked IO Error"))
     
     result = parser._parseData()
     assert result is False
@@ -73,7 +73,7 @@ def test_parseData_comments(mocker):
     )
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     parser._parseData()
@@ -103,7 +103,7 @@ def test_parseData_headers(mocker):
     )
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     parser._parseData()
@@ -137,7 +137,7 @@ def test_parseData_points(mocker):
     )
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     parser._parseData()
@@ -161,7 +161,7 @@ def test_parseData_multiple_scans(mocker):
     )
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     parser._parseData()
@@ -255,7 +255,7 @@ def test_scan_other_id(mocker):
     )
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     scan1 = parser.scan(scanID=1)
@@ -267,7 +267,7 @@ def test_parseData_empty_file(mocker):
     mock_content = "# Only comments\n\n"
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     parser._parseData()
@@ -284,7 +284,7 @@ def test_parseData_unknown_header(mocker):
     )
     path = "mock.mgf"
     mocker.patch('os.path.exists', return_value=True)
-    mocker.patch('__builtin__.file', mocker.mock_open(read_data=mock_content))
+    mocker.patch('builtins.open', mocker.mock_open(read_data=mock_content))
     
     parser = parseMGF(path)
     parser._parseData()

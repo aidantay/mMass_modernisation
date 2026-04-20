@@ -15,10 +15,10 @@ def signal_interpolate_x(x1: float, y1: float, x2: float, y2: float, y: float) -
         return float(x1)
     dy = y2 - y1
     if dy == 0:
-        return float('inf')
+        return float("inf")
     a = dy / (x2 - x1)
     if a == 0:
-        return float('inf')
+        return float("inf")
     b = y1 - a * x1
     return float((y - b) / a)
 
@@ -29,7 +29,7 @@ def signal_interpolate_y(x1: float, y1: float, x2: float, y2: float, x: float) -
         return float(y1)
     dx = x2 - x1
     if dx == 0:
-        return float('nan')
+        return float("nan")
     a = (y2 - y1) / dx
     b = y1 - a * x1
     return float(a * x + b)
@@ -39,7 +39,7 @@ def signal_locate_x(p_signal: np.ndarray, x: float) -> int:
     """Find the array index for insertion such that elements to the left are <= x."""
     if p_signal.size == 0:
         return 0
-    return int(np.searchsorted(p_signal[:, 0], x, side='right'))
+    return int(np.searchsorted(p_signal[:, 0], x, side="right"))
 
 
 def signal_locate_max_y(p_signal: np.ndarray) -> int:
@@ -82,10 +82,7 @@ def signal_centroid(p_signal: np.ndarray, x: float, height: float) -> float:
 
     y_left = p_signal[:idx, 1]
     below_height_left = np.nonzero(y_left <= height)[0]
-    if below_height_left.size > 0:
-        ileft = below_height_left[-1]
-    else:
-        ileft = 0
+    ileft = below_height_left[-1] if below_height_left.size > 0 else 0
 
     y_right = p_signal[idx:, 1]
     below_height_right = np.nonzero(y_right <= height)[0]
@@ -98,14 +95,18 @@ def signal_centroid(p_signal: np.ndarray, x: float, height: float) -> float:
         return float(p_signal[ileft, 0])
 
     xleft = signal_interpolate_x(
-        float(p_signal[ileft, 0]), float(p_signal[ileft, 1]),
-        float(p_signal[ileft + 1, 0]), float(p_signal[ileft + 1, 1]),
-        height
+        float(p_signal[ileft, 0]),
+        float(p_signal[ileft, 1]),
+        float(p_signal[ileft + 1, 0]),
+        float(p_signal[ileft + 1, 1]),
+        height,
     )
     xright = signal_interpolate_x(
-        float(p_signal[iright - 1, 0]), float(p_signal[iright - 1, 1]),
-        float(p_signal[iright, 0]), float(p_signal[iright, 1]),
-        height
+        float(p_signal[iright - 1, 0]),
+        float(p_signal[iright - 1, 1]),
+        float(p_signal[iright, 0]),
+        float(p_signal[iright, 1]),
+        height,
     )
 
     return (xleft + xright) / 2.0
@@ -119,10 +120,7 @@ def signal_width(p_signal: np.ndarray, x: float, height: float) -> float:
 
     y_left = p_signal[:idx, 1]
     below_height_left = np.nonzero(y_left <= height)[0]
-    if below_height_left.size > 0:
-        ileft = below_height_left[-1]
-    else:
-        ileft = 0
+    ileft = below_height_left[-1] if below_height_left.size > 0 else 0
 
     y_right = p_signal[idx:, 1]
     below_height_right = np.nonzero(y_right <= height)[0]
@@ -135,14 +133,18 @@ def signal_width(p_signal: np.ndarray, x: float, height: float) -> float:
         return 0.0
 
     xleft = signal_interpolate_x(
-        float(p_signal[ileft, 0]), float(p_signal[ileft, 1]),
-        float(p_signal[ileft + 1, 0]), float(p_signal[ileft + 1, 1]),
-        height
+        float(p_signal[ileft, 0]),
+        float(p_signal[ileft, 1]),
+        float(p_signal[ileft + 1, 0]),
+        float(p_signal[ileft + 1, 1]),
+        height,
     )
     xright = signal_interpolate_x(
-        float(p_signal[iright - 1, 0]), float(p_signal[iright - 1, 1]),
-        float(p_signal[iright, 0]), float(p_signal[iright, 1]),
-        height
+        float(p_signal[iright - 1, 0]),
+        float(p_signal[iright - 1, 1]),
+        float(p_signal[iright, 0]),
+        float(p_signal[iright, 1]),
+        height,
     )
 
     return abs(xright - xleft)
@@ -200,9 +202,11 @@ def signal_crop(p_signal: np.ndarray, minX: float, maxX: float) -> np.ndarray:
     # Left boundary
     if 0 < idx1 < n_points:
         y = signal_interpolate_y(
-            float(p_signal[idx1-1, 0]), float(p_signal[idx1-1, 1]),
-            float(p_signal[idx1, 0]), float(p_signal[idx1, 1]),
-            minX
+            float(p_signal[idx1 - 1, 0]),
+            float(p_signal[idx1 - 1, 1]),
+            float(p_signal[idx1, 0]),
+            float(p_signal[idx1, 1]),
+            minX,
         )
         result.append([minX, y])
     elif idx1 == n_points and p_signal[-1, 0] == minX:
@@ -213,11 +217,13 @@ def signal_crop(p_signal: np.ndarray, minX: float, maxX: float) -> np.ndarray:
         result.extend(p_signal[idx1:idx2])
 
     # Right boundary
-    if 0 < idx2 < n_points and p_signal[idx2-1, 0] != maxX:
+    if 0 < idx2 < n_points and p_signal[idx2 - 1, 0] != maxX:
         y = signal_interpolate_y(
-            float(p_signal[idx2-1, 0]), float(p_signal[idx2-1, 1]),
-            float(p_signal[idx2, 0]), float(p_signal[idx2, 1]),
-            maxX
+            float(p_signal[idx2 - 1, 0]),
+            float(p_signal[idx2 - 1, 1]),
+            float(p_signal[idx2, 0]),
+            float(p_signal[idx2, 1]),
+            maxX,
         )
         result.append([maxX, y])
 
@@ -275,7 +281,7 @@ def signal_smooth_ma(p_signal: np.ndarray, window: int, cycles: int) -> np.ndarr
     weights = np.ones(ksize) / float(ksize)
 
     for _ in range(cycles):
-        y_vals = scipy.ndimage.convolve1d(y_vals, weights, mode='reflect')
+        y_vals = scipy.ndimage.convolve1d(y_vals, weights, mode="reflect")
 
     result[:, 1] = y_vals
     return result
@@ -303,7 +309,7 @@ def signal_smooth_ga(p_signal: np.ndarray, window: int, cycles: int) -> np.ndarr
     weights /= np.sum(weights)
 
     for _ in range(cycles):
-        y_vals = scipy.ndimage.convolve1d(y_vals, weights, mode='reflect')
+        y_vals = scipy.ndimage.convolve1d(y_vals, weights, mode="reflect")
 
     result[:, 1] = y_vals
     return result
@@ -410,7 +416,9 @@ def signal_subbase(p_signal: np.ndarray, p_baseline: np.ndarray) -> np.ndarray:
     return result
 
 
-def signal_rescale(p_signal: np.ndarray, scaleX: float, scaleY: float, shiftX: float, shiftY: float) -> np.ndarray:
+def signal_rescale(
+    p_signal: np.ndarray, scaleX: float, scaleY: float, shiftX: float, shiftY: float
+) -> np.ndarray:
     """Applies a linear scaling and translation transformation to an MS signal and rounds the results to integer boundaries."""
     if p_signal.size == 0:
         return np.empty((0, 2), dtype=np.double)
@@ -484,47 +492,53 @@ def signal_filter(p_signal: np.ndarray, resol: float) -> np.ndarray:
     return np.ascontiguousarray(p_buff[:count], dtype=np.double)
 
 
-def signal_gaussian(x: float, minY: float, maxY: float, fwhm: float, points: int) -> np.ndarray:
+def signal_gaussian(
+    x: float, minY: float, maxY: float, fwhm: float, points: int
+) -> np.ndarray:
     """Models a Gaussian peak over points."""
     minX = x - 5.0 * fwhm
     maxX = x + 5.0 * fwhm
     current_x = np.linspace(minX, maxX, points, endpoint=False, dtype=np.double)
-    
+
     amplitude = maxY - minY
     f = (fwhm / 1.66) ** 2
     y = minY + amplitude * np.exp(-((current_x - x) ** 2) / f)
-    
+
     return np.column_stack((current_x, y)).astype(np.double)
 
 
-def signal_lorentzian(x: float, minY: float, maxY: float, fwhm: float, points: int) -> np.ndarray:
+def signal_lorentzian(
+    x: float, minY: float, maxY: float, fwhm: float, points: int
+) -> np.ndarray:
     """Models a Lorentzian peak over points."""
     minX = x - 10.0 * fwhm
     maxX = x + 10.0 * fwhm
     current_x = np.linspace(minX, maxX, points, endpoint=False, dtype=np.double)
-    
+
     amplitude = maxY - minY
     f = (fwhm / 2.0) ** 2
     y = minY + amplitude / (1.0 + ((current_x - x) ** 2) / f)
-    
+
     return np.column_stack((current_x, y)).astype(np.double)
 
 
-def signal_gausslorentzian(x: float, minY: float, maxY: float, fwhm: float, points: int) -> np.ndarray:
+def signal_gausslorentzian(
+    x: float, minY: float, maxY: float, fwhm: float, points: int
+) -> np.ndarray:
     """Models a hybrid peak (Gaussian on the left, Lorentzian on the right)."""
     minX = x - 5.0 * fwhm
     maxX = x + 10.0 * fwhm
     current_x = np.linspace(minX, maxX, points, endpoint=False, dtype=np.double)
-    
+
     amplitude = maxY - minY
     f_gauss = (fwhm / 1.66) ** 2
     f_lorentz = (fwhm / 2.0) ** 2
-    
+
     y_gauss = minY + amplitude * np.exp(-((current_x - x) ** 2) / f_gauss)
     y_lorentz = minY + amplitude / (1.0 + ((current_x - x) ** 2) / f_lorentz)
-    
+
     y = np.where(current_x < x, y_gauss, y_lorentz)
-    
+
     return np.column_stack((current_x, y)).astype(np.double)
 
 
@@ -532,23 +546,23 @@ def signal_profile_raster(p_peaks: np.ndarray, points: int) -> np.ndarray:
     """Dynamically generates a geometric sequence of x-values optimized for a set of peaks."""
     if p_peaks.size == 0:
         return np.empty(0, dtype=np.double)
-    
+
     minX = np.min(p_peaks[:, 0])
     maxX = np.max(p_peaks[:, 0])
     minFwhm = np.min(p_peaks[:, 2])
     maxFwhm = np.max(p_peaks[:, 2])
-    
+
     minX -= 5.0 * maxFwhm
     maxX += 5.0 * maxFwhm
-    
+
     # Gradient calculation matching C-extension logic
     range_x = maxX - minX
     if range_x == 0:
         return np.array([minX], dtype=np.double)
-        
+
     a = (maxFwhm / points - minFwhm / points) / range_x
     b = minFwhm / points - a * minX
-    
+
     # Recurrence: x_next = (1+a)*x + b
     # Formula: x_n = (minX + b/a)*(1+a)**n - b/a
     if abs(a) < 1e-12:
@@ -560,65 +574,80 @@ def signal_profile_raster(p_peaks: np.ndarray, points: int) -> np.ndarray:
         offset = b / a
         start_val = minX + offset
         end_val = maxX + offset
-        
+
         # (1+a)**n = end_val / start_val
         n = int(np.ceil(np.log(end_val / start_val) / np.log(1.0 + a)))
         return start_val * (1.0 + a) ** np.arange(n) - offset
 
 
-def signal_profile_to_raster(p_peaks: np.ndarray, p_raster: np.ndarray, noise: float, shape: int) -> np.ndarray:
+def signal_profile_to_raster(
+    p_peaks: np.ndarray, p_raster: np.ndarray, noise: float, shape: int
+) -> np.ndarray:
     """Maps modeled peak shapes onto an established raster grid and optionally adds noise."""
     if p_peaks.size == 0 or p_raster.size == 0:
         return np.empty((0, 2), dtype=np.double)
-    
+
     intensities = np.zeros(p_raster.size, dtype=np.double)
     # Helper for signal_locate_x (expects (N, 2) array)
     dummy_signal = np.column_stack((p_raster, intensities))
-    
+
     for i in range(p_peaks.shape[0]):
         mz, intens, fwhm = p_peaks[i]
-        
-        if shape == 0: # Gaussian
+
+        if shape == 0:  # Gaussian
             minX, maxX = mz - 5.0 * fwhm, mz + 5.0 * fwhm
             f = (fwhm / 1.66) ** 2
             idx1 = signal_locate_x(dummy_signal, minX)
             idx2 = signal_locate_x(dummy_signal, maxX)
             x_slice = p_raster[idx1:idx2]
             intensities[idx1:idx2] += intens * np.exp(-((x_slice - mz) ** 2) / f)
-            
-        elif shape == 1: # Lorentzian
+
+        elif shape == 1:  # Lorentzian
             minX, maxX = mz - 10.0 * fwhm, mz + 10.0 * fwhm
             f = (fwhm / 2.0) ** 2
             idx1 = signal_locate_x(dummy_signal, minX)
             idx2 = signal_locate_x(dummy_signal, maxX)
             x_slice = p_raster[idx1:idx2]
             intensities[idx1:idx2] += intens / (1.0 + ((x_slice - mz) ** 2) / f)
-            
-        elif shape == 2: # Gauss-Lorentzian
+
+        elif shape == 2:  # Gauss-Lorentzian
             minX, maxX = mz - 5.0 * fwhm, mz + 10.0 * fwhm
             idx1 = signal_locate_x(dummy_signal, minX)
             idx2 = signal_locate_x(dummy_signal, maxX)
             x_slice = p_raster[idx1:idx2]
-            
+
             f_gauss = (fwhm / 1.66) ** 2
             f_lorentz = (fwhm / 2.0) ** 2
             y_gauss = intens * np.exp(-((x_slice - mz) ** 2) / f_gauss)
             y_lorentz = intens / (1.0 + ((x_slice - mz) ** 2) / f_lorentz)
             intensities[idx1:idx2] += np.where(x_slice < mz, y_gauss, y_lorentz)
-            
+
     if noise != 0:
-        intensities += np.random.uniform(-noise/2.0, noise/2.0, size=intensities.size)
-        
+        intensities += np.random.uniform(
+            -noise / 2.0, noise / 2.0, size=intensities.size
+        )
+
     return np.column_stack((p_raster, intensities)).astype(np.double)
 
 
-def signal_profile(p_peaks: np.ndarray, points: int, noise: float, shape: int) -> np.ndarray:
+def signal_profile(
+    p_peaks: np.ndarray, points: int, noise: float, shape: int
+) -> np.ndarray:
     """Orchestrates the rasterization and profile modeling functions."""
     p_raster = signal_profile_raster(p_peaks, points)
     return signal_profile_to_raster(p_peaks, p_raster, noise, shape)
 
 
-def _formula_generator(current_comp: list[int], maximum: tuple[int, ...], masses: tuple[float, ...], lo_mass: float, hi_mass: float, limit: int, pos: int, results: list[list[int]]) -> None:
+def _formula_generator(
+    current_comp: list[int],
+    maximum: tuple[int, ...],
+    masses: tuple[float, ...],
+    lo_mass: float,
+    hi_mass: float,
+    limit: int,
+    pos: int,
+    results: list[list[int]],
+) -> None:
     """
     Recursive helper to generate chemical compositions within a mass range.
     Matches logic in calculations.c.
@@ -644,7 +673,9 @@ def _formula_generator(current_comp: list[int], maximum: tuple[int, ...], masses
             break
 
         # Do next recursion
-        _formula_generator(current_comp, maximum, masses, lo_mass, hi_mass, limit, pos + 1, results)
+        _formula_generator(
+            current_comp, maximum, masses, lo_mass, hi_mass, limit, pos + 1, results
+        )
 
         # Increment current position and mass
         current_comp[pos] += 1
@@ -654,12 +685,28 @@ def _formula_generator(current_comp: list[int], maximum: tuple[int, ...], masses
     current_comp[pos] = original_val
 
 
-def formula_composition(minimum: tuple[int, ...], maximum: tuple[int, ...], masses: tuple[float, ...], lo_mass: float, hi_mass: float, limit: int) -> list[list[int]]:
+def formula_composition(
+    minimum: tuple[int, ...],
+    maximum: tuple[int, ...],
+    masses: tuple[float, ...],
+    lo_mass: float,
+    hi_mass: float,
+    limit: int,
+) -> list[list[int]]:
     """
     Generate chemical compositions within a given mass range.
     Matches logic in calculations.c.
     """
     results: list[list[int]] = []
     current_comp = list(minimum)
-    _formula_generator(current_comp, maximum, masses, float(lo_mass), float(hi_mass), int(limit), 0, results)
+    _formula_generator(
+        current_comp,
+        maximum,
+        masses,
+        float(lo_mass),
+        float(hi_mass),
+        int(limit),
+        0,
+        results,
+    )
     return results

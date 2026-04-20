@@ -16,402 +16,410 @@
 # -------------------------------------------------------------------------
 
 # load stopper
-from mod_stopper import CHECK_FORCE_QUIT
 
 # load objects
-import blocks
-
 # load modules
-import mod_basics
-import mod_pattern
-
 
 # COMPOUND OBJECT DEFINITION
 # --------------------------
 
+
 class compound:
     """Compound object definition."""
-    
+
     def __init__(self, expression, **attr):
-        
         # check formula
         self._checkFormula(expression)
         self.expression = expression
-        
+
         # buffers
         self._composition = None
         self._formula = None
         self._mass = None
         self._nominalmass = None
-        
+
         # get additional attributes
         self.attributes = {}
-        for name, value in attr.items():
+        for name, value in list(attr.items()):
             self.attributes[name] = value
+
     # ----
-    
-    
+
     def __iadd__(self, other):
         """Append formula."""
-        
+
         # check and append value
         if isinstance(other, compound):
             self.expression += other.expression
         else:
             self._checkFormula(other)
             self.expression += other
-        
+
         # clear buffers
         self.reset()
-        
+
         return self
+
     # ----
-    
-    
+
     def reset(self):
         """Clear formula buffers."""
-        
+
         self._composition = None
         self._formula = None
         self._mass = None
         self._nominalmass = None
+
     # ----
-    
-    
-    
+
     # GETTERS
-    
+
     def count(self, item, groupIsotopes=False):
         """Count atom in formula."""
-        
+
         # get composition
         comp = self.composition()
-        
+
         # get atoms to count
         atoms = [item]
+        from . import blocks
         if groupIsotopes and item in blocks.elements:
             for massNo in blocks.elements[item].isotopes:
-                atom = '%s{%d}' % (item,massNo)
+                atom = "%s{%d}" % (item, massNo)
                 atoms.append(atom)
-        
+
         # count atom
         atomsCount = 0
         for atom in atoms:
             if atom in comp:
                 atomsCount += comp[atom]
-        
+
         return atomsCount
+
     # ----
-    
-    
+
     def formula(self):
         """Get formula."""
-        
+
         # check formula buffer
-        if self._formula != None:
+        if self._formula is not None:
             return self._formula
-        
-        self._formula = ''
-        
+
+        self._formula = ""
+
         # get composition
         comp = self.composition()
         elements = sorted(comp.keys())
-        
+
         # add C and H first
-        for el in ('C', 'C{12}', 'C{13}', 'C{14}', 'H', 'H{1}', 'H{2}', 'H{3}'):
+        for el in ("C", "C{12}", "C{13}", "C{14}", "H", "H{1}", "H{2}", "H{3}"):
             if el in elements:
                 if comp[el] == 1:
                     self._formula += el
                 else:
-                    self._formula += '%s%d' % (el, comp[el])
+                    self._formula += "%s%d" % (el, comp[el])
                 del elements[elements.index(el)]
-        
+
         # add remaining atoms
         for el in elements:
             if comp[el] == 1:
                 self._formula += el
             else:
-                self._formula += '%s%d' % (el, comp[el])
-        
+                self._formula += "%s%d" % (el, comp[el])
+
         return self._formula
+
     # ----
-    
-    
+
     def composition(self):
         """Get elemental composition."""
-        
+
         # check composition buffer
-        if self._composition != None:
+        if self._composition is not None:
             return self._composition
-        
+
         # unfold brackets
         unfoldedFormula = self._unfoldBrackets(self.expression)
-        
+
         # group elements
         self._composition = {}
-        for symbol, isotop, count in mod_basics.ELEMENT_PATTERN.findall(unfoldedFormula):
-            
+        from . import mod_basics
+        for symbol, isotop, count in mod_basics.ELEMENT_PATTERN.findall(
+            unfoldedFormula
+        ):
             # make atom
-            if isotop:
-                atom = '%s{%s}' % (symbol, isotop)
-            else:
-                atom = symbol
-            
+            atom = f"{symbol}{{{isotop}}}" if isotop else symbol
+
             # convert counting
-            if count:
-                count = int(count)
-            else:
-                count = 1
-            
+            count = int(count) if count else 1
+
             # add atom
             if atom in self._composition:
                 self._composition[atom] += count
             else:
                 self._composition[atom] = count
-        
+
         # remove zeros
-        for atom in self._composition.keys():
+        for atom in list(self._composition.keys()):
             if self._composition[atom] == 0:
                 del self._composition[atom]
-        
+
         return self._composition
+
     # ----
-    
-    
+
     def mass(self, massType=None):
         """Get mass."""
-        
+
         # get mass
-        if self._mass == None:
+        if self._mass is None:
             massMo = 0
             massAv = 0
-            
+
             # get composition
             comp = self.composition()
-            
+
             # get mass for each atom
+            from . import mod_basics, blocks
             for atom in comp:
                 count = comp[atom]
-                
+
                 # check specified isotope and mass
                 match = mod_basics.ELEMENT_PATTERN.match(atom)
-                symbol, massNumber, tmp = match.groups()
+                symbol, massNumber, _tmp = match.groups()
                 if massNumber:
                     isotope = blocks.elements[symbol].isotopes[int(massNumber)]
                     atomMass = (isotope[0], isotope[0])
                 else:
                     atomMass = blocks.elements[symbol].mass
-                
+
                 # multiply atom mass
-                massMo += atomMass[0]*count
-                massAv += atomMass[1]*count
-            
+                massMo += atomMass[0] * count
+                massAv += atomMass[1] * count
+
             # store mass in buffer
             self._mass = (massMo, massAv)
-        
+
         # return mass
         if massType == 0:
             return self._mass[0]
-        elif massType ==  1:
+        elif massType == 1:
             return self._mass[1]
         else:
             return self._mass
+
     # ----
-    
-    
+
     def nominalmass(self):
         """Get nominal mass."""
-        
+
         # get mass
-        if self._nominalmass == None:
-            
+        if self._nominalmass is None:
             nominalmass = 0
-            
+
             # get composition
             comp = self.composition()
-            
+
             # get mass for each atom
+            from . import mod_basics, blocks
             for atom in comp:
                 count = comp[atom]
-                
+
                 # check specified isotope and mass
                 match = mod_basics.ELEMENT_PATTERN.match(atom)
-                symbol, massNumber, tmp = match.groups()
+                symbol, massNumber, _tmp = match.groups()
                 if massNumber:
                     isotope = blocks.elements[symbol].isotopes[int(massNumber)]
                     atomMass = isotope[0]
                 else:
                     atomMass = blocks.elements[symbol].mass[0]
-                
+
                 # multiply atom mass
-                nominalmass += round(atomMass)*count
-            
+                nominalmass += round(atomMass) * count
+
             # store mass in buffer
             self._nominalmass = nominalmass
-        
+
         return self._nominalmass
+
     # ----
-    
-    
-    def mz(self, charge, agentFormula='H', agentCharge=1):
+
+    def mz(self, charge, agentFormula="H", agentCharge=1):
         """Get ion m/z."""
-        
-        return mod_basics.mz(self.mass(),
-            charge = charge,
-            agentFormula = agentFormula,
-            agentCharge = agentCharge
+
+        from . import mod_basics
+        return mod_basics.mz(
+            self.mass(),
+            charge=charge,
+            agentFormula=agentFormula,
+            agentCharge=agentCharge,
         )
+
     # ----
-    
-    
-    def pattern(self, fwhm=0.1, threshold=0.01, charge=0, agentFormula='H', agentCharge=1, real=True):
+
+    def pattern(
+        self,
+        fwhm=0.1,
+        threshold=0.01,
+        charge=0,
+        agentFormula="H",
+        agentCharge=1,
+        real=True,
+    ):
         """Get isotopic pattern."""
-        
+
+        from . import mod_pattern
         return mod_pattern.pattern(
-            compound = self,
-            fwhm = fwhm,
-            threshold = threshold,
-            charge = charge,
-            agentFormula = agentFormula,
-            agentCharge = agentCharge,
-            real = real
+            compound=self,
+            fwhm=fwhm,
+            threshold=threshold,
+            charge=charge,
+            agentFormula=agentFormula,
+            agentCharge=agentCharge,
+            real=real,
         )
+
     # ----
-    
-    
+
     def rdbe(self):
         """Get RDBE (Range or Double Bonds Equivalents)."""
-        
+
+        from . import mod_basics
         return mod_basics.rdbe(self)
+
     # ----
-    
-    
-    def isvalid(self, charge=0, agentFormula='H', agentCharge=1):
+
+    def isvalid(self, charge=0, agentFormula="H", agentCharge=1):
         """Check ion composition."""
-        
+
         # check agent formula
-        if agentFormula != 'e' and not isinstance(agentFormula, compound):
+        if agentFormula != "e" and not isinstance(agentFormula, compound):
             agentFormula = compound(agentFormula)
-        
+
         # make ion compound
-        if charge and agentFormula != 'e':
+        if charge and agentFormula != "e":
             ionFormula = self.expression
-            for atom, count in agentFormula.composition().items():
-                ionFormula += '%s%d' % (atom, count*(charge/agentCharge))
+            for atom, count in list(agentFormula.composition().items()):
+                ionFormula += "%s%d" % (atom, count * (charge / agentCharge))
             ion = compound(ionFormula)
         else:
             ion = compound(self.expression)
-        
+
         # get composition
-        for atom, count in ion.composition().items():
-            if count < 0:
-                return False
-        
-        return True
+        return all(count >= 0 for atom, count in list(ion.composition().items()))
+
     # ----
-    
-    
-    def frules(self, rules=['HC','NOPSC','NOPS','RDBE'], HC=(0.1, 3.0), NOPSC=(4,3,2,3), RDBE=(-1,40)):
+
+    def frules(
+        self,
+        rules=None,
+        HC=(0.1, 3.0),
+        NOPSC=(4, 3, 2, 3),
+        RDBE=(-1, 40),
+    ):
         """Check formula rules."""
-        
+
+        if rules is None:
+            rules = ["HC", "NOPSC", "NOPS", "RDBE"]
+        from . import mod_basics
         return mod_basics.frules(
-            compound = self,
-            rules = rules,
-            HC = HC,
-            NOPSC = NOPSC,
-            RDBE = RDBE
+            compound=self, rules=rules, HC=HC, NOPSC=NOPSC, RDBE=RDBE
         )
+
     # ----
-    
-    
-    
+
     # MODIFIERS
-    
+
     def negate(self):
         """Make all atom counts negative."""
-        
+
         # get composition
         comp = self.composition()
-        
+
         # negate composition
-        formula = ''
+        formula = ""
         for el in sorted(comp.keys()):
-            formula += '%s%d' % (el, -1*comp[el])
+            formula += "%s%d" % (el, -1 * comp[el])
         self.expression = formula
-        
+
         # clear buffers
         self.reset()
+
     # ----
-    
-    
-    
+
     # HELPERS
-    
+
     def _checkFormula(self, formula):
         """Check given formula."""
-        
+
         # check formula
+        from . import mod_basics, blocks
         if not mod_basics.FORMULA_PATTERN.match(formula):
-            raise ValueError, 'Wrong formula! --> ' + formula
-        
+            raise ValueError("Wrong formula! --> " + formula)
+
         # check elements and isotopes
         for atom in mod_basics.ELEMENT_PATTERN.findall(formula):
-            if not atom[0] in blocks.elements:
-                raise ValueError, 'Unknown element in formula! --> ' + atom[0] + ' in ' + formula
-            elif atom[1] and not int(atom[1]) in blocks.elements[atom[0]].isotopes:
-                raise ValueError, 'Unknown isotope in formula! --> ' + atom[0] + atom[1] + ' in ' + formula
-        
+            if atom[0] not in blocks.elements:
+                raise ValueError(
+                    "Unknown element in formula! --> " + atom[0] + " in " + formula
+                )
+            elif atom[1] and int(atom[1]) not in blocks.elements[atom[0]].isotopes:
+                raise ValueError(
+                    "Unknown isotope in formula! --> "
+                    + atom[0]
+                    + atom[1]
+                    + " in "
+                    + formula
+                )
+
         # check brackets
-        if formula.count(')') != formula.count('('):
-            raise ValueError, 'Wrong number of brackets in formula! --> ' + formula
+        if formula.count(")") != formula.count("("):
+            raise ValueError("Wrong number of brackets in formula! --> " + formula)
+
     # ----
-    
-    
+
     def _unfoldBrackets(self, string):
         """Unfold formula and count each atom."""
-        
-        unfoldedFormula = ''
-        brackets = [0,0]
-        enclosedFormula = ''
-        
+
+        unfoldedFormula = ""
+        brackets = [0, 0]
+        enclosedFormula = ""
+
         i = 0
         while i < len(string):
-            
             # handle brackets
-            if string[i] == '(':
+            if string[i] == "(":
                 brackets[0] += 1
-            elif string[i] == ')':
+            elif string[i] == ")":
                 brackets[1] += 1
-            
+
             # part outside brackets
-            if brackets == [0,0]:
+            if brackets == [0, 0]:
                 unfoldedFormula += string[i]
-            
+
             # part within brackets
             else:
                 enclosedFormula += string[i]
-                
+
                 # unfold part within brackets
                 if brackets[0] == brackets[1]:
                     enclosedFormula = self._unfoldBrackets(enclosedFormula[1:-1])
-                    
+
                     # multiply part within brackets
-                    count = ''
-                    while len(string)>(i+1) and string[i+1].isdigit():
-                        count += string[i+1]
+                    count = ""
+                    while len(string) > (i + 1) and string[i + 1].isdigit():
+                        count += string[i + 1]
                         i += 1
                     if count:
                         enclosedFormula = enclosedFormula * int(count)
-                    
+
                     # add and clear
                     unfoldedFormula += enclosedFormula
-                    enclosedFormula = ''
-                    brackets = [0,0]
-            
-            i += 1
-            
-        return unfoldedFormula
-    # ----
-    
-    
+                    enclosedFormula = ""
+                    brackets = [0, 0]
 
+            i += 1
+
+        return unfoldedFormula
+
+    # ----

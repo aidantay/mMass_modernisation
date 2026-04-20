@@ -1,5 +1,6 @@
 import pytest
-import wx
+wx = pytest.importorskip("wx")
+
 import numpy
 import copy
 from hypothesis import given, settings, strategies as st
@@ -1286,7 +1287,7 @@ class TestSpectrum(object):
         """Test _drawSpectrumGel when step == 0 (returns False)."""
         spec = spectrum(simple_scan)
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
-        gelCoords = [0, 10, 100, 100, 190, 100] # plotY1 == plotY2
+        gelCoords = [0, 10, 100, 100, 100, 100] # plotY1 == plotY2 (indices 2 and 4)
         result = spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
         assert result == False
 

@@ -19,90 +19,89 @@
 import os.path
 
 # load stopper
-from mod_stopper import CHECK_FORCE_QUIT
+from .parser_mgf import parseMGF
+from .parser_mzdata import parseMZDATA
+from .parser_mzml import parseMZML
+from .parser_mzxml import parseMZXML
 
 # load parsers
-from parser_xy import parseXY
-from parser_mzxml import parseMZXML
-from parser_mzdata import parseMZDATA
-from parser_mzml import parseMZML
-from parser_mgf import parseMGF
-from parser_fasta import parseFASTA
-
+from .parser_xy import parseXY
 
 # UTILITIES
 # ---------
 
-def load(path, scanID=None, dataType='continuous'):
+
+def load(path, scanID=None, dataType="continuous"):
     """Load scan from given document."""
-    
+
     # check path
     if not os.path.exists(path):
-        raise IOError, 'File not found! --> ' + path
-    
+        raise OSError("File not found! --> " + path)
+
     # get filename and extension
-    dirName, fileName = os.path.split(path)
+    _dirName, fileName = os.path.split(path)
     baseName, extension = os.path.splitext(fileName)
     fileName = fileName.lower()
     baseName = baseName.lower()
     extension = extension.lower()
-    
+
     # get document type
-    if extension == '.mzdata':
-        docType = 'mzData'
-    elif extension == '.mzxml':
-        docType = 'mzXML'
-    elif extension == '.mzml':
-        docType = 'mzML'
-    elif extension == '.mgf':
-        docType = 'MGF'
-    elif extension in ('.xy', '.txt', '.asc'):
-        docType = 'XY'
-    elif extension == '.xml':
-        doc = open(path, 'r')
-        data = doc.read(500)
-        if '<mzData' in data:
-            docType = 'mzData'
-        elif '<mzXML' in data:
-            docType = 'mzXML'
-        elif '<mzML' in data:
-            docType = 'mzML'
-        doc.close()
-    
+    if extension == ".mzdata":
+        docType = "mzData"
+    elif extension == ".mzxml":
+        docType = "mzXML"
+    elif extension == ".mzml":
+        docType = "mzML"
+    elif extension == ".mgf":
+        docType = "MGF"
+    elif extension in (".xy", ".txt", ".asc"):
+        docType = "XY"
+    elif extension == ".xml":
+        with open(path, "r", encoding="utf-8", errors="ignore") as doc:
+            data = doc.read(500)
+            if "<mzData" in data:
+                docType = "mzData"
+            elif "<mzXML" in data:
+                docType = "mzXML"
+            elif "<mzML" in data:
+                docType = "mzML"
+
     # check document type
     if not docType:
-        raise ValueError, 'Unknown document type! --> ' + path
-    
+        raise ValueError("Unknown document type! --> " + path)
+
     # load document data
-    if docType == 'mzData':
+    if docType == "mzData":
         parser = parseMZDATA(path)
         scan = parser.scan(scanID)
-    elif docType == 'mzXML':
+    elif docType == "mzXML":
         parser = parseMZXML(path)
         scan = parser.scan(scanID)
-    elif docType == 'mzML':
+    elif docType == "mzML":
         parser = parseMZML(path)
         scan = parser.scan(scanID)
-    elif docType == 'MGF':
+    elif docType == "MGF":
         parser = parseMGF(path)
         scan = parser.scan(scanID)
-    elif docType == 'XY':
+    elif docType == "XY":
         parser = parseXY(path)
         scan = parser.scan(dataType)
-    
+
     return scan
+
+
 # ----
 
 
 def save(data, path):
     """"""
-    
-    buff = ''
-    for point in data:
-        buff += "%f\t%f\n" % tuple(point)
-    
-    save = file(path, 'w')
-    save.write(buff.encode("utf-8"))
-    save.close()
-# ----
 
+    buff = ""
+    for point in data:
+        buff += "{:f}\t{:f}\n".format(*tuple(point))
+
+    with open(path, "wb") as save_file:
+        save_file.write(buff.encode("utf-8"))
+
+
+# ----

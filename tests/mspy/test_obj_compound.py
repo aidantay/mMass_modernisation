@@ -400,13 +400,13 @@ def test_mz_positive_charge():
     """Test mz() with positive charge."""
     c = mspy.obj_compound.compound('H2O')
     mz = c.mz(charge=1)
-    assert mz > 0
+    assert mz[0] > 0
 
 def test_mz_negative_charge():
     """Test mz() with negative charge."""
     c = mspy.obj_compound.compound('H2O')
     mz = c.mz(charge=-1)
-    assert mz > 0
+    assert mz[0] > 0
 
 def test_mz_zero_charge():
     """Test mz() with zero charge."""
@@ -423,13 +423,13 @@ def test_mz_electron_agent():
     """Test mz() with electron agent."""
     c = mspy.obj_compound.compound('H2O')
     mz = c.mz(charge=-1, agentFormula='e')
-    assert mz > 0
+    assert mz[0] > 0
 
 def test_mz_compound_agent():
     """Test mz() with compound agent."""
     c = mspy.obj_compound.compound('H2O')
     mz = c.mz(charge=1, agentFormula='H')
-    assert mz > 0
+    assert mz[0] > 0
 
 # ======================================================================
 # STEP 12-13: pattern(), rdbe(), frules() DELEGATION SMOKE TESTS

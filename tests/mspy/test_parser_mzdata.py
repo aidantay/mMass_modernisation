@@ -382,8 +382,8 @@ def test_parsePoints_edge_cases():
         
         # Empty data (length 0 string) - also returns [] as per current implementation
         scanData = {
-            'mzData': base64.b64encode(''),
-            'intData': base64.b64encode(''),
+            'mzData': base64.b64encode(b''),
+            'intData': base64.b64encode(b''),
             'mzEndian': 'little',
             'mzPrecision': 32,
             'intEndian': 'little',
@@ -487,7 +487,7 @@ def test_parseMZDATA_load(mocker):
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
     mock_file = mocker.mock_open()
-    mocker.patch('__builtin__.file', mock_file)
+    mocker.patch('builtins.open', mock_file)
     
     # Mock runHandler and its data
     mock_handler = mocker.Mock()
@@ -529,7 +529,7 @@ def test_parseMZDATA_info(mocker):
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
     mock_file = mocker.mock_open()
-    mocker.patch('__builtin__.file', mock_file)
+    mocker.patch('builtins.open', mock_file)
     
     # Mock infoHandler and its data
     mock_handler = mocker.Mock()
@@ -573,7 +573,7 @@ def test_parseMZDATA_scanlist(mocker):
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
     mock_file = mocker.mock_open()
-    mocker.patch('__builtin__.file', mock_file)
+    mocker.patch('builtins.open', mock_file)
     
     # Mock scanlistHandler and its data
     mock_handler = mocker.Mock()
@@ -615,7 +615,7 @@ def test_parseMZDATA_scan(mocker):
     parser._scans = None
     mock_sax_parser = mocker.Mock()
     mocker.patch('xml.sax.make_parser', return_value=mock_sax_parser)
-    mocker.patch('__builtin__.file', mocker.mock_open())
+    mocker.patch('builtins.open', mocker.mock_open())
     
     mock_handler = mocker.Mock()
     mock_handler.data = {2: {'id': 2}} # scanHandler stores data for the requested ID

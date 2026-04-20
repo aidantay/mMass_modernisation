@@ -258,10 +258,10 @@ class TestPeaklistIter:
         """B7-true and B7-false: manual iteration via next."""
         pl = make_peaklist((100, 100), (200, 50))
         iter_pl = iter(pl)
-        assert iter_pl.next().mz == 100.0
-        assert iter_pl.next().mz == 200.0
+        assert next(iter_pl).mz == 100.0
+        assert next(iter_pl).mz == 200.0
         with pytest.raises(StopIteration):
-            iter_pl.next()
+            next(iter_pl)
 
 
 # ============================================================================
