@@ -128,12 +128,12 @@ def test_on_processing(panel, mocker):
 
 def test_on_stop(panel, mocker):
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     mock_stop = mocker.patch("mspy.stop")
     panel.onStop(None)
     mock_stop.assert_called_once()
 
-    panel.processing.isAlive.return_value = False
+    panel.processing.is_alive.return_value = False
     mock_bell = mocker.patch("wx.Bell")
     panel.onStop(None)
     mock_bell.assert_called_once()
@@ -196,7 +196,7 @@ def test_on_search_success(panel, mocker):
     # Mock threading.Thread to run target synchronously
     def mock_thread_init(target=None, args=(), kwargs={}):
         target(*args, **kwargs)
-        return mocker.Mock(isAlive=lambda: False)
+        return mocker.Mock(is_alive=lambda: False)
 
     mocker.patch("threading.Thread", side_effect=mock_thread_init)
     mocker.patch.object(panel, "getParams", return_value=True)
@@ -356,7 +356,7 @@ def test_on_search_no_peaklist(panel, mocker):
 
     def mock_thread_init(target=None, args=(), kwargs={}):
         target(*args, **kwargs)
-        return mocker.Mock(isAlive=lambda: False)
+        return mocker.Mock(is_alive=lambda: False)
 
     mocker.patch("threading.Thread", side_effect=mock_thread_init)
     mocker.patch.object(panel, "getParams", return_value=True)

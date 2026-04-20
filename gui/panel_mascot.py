@@ -1334,18 +1334,18 @@ class panelMascot(wx.MiniFrame):
 
         # get the tool
         if evt is not None:
-            tool = "pmf"
-            if evt and evt.GetId() == ID_mascotPMF:
+            if evt.GetId() == ID_mascotPMF:
                 tool = "pmf"
-            elif evt and evt.GetId() == ID_mascotMIS:
+            elif evt.GetId() == ID_mascotMIS:
                 tool = "mis"
-            elif evt and evt.GetId() == ID_mascotSQ:
+            elif evt.GetId() == ID_mascotSQ:
                 tool = "sq"
-            elif evt and evt.GetId() == ID_mascotQuery:
+            elif evt.GetId() == ID_mascotQuery:
                 tool = "query"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)

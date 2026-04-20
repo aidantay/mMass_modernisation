@@ -1121,7 +1121,6 @@ class panelProcessing(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "peakpicking"
             if evt.GetId() == ID_processingMath:
                 tool = "math"
             elif evt.GetId() == ID_processingCrop:
@@ -1140,7 +1139,8 @@ class panelProcessing(wx.MiniFrame):
                 tool = "batch"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)

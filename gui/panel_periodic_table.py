@@ -475,7 +475,7 @@ class panelPeriodicTable(wx.MiniFrame):
 
         # make elements
         for element, position in elements:
-            buttonID = wx.NewId()
+            buttonID = wx.NewIdRef()
             button = wx.BitmapButton(
                 panel,
                 buttonID,

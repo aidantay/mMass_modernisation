@@ -1945,7 +1945,7 @@ class mainFrame(wx.Frame):
             target=self.runDocumentSave, kwargs={"docIndex": docIndex}
         )
         process.start()
-        while process.isAlive():
+        while process.is_alive():
             gauge.pulse()
 
         # save file
@@ -1953,7 +1953,7 @@ class mainFrame(wx.Frame):
         if self.currentDocumentXML:
             gauge.setLabel("Saving data...")
             try:
-                save = file(path, "w")
+                save = open(path, "w")
                 save.write(self.currentDocumentXML.encode("utf-8"))
                 save.close()
                 failed = False
@@ -2081,7 +2081,7 @@ class mainFrame(wx.Frame):
 
             # make report file
             reportHTML = self.documents[self.currentDocument].report(image=imagePath)
-            reportFile = file(reportPath, "w")
+            reportFile = open(reportPath, "w")
             reportFile.write(reportHTML.encode("utf-8"))
             reportFile.close()
 
@@ -3775,7 +3775,7 @@ class mainFrame(wx.Frame):
             target=self.runLibrarySave, kwargs={"library": library}
         )
         process.start()
-        while process.isAlive():
+        while process.is_alive():
             gauge.pulse()
         gauge.close()
 
@@ -4120,7 +4120,7 @@ class mainFrame(wx.Frame):
                 kwargs={"path": path, "docType": docType, "scan": scan},
             )
             process.start()
-            while process.isAlive():
+            while process.is_alive():
                 gauge.pulse()
 
             # append document
@@ -4172,7 +4172,7 @@ class mainFrame(wx.Frame):
             kwargs={"rawData": rawData, "dataType": dataType},
         )
         process.start()
-        while process.isAlive():
+        while process.is_alive():
             gauge.pulse()
 
         # append document
@@ -4208,7 +4208,7 @@ class mainFrame(wx.Frame):
         gauge.show()
         process = threading.Thread(target=self.runCompassXport, kwargs={"path": path})
         process.start()
-        while process.isAlive():
+        while process.is_alive():
             gauge.pulse()
         gauge.close()
 
@@ -4569,7 +4569,7 @@ class mainFrame(wx.Frame):
             target=self.getDocumentScanList, kwargs={"path": path, "docType": docType}
         )
         process.start()
-        while process.isAlive():
+        while process.is_alive():
             gauge.pulse()
         gauge.close()
 
@@ -4612,7 +4612,7 @@ class mainFrame(wx.Frame):
             target=self.getDocumentSequences, kwargs={"path": path, "docType": docType}
         )
         process.start()
-        while process.isAlive():
+        while process.is_alive():
             gauge.pulse()
         gauge.close()
 

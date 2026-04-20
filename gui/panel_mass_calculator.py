@@ -519,16 +519,16 @@ class panelMassCalculator(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "summary"
-            if evt and evt.GetId() == ID_massCalculatorSummary:
+            if evt.GetId() == ID_massCalculatorSummary:
                 tool = "summary"
-            elif evt and evt.GetId() == ID_massCalculatorIonSeries:
+            elif evt.GetId() == ID_massCalculatorIonSeries:
                 tool = "ionseries"
-            elif evt and evt.GetId() == ID_massCalculatorPattern:
+            elif evt.GetId() == ID_massCalculatorPattern:
                 tool = "pattern"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)

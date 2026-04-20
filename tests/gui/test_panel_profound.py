@@ -169,19 +169,21 @@ def test_onSearch_success(profound_panel, mocker):
     mocker.patch.object(profound_panel, 'checkParams', return_value=True)
     mocker.patch.object(profound_panel, 'makeSearchHTML', return_value="<html></html>")
     mocker.patch('tempfile.gettempdir', return_value='/tmp')
-    mock_file = mocker.mock_open()
-    mocker.patch('gui.panel_profound.file', mock_file, create=True)
-    mock_open = mocker.patch('webbrowser.open')
+    mock_f = mocker.MagicMock()
+    mock_open_file = mocker.patch('gui.panel_profound.open', create=True)
+    mock_open_file.return_value = mock_f
+    mock_open_browser = mocker.patch('webbrowser.open')
     profound_panel.onSearch(None)
-    mock_file.assert_called_with('/tmp/mmass_profound_search.html', 'w')
-    mock_open.assert_called_with('file:///tmp/mmass_profound_search.html', autoraise=1)
+    mock_open_file.assert_called_with('/tmp/mmass_profound_search.html', 'w')
+    mock_f.write.assert_called_with("<html></html>".encode("utf-8"))
+    mock_open_browser.assert_called_with('file:///tmp/mmass_profound_search.html', autoraise=1)
 
 def test_onSearch_failure(profound_panel, mocker):
     """Verify error handling in search execution."""
     mocker.patch.object(profound_panel, 'getParams', return_value=True)
     mocker.patch.object(profound_panel, 'checkParams', return_value=True)
     mocker.patch.object(profound_panel, 'makeSearchHTML', return_value="<html></html>")
-    mocker.patch('gui.panel_profound.file', side_effect=IOError("Write error"), create=True)
+    mocker.patch('gui.panel_profound.open', side_effect=IOError("Write error"), create=True)
     mock_bell = mocker.patch('wx.Bell')
     mock_dlg = mocker.patch('gui.mwx.dlgMessage')
     profound_panel.onSearch(None)

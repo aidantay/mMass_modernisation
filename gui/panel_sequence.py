@@ -1364,19 +1364,19 @@ class panelSequence(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "editor"
-            if evt and evt.GetId() == ID_sequenceEditor:
+            if evt.GetId() == ID_sequenceEditor:
                 tool = "editor"
-            elif evt and evt.GetId() == ID_sequenceModifications:
+            elif evt.GetId() == ID_sequenceModifications:
                 tool = "modifications"
-            elif evt and evt.GetId() == ID_sequenceDigest:
+            elif evt.GetId() == ID_sequenceDigest:
                 tool = "digest"
-            elif evt and evt.GetId() == ID_sequenceFragment:
+            elif evt.GetId() == ID_sequenceFragment:
                 tool = "fragment"
-            elif evt and evt.GetId() == ID_sequenceSearch:
+            elif evt.GetId() == ID_sequenceSearch:
                 tool = "search"
 
         # block some tools for cyclic or custom sequence
+        tool = tool or self.currentTool
         if tool == "editor":
             pass
         elif self.currentSequence == None:

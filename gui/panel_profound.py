@@ -530,14 +530,14 @@ class panelProfound(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "pmf"
-            if evt and evt.GetId() == ID_profoundPMF:
+            if evt.GetId() == ID_profoundPMF:
                 tool = "pmf"
-            elif evt and evt.GetId() == ID_profoundQuery:
+            elif evt.GetId() == ID_profoundQuery:
                 tool = "query"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)
@@ -631,7 +631,7 @@ class panelProfound(wx.MiniFrame):
         htmlData = self.makeSearchHTML()
         try:
             path = os.path.join(tempfile.gettempdir(), "mmass_profound_search.html")
-            htmlFile = file(path, "w")
+            htmlFile = open(path, "w")
             htmlFile.write(htmlData.encode("utf-8"))
             htmlFile.close()
             webbrowser.open("file://" + path, autoraise=1)

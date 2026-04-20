@@ -8,9 +8,11 @@ from gui import images
 @pytest.fixture
 def clean_images_lib():
     """Fixture to clear images.lib before and after tests."""
-    images.lib = {}
+    original_lib = images.lib.copy()
+    images.lib.clear()
     yield
-    images.lib = {}
+    images.lib.clear()
+    images.lib.update(original_lib)
 
 def test_loadImages_gtk(wx_app, clean_images_lib, mocker):
     """Test loadImages on GTK (default) platform."""

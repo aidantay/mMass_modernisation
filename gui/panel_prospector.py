@@ -928,16 +928,16 @@ class panelProspector(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "msfit"
-            if evt and evt.GetId() == ID_prospectorMSFit:
+            if evt.GetId() == ID_prospectorMSFit:
                 tool = "msfit"
-            elif evt and evt.GetId() == ID_prospectorMSTag:
+            elif evt.GetId() == ID_prospectorMSTag:
                 tool = "mstag"
-            elif evt and evt.GetId() == ID_prospectorQuery:
+            elif evt.GetId() == ID_prospectorQuery:
                 tool = "query"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)
@@ -1054,7 +1054,7 @@ class panelProspector(wx.MiniFrame):
         htmlData = self.makeSearchHTML()
         try:
             path = os.path.join(tempfile.gettempdir(), "mmass_prospector_search.html")
-            htmlFile = file(path, "w")
+            htmlFile = open(path, "w")
             htmlFile.write(htmlData.encode("utf-8"))
             htmlFile.close()
             webbrowser.open("file://" + path, autoraise=1)

@@ -393,14 +393,14 @@ class panelCalibration(wx.MiniFrame):
 
         # get the tool
         if evt is not None:
-            tool = "references"
             if evt.GetId() == ID_calibrationReferences:
                 tool = "references"
             elif evt.GetId() == ID_calibrationErrors:
                 tool = "errors"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)

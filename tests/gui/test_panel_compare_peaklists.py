@@ -19,11 +19,16 @@ from gui.panel_compare_peaklists import panelComparePeaklists
 @pytest.fixture
 def setup_images(wx_app):
     """Fixture to populate images.lib after wx.App is created."""
-    if not hasattr(images, 'lib'):
-        images.lib = {}
-    images.lib['bgrToolbarNoBorder'] = wx.Bitmap(1, 1)
-    images.lib['stopper'] = wx.Bitmap(1, 1)
-    images.lib['icon16'] = wx.Bitmap(1, 1)
+    original_lib = images.lib.copy()
+    if 'bgrToolbarNoBorder' not in images.lib:
+        images.lib['bgrToolbarNoBorder'] = wx.Bitmap(1, 1)
+    if 'stopper' not in images.lib:
+        images.lib['stopper'] = wx.Bitmap(1, 1)
+    if 'icon16' not in images.lib:
+        images.lib['icon16'] = wx.Bitmap(1, 1)
+    yield
+    images.lib.clear()
+    images.lib.update(original_lib)
 
 from gui.panel_compare_peaklists import panelComparePeaklists
 

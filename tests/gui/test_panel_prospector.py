@@ -356,23 +356,23 @@ def test_on_search(wx_app, mock_parent, mock_config, mocker):
     mocker.patch.object(panel, 'getParams', return_value=True)
     mocker.patch.object(panel, 'checkParams', return_value=True)
     mocker.patch.object(panel, 'makeSearchHTML', return_value=u"<html>Test</html>")
-    mock_open = mocker.patch('webbrowser.open')
+    mock_open_browser = mocker.patch('webbrowser.open')
     mocker.patch('tempfile.gettempdir', return_value='/tmp')
-    mock_file = mocker.patch('gui.panel_prospector.file', create=True)
+    mock_open_file = mocker.patch('gui.panel_prospector.open', create=True)
     
     mock_f = mocker.MagicMock()
-    mock_file.return_value = mock_f
+    mock_open_file.return_value = mock_f
     
     panel.onSearch(None)
     
-    mock_open.assert_called_with('file:///tmp/mmass_prospector_search.html', autoraise=1)
+    mock_open_browser.assert_called_with('file:///tmp/mmass_prospector_search.html', autoraise=1)
     mock_f.write.assert_called_with("<html>Test</html>".encode("utf-8"))
 
     # Test error during file write
     mocker.patch.object(panel, 'getParams', return_value=True)
     mocker.patch.object(panel, 'checkParams', return_value=True)
     mocker.patch.object(panel, 'makeSearchHTML', return_value=u"<html>Test</html>")
-    mocker.patch('gui.panel_prospector.file', side_effect=IOError)
+    mocker.patch('gui.panel_prospector.open', side_effect=IOError)
     mock_bell = mocker.patch('wx.Bell')
     mock_dlg = mocker.patch('gui.mwx.dlgMessage')
     

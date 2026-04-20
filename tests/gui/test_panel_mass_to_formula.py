@@ -295,7 +295,7 @@ def test_on_generate_path3_valid(panel, mocker):
     mock_thread = mocker.patch('threading.Thread')
     mock_thread_instance = mock_thread.return_value
     # simulate thread finishing immediately
-    mock_thread_instance.isAlive.return_value = False
+    mock_thread_instance.is_alive.return_value = False
                         
     panel.onGenerate()
                         
@@ -319,7 +319,7 @@ def test_on_generate_limit_warning(panel, mocker):
     mocker.patch.object(panel, 'onProcessing')
     mocker.patch.object(panel, 'updateFormulaeList', side_effect=mock_update)
     mock_thread = mocker.patch('threading.Thread')
-    mock_thread.return_value.isAlive.return_value = False
+    mock_thread.return_value.is_alive.return_value = False
     mock_dlg = mocker.patch('gui.mwx.dlgMessage')
     mock_bell = mocker.patch('wx.Bell')
     panel.onGenerate()
@@ -346,7 +346,7 @@ def test_on_stop(panel, mocker):
     """Test onStop behavior."""
     # Case 1: Processing alive -> mspy.stop called
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     mock_stop = mocker.patch('mspy.stop')
     panel.onStop(None)
     mock_stop.assert_called_once()

@@ -324,7 +324,7 @@ class panelPeakDifferences(wx.MiniFrame):
     def onStop(self, evt):
         """Cancel current processing."""
 
-        if self.processing and self.processing.isAlive():
+        if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
             wx.Bell()
@@ -420,7 +420,7 @@ class panelPeakDifferences(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update gui

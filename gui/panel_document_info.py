@@ -357,7 +357,6 @@ class panelDocumentInfo(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "summary"
             if evt.GetId() == ID_documentInfoSummary:
                 tool = "summary"
             elif evt.GetId() == ID_documentInfoSpectrum:
@@ -366,7 +365,8 @@ class panelDocumentInfo(wx.MiniFrame):
                 tool = "notes"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)

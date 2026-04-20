@@ -269,7 +269,7 @@ def test_onMatch(panel, mocker):
         
     # mock_thread returns an instance
     mock_thread_instance = mock_thread.return_value
-    mock_thread_instance.isAlive.return_value = False # Stop the while loop immediately
+    mock_thread_instance.is_alive.return_value = False # Stop the while loop immediately
         
     panel.onMatch()
         
@@ -288,14 +288,14 @@ def test_onStop(panel, mocker):
     
     # Case 1: Processing is alive
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     
     mock_stop = mocker.patch('mspy.stop')
     panel.onStop(None)
     mock_stop.assert_called_once()
     
     # Case 2: Processing is NOT alive
-    panel.processing.isAlive.return_value = False
+    panel.processing.is_alive.return_value = False
     mock_bell = mocker.patch('wx.Bell')
     panel.onStop(None)
     mock_bell.assert_called_once()

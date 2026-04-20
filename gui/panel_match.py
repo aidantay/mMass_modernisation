@@ -383,14 +383,14 @@ class panelMatch(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "errors"
-            if evt and evt.GetId() == ID_matchErrors:
+            if evt.GetId() == ID_matchErrors:
                 tool = "errors"
-            elif evt and evt.GetId() == ID_matchSummary:
+            elif evt.GetId() == ID_matchSummary:
                 tool = "summary"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(2)
@@ -442,7 +442,7 @@ class panelMatch(wx.MiniFrame):
     def onStop(self, evt):
         """Cancel current processing."""
 
-        if self.processing and self.processing.isAlive():
+        if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
             wx.Bell()
@@ -528,7 +528,7 @@ class panelMatch(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update gui

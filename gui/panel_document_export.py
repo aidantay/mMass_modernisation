@@ -524,7 +524,6 @@ class panelDocumentExport(wx.MiniFrame):
 
         # get the tool
         if evt != None:
-            tool = "image"
             if evt.GetId() == ID_documentExportImage:
                 tool = "image"
             elif evt.GetId() == ID_documentExportPeaklist:
@@ -533,7 +532,8 @@ class panelDocumentExport(wx.MiniFrame):
                 tool = "spectrum"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide panels
         self.mainSizer.Hide(1)

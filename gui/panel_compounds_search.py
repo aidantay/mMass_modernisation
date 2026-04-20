@@ -402,14 +402,14 @@ class panelCompoundsSearch(wx.MiniFrame):
 
         # get the tool
         if evt is not None:
-            tool = "compounds"
             if evt.GetId() == ID_compoundsSearchCompounds:
                 tool = "compounds"
             elif evt.GetId() == ID_compoundsSearchFormula:
                 tool = "formula"
 
         # set current tool
-        self.currentTool = tool
+        if tool:
+            self.currentTool = tool
 
         # hide toolbars
         self.toolbar.Hide(5)
