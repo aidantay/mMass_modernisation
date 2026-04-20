@@ -54,14 +54,17 @@ def test_hk_preferences_platform_logic(monkeypatch):
     """
     # Test for __WXMAC__
     monkeypatch.setattr(wx, 'Platform', '__WXMAC__')
+    from importlib import reload
     reload(gui.ids)
     assert gui.ids.HK_preferences == '\tCtrl+,'
     
     # Test for other platforms (e.g., __WXMSW__)
     monkeypatch.setattr(wx, 'Platform', '__WXMSW__')
+    from importlib import reload
     reload(gui.ids)
     assert gui.ids.HK_preferences == ''
     
     # Cleanup: restore to actual platform and reload
     monkeypatch.undo()
+    from importlib import reload
     reload(gui.ids)

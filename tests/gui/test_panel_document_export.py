@@ -99,6 +99,8 @@ def export_panel(wx_app, mock_parent, mock_images, monkeypatch_config, mocker):
     mocker.patch('wx.WindowDisabler')
     
     panel = panelDocumentExport(mock_parent)
+    # Mock gauge.pulse to avoid wx.Yield issues in headless environments
+    mocker.patch.object(panel.gauge, 'pulse')
     yield panel
     if panel:
         panel.Destroy()

@@ -135,7 +135,7 @@ def test_onStop(panel, mocker):
     
     # Active thread
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     panel.onStop(None)
     mspy.stop.assert_called_once()
     
@@ -147,21 +147,21 @@ def test_onStop(panel, mocker):
 
 def test_onProcessing(panel, mocker):
     """Test onProcessing behavior."""
-    mocker.patch.object(panel, 'MakeModal', create=True)
-    mspy_start = mocker.patch('mspy.start')
-    mocker.patch.object(panel, 'Layout')
-    
+    mock_disabler = mocker.patch("wx.WindowDisabler")
+    mspy_start = mocker.patch("mspy.start")
+    mocker.patch.object(panel, "Layout")
+
     # Start processing
     panel.onProcessing(True)
-    panel.MakeModal.assert_called_with(True)
+    mock_disabler.assert_called_with(panel)
     assert panel.mainSizer.IsShown(2) is True
-    
+
     # Stop processing
     panel.onProcessing(False)
-    panel.MakeModal.assert_called_with(False)
     assert panel.mainSizer.IsShown(2) is False
     mspy_start.assert_called_once()
     assert panel.processing is None
+    assert not hasattr(panel, "_disabler")
 
 def test_runGetPeaklists_peaklists(panel, mock_document, mocker):
     """Test runGetPeaklists with 'peaklists' mode."""
@@ -364,7 +364,7 @@ def test_onCompare_threaded(panel, mocker):
             self.target = target
         def start(self):
             self.target()
-        def isAlive(self):
+        def is_alive(self):
             return False
             
     mocker.patch('threading.Thread', side_effect=MockThread)
@@ -390,7 +390,7 @@ def test_onUpdatePeaklist_threaded(panel, mocker):
             self.target = target
         def start(self):
             self.target()
-        def isAlive(self):
+        def is_alive(self):
             return False
 
     mocker.patch('threading.Thread', side_effect=MockThread)

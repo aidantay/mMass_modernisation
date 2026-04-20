@@ -130,7 +130,9 @@ class dlgPreferences(wx.Dialog):
         self.compassFormat_choice.SetStringSelection(config.main["compassFormat"])
         self.compassFormat_choice.Bind(wx.EVT_CHOICE, self.onCompass)
 
-        compassDeleteFile_label = wx.StaticText(panel, wx.ID_ANY, "Delete converted file:")
+        compassDeleteFile_label = wx.StaticText(
+            panel, wx.ID_ANY, "Delete converted file:"
+        )
         self.compassDeleteFile_check = wx.CheckBox(panel, wx.ID_ANY, "")
         self.compassDeleteFile_check.SetValue(config.main["compassDeleteFile"])
         self.compassDeleteFile_check.Bind(wx.EVT_CHECKBOX, self.onCompass)

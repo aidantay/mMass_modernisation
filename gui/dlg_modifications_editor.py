@@ -134,11 +134,15 @@ class dlgModificationsEditor(wx.Dialog):
         self.itemTermSpecifity_choice.SetStringSelection("None")
 
         itemGainFormula_label = wx.StaticText(self, wx.ID_ANY, "Gain formula:")
-        self.itemGainFormula_value = mwx.formulaCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        self.itemGainFormula_value = mwx.formulaCtrl(
+            self, wx.ID_ANY, "", size=(150, -1)
+        )
         self.itemGainFormula_value.Bind(wx.EVT_TEXT, self.onFormulaEdited)
 
         itemLossFormula_label = wx.StaticText(self, wx.ID_ANY, "Loss formula:")
-        self.itemLossFormula_value = mwx.formulaCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        self.itemLossFormula_value = mwx.formulaCtrl(
+            self, wx.ID_ANY, "", size=(150, -1)
+        )
         self.itemLossFormula_value.Bind(wx.EVT_TEXT, self.onFormulaEdited)
 
         itemMoMass_label = wx.StaticText(self, wx.ID_ANY, "Mo. mass:")

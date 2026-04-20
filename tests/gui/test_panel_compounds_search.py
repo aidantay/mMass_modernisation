@@ -15,7 +15,7 @@ class MockThread(object):
         if self.target:
             self.target(*self.args, **self.kwargs)
         self._alive = False
-    def isAlive(self):
+    def is_alive(self):
         return self._alive
     def is_alive(self):
         return self._alive
@@ -35,9 +35,12 @@ def mock_gui_env(mocker):
     for mod_name in modules_to_mock:
         m = mocker.MagicMock()
         mocks[mod_name] = m
+        # Also patch sys.modules for any direct imports
         mocks['gui.' + mod_name] = m
+        mocker.patch('gui.' + mod_name, m, create=True)
 
     mocks['gui.panel_match'] = mocker.MagicMock()
+    mocker.patch('gui.panel_match', mocks['gui.panel_match'], create=True)
     
     # Setup mock_images.lib
     mocks['images'].lib = MockImagesLib()
@@ -94,21 +97,27 @@ def mock_gui_env(mocker):
             return True
     mock_mwx.validator = MockValidator
 
-    class MockListCtrl(wx.ListCtrl):
+    class MockListCtrl(wx.Panel):
         def __init__(self, parent=None, *args, **kwargs):
-            wx.ListCtrl.__init__(self, parent, -1)
-            for attr in [
-                'SetFont', 'setSecondarySortColumn', 'setAltColour', 
-                'InsertColumn', 'SetColumnWidth', 'DeleteAllItems', 
-                'setDataMap', 'getSelected', 'GetItemData', 
-                'InsertItem', 'SetItem', 'SetItemData', 
-                'SetItemTextColour', 'SetItemFont', 'sort', 
-                'EnsureVisible', 'copyToClipboard'
-            ]:
-                setattr(self, attr, mocker.MagicMock())
-            self.getSelected.return_value = []
-            self.GetItemData.return_value = 0
-            self.InsertItem.return_value = 0
+            wx.Panel.__init__(self, parent, -1)
+            self.SetFont = mocker.MagicMock()
+            self.setSecondarySortColumn = mocker.MagicMock()
+            self.setAltColour = mocker.MagicMock()
+            self.InsertColumn = mocker.MagicMock()
+            self.SetColumnWidth = mocker.MagicMock()
+            self.DeleteAllItems = mocker.MagicMock()
+            self.setDataMap = mocker.MagicMock()
+            self.getSelected = mocker.MagicMock(return_value=[])
+            self.GetItemData = mocker.MagicMock(return_value=0)
+            self.InsertItem = mocker.MagicMock(return_value=0)
+            self.SetItem = mocker.MagicMock()
+            self.SetItemData = mocker.MagicMock()
+            self.SetItemTextColour = mocker.MagicMock()
+            self.SetItemFont = mocker.MagicMock()
+            self.sort = mocker.MagicMock()
+            self.EnsureVisible = mocker.MagicMock()
+            self.copyToClipboard = mocker.MagicMock()
+            self.GetItemCount = mocker.MagicMock(return_value=0)
 
     mock_mwx.sortListCtrl = lambda parent, *args, **kwargs: MockListCtrl(parent)
 
@@ -144,6 +153,7 @@ def mock_gui_env(mocker):
     mock_mspy = mocks['mspy']
     mock_mspy.ForceQuit = MockForceQuit
     mock_mspy.CHECK_FORCE_QUIT = mocker.MagicMock()
+    mocker.patch('mspy.CHECK_FORCE_QUIT', mock_mspy.CHECK_FORCE_QUIT)
 
     def make_mock_compound(formula):
         comp = mocker.MagicMock()
@@ -152,6 +162,7 @@ def mock_gui_env(mocker):
         comp.expression = formula
         return comp
     mock_mspy.compound = mocker.MagicMock(side_effect=make_mock_compound)
+    mocker.patch('mspy.compound', mock_mspy.compound)
 
     # Patch sys.modules
     mocker.patch.dict(sys.modules, mocks)
@@ -218,20 +229,21 @@ def test_getParams(panel, mock_gui_env, mocker):
     mock_bell.assert_called_once()
 
 def test_onProcessing(panel, mock_gui_env, mocker):
-    mock_mspy = mock_gui_env['mspy']
-    mock_modal = mocker.patch.object(panel, 'MakeModal', create=True)
+    mock_mspy = mock_gui_env["mspy"]
+    mock_disabler = mocker.patch("wx.WindowDisabler")
     panel.onProcessing(True)
     assert panel.mainSizer.IsShown(3)
-    mock_modal.assert_called_with(True)
+    mock_disabler.assert_called_with(panel)
 
     panel.onProcessing(False)
     assert not panel.mainSizer.IsShown(3)
     mock_mspy.start.assert_called_once()
+    assert not hasattr(panel, "_disabler")
 
 def test_onStop(panel, mock_gui_env, mocker):
     mock_mspy = mock_gui_env['mspy']
     panel.processing = mocker.MagicMock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     panel.onStop(None)
     mock_mspy.stop.assert_called_once()
 

@@ -35,6 +35,7 @@ def test_frame_type_and_title(mocker):
     # because these are defined at module level.
 
     mocker.patch('wx.Platform', '__WXMAC__')
+    from importlib import reload
     import gui.panel_about as pa
     reload(pa)
     assert pa.frame == wx.Frame
@@ -49,6 +50,7 @@ def test_frame_type_and_title(mocker):
     mocker.stopall()
 
     # Reload again to restore original state for other tests
+    from importlib import reload
     reload(gui.panel_about)
 
 def test_gui_elements_exist(about_frame):

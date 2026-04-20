@@ -30,3 +30,10 @@ def wx_app():
     yield app
     # wx.App objects are cleaned up by the Python garbage collector
     # and don't typically require explicit termination in unit tests.
+
+@pytest.fixture(autouse=True)
+def mock_wx_yield(mocker):
+    """
+    Globally mock wx.Yield to prevent crashes and hangs in headless test environments.
+    """
+    return mocker.patch('wx.Yield', return_value=True)

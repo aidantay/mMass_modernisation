@@ -101,7 +101,9 @@ class dlgMascotEditor(wx.Dialog):
     def makeItemEditor(self) -> wx.StaticBoxSizer:
         """Make items editor."""
 
-        mainSizer = wx.StaticBoxSizer(wx.StaticBox(self, id=wx.ID_ANY, label=""), wx.VERTICAL)
+        mainSizer = wx.StaticBoxSizer(
+            wx.StaticBox(self, id=wx.ID_ANY, label=""), wx.VERTICAL
+        )
 
         # make elements
         itemName_label = wx.StaticText(self, id=wx.ID_ANY, label="Title:")

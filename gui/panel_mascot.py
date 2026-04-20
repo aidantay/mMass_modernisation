@@ -16,20 +16,21 @@
 # -------------------------------------------------------------------------
 
 # load libs
+import contextlib
 import http.client
-import os.path
 import re
 import socket
 import tempfile
 import threading
 import webbrowser
+from pathlib import Path
 
 import wx
 
 from . import config, images, libs, mwx
 
 # load modules
-from .ids import *
+from .ids import ID_mascotMIS, ID_mascotPMF, ID_mascotQuery, ID_mascotSQ
 
 # FLOATING PANEL WITH MASCOT SEARCH
 # ---------------------------------
@@ -45,8 +46,7 @@ class panelMascot(wx.MiniFrame):
             -1,
             "Mascot Tools",
             size=(300, -1),
-            style=wx.DEFAULT_FRAME_STYLE
-            & ~(wx.RESIZE_BORDER | wx.RESIZE_BOX | wx.MAXIMIZE_BOX),
+            style=wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX),
         )
 
         self.parent = parent
@@ -1247,15 +1247,15 @@ class panelMascot(wx.MiniFrame):
         pklSizer.Add(
             self.paramQuery_value,
             1,
-            wx.EXPAND | wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
         )
         pklSizer.Fit(pklPanel)
         pklPanel.SetSizer(pklSizer)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        mainSizer.Add(ctrlPanel, 0, wx.EXPAND | wx.ALIGN_CENTER)
-        mainSizer.Add(pklPanel, 1, wx.EXPAND | wx.ALIGN_CENTER)
+        mainSizer.Add(ctrlPanel, 0, wx.EXPAND)
+        mainSizer.Add(pklPanel, 1, wx.EXPAND)
 
         return mainSizer
 
@@ -1283,19 +1283,19 @@ class panelMascot(wx.MiniFrame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, _evt):
         """Hide this frame."""
 
         # check processing
-        if self.processing != None:
+        if self.processing is not None:
             wx.Bell()
             return
 
         # delete temporary file
         try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_mascot_search.html")
-            os.unlink(path)
-        except:
+            path = Path(tempfile.gettempdir()) / "mmass_mascot_search.html"
+            path.unlink()
+        except Exception:
             pass
 
         self.Destroy()
@@ -1308,20 +1308,19 @@ class panelMascot(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._window_disabler = wx.WindowDisabler(self)
             self.mainSizer.Show(5)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_window_disabler"):
+                del self._window_disabler
             self.mainSizer.Hide(5)
             self.processing = None
 
         # fit layout
         self.Layout()
         self.mainSizer.Fit(self)
-        try:
+        with contextlib.suppress(BaseException):
             wx.Yield()
-        except:
-            pass
 
     # ----
 
@@ -1329,12 +1328,12 @@ class panelMascot(wx.MiniFrame):
         """Selected tool."""
 
         # check processing
-        if self.processing != None:
+        if self.processing is not None:
             wx.Bell()
             return
 
         # get the tool
-        if evt != None:
+        if evt is not None:
             tool = "pmf"
             if evt and evt.GetId() == ID_mascotPMF:
                 tool = "pmf"
@@ -1399,48 +1398,36 @@ class panelMascot(wx.MiniFrame):
 
     # ----
 
-    def onServerSelected(self, evt=None):
+    def onServerSelected(self, _evt=None):
         """Get parameters from the server and update form."""
         self.updateServerParams()
 
     # ----
 
-    def onModificationSelected(self, evt=None):
+    def onModificationSelected(self, _evt=None):
         """Count and show number of selected modifications."""
 
         if self.paramPMFFixedMods_label and self.paramPMFVariableMods_label:
-            label = "Fixed modifications: (%d)" % len(
-                self.paramPMFFixedMods_listbox.GetSelections()
-            )
+            label = f"Fixed modifications: ({len(self.paramPMFFixedMods_listbox.GetSelections())})"
             self.paramPMFFixedMods_label.SetLabel(label)
-            label = "Variable modifications: (%d)" % len(
-                self.paramPMFVariableMods_listbox.GetSelections()
-            )
+            label = f"Variable modifications: ({len(self.paramPMFVariableMods_listbox.GetSelections())})"
             self.paramPMFVariableMods_label.SetLabel(label)
 
         if self.paramMISFixedMods_label and self.paramMISVariableMods_label:
-            label = "Fixed modifications: (%d)" % len(
-                self.paramMISFixedMods_listbox.GetSelections()
-            )
+            label = f"Fixed modifications: ({len(self.paramMISFixedMods_listbox.GetSelections())})"
             self.paramMISFixedMods_label.SetLabel(label)
-            label = "Variable modifications: (%d)" % len(
-                self.paramMISVariableMods_listbox.GetSelections()
-            )
+            label = f"Variable modifications: ({len(self.paramMISVariableMods_listbox.GetSelections())})"
             self.paramMISVariableMods_label.SetLabel(label)
 
         if self.paramSQFixedMods_label and self.paramSQVariableMods_label:
-            label = "Fixed modifications: (%d)" % len(
-                self.paramSQFixedMods_listbox.GetSelections()
-            )
+            label = f"Fixed modifications: ({len(self.paramSQFixedMods_listbox.GetSelections())})"
             self.paramSQFixedMods_label.SetLabel(label)
-            label = "Variable modifications: (%d)" % len(
-                self.paramSQVariableMods_listbox.GetSelections()
-            )
+            label = f"Variable modifications: ({len(self.paramSQVariableMods_listbox.GetSelections())})"
             self.paramSQVariableMods_label.SetLabel(label)
 
     # ----
 
-    def onHiddenModifications(self, evt=None):
+    def onHiddenModifications(self, _evt=None):
         """Enable / disable hidden modifications."""
 
         # get value
@@ -1487,14 +1474,14 @@ class panelMascot(wx.MiniFrame):
         # make new query
         query = ""
         for peak in peaklist:
-            query += "%f\t%f\n" % (peak.mz, peak.intensity)
+            query += f"{peak.mz:f}\t{peak.intensity:f}\n"
 
         # set data
         self.paramQuery_value.SetValue(query)
 
     # ----
 
-    def onSearch(self, evt):
+    def onSearch(self, _evt):
         """Make query and send data to Mascot."""
 
         # get params
@@ -1508,12 +1495,11 @@ class panelMascot(wx.MiniFrame):
         # make temporary search file
         htmlData = self.makeSearchHTML()
         try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_mascot_search.html")
-            htmlFile = file(path, "w")
-            htmlFile.write(htmlData.encode("utf-8"))
-            htmlFile.close()
-            webbrowser.open("file://" + path, autoraise=1)
-        except:
+            path = Path(tempfile.gettempdir()) / "mmass_mascot_search.html"
+            with path.open("w", encoding="utf-8") as htmlFile:
+                htmlFile.write(htmlData)
+            webbrowser.open("file://" + str(path), autoraise=1)
+        except Exception:
             wx.Bell()
             dlg = mwx.dlgMessage(
                 self,
@@ -1569,12 +1555,12 @@ class panelMascot(wx.MiniFrame):
             conn.connect()
             conn.request("GET", server["path"] + server["params"])
             response = conn.getresponse()
-        except:
+        except Exception:
             self.currentParams = None
             return False
 
         if response.status == 200:
-            data = response.read()
+            data = response.read().decode("utf-8", errors="replace")
             conn.close()
         else:
             conn.close()
@@ -1817,7 +1803,7 @@ class panelMascot(wx.MiniFrame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
@@ -1844,12 +1830,14 @@ class panelMascot(wx.MiniFrame):
             errors += "- Enzyme must be selected.\n"
 
         # check protein mass
-        if config.mascot["common"]["searchType"] == "pmf":
-            if config.mascot["pmf"]["proteinMass"]:
-                if config.mascot["pmf"]["proteinMass"] < 0:
-                    errors += "- Protein mass cannot be negative.\n"
-                elif config.mascot["pmf"]["proteinMass"] > 1000:
-                    errors += "- Upper limit on protein mass cannot exceed 1000 kDa.\n"
+        if (
+            config.mascot["common"]["searchType"] == "pmf"
+            and config.mascot["pmf"]["proteinMass"]
+        ):
+            if config.mascot["pmf"]["proteinMass"] < 0:
+                errors += "- Protein mass cannot be negative.\n"
+            elif config.mascot["pmf"]["proteinMass"] > 1000:
+                errors += "- Upper limit on protein mass cannot exceed 1000 kDa.\n"
 
         # check precursor mass
         if config.mascot["common"]["searchType"] == "mis":
@@ -1980,7 +1968,7 @@ class panelMascot(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # hide processing gauge
@@ -2207,77 +2195,77 @@ class panelMascot(wx.MiniFrame):
 
         # common params
         query = ""
-        query += "SEARCH=%s\n" % (form.upper())
+        query += f"SEARCH={form.upper()}\n"
         query += "FORMVER=1.01\n"
         query += "REPTYPE=Peptide\n"
-        query += "REPORT=%s\n" % (config.mascot[form]["report"])
+        query += "REPORT={}\n".format(config.mascot[form]["report"])
         query += "PEAK=AUTO\n"
         query += "FORMAT=Mascot generic\n"
 
         # title and user
-        query += "COM=%s\n" % (config.mascot["common"]["title"])
-        query += "USERNAME=%s\n" % (config.mascot["common"]["userName"])
-        query += "USEREMAIL=%s\n" % (config.mascot["common"]["userEmail"])
+        query += "COM={}\n".format(config.mascot["common"]["title"])
+        query += "USERNAME={}\n".format(config.mascot["common"]["userName"])
+        query += "USEREMAIL={}\n".format(config.mascot["common"]["userEmail"])
 
         # taxonomy
-        query += "DB=%s\n" % (config.mascot[form]["database"])
-        query += "TAXONOMY=%s\n" % (config.mascot[form]["taxonomy"])
-        query += "CLE=%s\n" % (config.mascot[form]["enzyme"])
-        query += "PFA=%s\n" % (config.mascot[form]["miscleavages"])
-        query += "DECOY=%s\n" % (config.mascot[form]["decoy"])
+        query += "DB={}\n".format(config.mascot[form]["database"])
+        query += "TAXONOMY={}\n".format(config.mascot[form]["taxonomy"])
+        query += "CLE={}\n".format(config.mascot[form]["enzyme"])
+        query += "PFA={}\n".format(config.mascot[form]["miscleavages"])
+        query += "DECOY={}\n".format(config.mascot[form]["decoy"])
 
         # fixed modifications
         query += "MODS="
         for mod in config.mascot[form]["fixedMods"]:
-            query += "%s," % (mod)
+            query += f"{mod},"
         query += "\n"
 
         # variable modifications
         query += "IT_MODS="
         for mod in config.mascot[form]["variableMods"]:
-            query += "%s," % (mod)
+            query += f"{mod},"
         query += "\n"
 
         # PMF params
         if config.mascot["common"]["searchType"] == "pmf":
-            query += "SEG=%s\n" % (config.mascot["pmf"]["proteinMass"])
-            query += "TOL=%s\n" % (config.mascot["pmf"]["peptideTol"])
-            query += "TOLU=%s\n" % (config.mascot["pmf"]["peptideTolUnits"])
-            query += "MASS=%s\n" % (config.mascot["pmf"]["massType"])
-            query += "CHARGE=%s\n" % (config.mascot["pmf"]["charge"])
+            query += "SEG={}\n".format(config.mascot["pmf"]["proteinMass"])
+            query += "TOL={}\n".format(config.mascot["pmf"]["peptideTol"])
+            query += "TOLU={}\n".format(config.mascot["pmf"]["peptideTolUnits"])
+            query += "MASS={}\n".format(config.mascot["pmf"]["massType"])
+            query += "CHARGE={}\n".format(config.mascot["pmf"]["charge"])
 
             # add peaklist
             query += self.paramQuery_value.GetValue()
 
         # MIS params
         elif config.mascot["common"]["searchType"] == "mis":
-            query += "PRECURSOR=%s\n" % (config.mascot["mis"]["peptideMass"])
-            query += "TOL=%s\n" % (config.mascot["mis"]["peptideTol"])
-            query += "TOLU=%s\n" % (config.mascot["mis"]["peptideTolUnits"])
-            query += "ITOL=%s\n" % (config.mascot["mis"]["msmsTol"])
-            query += "ITOLU=%s\n" % (config.mascot["mis"]["msmsTolUnits"])
-            query += "MASS=%s\n" % (config.mascot["mis"]["massType"])
-            query += "CHARGE=%s\n" % (config.mascot["mis"]["charge"])
-            query += "INSTRUMENT=%s\n" % (config.mascot["mis"]["instrument"])
-            query += "QUANTITATION=%s\n" % (config.mascot["mis"]["quantitation"])
-            query += "ERRORTOLERANT=%s\n" % (config.mascot["mis"]["errorTolerant"])
+            query += "PRECURSOR={}\n".format(config.mascot["mis"]["peptideMass"])
+            query += "TOL={}\n".format(config.mascot["mis"]["peptideTol"])
+            query += "TOLU={}\n".format(config.mascot["mis"]["peptideTolUnits"])
+            query += "ITOL={}\n".format(config.mascot["mis"]["msmsTol"])
+            query += "ITOLU={}\n".format(config.mascot["mis"]["msmsTolUnits"])
+            query += "MASS={}\n".format(config.mascot["mis"]["massType"])
+            query += "CHARGE={}\n".format(config.mascot["mis"]["charge"])
+            query += "INSTRUMENT={}\n".format(config.mascot["mis"]["instrument"])
+            query += "QUANTITATION={}\n".format(config.mascot["mis"]["quantitation"])
+            query += "ERRORTOLERANT={}\n".format(config.mascot["mis"]["errorTolerant"])
 
             # add peaklist
             query += "BEGIN IONS\n"
-            query += "PEPMASS=%s\n" % (config.mascot["mis"]["peptideMass"])
+            query += "PEPMASS={}\n".format(config.mascot["mis"]["peptideMass"])
             query += self.paramQuery_value.GetValue()
             query += "\nEND IONS\n"
 
         # SQ params
         elif config.mascot["common"]["searchType"] == "sq":
-            query += "TOL=%s\n" % (config.mascot["sq"]["peptideTol"])
-            query += "TOLU=%s\n" % (config.mascot["sq"]["peptideTolUnits"])
-            query += "ITOL=%s\n" % (config.mascot["sq"]["msmsTol"])
-            query += "ITOLU=%s\n" % (config.mascot["sq"]["msmsTolUnits"])
-            query += "MASS=%s\n" % (config.mascot["sq"]["massType"])
-            query += "CHARGE=%s\n" % (config.mascot["sq"]["charge"])
-            query += "INSTRUMENT=%s\n" % (config.mascot["sq"]["instrument"])
-            query += "QUANTITATION=%s\n" % (config.mascot["sq"]["quantitation"])
+            query += "TOL={}\n".format(config.mascot["sq"]["peptideTol"])
+            query += "TOLU={}\n".format(config.mascot["sq"]["peptideTolUnits"])
+            query += "ITOL={}\n".format(config.mascot["sq"]["msmsTol"])
+            query += "ITOLU={}\n".format(config.mascot["sq"]["msmsTolUnits"])
+            query += "MASS={}\n".format(config.mascot["sq"]["massType"])
+            query += "CHARGE={}\n".format(config.mascot["sq"]["charge"])
+            query += "INSTRUMENT={}\n".format(config.mascot["sq"]["instrument"])
+            query += "QUANTITATION={}\n".format(config.mascot["sq"]["quantitation"])
 
             # add peaklist
             query += self.paramQuery_value.GetValue()
@@ -2333,20 +2321,16 @@ class panelMascot(wx.MiniFrame):
         buff += "</head>\n\n"
 
         buff += '<body onload="runsearch()">\n'
-        buff += (
-            '  <form action="%s" id="mainSearch" enctype="multipart/form-data" method="post">\n'
-            % (script)
-        )
+        buff += f'  <form action="{script}" id="mainSearch" enctype="multipart/form-data" method="post">\n'
         buff += '    <div style="display:none;">\n\n'
         buff += (
-            '      <textarea name="QUE" rows="6" cols="30">\n%s\n</textarea>\n\n'
-            % (query)
+            f'      <textarea name="QUE" rows="6" cols="30">\n{query}\n</textarea>\n\n'
         )
         buff += "    </div>\n\n"
 
         buff += '    <div id="info">\n'
         buff += "      <h1>mMass - Mascot Search</h1>\n"
-        buff += '      <p id="sending">Sending data to %s &hellip;</p>\n' % (name)
+        buff += f'      <p id="sending">Sending data to {name} &hellip;</p>\n'
         buff += '      <p id="wait">Please wait &hellip;</p>\n'
         buff += '      <p id="note">Press the <strong>Search</strong> button if data was not sent automatically.</p>\n'
         buff += '      <p id="button"><input type="submit" value="Search" /></p>\n'

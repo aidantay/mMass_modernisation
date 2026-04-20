@@ -62,6 +62,7 @@ class dlgError(wx.Dialog):
         else:
             try:
                 import distro
+
                 linux_dist = " ".join(distro.linux_distribution())
             except (ImportError, AttributeError):
                 linux_dist = platform.release()

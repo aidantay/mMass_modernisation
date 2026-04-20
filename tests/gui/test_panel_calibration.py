@@ -335,7 +335,7 @@ def test_apply_calibration(panel, mock_main_frame, mocker):
             self.kwargs = kwargs
         def start(self):
             self.target(**self.kwargs)
-        def isAlive(self):
+        def is_alive(self):
             return False
 
     mocker.patch('threading.Thread', side_effect=MockThread)
