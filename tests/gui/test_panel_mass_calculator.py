@@ -60,7 +60,7 @@ def calculator_panel(wx_app, mock_parent, patched_config, mocker):
     
     # Patch updateTmpSpectrum to avoid numpy comparison ValueError (using 'is' instead of '==')
     import types
-    panel.updateTmpSpectrum = types.MethodType(safe_updateTmpSpectrum, panel, panel.__class__)
+    panel.updateTmpSpectrum = types.MethodType(safe_updateTmpSpectrum, panel)
     
     yield panel
     

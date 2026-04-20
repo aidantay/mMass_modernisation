@@ -141,6 +141,7 @@ class panelMassToFormula(wx.MiniFrame):
             -1,
             str(config.massToFormula["tolerance"]),
             size=(50, -1),
+            style=wx.TE_PROCESS_ENTER,
             validator=mwx.validator("floatPos"),
         )
         self.tolerance_value.Bind(wx.EVT_TEXT_ENTER, self.onGenerate)
@@ -379,10 +380,11 @@ class panelMassToFormula(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._disabler = wx.WindowDisabler(self)
             self.mainSizer.Show(4)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_disabler"):
+                del self._disabler
             self.mainSizer.Hide(4)
             self.processing = None
             mspy.start()
@@ -481,7 +483,7 @@ class panelMassToFormula(wx.MiniFrame):
         # run search
         try:
             path = os.path.join(tempfile.gettempdir(), "mmass_formula_search.html")
-            htmlFile = file(path, "w")
+            htmlFile = open(path, "wb")
             htmlFile.write(htmlData.encode("utf-8"))
             htmlFile.close()
             webbrowser.open("file://" + path, autoraise=1)

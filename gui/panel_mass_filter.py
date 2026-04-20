@@ -18,7 +18,7 @@
 # load libs
 import wx
 
-from gui.panel_match import panelMatch
+from .panel_match import panelMatch
 
 from . import config, images, libs, mwx
 

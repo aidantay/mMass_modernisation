@@ -110,7 +110,7 @@ class panelCalibration(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.references_butt.SetToolTip(wx.ToolTip("Calibration references"))
+        self.references_butt.SetToolTip("Calibration references")
         self.references_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.errors_butt = wx.BitmapButton(
@@ -120,7 +120,7 @@ class panelCalibration(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.errors_butt.SetToolTip(wx.ToolTip("Calibration error plot"))
+        self.errors_butt.SetToolTip("Calibration error plot")
         self.errors_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         # make controls

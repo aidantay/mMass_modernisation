@@ -11,20 +11,7 @@ from gui import images
 import mspy
 
 @pytest.fixture
-def app():
-    """Create wx.App instance."""
-    app = wx.App(False)
-    # Ensure images.lib is populated with required keys
-    dummy_bitmap = wx.EmptyBitmap(16, 16)
-    required_images = ['bgrToolbar', 'bgrControlbarBorder', 'bgrControlbar', 'stopper']
-    for key in required_images:
-        if key not in images.lib:
-            images.lib[key] = dummy_bitmap
-    yield app
-    app.Destroy()
-
-@pytest.fixture
-def mock_parent(app, mocker):
+def mock_parent(wx_app, mocker):
     """Create mock parent for the panel."""
     # Use a real wx.Frame to avoid TypeError in MiniFrame.__init__
     parent = wx.Frame(None)
@@ -35,7 +22,7 @@ def mock_parent(app, mocker):
         parent.Destroy()
 
 @pytest.fixture
-def panel(app, mock_parent):
+def panel(wx_app, mock_parent):
     """Instantiate panelMassToFormula."""
     # Ensure config.massToFormula and config.main are properly initialized
     # They are initialized on import in gui.config
@@ -241,9 +228,8 @@ def test_on_item_search(panel, server_id, server_name, mocker):
     mocker.patch.object(panel.formulaeList, 'getSelected', return_value=[0])
     mocker.patch.object(panel.formulaeList, 'GetItemData', return_value=0)
     mock_web_open = mocker.patch('webbrowser.open')
-    # We need to mock the built-in 'file' for Python 2.7 or 'open'
-    # panel_mass_to_formula.py uses 'file(path, 'w')'
-    mock_file = mocker.patch('gui.panel_mass_to_formula.file', mocker.mock_open(), create=True)
+    # We need to mock the built-in 'open'
+    mock_file = mocker.patch('builtins.open', mocker.mock_open())
     panel.onItemSearch(mock_evt)
                     
     mock_file.assert_called()
@@ -251,6 +237,8 @@ def test_on_item_search(panel, server_id, server_name, mocker):
     # We don't check full HTML but verify formula and server name are present
     handle = mock_file()
     written_content = handle.write.call_args[0][0]
+    if isinstance(written_content, bytes):
+        written_content = written_content.decode('utf-8')
     assert server_name in written_content
     assert 'C6H12O6' in written_content
                     
@@ -265,7 +253,7 @@ def test_on_item_search_exception(panel, mocker):
     
     mocker.patch.object(panel.formulaeList, 'getSelected', return_value=[0])
     mocker.patch.object(panel.formulaeList, 'GetItemData', return_value=0)
-    mocker.patch('gui.panel_mass_to_formula.file', side_effect=IOError("Test Error"), create=True)
+    mocker.patch('builtins.open', side_effect=IOError("Test Error"))
     mock_dlg = mocker.patch('gui.mwx.dlgMessage')
     mock_bell = mocker.patch('wx.Bell')
     panel.onItemSearch(mock_evt)
@@ -340,21 +328,20 @@ def test_on_generate_limit_warning(panel, mocker):
 
 def test_on_processing(panel, mocker):
     """Test onProcessing show/hide gauge."""
-    mock_modal = mocker.patch.object(panel, 'MakeModal', create=True)
+    mock_disabler = mocker.patch('wx.WindowDisabler')
     mocker.patch.object(panel, 'Layout')
     mock_mspy_start = mocker.patch('mspy.start')
     # Show
     panel.onProcessing(True)
-    mock_modal.assert_called_with(True)
+    mock_disabler.assert_called_with(panel)
     assert panel.mainSizer.IsShown(4)
-                
+
     # Hide
     panel.onProcessing(False)
-    mock_modal.assert_called_with(False)
+    assert not hasattr(panel, '_disabler')
     assert not panel.mainSizer.IsShown(4)
     assert panel.processing is None
     mock_mspy_start.assert_called_once()
-
 def test_on_stop(panel, mocker):
     """Test onStop behavior."""
     # Case 1: Processing alive -> mspy.stop called

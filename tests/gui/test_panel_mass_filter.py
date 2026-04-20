@@ -13,13 +13,7 @@ from gui import mwx
 from gui import panel_mass_filter
 
 @pytest.fixture
-def app():
-    app = wx.App(False)
-    yield app
-    app.Destroy()
-
-@pytest.fixture
-def mock_parent(app, mocker):
+def mock_parent(wx_app, mocker):
     parent = wx.Frame(None)
     parent.updateMassPoints = mocker.MagicMock()
     parent.onDocumentChanged = mocker.MagicMock()
@@ -41,7 +35,7 @@ def mock_document(mocker):
     return doc
 
 @pytest.fixture
-def panel(app, mock_parent, mocker):
+def panel(wx_app, mock_parent, mocker):
     # Patch config and images before initialization
     mocker.patch.dict(config.main, {'mzDigits': 4, 'ppmDigits': 2, 'macListCtrlGeneric': 0, 'reverseScrolling': 0})
     mocker.patch.dict(config.match, {'units': 'ppm', 'ppmDigits': 2})

@@ -209,7 +209,7 @@ def test_onBeginDrag(panel, mocker):
     panel.monomerList._selected = [0]
     panel.monomerMap = [('Gly', 'Glycine')]
     
-    mock_data_obj = mocker.patch('wx.PyTextDataObject')
+    mock_data_obj = mocker.patch('wx.TextDataObject')
     mock_drop_source = mocker.patch('wx.DropSource')
     
     # We need to mock return value of DoDragDrop

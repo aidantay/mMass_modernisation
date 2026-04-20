@@ -574,8 +574,8 @@ def test_updateMatchSummary(panel, mocker):
     # summaryList is a sortListCtrl which inherits from wx.ListCtrl
     mock_delete = mocker.patch.object(panel.summaryList, 'DeleteAllItems')
     mock_set_map = mocker.patch.object(panel.summaryList, 'setDataMap')
-    mock_insert = mocker.patch.object(panel.summaryList, 'InsertStringItem')
-    mock_set_string = mocker.patch.object(panel.summaryList, 'SetStringItem')
+    mock_insert = mocker.patch.object(panel.summaryList, 'InsertItem')
+    mock_set_string = mocker.patch.object(panel.summaryList, 'SetItem')
     mock_set_data = mocker.patch.object(panel.summaryList, 'SetItemData')
     mock_visible = mocker.patch.object(panel.summaryList, 'EnsureVisible')
     mocker.patch.object(panel.summaryList, 'updateItemsBackground')
@@ -617,4 +617,24 @@ def test_makeCurrentPeaklist(panel):
     assert pytest.approx(mz100.ai) == 0.50
     assert pytest.approx(mz200.ai) == 0.29
     assert pytest.approx(mz100.base) == 0.08
+
+def test_tooltips(panel):
+    """Test tooltips for buttons."""
+    # Check if tooltips are set correctly
+    assert panel.errors_butt.GetToolTipText() == "Error plot"
+    assert panel.summary_butt.GetToolTipText() == "Match summary"
+
+def test_onProcessing(panel, mocker):
+    """Test onProcessing for modal behavior."""
+    # Mock wx.WindowDisabler
+    mock_disabler = mocker.patch('wx.WindowDisabler', autospec=True)
+    
+    # Enable processing
+    panel.onProcessing(True)
+    assert hasattr(panel, '_window_disabler')
+    mock_disabler.assert_called_once()
+    
+    # Disable processing
+    panel.onProcessing(False)
+    assert not hasattr(panel, '_window_disabler')
 

@@ -104,7 +104,7 @@ class panelDocumentExport(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.image_butt.SetToolTip(wx.ToolTip("Export spectrum image"))
+        self.image_butt.SetToolTip("Export spectrum image")
         self.image_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.peaklist_butt = wx.BitmapButton(
@@ -114,7 +114,7 @@ class panelDocumentExport(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.peaklist_butt.SetToolTip(wx.ToolTip("Export peak list"))
+        self.peaklist_butt.SetToolTip("Export peak list")
         self.peaklist_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.spectrum_butt = wx.BitmapButton(
@@ -124,7 +124,7 @@ class panelDocumentExport(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.spectrum_butt.SetToolTip(wx.ToolTip("Export spectrum data"))
+        self.spectrum_butt.SetToolTip("Export spectrum data")
         self.spectrum_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         # make controls

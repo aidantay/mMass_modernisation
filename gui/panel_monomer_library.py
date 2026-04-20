@@ -177,7 +177,7 @@ class panelMonomerLibrary(wx.MiniFrame):
         abbr = self.monomerMap[index[0]][0]
 
         # create data object with text
-        dataObject = wx.PyTextDataObject()
+        dataObject = wx.TextDataObject()
         dataObject.SetText(abbr)
 
         # create drop source

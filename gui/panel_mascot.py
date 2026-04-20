@@ -117,7 +117,7 @@ class panelMascot(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.pmf_butt.SetToolTip(wx.ToolTip("Peptide mass fingerprint"))
+        self.pmf_butt.SetToolTip("Peptide mass fingerprint")
         self.pmf_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.mis_butt = wx.BitmapButton(
@@ -127,7 +127,7 @@ class panelMascot(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.mis_butt.SetToolTip(wx.ToolTip("MS/MS ion search"))
+        self.mis_butt.SetToolTip("MS/MS ion search")
         self.mis_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.sq_butt = wx.BitmapButton(
@@ -137,7 +137,7 @@ class panelMascot(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.sq_butt.SetToolTip(wx.ToolTip("Sequence query"))
+        self.sq_butt.SetToolTip("Sequence query")
         self.sq_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.query_butt = wx.BitmapButton(
@@ -147,7 +147,7 @@ class panelMascot(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.query_butt.SetToolTip(wx.ToolTip("Query / Peak list"))
+        self.query_butt.SetToolTip("Query / Peak list")
         self.query_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         server_label = wx.StaticText(panel, -1, "Server:")

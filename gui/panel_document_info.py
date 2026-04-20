@@ -98,7 +98,7 @@ class panelDocumentInfo(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.summary_butt.SetToolTip(wx.ToolTip("Document summary"))
+        self.summary_butt.SetToolTip("Document summary")
         self.summary_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.spectrum_butt = wx.BitmapButton(

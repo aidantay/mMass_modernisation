@@ -128,7 +128,7 @@ class panelMatch(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.errors_butt.SetToolTip(wx.ToolTip("Error plot"))
+        self.errors_butt.SetToolTip("Error plot")
         self.errors_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.summary_butt = wx.BitmapButton(
@@ -138,7 +138,7 @@ class panelMatch(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.summary_butt.SetToolTip(wx.ToolTip("Match summary"))
+        self.summary_butt.SetToolTip("Match summary")
         self.summary_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         # make match fields
@@ -420,10 +420,11 @@ class panelMatch(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._window_disabler = wx.WindowDisabler()
             self.mainSizer.Show(4)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_window_disabler"):
+                del self._window_disabler
             self.mainSizer.Hide(4)
             self.processing = None
             mspy.start()
@@ -812,8 +813,8 @@ class panelMatch(wx.MiniFrame):
 
         # add new data
         for row, item in enumerate(self.currentSummary):
-            self.summaryList.InsertStringItem(row, item[0])
-            self.summaryList.SetStringItem(row, 1, str(item[1]))
+            self.summaryList.InsertItem(row, item[0])
+            self.summaryList.SetItem(row, 1, str(item[1]))
             self.summaryList.SetItemData(row, row)
 
         # update background
