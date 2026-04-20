@@ -44,7 +44,7 @@ class panelProcessing(wx.MiniFrame):
             "Processing",
             size=(300, -1),
             style=wx.DEFAULT_FRAME_STYLE
-            & ~(wx.RESIZE_BORDER | wx.RESIZE_BOX | wx.MAXIMIZE_BOX),
+            & ~(wx.RESIZE_BORDER | getattr(wx, "RESIZE_BOX", 0) | wx.MAXIMIZE_BOX),
         )
 
         self.parent = parent
@@ -131,7 +131,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.math_butt.SetToolTip(wx.ToolTip("Math operations"))
+        self.math_butt.SetToolTip("Math operations")
         self.math_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.crop_butt = wx.BitmapButton(
@@ -141,7 +141,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.crop_butt.SetToolTip(wx.ToolTip("Crop data"))
+        self.crop_butt.SetToolTip("Crop data")
         self.crop_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.baseline_butt = wx.BitmapButton(
@@ -151,7 +151,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.baseline_butt.SetToolTip(wx.ToolTip("Baseline correction"))
+        self.baseline_butt.SetToolTip("Baseline correction")
         self.baseline_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.smoothing_butt = wx.BitmapButton(
@@ -161,7 +161,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.smoothing_butt.SetToolTip(wx.ToolTip("Smoothing"))
+        self.smoothing_butt.SetToolTip("Smoothing")
         self.smoothing_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.peakpicking_butt = wx.BitmapButton(
@@ -171,7 +171,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.peakpicking_butt.SetToolTip(wx.ToolTip("Peak picking"))
+        self.peakpicking_butt.SetToolTip("Peak picking")
         self.peakpicking_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.deisotoping_butt = wx.BitmapButton(
@@ -181,7 +181,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.deisotoping_butt.SetToolTip(wx.ToolTip("Deisotoping"))
+        self.deisotoping_butt.SetToolTip("Deisotoping")
         self.deisotoping_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.deconvolution_butt = wx.BitmapButton(
@@ -191,7 +191,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.deconvolution_butt.SetToolTip(wx.ToolTip("Deconvolution"))
+        self.deconvolution_butt.SetToolTip("Deconvolution")
         self.deconvolution_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.batch_butt = wx.BitmapButton(
@@ -201,7 +201,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.batch_butt.SetToolTip(wx.ToolTip("Batch processing"))
+        self.batch_butt.SetToolTip("Batch processing")
         self.batch_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.presets_butt = wx.BitmapButton(
@@ -211,7 +211,7 @@ class panelProcessing(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.presets_butt.SetToolTip(wx.ToolTip("Processing presets"))
+        self.presets_butt.SetToolTip("Processing presets")
         self.presets_butt.Bind(wx.EVT_BUTTON, self.onPresets)
 
         self.preview_butt = wx.Button(
@@ -447,7 +447,7 @@ class panelProcessing(wx.MiniFrame):
         self.baselinePrecision_slider = wx.Slider(
             panel,
             -1,
-            config.processing["baseline"]["precision"],
+            int(config.processing["baseline"]["precision"]),
             1,
             100,
             size=(150, -1),
@@ -460,7 +460,7 @@ class panelProcessing(wx.MiniFrame):
         self.baselineOffset_slider = wx.Slider(
             panel,
             -1,
-            config.processing["baseline"]["offset"] * 100,
+            int(config.processing["baseline"]["offset"] * 100),
             0,
             100,
             size=(150, -1),
@@ -528,7 +528,7 @@ class panelProcessing(wx.MiniFrame):
         self.smoothingCycles_slider = wx.Slider(
             panel,
             -1,
-            config.processing["smoothing"]["cycles"],
+            int(config.processing["smoothing"]["cycles"]),
             1,
             5,
             size=(150, -1),
@@ -625,7 +625,7 @@ class panelProcessing(wx.MiniFrame):
         self.peakpickingHeight_slider = wx.Slider(
             panel,
             -1,
-            config.processing["peakpicking"]["pickingHeight"] * 100,
+            int(config.processing["peakpicking"]["pickingHeight"] * 100),
             1,
             100,
             size=(150, -1),
@@ -665,7 +665,7 @@ class panelProcessing(wx.MiniFrame):
         peakpickingRemoveShoulders_label = wx.StaticText(
             panel, -1, "Remove shoulder peaks:"
         )
-        peakpickingRemoveShoulders_label.SetToolTip(wx.ToolTip("For FTMS data only."))
+        peakpickingRemoveShoulders_label.SetToolTip("For FTMS data only.")
         self.peakpickingRemoveShoulders_check = wx.CheckBox(panel, -1, "")
         self.peakpickingRemoveShoulders_check.SetValue(
             bool(config.processing["peakpicking"]["removeShoulders"])
@@ -895,7 +895,7 @@ class panelProcessing(wx.MiniFrame):
             wx.StaticLine(panel),
             (6, 0),
             (1, 3),
-            flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL,
+            flag=wx.EXPAND,
         )
         grid.Add(
             deisotopingLabelEnvelopeTool_label,
@@ -1240,10 +1240,11 @@ class panelProcessing(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._window_disabler = wx.WindowDisabler(self)
             self.mainSizer.Show(9)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_window_disabler") and self._window_disabler:
+                del self._window_disabler
             self.mainSizer.Hide(9)
             self.processing = None
             mspy.start()
@@ -1261,7 +1262,7 @@ class panelProcessing(wx.MiniFrame):
     def onStop(self, evt):
         """Cancel current processing."""
 
-        if self.processing and self.processing.isAlive():
+        if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
             wx.Bell()
@@ -1303,8 +1304,8 @@ class panelProcessing(wx.MiniFrame):
         self.cropHighMass_value.SetValue(str(presets["crop"]["highMass"]))
 
         # set baseline
-        self.baselinePrecision_slider.SetValue(presets["baseline"]["precision"])
-        self.baselineOffset_slider.SetValue(presets["baseline"]["offset"] * 100)
+        self.baselinePrecision_slider.SetValue(int(presets["baseline"]["precision"]))
+        self.baselineOffset_slider.SetValue(int(presets["baseline"]["offset"] * 100))
 
         # set smoothing
         if presets["smoothing"]["method"] == "MA":
@@ -1315,7 +1316,7 @@ class panelProcessing(wx.MiniFrame):
             self.smoothingMethod_choice.Select(2)
 
         self.smoothingWindow_value.SetValue(str(presets["smoothing"]["windowSize"]))
-        self.smoothingCycles_slider.SetValue(presets["smoothing"]["cycles"])
+        self.smoothingCycles_slider.SetValue(int(presets["smoothing"]["cycles"]))
 
         # set peakpicking
         self.peakpickingSNThreshold_value.SetValue(
@@ -1328,7 +1329,7 @@ class panelProcessing(wx.MiniFrame):
             str(presets["peakpicking"]["relIntThreshold"] * 100)
         )
         self.peakpickingHeight_slider.SetValue(
-            presets["peakpicking"]["pickingHeight"] * 100
+            int(presets["peakpicking"]["pickingHeight"] * 100)
         )
         self.peakpickingBaseline_check.SetValue(
             bool(presets["peakpicking"]["baseline"])
@@ -1604,7 +1605,7 @@ class panelProcessing(wx.MiniFrame):
 
         # pulse gauge while working
         self.processing.start()
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # send tmp spectrum to plot canvas
@@ -1684,7 +1685,7 @@ class panelProcessing(wx.MiniFrame):
 
         # pulse gauge while working
         self.processing.start()
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update gui

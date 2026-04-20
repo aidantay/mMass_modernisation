@@ -24,10 +24,10 @@ import mspy
 from gui.panel_match import panelMatch
 from gui.panel_monomer_library import panelMonomerLibrary
 
-from . import config, images, libs, mwx
+from gui import config, images, libs, mwx
 
 # load modules
-from .ids import *
+from gui.ids import *
 
 # FLOATING PANEL WITH SEQUENCE TOOLS
 # ----------------------------------
@@ -124,7 +124,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.editor_butt.SetToolTip(wx.ToolTip("Sequence editor"))
+        self.editor_butt.SetToolTip("Sequence editor")
         self.editor_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.modifications_butt = wx.BitmapButton(
@@ -134,7 +134,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.modifications_butt.SetToolTip(wx.ToolTip("Sequence modifications"))
+        self.modifications_butt.SetToolTip("Sequence modifications")
         self.modifications_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.digest_butt = wx.BitmapButton(
@@ -144,7 +144,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.digest_butt.SetToolTip(wx.ToolTip("Protein digest"))
+        self.digest_butt.SetToolTip("Protein digest")
         self.digest_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.fragment_butt = wx.BitmapButton(
@@ -154,7 +154,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.fragment_butt.SetToolTip(wx.ToolTip("Peptide fragmentation"))
+        self.fragment_butt.SetToolTip("Peptide fragmentation")
         self.fragment_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.search_butt = wx.BitmapButton(
@@ -164,7 +164,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.search_butt.SetToolTip(wx.ToolTip("Mass search"))
+        self.search_butt.SetToolTip("Mass search")
         self.search_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         # pack elements
@@ -232,8 +232,8 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.monomerLibrary_butt.SetToolTip(wx.ToolTip("Monomer library"))
-        self.monomerLibrary_butt.Bind(wx.EVT_BUTTON, self.onMonomerLibrary)
+        self.monomerLibrary_butt.SetToolTip("Monomer library")
+        self.monomerLibrary_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         sequenceType_label = wx.StaticText(panel, -1, "Sequence type:")
         sequenceType_label.SetFont(wx.SMALL_FONT)
@@ -285,7 +285,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.modsPresets_butt.SetToolTip(wx.ToolTip("Modifications presets"))
+        self.modsPresets_butt.SetToolTip("Modifications presets")
         self.modsPresets_butt.Bind(wx.EVT_BUTTON, self.onPresets)
 
         self.modsSpecifity_check = wx.CheckBox(
@@ -395,7 +395,7 @@ class panelSequence(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.fragmentPresets_butt.SetToolTip(wx.ToolTip("Fragments presets"))
+        self.fragmentPresets_butt.SetToolTip("Fragments presets")
         self.fragmentPresets_butt.Bind(wx.EVT_BUTTON, self.onPresets)
 
         fragmentMassType_label = wx.StaticText(panel, -1, "Mass:")
@@ -592,26 +592,26 @@ class panelSequence(wx.MiniFrame):
             self.sequenceEditorSizer.Add(
                 sequenceTitleSizer,
                 0,
-                wx.EXPAND | wx.ALIGN_CENTER | wx.ALL,
+                wx.EXPAND | wx.ALL,
                 mwx.PANEL_SPACE_MAIN,
             )
         else:
             self.sequenceEditorSizer.Add(
                 sequenceTitleSizer,
                 0,
-                wx.EXPAND | wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+                wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                 mwx.PANEL_SPACE_MAIN,
             )
         self.sequenceEditorSizer.Add(
             self.sequenceCanvas,
             1,
-            wx.EXPAND | wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
         )
         self.sequenceEditorSizer.Add(
             self.sequenceGrid,
             1,
-            wx.EXPAND | wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
         )
         self.sequenceEditorSizer.Hide(2)
@@ -908,7 +908,7 @@ class panelSequence(wx.MiniFrame):
             config.sequence["fragment"]["fragments"].count("losses")
         )
         self.fragmentLossDefined_check.SetToolTip(
-            wx.ToolTip("Apply specific losses from monomer library.")
+            "Apply specific losses from monomer library."
         )
 
         self.fragmentLossCombi_check = wx.CheckBox(ctrlPanel, -1, "Combinations")
@@ -922,7 +922,7 @@ class panelSequence(wx.MiniFrame):
         self.fragmentGainH2O_check.SetValue(
             config.sequence["fragment"]["fragments"].count("+H2O")
         )
-        self.fragmentGainH2O_check.SetToolTip(wx.ToolTip("Allowed for 'b' ions only."))
+        self.fragmentGainH2O_check.SetToolTip("Allowed for 'b' ions only.")
 
         self.fragmentGainCO_check = wx.CheckBox(ctrlPanel, -1, "+CO")
         self.fragmentGainCO_check.SetFont(wx.SMALL_FONT)
@@ -930,7 +930,7 @@ class panelSequence(wx.MiniFrame):
             config.sequence["fragment"]["fragments"].count("+CO")
         )
         self.fragmentGainCO_check.SetToolTip(
-            wx.ToolTip("Allowed for 'b' and 'c' ions only.")
+            "Allowed for 'b' and 'c' ions only."
         )
 
         self.fragmentScrambling_check = wx.CheckBox(ctrlPanel, -1, "Allow scrambling")
@@ -939,7 +939,7 @@ class panelSequence(wx.MiniFrame):
             config.sequence["fragment"]["fragments"].count("scrambling")
         )
         self.fragmentScrambling_check.SetToolTip(
-            wx.ToolTip("Allow non-direct sequencing.")
+            "Allow non-direct sequencing."
         )
         self.fragmentScrambling_check.Bind(
             wx.EVT_CHECKBOX, self.updateAvailableFragments
@@ -1269,10 +1269,11 @@ class panelSequence(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._disabler = wx.WindowDisabler(self)
             self.mainSizer.Show(6)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_disabler"):
+                del self._disabler
             self.mainSizer.Hide(6)
             self.processing = None
             mspy.start()
@@ -1290,7 +1291,7 @@ class panelSequence(wx.MiniFrame):
     def onStop(self, evt):
         """Cancel current processing."""
 
-        if self.processing and self.processing.isAlive():
+        if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
             wx.Bell()
@@ -2101,7 +2102,7 @@ class panelSequence(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update digest list
@@ -2157,7 +2158,7 @@ class panelSequence(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update digest list
@@ -2206,7 +2207,7 @@ class panelSequence(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update search list
@@ -4006,7 +4007,7 @@ class sequenceGrid(wx.StaticBoxSizer):
         self.grid.AddGrowableCol(9)
 
         # add to self
-        self.Add(self.grid, 1, wx.EXPAND | wx.ALIGN_CENTER | wx.ALL, 10)
+        self.Add(self.grid, 1, wx.EXPAND | wx.ALL, 10)
 
         # lock items
         self._lockItems()
@@ -4124,7 +4125,7 @@ class sequenceGrid(wx.StaticBoxSizer):
             self.items.append(item)
 
             # add to grid
-            row = (length + x) / 5
+            row = (length + x) // 5
             col = 2 * (x % 5)
 
             label = wx.StaticText(self.panel, -1, str(length + x + 1))

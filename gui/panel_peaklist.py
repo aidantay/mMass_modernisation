@@ -91,7 +91,7 @@ class panelPeaklist(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.addPeak_butt.SetToolTip(wx.ToolTip("Add peak manually..."))
+        self.addPeak_butt.SetToolTip("Add peak manually...")
         self.addPeak_butt.Bind(wx.EVT_BUTTON, self.onAdd)
 
         self.deletePeak_butt = wx.BitmapButton(
@@ -101,7 +101,7 @@ class panelPeaklist(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.deletePeak_butt.SetToolTip(wx.ToolTip("Remove peaks..."))
+        self.deletePeak_butt.SetToolTip("Remove peaks...")
         self.deletePeak_butt.Bind(wx.EVT_BUTTON, self.onDelete)
 
         self.annotatePeak_butt = wx.BitmapButton(
@@ -111,7 +111,7 @@ class panelPeaklist(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.annotatePeak_butt.SetToolTip(wx.ToolTip("Annotate peak..."))
+        self.annotatePeak_butt.SetToolTip("Annotate peak...")
         self.annotatePeak_butt.Bind(wx.EVT_BUTTON, self.onAnnotate)
 
         self.editPeak_butt = wx.BitmapButton(
@@ -121,7 +121,7 @@ class panelPeaklist(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.editPeak_butt.SetToolTip(wx.ToolTip("Show / hide peak editor"))
+        self.editPeak_butt.SetToolTip("Show / hide peak editor")
         self.editPeak_butt.Bind(wx.EVT_BUTTON, self.onEdit)
 
         self.peaksCount = wx.StaticText(panel, -1, "")
@@ -396,7 +396,7 @@ class panelPeaklist(wx.Panel):
         buttons.Add(self.peakReplace_butt, 0)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        mainSizer.Add(grid, 0, wx.EXPAND | wx.ALIGN_CENTER | wx.ALL, 10)
+        mainSizer.Add(grid, 0, wx.EXPAND | wx.ALL, 10)
         mainSizer.Add(buttons, 0, wx.ALIGN_CENTER | wx.RIGHT | wx.LEFT | wx.BOTTOM, 10)
 
         # fit layout
@@ -607,9 +607,9 @@ class panelPeaklist(wx.Panel):
             return
 
         # popup menu
-        menuDeleteSelectedID = wx.NewId()
-        menuDeleteByThresholdID = wx.NewId()
-        menuDeleteAllID = wx.NewId()
+        menuDeleteSelectedID = wx.NewIdRef()
+        menuDeleteByThresholdID = wx.NewIdRef()
+        menuDeleteAllID = wx.NewIdRef()
 
         menu = wx.Menu()
         menu.Append(menuDeleteSelectedID, "Delete Selected")

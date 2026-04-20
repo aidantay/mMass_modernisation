@@ -22,10 +22,10 @@ import webbrowser
 
 import wx
 
-from . import config, images, mwx
+from gui import config, images, mwx
 
 # load modules
-from .ids import *
+from gui.ids import *
 
 # FLOATING PANEL WITH PROFOUND SEARCH
 # -----------------------------------
@@ -105,7 +105,7 @@ class panelProfound(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.pmf_butt.SetToolTip(wx.ToolTip("Peptide mass fingerprint"))
+        self.pmf_butt.SetToolTip("Peptide mass fingerprint")
         self.pmf_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.query_butt = wx.BitmapButton(
@@ -115,7 +115,7 @@ class panelProfound(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.query_butt.SetToolTip(wx.ToolTip("Peak list"))
+        self.query_butt.SetToolTip("Peak list")
         self.query_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.search_butt = wx.Button(
@@ -497,15 +497,15 @@ class panelProfound(wx.MiniFrame):
         pklSizer.Add(
             self.paramQuery_value,
             1,
-            wx.EXPAND | wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
         )
         pklSizer.Fit(pklPanel)
         pklPanel.SetSizer(pklSizer)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        mainSizer.Add(ctrlPanel, 0, wx.EXPAND | wx.ALIGN_CENTER)
-        mainSizer.Add(pklPanel, 1, wx.EXPAND | wx.ALIGN_CENTER)
+        mainSizer.Add(ctrlPanel, 0, wx.EXPAND)
+        mainSizer.Add(pklPanel, 1, wx.EXPAND)
 
         return mainSizer
 

@@ -190,7 +190,7 @@ def test_processing_digestion(panel, mocker):
     mocker.patch.object(mwx, 'dlgMessage')
     mock_thread = mocker.patch('threading.Thread')
     mock_thread_instance = mock_thread.return_value
-    mock_thread_instance.isAlive.return_value = False
+    mock_thread_instance.is_alive.return_value = False
     
     # Simulate runDigestion when start is called
     def simulate_start():
@@ -219,7 +219,7 @@ def test_processing_fragmentation(panel, mocker):
     
     mock_thread = mocker.patch('threading.Thread')
     mock_thread_instance = mock_thread.return_value
-    mock_thread_instance.isAlive.return_value = False
+    mock_thread_instance.is_alive.return_value = False
     def simulate_start():
         panel.runFragmentation()
     mock_thread_instance.start.side_effect = simulate_start
@@ -246,7 +246,7 @@ def test_processing_search(panel, mocker):
     
     mock_thread = mocker.patch('threading.Thread')
     mock_thread_instance = mock_thread.return_value
-    mock_thread_instance.isAlive.return_value = False
+    mock_thread_instance.is_alive.return_value = False
     def simulate_start():
         panel.runSearch()
     mock_thread_instance.start.side_effect = simulate_start

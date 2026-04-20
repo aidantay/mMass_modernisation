@@ -22,10 +22,10 @@ import webbrowser
 
 import wx
 
-from . import config, images, mwx
+from gui import config, images, mwx
 
 # load modules
-from .ids import *
+from gui.ids import *
 
 # FLOATING PANEL WITH PROSPECTOR SEARCH TOOLS
 # -------------------------------------------
@@ -108,7 +108,7 @@ class panelProspector(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.msFit_butt.SetToolTip(wx.ToolTip("MS-Fit Tool"))
+        self.msFit_butt.SetToolTip("MS-Fit Tool")
         self.msFit_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.msTag_butt = wx.BitmapButton(
@@ -118,7 +118,7 @@ class panelProspector(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.msTag_butt.SetToolTip(wx.ToolTip("MS-Tag Tool"))
+        self.msTag_butt.SetToolTip("MS-Tag Tool")
         self.msTag_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.query_butt = wx.BitmapButton(
@@ -128,7 +128,7 @@ class panelProspector(wx.MiniFrame):
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.query_butt.SetToolTip(wx.ToolTip("Peak list"))
+        self.query_butt.SetToolTip("Peak list")
         self.query_butt.Bind(wx.EVT_BUTTON, self.onToolSelected)
 
         self.search_butt = wx.Button(
@@ -715,7 +715,7 @@ class panelProspector(wx.MiniFrame):
         massesGrid.Add(
             self.paramMSTagPeptideTol_value,
             (2, 1),
-            flag=wx.ALIGN_CENTER_VERTICAL | wx.EXPAND,
+            flag=wx.EXPAND,
         )
         massesGrid.Add(
             self.paramMSTagPeptideTolUnits_choice,
@@ -730,7 +730,7 @@ class panelProspector(wx.MiniFrame):
         massesGrid.Add(
             self.paramMSTagMSMSTol_value,
             (3, 1),
-            flag=wx.ALIGN_CENTER_VERTICAL | wx.EXPAND,
+            flag=wx.EXPAND,
         )
         massesGrid.Add(
             self.paramMSTagMSMSTolUnits_choice,
@@ -895,15 +895,15 @@ class panelProspector(wx.MiniFrame):
         pklSizer.Add(
             self.paramQuery_value,
             1,
-            wx.EXPAND | wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
         )
         pklSizer.Fit(pklPanel)
         pklPanel.SetSizer(pklSizer)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        mainSizer.Add(ctrlPanel, 0, wx.EXPAND | wx.ALIGN_CENTER)
-        mainSizer.Add(pklPanel, 1, wx.EXPAND | wx.ALIGN_CENTER)
+        mainSizer.Add(ctrlPanel, 0, wx.EXPAND)
+        mainSizer.Add(pklPanel, 1, wx.EXPAND)
 
         return mainSizer
 

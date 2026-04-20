@@ -300,10 +300,11 @@ class panelPeakDifferences(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._disabler = wx.WindowDisabler(self)
             self.mainSizer.Show(2)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_disabler"):
+                del self._disabler
             self.mainSizer.Hide(2)
             self.processing = None
             mspy.start()

@@ -102,12 +102,9 @@ def mock_parent(wx_app, mocker):
 def panel(mock_parent, mock_config, mock_images, mocker):
     """Fixture for panelProcessing."""
     # Mock Slider.SetTickFreq because it might have incompatible signature in some wx versions
-    mocker.patch('wx.Slider.SetTickFreq')
-    # Mock MakeModal as it's missing in wxPython 4 but used in mMass
-    if not hasattr(wx.MiniFrame, 'MakeModal'):
-        mocker.patch.object(wx.MiniFrame, 'MakeModal', create=True)
-    
-    mocker.patch('mspy.start')
+    mocker.patch("wx.Slider.SetTickFreq")
+
+    mocker.patch("mspy.start")
     mocker.patch('mspy.stop')
     p = panelProcessing(mock_parent)
     yield p
@@ -474,7 +471,7 @@ def sync_thread(mocker):
     
     mocker.patch('threading.Thread.__init__', mock_init)
     mocker.patch('threading.Thread.start', mock_start)
-    mocker.patch('threading.Thread.isAlive', return_value=False)
+    mocker.patch('threading.Thread.is_alive', return_value=False)
 
 def test_onPreview_math(panel, mocker, sync_thread):
     """Test preview for math operations."""
@@ -757,7 +754,7 @@ def test_runApplyBatch_all_ops(panel, mocker, sync_thread):
 def test_onStop(panel, mocker):
     """Test stopping processing."""
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     
     stop_mock = mocker.patch('mspy.stop')
     panel.onStop(None)

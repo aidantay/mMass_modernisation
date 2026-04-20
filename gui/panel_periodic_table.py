@@ -42,7 +42,7 @@ class panelPeriodicTable(wx.MiniFrame):
             "Periodic Table of the Elements",
             size=(400, 300),
             style=wx.DEFAULT_FRAME_STYLE
-            & ~(wx.RESIZE_BOX | wx.RESIZE_BORDER | wx.MAXIMIZE_BOX),
+            & ~(getattr(wx, "RESIZE_BOX", 0) | wx.RESIZE_BORDER | wx.MAXIMIZE_BOX),
         )
 
         self.parent = parent
@@ -480,10 +480,10 @@ class panelPeriodicTable(wx.MiniFrame):
                 panel,
                 buttonID,
                 images.lib["periodicTable" + element + "Off"],
-                style=wx.NO_BORDER,
+                style=wx.BORDER_NONE,
             )
             button.Bind(wx.EVT_BUTTON, self.onElementSelected)
-            button.SetToolTip(wx.ToolTip(mspy.elements[element].name))
+            button.SetToolTip(mspy.elements[element].name)
 
             self.elementsIDs[buttonID] = element
             self.elementsButtons[element] = button
