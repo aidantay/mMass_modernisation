@@ -16,6 +16,7 @@
 # -------------------------------------------------------------------------
 
 # load libs
+import contextlib
 import threading
 
 import mspy.plot
@@ -302,7 +303,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
         """Close panel."""
 
         # check processing
-        if self.processing != None:
+        if self.processing is not None:
             wx.Bell()
             return
 
@@ -317,10 +318,11 @@ class panelSpectrumGenerator(wx.MiniFrame):
         self.gauge.SetValue(0)
 
         if status:
-            self.MakeModal(True)
+            self._disabler = wx.WindowDisabler(self)
             self.mainSizer.Show(3)
         else:
-            self.MakeModal(False)
+            if hasattr(self, "_disabler"):
+                del self._disabler
             self.mainSizer.Hide(3)
             self.processing = None
             mspy.start()
@@ -328,17 +330,15 @@ class panelSpectrumGenerator(wx.MiniFrame):
         # fit layout
         self.Layout()
         self.mainSizer.Fit(self)
-        try:
+        with contextlib.suppress(BaseException):
             wx.Yield()
-        except:
-            pass
 
     # ----
 
     def onStop(self, evt):
         """Cancel current processing."""
 
-        if self.processing and self.processing.isAlive():
+        if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
             wx.Bell()
@@ -377,7 +377,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
         self.processing.start()
 
         # pulse gauge while working
-        while self.processing and self.processing.isAlive():
+        while self.processing and self.processing.is_alive():
             self.gauge.pulse()
 
         # update spectrum canvas
@@ -397,7 +397,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
         """Apply current profile to current document."""
 
         # check data and document
-        if self.currentDocument == None or self.currentProfile == None:
+        if self.currentDocument is None or self.currentProfile is None:
             wx.Bell()
             return
 
@@ -597,7 +597,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
 
         # get current profile data
         profile = []
-        if self.currentProfile != None:
+        if self.currentProfile is not None:
             profile = self.currentProfile
 
         # add main profile spectrum to container
@@ -623,17 +623,16 @@ class panelSpectrumGenerator(wx.MiniFrame):
         self.spectrumContainer.append(spectrum)
 
         # add individual peaks to container
-        if config.spectrumGenerator["showPeaks"]:
-            if self.currentPeaks != None:
-                for peak in self.currentPeaks:
-                    spectrum = mspy.plot.points(
-                        points=peak,
-                        lineColour=(50, 140, 0),
-                        showLines=True,
-                        showPoints=False,
-                        exactFit=True,
-                    )
-                    self.spectrumContainer.append(spectrum)
+        if config.spectrumGenerator["showPeaks"] and self.currentPeaks is not None:
+            for peak in self.currentPeaks:
+                spectrum = mspy.plot.points(
+                    points=peak,
+                    lineColour=(50, 140, 0),
+                    showLines=True,
+                    showPoints=False,
+                    exactFit=True,
+                )
+                self.spectrumContainer.append(spectrum)
 
         # get current axis
         if not rescale:
@@ -652,7 +651,7 @@ class panelSpectrumGenerator(wx.MiniFrame):
         """Show / hide profile overlay in main viewer."""
 
         # update tmp spectrum
-        if self.currentProfile == None or not config.spectrumGenerator["showOverlay"]:
+        if self.currentProfile is None or not config.spectrumGenerator["showOverlay"]:
             self.parent.updateTmpSpectrum(None)
         else:
             self.parent.updateTmpSpectrum(

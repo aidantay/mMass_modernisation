@@ -58,11 +58,15 @@ def mock_dependencies(mocker):
     mock_container_inst.__len__ = mocker.Mock(return_value=0)
     mock_plot.container.return_value = mock_container_inst
 
+    mock_mspy = mocker.Mock()
+    mock_mspy.plot = mock_plot
+
     mocker.patch.dict(sys.modules, {
         'images': mock_images,
         'gui.images': mock_images,
         'mwx': mock_mwx,
         'gui.mwx': mock_mwx,
+        'mspy': mock_mspy,
         'mspy.plot': mock_plot
     })
     yield
@@ -71,27 +75,7 @@ def mock_dependencies(mocker):
 def panel(wx_app, mocker):
     import gui.config as config
     from gui.panel_spectrum_generator import panelSpectrumGenerator
-    import mspy
     
-    # Mock mspy.plot to avoid errors
-    mock_plot = mocker.Mock()
-    def mock_canvas_class(parent, *args, **kwargs):
-        p = wx.Panel(parent, -1)
-        p.setProperties = mocker.Mock()
-        p.setCursorImage = mocker.Mock()
-        p.setMFunction = mocker.Mock()
-        p.setLMBFunction = mocker.Mock()
-        p.draw = mocker.Mock()
-        p.refresh = mocker.Mock()
-        p.getCurrentXRange = mocker.Mock(return_value=(0, 1000))
-        p.getCurrentYRange = mocker.Mock(return_value=(0, 1000))
-        return p
-    mock_plot.canvas = mock_canvas_class
-    mock_container_inst = mocker.Mock()
-    mock_container_inst.__len__ = mocker.Mock(return_value=0)
-    mock_plot.container.return_value = mock_container_inst
-    mocker.patch('mspy.plot', mock_plot, create=True)
-
     config.spectrumGenerator.update({
         'fwhm': 0.1,
         'points': 10,
@@ -159,7 +143,7 @@ def test_onStop_idle(panel, mocker):
 
 def test_onStop_processing(panel, mocker):
     panel.processing = mocker.Mock()
-    panel.processing.isAlive.return_value = True
+    panel.processing.is_alive.return_value = True
     mock_stop = mocker.patch('mspy.stop')
     panel.onStop(None)
     mock_stop.assert_called_once()
@@ -294,17 +278,18 @@ def test_onGenerate_happy(panel, mocker):
     mock_thread = mocker.patch('threading.Thread')
     
     mock_thread_inst = mock_thread.return_value
-    mock_thread_inst.isAlive.return_value = False
+    mock_thread_inst.is_alive.return_value = False
     panel.onGenerate(None)
     mock_thread_inst.start.assert_called_once()
 
 def test_onProcessing(panel, mocker):
-    mock_modal = mocker.patch.object(panel, 'MakeModal', create=True)
+    mock_disabler = mocker.patch('wx.WindowDisabler')
     mock_show = mocker.patch.object(panel.mainSizer, 'Show')
     mock_hide = mocker.patch.object(panel.mainSizer, 'Hide')
     
     panel.onProcessing(True)
-    mock_modal.assert_called_with(True)
+    mock_disabler.assert_called_with(panel)
+    assert hasattr(panel, '_disabler')
     
     panel.onProcessing(False)
-    mock_modal.assert_called_with(False)
+    assert not hasattr(panel, '_disabler')

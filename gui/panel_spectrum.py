@@ -162,7 +162,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.showLabels_butt.SetToolTip(wx.ToolTip("Show / hide labels"))
+        self.showLabels_butt.SetToolTip("Show / hide labels")
         self.showLabels_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumTicksOff"], images.lib["spectrumTicksOn"])[
@@ -175,7 +175,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.showTicks_butt.SetToolTip(wx.ToolTip("Show / hide ticks"))
+        self.showTicks_butt.SetToolTip("Show / hide ticks")
         self.showTicks_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumNotationsOff"], images.lib["spectrumNotationsOn"])[
@@ -188,7 +188,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.showNotations_butt.SetToolTip(wx.ToolTip("Show / hide notations"))
+        self.showNotations_butt.SetToolTip("Show / hide notations")
         self.showNotations_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (
@@ -202,7 +202,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.labelAngle_butt.SetToolTip(wx.ToolTip("Labels orientation"))
+        self.labelAngle_butt.SetToolTip("Labels orientation")
         self.labelAngle_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumPosBarsOff"], images.lib["spectrumPosBarsOn"])[
@@ -215,7 +215,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.showPosBars_butt.SetToolTip(wx.ToolTip("Show / hide position bars"))
+        self.showPosBars_butt.SetToolTip("Show / hide position bars")
         self.showPosBars_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumGelOff"], images.lib["spectrumGelOn"])[
@@ -228,7 +228,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.showGel_butt.SetToolTip(wx.ToolTip("Show / hide gel"))
+        self.showGel_butt.SetToolTip("Show / hide gel")
         self.showGel_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumTrackerOff"], images.lib["spectrumTrackerOn"])[
@@ -241,7 +241,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.showTracker_butt.SetToolTip(wx.ToolTip("Show / hide cursor tracker"))
+        self.showTracker_butt.SetToolTip("Show / hide cursor tracker")
         self.showTracker_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumAutoscaleOff"], images.lib["spectrumAutoscaleOn"])[
@@ -254,7 +254,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.autoscale_butt.SetToolTip(wx.ToolTip("Autoscale intensity"))
+        self.autoscale_butt.SetToolTip("Autoscale intensity")
         self.autoscale_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         image = (images.lib["spectrumNormalizeOff"], images.lib["spectrumNormalizeOn"])[
@@ -267,7 +267,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.normalize_butt.SetToolTip(wx.ToolTip("Normalize intensity"))
+        self.normalize_butt.SetToolTip("Normalize intensity")
         self.normalize_butt.Bind(wx.EVT_BUTTON, self.parent.onView)
 
         # make processing toolset
@@ -278,7 +278,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.toolsRuler_butt.SetToolTip(wx.ToolTip("Spectrum ruler"))
+        self.toolsRuler_butt.SetToolTip("Spectrum ruler")
         self.toolsRuler_butt.Bind(wx.EVT_BUTTON, self.parent.onToolsSpectrum)
 
         self.toolsLabelPeak_butt = wx.BitmapButton(
@@ -288,7 +288,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.toolsLabelPeak_butt.SetToolTip(wx.ToolTip("Label peak"))
+        self.toolsLabelPeak_butt.SetToolTip("Label peak")
         self.toolsLabelPeak_butt.Bind(wx.EVT_BUTTON, self.parent.onToolsSpectrum)
 
         self.toolsLabelPoint_butt = wx.BitmapButton(
@@ -298,7 +298,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.toolsLabelPoint_butt.SetToolTip(wx.ToolTip("Label point"))
+        self.toolsLabelPoint_butt.SetToolTip("Label point")
         self.toolsLabelPoint_butt.Bind(wx.EVT_BUTTON, self.parent.onToolsSpectrum)
 
         self.toolsLabelEnvelope_butt = wx.BitmapButton(
@@ -308,7 +308,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.toolsLabelEnvelope_butt.SetToolTip(wx.ToolTip("Label envelope"))
+        self.toolsLabelEnvelope_butt.SetToolTip("Label envelope")
         self.toolsLabelEnvelope_butt.Bind(wx.EVT_BUTTON, self.parent.onToolsSpectrum)
 
         self.toolsDeleteLabel_butt = wx.BitmapButton(
@@ -318,7 +318,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.toolsDeleteLabel_butt.SetToolTip(wx.ToolTip("Delete label"))
+        self.toolsDeleteLabel_butt.SetToolTip("Delete label")
         self.toolsDeleteLabel_butt.Bind(wx.EVT_BUTTON, self.parent.onToolsSpectrum)
 
         self.toolsOffset_butt = wx.BitmapButton(
@@ -328,7 +328,7 @@ class panelSpectrum(wx.Panel):
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
         )
-        self.toolsOffset_butt.SetToolTip(wx.ToolTip("Offset spectrum"))
+        self.toolsOffset_butt.SetToolTip("Offset spectrum")
         self.toolsOffset_butt.Bind(wx.EVT_BUTTON, self.parent.onToolsSpectrum)
 
         # make cursor info
@@ -461,7 +461,7 @@ class panelSpectrum(wx.Panel):
         """Process selected mouse function."""
 
         # check document
-        if self.currentDocument == None:
+        if self.currentDocument is None:
             evt.Skip()
             if self.currentTool not in ("ruler"):
                 wx.Bell()
@@ -679,7 +679,7 @@ class panelSpectrum(wx.Panel):
         """Set spectrum properties."""
 
         # check document
-        if docIndex == None:
+        if docIndex is None:
             return
 
         # get document
@@ -742,7 +742,7 @@ class panelSpectrum(wx.Panel):
         """Update canvas properties."""
 
         # update button image
-        if ID != None:
+        if ID is not None:
             if ID_viewLabels == ID:
                 image = (
                     images.lib["spectrumLabelsOff"],
@@ -835,7 +835,7 @@ class panelSpectrum(wx.Panel):
         self.setCurrentTool(self.currentTool)
 
         # set properties for documents
-        labelFont = wx.Font(
+        wx.Font(
             config.spectrum["labelFontSize"],
             wx.SWISS,
             wx.FONTSTYLE_NORMAL,
@@ -865,7 +865,7 @@ class panelSpectrum(wx.Panel):
         # get spectrum polarity
         polarity = 1
         if (
-            self.currentDocument != None
+            self.currentDocument is not None
             and self.documents[self.currentDocument].spectrum.polarity == -1
         ):
             polarity = -1
@@ -893,14 +893,14 @@ class panelSpectrum(wx.Panel):
 
         # offset dragging
         if self.currentTool == "offset" and distance and position:
-            format = "a.i.: %s   dist: %s" % (intFormat, intFormat)
+            format = f"a.i.: {intFormat}   dist: {intFormat}"
             label += format % (position[1], distance[1])
 
         # isotope ruler
         elif self.currentTool == "labelenvelope" and position:
             charge = self.spectrumCanvas.getCharge()
             mass = mspy.mz(position[0], charge=0, currentCharge=charge * polarity)
-            format = "m/z: %s   z: %s   mass: %s" % (mzFormat, "%d", mzFormat)
+            format = "m/z: {}   z: {}   mass: {}".format(mzFormat, "%d", mzFormat)
             label = format % (position[0], charge * polarity, mass)
 
         # distance measurement
@@ -926,46 +926,46 @@ class panelSpectrum(wx.Panel):
                 pmass = 0
 
             if "mz" in config.main["cursorInfo"]:
-                format = "m/z: %s   " % mzFormat
+                format = f"m/z: {mzFormat}   "
                 label += format % position[0]
 
             if "dist" in config.main["cursorInfo"]:
-                format = "dist: %s   " % distFormat
+                format = f"dist: {distFormat}   "
                 label += format % distance[0]
 
             if "ppm" in config.main["cursorInfo"]:
-                format = "ppm: %s   " % ppmFormat
+                format = f"ppm: {ppmFormat}   "
                 label += format % (1e6 * distance[0] / position[0])
 
             if "z" in config.main["cursorInfo"] and charge:
                 if abs(distance[0]) > 10:
-                    format = "z: %s/%s   " % (chargeFormat, chargeFormat)
+                    format = f"z: {chargeFormat}/{chargeFormat}   "
                     label += format % ((charge + 1) * polarity, charge * polarity)
                 else:
-                    format = "z: %%d (%s)   " % chargeFormat
+                    format = f"z: %d ({chargeFormat})   "
                     label += format % (round(charge * polarity), charge * polarity)
 
             if "cmass" in config.main["cursorInfo"] and cmass > 0:
-                format = "mass (c): %s   " % mzFormat
+                format = f"mass (c): {mzFormat}   "
                 label += format % cmass
 
             if "pmass" in config.main["cursorInfo"] and pmass > 0:
-                format = "mass (p): %s   " % mzFormat
+                format = f"mass (p): {mzFormat}   "
                 label += format % pmass
 
-            if "area" in config.main["cursorInfo"] and self.currentDocument != None:
+            if "area" in config.main["cursorInfo"] and self.currentDocument is not None:
                 area = self.documents[self.currentDocument].spectrum.area(
                     minX=position[0] - distance[0],
                     maxX=position[0],
                     baselineWindow=baselineWindow,
                     baselineOffset=config.processing["baseline"]["offset"],
                 )
-                format = "area: %s   " % areaFormat
+                format = f"area: {areaFormat}   "
                 label += format % area
 
         # no specific function
         elif position:
-            format = "m/z: %s   a.i.: %s" % (mzFormat, intFormat)
+            format = f"m/z: {mzFormat}   a.i.: {intFormat}"
             label = format % (position[0], position[1])
 
         # ensure some label size to enable popup menu
@@ -984,14 +984,14 @@ class panelSpectrum(wx.Panel):
         self.currentTmpSpectrumFlip = flipped
 
         # check spectrum
-        if points == None:
+        if points is None:
             points = []
 
         # snap to current spectrum
         normalization = None
         xOffset = 0
         yOffset = 0
-        if self.currentDocument != None and len(points):
+        if self.currentDocument is not None and len(points):
             # get normalization
             if config.spectrum["normalize"]:
                 normalization = self.documents[
@@ -1043,7 +1043,7 @@ class panelSpectrum(wx.Panel):
         self.currentNotationMarks = notations
 
         # check spectrum and view option
-        if notations == None or not config.spectrum["showNotations"]:
+        if notations is None or not config.spectrum["showNotations"]:
             notations = []
 
         # snap data to current spectrum
@@ -1051,7 +1051,7 @@ class panelSpectrum(wx.Panel):
         flipped = False
         xOffset = 0
         yOffset = 0
-        if self.currentDocument != None and len(notations):
+        if self.currentDocument is not None and len(notations):
             # normalize points
             if config.spectrum["normalize"]:
                 normalization = self.documents[
@@ -1147,7 +1147,7 @@ class panelSpectrum(wx.Panel):
         """Set document as active."""
 
         # hide labels on last active document
-        if self.currentDocument != None:
+        if self.currentDocument is not None:
             self.container[self.currentDocument + 2].setProperties(
                 showLabels=(
                     config.spectrum["showLabels"] and config.spectrum["showAllLabels"]
@@ -1159,7 +1159,7 @@ class panelSpectrum(wx.Panel):
 
         # set current document
         self.currentDocument = docIndex
-        if self.currentDocument != None:
+        if self.currentDocument is not None:
             self.spectrumCanvas.setCurrentObject(self.currentDocument + 2)
             self.container[self.currentDocument + 2].setProperties(
                 showLabels=config.spectrum["showLabels"]
@@ -1230,7 +1230,7 @@ class panelSpectrum(wx.Panel):
 
         # check document
         if (
-            self.currentDocument == None
+            self.currentDocument is None
             or not self.documents[self.currentDocument].spectrum.hasprofile()
         ):
             return
@@ -1271,7 +1271,7 @@ class panelSpectrum(wx.Panel):
 
         # check document
         if (
-            self.currentDocument == None
+            self.currentDocument is None
             or not self.documents[self.currentDocument].spectrum.hasprofile()
         ):
             return
@@ -1310,7 +1310,7 @@ class panelSpectrum(wx.Panel):
 
         # check document
         if (
-            self.currentDocument == None
+            self.currentDocument is None
             or not self.documents[self.currentDocument].spectrum.hasprofile()
         ):
             return
@@ -1428,7 +1428,7 @@ class panelSpectrum(wx.Panel):
         """Delete all labels within selection."""
 
         # check document
-        if self.currentDocument == None:
+        if self.currentDocument is None:
             return
 
         # remove peaks
@@ -1518,7 +1518,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.mzDigits_slider = wx.Slider(
             self,
             -1,
-            config.main["mzDigits"],
+            int(config.main["mzDigits"]),
             0,
             6,
             size=(150, -1),
@@ -1531,7 +1531,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.intDigits_slider = wx.Slider(
             self,
             -1,
-            config.main["intDigits"],
+            int(config.main["intDigits"]),
             0,
             6,
             size=(150, -1),
@@ -1544,7 +1544,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.posBarSize_slider = wx.Slider(
             self,
             -1,
-            config.spectrum["posBarSize"],
+            int(config.spectrum["posBarSize"]),
             5,
             20,
             size=(150, -1),
@@ -1557,7 +1557,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.gelHeight_slider = wx.Slider(
             self,
             -1,
-            config.spectrum["gelHeight"],
+            int(config.spectrum["gelHeight"]),
             10,
             50,
             size=(150, -1),
@@ -1570,7 +1570,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.axisFontSize_slider = wx.Slider(
             self,
             -1,
-            config.spectrum["axisFontSize"],
+            int(config.spectrum["axisFontSize"]),
             5,
             15,
             size=(150, -1),
@@ -1583,7 +1583,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.labelFontSize_slider = wx.Slider(
             self,
             -1,
-            config.spectrum["labelFontSize"],
+            int(config.spectrum["labelFontSize"]),
             5,
             15,
             size=(150, -1),
@@ -1596,7 +1596,7 @@ class dlgCanvasProperties(wx.Dialog):
         self.notationMaxLength_slider = wx.Slider(
             self,
             -1,
-            config.spectrum["notationMaxLength"],
+            int(config.spectrum["notationMaxLength"]),
             1,
             100,
             size=(150, -1),
@@ -1740,7 +1740,7 @@ class dlgViewRange(wx.Dialog):
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         mainSizer.Add(
-            staticSizer, 0, wx.EXPAND | wx.CENTER | wx.ALL, mwx.PANEL_SPACE_MAIN
+            staticSizer, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN
         )
         mainSizer.Add(
             buttSizer,
@@ -1858,7 +1858,7 @@ class dlgSpectrumOffset(wx.Dialog):
         """Offset."""
 
         # check value and end
-        if self.offset != None:
+        if self.offset is not None:
             self.EndModal(wx.ID_OK)
         else:
             wx.Bell()
