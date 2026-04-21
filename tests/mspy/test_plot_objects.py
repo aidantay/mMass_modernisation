@@ -7,10 +7,11 @@ import numpy
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
-from mspy.obj_peak import peak
-from mspy.obj_peaklist import peaklist
-from mspy.obj_scan import scan
-from mspy.plot_objects import (
+
+from mmass.mspy.obj_peak import peak
+from mmass.mspy.obj_peaklist import peaklist
+from mmass.mspy.obj_scan import scan
+from mmass.mspy.plot_objects import (
     _filterPoints,
     _scaleAndShift,
     _scaleFont,

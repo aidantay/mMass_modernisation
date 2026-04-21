@@ -2,12 +2,13 @@ import xml.dom.minidom
 
 import pytest
 import wx
-from gui.dlg_references_editor import (
+
+from mmass.gui.dlg_references_editor import (
     dlgGroupName,
     dlgReferencesEditor,
     dlgSelectItemsToImport,
 )
-from gui.ids import ID_dlgReplace, ID_dlgReplaceAll, ID_dlgSkip
+from mmass.gui.ids import ID_dlgReplace, ID_dlgReplaceAll, ID_dlgSkip
 
 
 @pytest.fixture
@@ -16,8 +17,8 @@ def editor_dialog(wx_app, mocker):
     mock_references = {"Group A": [("Item 1", 100.0), ("Item 2", 200.0)], "Group B": []}
     mock_compounds = {"Existing Compound Group": {}}
 
-    mocker.patch("gui.dlg_references_editor.libs.references", mock_references)
-    mocker.patch("gui.dlg_references_editor.libs.compounds", mock_compounds)
+    mocker.patch("mmass.gui.dlg_references_editor.libs.references", mock_references)
+    mocker.patch("mmass.gui.dlg_references_editor.libs.compounds", mock_compounds)
     dlg = dlgReferencesEditor(None)
     yield dlg, mock_references, mock_compounds
     if dlg:
@@ -183,7 +184,7 @@ def test_editor_add_group(editor_dialog, mocker):
     """Test adding a new group."""
     dlg, mock_refs, mock_compounds = editor_dialog
 
-    MockDlg = mocker.patch("gui.dlg_references_editor.dlgGroupName")
+    MockDlg = mocker.patch("mmass.gui.dlg_references_editor.dlgGroupName")
     mock_instance = MockDlg.return_value
     mock_instance.ShowModal.return_value = wx.ID_OK
     mock_instance.name = "New Group"
@@ -200,8 +201,8 @@ def test_editor_add_group_duplicate_in_compounds(editor_dialog, mocker):
     """Test adding a group that already exists in compounds."""
     dlg, mock_refs, mock_compounds = editor_dialog
 
-    MockDlg = mocker.patch("gui.dlg_references_editor.dlgGroupName")
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockDlg = mocker.patch("mmass.gui.dlg_references_editor.dlgGroupName")
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
     mock_instance = MockDlg.return_value
     mock_instance.ShowModal.return_value = wx.ID_OK
     mock_instance.name = "Existing Compound Group"
@@ -220,7 +221,7 @@ def test_editor_rename_group(editor_dialog, mocker):
     dlg.groupName_choice.SetStringSelection("Group A")
     dlg.onGroupSelected()
 
-    MockDlg = mocker.patch("gui.dlg_references_editor.dlgGroupName")
+    MockDlg = mocker.patch("mmass.gui.dlg_references_editor.dlgGroupName")
     mock_instance = MockDlg.return_value
     mock_instance.ShowModal.return_value = wx.ID_OK
     mock_instance.name = "Renamed Group"
@@ -241,7 +242,7 @@ def test_editor_delete_group(editor_dialog, mocker):
     dlg.groupName_choice.SetStringSelection("Group A")
     dlg.onGroupSelected()
 
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
     mock_instance = MockMsg.return_value
     mock_instance.ShowModal.return_value = wx.ID_OK
 
@@ -283,7 +284,7 @@ def test_editor_delete_item(editor_dialog, mocker):
     # Mock selected items in list
     mocker.patch.object(dlg.itemsList, "getSelected", return_value=[0])
     mocker.patch.object(dlg.itemsList, "GetItemData", return_value=0)
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
 
     mock_instance = MockMsg.return_value
     mock_instance.ShowModal.return_value = wx.ID_OK
@@ -357,8 +358,10 @@ def test_editor_import_workflow(editor_dialog, mocker):
 
     MockFileDlg = mocker.patch("wx.FileDialog")
     mocker.patch.object(dlg, "readLibraryXML", return_value=imported_data)
-    MockSelectDlg = mocker.patch("gui.dlg_references_editor.dlgSelectItemsToImport")
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockSelectDlg = mocker.patch(
+        "mmass.gui.dlg_references_editor.dlgSelectItemsToImport"
+    )
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
 
     # 1. File Selection
     MockFileDlg.return_value.ShowModal.return_value = wx.ID_OK
@@ -391,7 +394,7 @@ def test_editor_import_workflow_no_data(editor_dialog, mocker):
     dlg, mock_refs, _ = editor_dialog
     MockFileDlg = mocker.patch("wx.FileDialog")
     mocker.patch.object(dlg, "readLibraryXML", return_value={})
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
 
     MockFileDlg.return_value.ShowModal.return_value = wx.ID_OK
     dlg.onImport(None)
@@ -447,8 +450,10 @@ def test_editor_import_replace_all(editor_dialog, mocker):
     }
     MockFileDlg = mocker.patch("wx.FileDialog")
     mocker.patch.object(dlg, "readLibraryXML", return_value=imported_data)
-    MockSelectDlg = mocker.patch("gui.dlg_references_editor.dlgSelectItemsToImport")
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockSelectDlg = mocker.patch(
+        "mmass.gui.dlg_references_editor.dlgSelectItemsToImport"
+    )
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
 
     MockFileDlg.return_value.ShowModal.return_value = wx.ID_OK
     MockSelectDlg.return_value.ShowModal.return_value = wx.ID_OK
@@ -472,8 +477,10 @@ def test_editor_import_skip(editor_dialog, mocker):
 
     MockFileDlg = mocker.patch("wx.FileDialog")
     mocker.patch.object(dlg, "readLibraryXML", return_value=imported_data)
-    MockSelectDlg = mocker.patch("gui.dlg_references_editor.dlgSelectItemsToImport")
-    MockMsg = mocker.patch("gui.dlg_references_editor.mwx.dlgMessage")
+    MockSelectDlg = mocker.patch(
+        "mmass.gui.dlg_references_editor.dlgSelectItemsToImport"
+    )
+    MockMsg = mocker.patch("mmass.gui.dlg_references_editor.mwx.dlgMessage")
 
     MockFileDlg.return_value.ShowModal.return_value = wx.ID_OK
     MockSelectDlg.return_value.ShowModal.return_value = wx.ID_OK

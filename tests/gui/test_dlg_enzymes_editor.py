@@ -1,6 +1,7 @@
 import pytest
 import wx
-from gui.dlg_enzymes_editor import dlgEnzymesEditor
+
+from mmass.gui.dlg_enzymes_editor import dlgEnzymesEditor
 
 
 @pytest.fixture
@@ -9,7 +10,7 @@ def dialog(wx_app, mocker):
     Fixture for dlgEnzymesEditor.
     """
     # Mock global enzymes and enzyme class
-    mocker.patch("gui.dlg_enzymes_editor.mspy.enzymes", new={})
+    mocker.patch("mmass.gui.dlg_enzymes_editor.mspy.enzymes", new={})
     # Also mock formulaCtrl because it might need more setup or might be slow
     # But for now, let's see if it works with original.
     # Actually, the plan says mock mspy.enzyme too.
@@ -45,7 +46,7 @@ def test_get_item_data_success(dialog, mocker):
     dialog.itemModsAfter_check.SetValue(True)
 
     # Mock mspy.enzyme to avoid side effects of its constructor (like formula validation)
-    mock_enzyme_class = mocker.patch("gui.dlg_enzymes_editor.mspy.enzyme")
+    mock_enzyme_class = mocker.patch("mmass.gui.dlg_enzymes_editor.mspy.enzyme")
     mock_enzyme_instance = mocker.Mock()
     mock_enzyme_class.return_value = mock_enzyme_instance
 
@@ -114,7 +115,7 @@ def test_get_item_data_enzyme_creation_failure(dialog, mocker):
     dialog.itemCTerm_value.SetValue("OH")
     dialog.itemNTerm_value.SetValue("H")
 
-    mocker.patch("gui.dlg_enzymes_editor.mspy.enzyme", side_effect=Exception)
+    mocker.patch("mmass.gui.dlg_enzymes_editor.mspy.enzyme", side_effect=Exception)
     mock_bell = mocker.patch("wx.Bell")
 
     result = dialog.getItemData()
@@ -144,7 +145,7 @@ def test_update_items_list(dialog, mocker):
     mock_enzyme2.modsAfter = True
 
     mocker.patch(
-        "gui.dlg_enzymes_editor.mspy.enzymes",
+        "mmass.gui.dlg_enzymes_editor.mspy.enzymes",
         new={"Enzyme1": mock_enzyme1, "Enzyme2": mock_enzyme2},
     )
 
@@ -197,7 +198,9 @@ def test_on_item_selected(dialog, mocker):
     mock_enzyme.modsBefore = True
     mock_enzyme.modsAfter = False
 
-    mocker.patch("gui.dlg_enzymes_editor.mspy.enzymes", new={"MockEnzyme": mock_enzyme})
+    mocker.patch(
+        "mmass.gui.dlg_enzymes_editor.mspy.enzymes", new={"MockEnzyme": mock_enzyme}
+    )
 
     evt = mocker.Mock()
     evt.GetText.return_value = "MockEnzyme"
@@ -220,7 +223,7 @@ def test_on_add_item_new(dialog, mocker):
     mock_item_data.name = "NewEnzyme"
 
     mocker.patch.object(dialog, "getItemData", return_value=mock_item_data)
-    mock_enzymes = mocker.patch("gui.dlg_enzymes_editor.mspy.enzymes", new={})
+    mock_enzymes = mocker.patch("mmass.gui.dlg_enzymes_editor.mspy.enzymes", new={})
     mock_update = mocker.patch.object(dialog, "updateItemsList")
     mock_clear = mocker.patch.object(dialog, "clearEditor")
 
@@ -236,7 +239,7 @@ def test_on_add_item_invalid(dialog, mocker):
     Test onAddItem with invalid data.
     """
     mocker.patch.object(dialog, "getItemData", return_value=None)
-    mock_enzymes = mocker.patch("gui.dlg_enzymes_editor.mspy.enzymes", new={})
+    mock_enzymes = mocker.patch("mmass.gui.dlg_enzymes_editor.mspy.enzymes", new={})
 
     dialog.onAddItem(None)
 
@@ -252,10 +255,10 @@ def test_on_add_item_existing_replace(dialog, mocker):
 
     mocker.patch.object(dialog, "getItemData", return_value=mock_item_data)
     mock_enzymes = mocker.patch(
-        "gui.dlg_enzymes_editor.mspy.enzymes", new={"Existing": "Old"}
+        "mmass.gui.dlg_enzymes_editor.mspy.enzymes", new={"Existing": "Old"}
     )
 
-    mock_dlg_message = mocker.patch("gui.dlg_enzymes_editor.mwx.dlgMessage")
+    mock_dlg_message = mocker.patch("mmass.gui.dlg_enzymes_editor.mwx.dlgMessage")
     mock_dlg_instance = mock_dlg_message.return_value
     mock_dlg_instance.ShowModal.return_value = wx.ID_OK
 
@@ -279,10 +282,10 @@ def test_on_add_item_existing_cancel(dialog, mocker):
 
     mocker.patch.object(dialog, "getItemData", return_value=mock_item_data)
     mock_enzymes = mocker.patch(
-        "gui.dlg_enzymes_editor.mspy.enzymes", new={"Existing": "Old"}
+        "mmass.gui.dlg_enzymes_editor.mspy.enzymes", new={"Existing": "Old"}
     )
 
-    mock_dlg_message = mocker.patch("gui.dlg_enzymes_editor.mwx.dlgMessage")
+    mock_dlg_message = mocker.patch("mmass.gui.dlg_enzymes_editor.mwx.dlgMessage")
     mock_dlg_instance = mock_dlg_message.return_value
     mock_dlg_instance.ShowModal.return_value = wx.ID_CANCEL
 
@@ -297,11 +300,12 @@ def test_on_delete_item_confirm(dialog, mocker):
     Test onDeleteItem with confirmation.
     """
     mock_enzymes = mocker.patch(
-        "gui.dlg_enzymes_editor.mspy.enzymes", new={"Enzyme1": "E1", "Enzyme2": "E2"}
+        "mmass.gui.dlg_enzymes_editor.mspy.enzymes",
+        new={"Enzyme1": "E1", "Enzyme2": "E2"},
     )
     dialog.itemsMap = [("Enzyme1",), ("Enzyme2",)]
 
-    mock_dlg_message = mocker.patch("gui.dlg_enzymes_editor.mwx.dlgMessage")
+    mock_dlg_message = mocker.patch("mmass.gui.dlg_enzymes_editor.mwx.dlgMessage")
     mock_dlg_instance = mock_dlg_message.return_value
     mock_dlg_instance.ShowModal.return_value = wx.ID_OK
 
@@ -325,10 +329,11 @@ def test_on_delete_item_cancel(dialog, mocker):
     Test onDeleteItem with cancellation.
     """
     mock_enzymes = mocker.patch(
-        "gui.dlg_enzymes_editor.mspy.enzymes", new={"Enzyme1": "E1", "Enzyme2": "E2"}
+        "mmass.gui.dlg_enzymes_editor.mspy.enzymes",
+        new={"Enzyme1": "E1", "Enzyme2": "E2"},
     )
 
-    mock_dlg_message = mocker.patch("gui.dlg_enzymes_editor.mwx.dlgMessage")
+    mock_dlg_message = mocker.patch("mmass.gui.dlg_enzymes_editor.mwx.dlgMessage")
     mock_dlg_instance = mock_dlg_message.return_value
     mock_dlg_instance.ShowModal.return_value = wx.ID_CANCEL
 

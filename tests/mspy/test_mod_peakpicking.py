@@ -1,13 +1,14 @@
-import mspy.mod_peakpicking as mod_peakpicking
-import mspy.mod_signal as mod_signal
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_compound as obj_compound
-import mspy.obj_peak as obj_peak
-import mspy.obj_peaklist as obj_peaklist
 import numpy
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.mod_peakpicking as mod_peakpicking
+import mmass.mspy.mod_signal as mod_signal
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_compound as obj_compound
+import mmass.mspy.obj_peak as obj_peak
+import mmass.mspy.obj_peaklist as obj_peaklist
 
 
 # Module-level fixture to reset stopper state

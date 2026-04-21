@@ -1,7 +1,8 @@
-import mspy.mod_stopper
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 # ============================================================================
 # Module-level and function-level fixtures for state isolation

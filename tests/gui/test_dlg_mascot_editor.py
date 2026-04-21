@@ -1,8 +1,8 @@
 import pytest
 import wx
-from gui.dlg_mascot_editor import dlgMascotEditor
 
-from gui import libs, mwx
+from mmass.gui import libs, mwx
+from mmass.gui.dlg_mascot_editor import dlgMascotEditor
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def dialog_fixture(mocker, wx_app):
             "params": "paramsA",
         }
     }
-    mocker.patch.dict("gui.libs.mascot", mock_mascot, clear=True)
+    mocker.patch.dict("mmass.gui.libs.mascot", mock_mascot, clear=True)
 
     # Mock wx components to prevent actual GUI creation
     mocker.patch("wx.Dialog.__init__", return_value=None)
@@ -46,8 +46,8 @@ def dialog_fixture(mocker, wx_app):
 
     # Mock mwx components
     # We patch them in the gui.mwx module which is what's being used
-    mocker.patch("gui.mwx.sortListCtrl")
-    mocker.patch("gui.mwx.dlgMessage")
+    mocker.patch("mmass.gui.mwx.sortListCtrl")
+    mocker.patch("mmass.gui.mwx.dlgMessage")
 
     # Mock parent
     parent = mocker.Mock()
@@ -166,7 +166,7 @@ def test_on_add_item_replace_confirm(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to confirm replacement
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_OK
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Call onAddItem
     dialog.onAddItem(None)
@@ -195,7 +195,7 @@ def test_on_add_item_replace_cancel(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to cancel replacement
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Call onAddItem
     dialog.onAddItem(None)
@@ -239,7 +239,7 @@ def test_on_delete_item_confirm(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to confirm deletion
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_OK
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Spy on clearEditor
     mocker.spy(dialog, "clearEditor")
@@ -271,7 +271,7 @@ def test_on_delete_item_cancel(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to cancel deletion
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Call onDeleteItem
     dialog.onDeleteItem(None)

@@ -1,7 +1,8 @@
 import os
 
 import pytest
-from mspy.parser_mgf import parseMGF
+
+from mmass.mspy.parser_mgf import parseMGF
 
 # Step 1: Setup Test Module
 # Step 2: Test Initialization & IO Errors

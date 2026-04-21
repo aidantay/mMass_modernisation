@@ -5,10 +5,9 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-import gui.config as config
-import gui.panel_mass_to_formula as panel_mass_to_formula
-
-import mspy
+import mmass.gui.config as config
+import mmass.gui.panel_mass_to_formula as panel_mass_to_formula
+from mmass import mspy
 
 
 @pytest.fixture
@@ -273,7 +272,7 @@ def test_on_item_search_exception(panel, mocker):
     mocker.patch.object(panel.formulaeList, "getSelected", return_value=[0])
     mocker.patch.object(panel.formulaeList, "GetItemData", return_value=0)
     mocker.patch("builtins.open", side_effect=OSError("Test Error"))
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_bell = mocker.patch("wx.Bell")
     panel.onItemSearch(mock_evt)
     mock_bell.assert_called_once()
@@ -295,7 +294,7 @@ def test_on_generate_path2_mass_limit(panel, mocker):
     """Test onGenerate path 2: checkMassLimit returns False (Step 6)."""
     mocker.patch.object(panel, "getParams", return_value=True)
     mocker.patch.object(panel, "checkMassLimit", return_value=False)
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_bell = mocker.patch("wx.Bell")
     panel.onGenerate()
     mock_bell.assert_called_once()
@@ -343,7 +342,7 @@ def test_on_generate_limit_warning(panel, mocker):
     mocker.patch.object(panel, "updateFormulaeList", side_effect=mock_update)
     mock_thread = mocker.patch("threading.Thread")
     mock_thread.return_value.is_alive.return_value = False
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_bell = mocker.patch("wx.Bell")
     panel.onGenerate()
     mock_bell.assert_called_once()
@@ -354,7 +353,7 @@ def test_on_processing(panel, mocker):
     """Test onProcessing show/hide gauge."""
     mock_disabler = mocker.patch("wx.WindowDisabler")
     mocker.patch.object(panel, "Layout")
-    mock_mspy_start = mocker.patch("mspy.start")
+    mock_mspy_start = mocker.patch("mmass.mspy.start")
     # Show
     panel.onProcessing(True)
     mock_disabler.assert_called_with(panel)
@@ -373,7 +372,7 @@ def test_on_stop(panel, mocker):
     # Case 1: Processing alive -> mspy.stop called
     panel.processing = mocker.Mock()
     panel.processing.is_alive.return_value = True
-    mock_stop = mocker.patch("mspy.stop")
+    mock_stop = mocker.patch("mmass.mspy.stop")
     panel.onStop(None)
     mock_stop.assert_called_once()
 
@@ -399,11 +398,11 @@ def test_run_generator(panel, mocker):
     panel.currentMass = 180.0
 
     # Mock mspy functions
-    mock_mz = mocker.patch("mspy.mz", return_value=179.0)
-    mock_formulator = mocker.patch("mspy.formulator", return_value=["C6H12O6"])
-    mock_delta = mocker.patch("mspy.delta", side_effect=[0.1, 0.001])
+    mock_mz = mocker.patch("mmass.mspy.mz", return_value=179.0)
+    mock_formulator = mocker.patch("mmass.mspy.formulator", return_value=["C6H12O6"])
+    mock_delta = mocker.patch("mmass.mspy.delta", side_effect=[0.1, 0.001])
     # Mock mspy.compound class
-    mock_compound_class = mocker.patch("mspy.compound")
+    mock_compound_class = mocker.patch("mmass.mspy.compound")
     mock_cmpd = mocker.Mock()
     mock_compound_class.return_value = mock_cmpd
     mock_cmpd.composition.return_value = {"C": 1, "H": 1}
@@ -436,7 +435,7 @@ def test_run_generator(panel, mocker):
 
 def test_run_generator_force_quit(panel, mocker):
     """Test runGenerator handles mspy.ForceQuit (Step 7)."""
-    mocker.patch("mspy.mz", side_effect=mspy.ForceQuit)
+    mocker.patch("mmass.mspy.mz", side_effect=mspy.ForceQuit)
     # Should return without raising exception
     panel.runGenerator()
     assert panel.currentFormulae == []
@@ -455,12 +454,12 @@ def test_compare_isotopic_pattern(panel, mocker):
     mock_cmpd.mz.return_value = [100.0]
     mock_cmpd.pattern.return_value = [[100.0, 100.0], [101.0, 50.0]]
 
-    mock_labelpeak = mocker.patch("mspy.labelpeak")
+    mock_labelpeak = mocker.patch("mmass.mspy.labelpeak")
     mock_peak = mocker.Mock()
     mock_peak.fwhm = 0.1
     mock_labelpeak.return_value = mock_peak
 
-    mock_matchpattern = mocker.patch("mspy.matchpattern", return_value=0.2)
+    mock_matchpattern = mocker.patch("mmass.mspy.matchpattern", return_value=0.2)
     similarity = panel.compareIsotopicPattern(mock_cmpd, 1, "H", shift=0.01)
 
     # (1 - rms) * 100 = (1 - 0.2) * 100 = 80.0
@@ -520,16 +519,16 @@ def test_check_mass_limit(panel, mocker):
     panel.currentMass = 500.0
 
     # Mock mspy.mz to return a value within limit
-    mocker.patch("mspy.mz", return_value=500.0)
+    mocker.patch("mmass.mspy.mz", return_value=500.0)
     assert panel.checkMassLimit() is True
 
     # Mock mspy.mz to return a value over limit
-    mocker.patch("mspy.mz", return_value=1500.0)
+    mocker.patch("mmass.mspy.mz", return_value=1500.0)
     assert panel.checkMassLimit() is False
 
     # Test with ionization 'e'
     config.massToFormula["ionization"] = "e"
-    mock_mz = mocker.patch("mspy.mz", return_value=500.0)
+    mock_mz = mocker.patch("mmass.mspy.mz", return_value=500.0)
     panel.checkMassLimit()
     # Verify agentCharge was passed as -1
     assert mock_mz.call_args[1]["agentCharge"] == -1

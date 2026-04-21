@@ -1,19 +1,19 @@
 import collections
 
-import gui.config as config
-import gui.images as images
-import gui.libs as libs
 import pytest
 import wx
-from gui.ids import *
 
-import mspy
+import mmass.gui.config as config
+import mmass.gui.images as images
+import mmass.gui.libs as libs
+from mmass import mspy
+from mmass.gui.ids import *
 
 # Patch wx for compatibility with legacy code
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = wx.RESIZE_BORDER
 
-from gui.panel_calibration import panelCalibration
+from mmass.gui.panel_calibration import panelCalibration
 
 
 @pytest.fixture

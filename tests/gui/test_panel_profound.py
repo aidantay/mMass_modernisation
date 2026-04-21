@@ -1,9 +1,10 @@
-import gui.config as config
-import gui.images as images
-import gui.panel_profound
 import pytest
 import wx
-from gui.ids import *
+
+import mmass.gui.config as config
+import mmass.gui.images as images
+from mmass import gui
+from mmass.gui.ids import *
 
 
 @pytest.fixture
@@ -107,9 +108,14 @@ def test_onClose(profound_panel, mocker):
 
 def test_onToolSelected(profound_panel, mocker):
     """Verify tool selection logic and UI updates."""
+    import mmass.gui.panel_profound as mod
+
+    mocker.patch.object(mod, "ID_profoundQuery", 1001)
+    mocker.patch.object(mod, "ID_profoundPMF", 1002)
+
     # Test switching to query
     mock_event = mocker.Mock(spec=wx.CommandEvent)
-    mock_event.GetId.return_value = ID_profoundQuery
+    mock_event.GetId.return_value = 1001
 
     profound_panel.onToolSelected(mock_event)
     assert profound_panel.currentTool == "query"
@@ -117,7 +123,7 @@ def test_onToolSelected(profound_panel, mocker):
     assert not profound_panel.mainSizer.GetItem(1).IsShown()
 
     # Test switching to pmf
-    mock_event.GetId.return_value = ID_profoundPMF
+    mock_event.GetId.return_value = 1002
     profound_panel.onToolSelected(mock_event)
     assert profound_panel.currentTool == "pmf"
     assert profound_panel.mainSizer.GetItem(1).IsShown()
@@ -180,7 +186,7 @@ def test_onSearch_success(profound_panel, mocker):
     mocker.patch.object(profound_panel, "makeSearchHTML", return_value="<html></html>")
     mocker.patch("tempfile.gettempdir", return_value="/tmp")
     mock_f = mocker.MagicMock()
-    mock_open_file = mocker.patch("gui.panel_profound.open", create=True)
+    mock_open_file = mocker.patch("mmass.gui.panel_profound.open", create=True)
     mock_open_file.return_value = mock_f
     mock_open_browser = mocker.patch("webbrowser.open")
     profound_panel.onSearch(None)
@@ -197,10 +203,10 @@ def test_onSearch_failure(profound_panel, mocker):
     mocker.patch.object(profound_panel, "checkParams", return_value=True)
     mocker.patch.object(profound_panel, "makeSearchHTML", return_value="<html></html>")
     mocker.patch(
-        "gui.panel_profound.open", side_effect=OSError("Write error"), create=True
+        "mmass.gui.panel_profound.open", side_effect=OSError("Write error"), create=True
     )
     mock_bell = mocker.patch("wx.Bell")
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     profound_panel.onSearch(None)
     assert mock_bell.called
     assert mock_dlg.called
@@ -267,7 +273,7 @@ def test_checkParams(profound_panel, mocker):
     # Test invalid
     config.profound["taxonomy"] = ""
     mock_bell = mocker.patch("wx.Bell")
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     assert profound_panel.checkParams() is False
     assert mock_bell.called
     assert mock_dlg.called

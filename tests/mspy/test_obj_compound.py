@@ -1,8 +1,8 @@
-import mspy.mod_basics
-import mspy.obj_compound
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 # ======================================================================
 # STEP 1-2: SMOKE/IMPORT TESTS
@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 
 def test_import_compound():
     """Test that compound class can be imported."""
-    from mspy.obj_compound import compound
+    from mmass.mspy.obj_compound import compound
 
     assert compound is not None
 

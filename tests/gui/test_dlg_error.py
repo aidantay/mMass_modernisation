@@ -10,15 +10,15 @@ def mock_gui_deps(mocker):
 
     # Patch images.lib in the dlg_error module
     # Note: we patch where it's USED
-    mocker.patch("gui.dlg_error.images.lib", {"iconError": bmp})
+    mocker.patch("mmass.gui.dlg_error.images.lib", {"iconError": bmp})
 
     # Patch config.version in the dlg_error module
-    mocker.patch("gui.dlg_error.config.version", "5.0.0")
+    mocker.patch("mmass.gui.dlg_error.config.version", "5.0.0")
 
 
 def test_dlg_error_initialization(wx_app):
     """Test initialization with different exception strings."""
-    from gui.dlg_error import dlgError
+    from mmass.gui.dlg_error import dlgError
 
     # Test with normal exception
     dlg = dlgError(None, "Test Exception")
@@ -42,7 +42,7 @@ def test_dlg_error_initialization(wx_app):
 
 def test_dlg_error_ui_elements(wx_app):
     """Test presence and properties of UI elements."""
-    from gui.dlg_error import dlgError
+    from mmass.gui.dlg_error import dlgError
 
     dlg = dlgError(None, "Test UI")
     try:
@@ -87,10 +87,10 @@ def test_dlg_error_ui_elements(wx_app):
 
 def test_dlg_error_on_quit(wx_app, mocker):
     """Test the onQuit event handler."""
-    from gui.dlg_error import dlgError
+    from mmass.gui.dlg_error import dlgError
 
     # We must patch sys.exit in the module where it is used
-    mock_exit = mocker.patch("gui.dlg_error.sys.exit")
+    mock_exit = mocker.patch("mmass.gui.dlg_error.sys.exit")
 
     dlg = dlgError(None, "Test Quit")
     try:
@@ -122,7 +122,7 @@ def test_dlg_error_on_quit(wx_app, mocker):
 
 def test_dlg_error_layout(wx_app):
     """Test if layout methods are called during initialization."""
-    from gui.dlg_error import dlgError
+    from mmass.gui.dlg_error import dlgError
 
     dlg = dlgError(None, "Test Layout")
     try:

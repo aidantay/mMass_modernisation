@@ -1,12 +1,10 @@
 import copy
 
-import gui.config
-import gui.images
-import gui.mwx
-import gui.panel_prospector
 import pytest
 import wx
-from gui.ids import *
+
+from mmass import gui
+from mmass.gui.ids import *
 
 
 # Fixture to patch missing wx constants
@@ -49,8 +47,8 @@ def mock_images_lib(mocker):
         def __getitem__(self, key):
             return blank_bitmap
 
-    mocker.patch("gui.images.lib", MockLib())
-    mocker.patch("gui.images.loadImages")
+    mocker.patch("mmass.gui.images.lib", MockLib())
+    mocker.patch("mmass.gui.images.loadImages")
 
 
 def test_init(wx_app, mock_parent, mock_config):
@@ -81,11 +79,17 @@ def test_make_gui(wx_app, mock_parent, mock_config):
 
 def test_on_tool_selected(wx_app, mock_parent, mock_config, mocker):
     """Test tool selection logic."""
+    import mmass.gui.panel_prospector as mod
+
+    mocker.patch.object(mod, "ID_prospectorMSFit", 1001)
+    mocker.patch.object(mod, "ID_prospectorMSTag", 1002)
+    mocker.patch.object(mod, "ID_prospectorQuery", 1003)
+
     panel = gui.panel_prospector.panelProspector(mock_parent)
 
     # Select MS-Tag via event
     evt = mocker.MagicMock()
-    evt.GetId.return_value = ID_prospectorMSTag
+    evt.GetId.return_value = 1002
     panel.onToolSelected(evt)
     assert panel.currentTool == "mstag"
     assert panel.GetTitle() == "Protein Prospector - MS-Tag"
@@ -93,14 +97,14 @@ def test_on_tool_selected(wx_app, mock_parent, mock_config, mocker):
     assert gui.config.prospector["common"]["searchType"] == "mstag"
 
     # Select Query via event
-    evt.GetId.return_value = ID_prospectorQuery
+    evt.GetId.return_value = 1003
     panel.onToolSelected(evt)
     assert panel.currentTool == "query"
     assert panel.GetTitle() == "Protein Prospector - Peak List"
     assert not panel.search_butt.IsEnabled()
 
     # Select MS-Fit via event
-    evt.GetId.return_value = ID_prospectorMSFit
+    evt.GetId.return_value = 1001
     panel.onToolSelected(evt)
     assert panel.currentTool == "msfit"
     assert panel.GetTitle() == "Protein Prospector - MS-Fit"
@@ -323,7 +327,7 @@ def test_check_params(wx_app, mock_parent, mock_config, mocker):
 
     # Invalid - missing taxonomy
     gui.config.prospector["msfit"]["taxonomy"] = ""
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     assert panel.checkParams() is False
     mock_dlg.assert_called()
 
@@ -372,7 +376,7 @@ def test_on_search(wx_app, mock_parent, mock_config, mocker):
     mocker.patch.object(panel, "makeSearchHTML", return_value="<html>Test</html>")
     mock_open_browser = mocker.patch("webbrowser.open")
     mocker.patch("tempfile.gettempdir", return_value="/tmp")
-    mock_open_file = mocker.patch("gui.panel_prospector.open", create=True)
+    mock_open_file = mocker.patch("mmass.gui.panel_prospector.open", create=True)
 
     mock_f = mocker.MagicMock()
     mock_open_file.return_value = mock_f
@@ -388,9 +392,9 @@ def test_on_search(wx_app, mock_parent, mock_config, mocker):
     mocker.patch.object(panel, "getParams", return_value=True)
     mocker.patch.object(panel, "checkParams", return_value=True)
     mocker.patch.object(panel, "makeSearchHTML", return_value="<html>Test</html>")
-    mocker.patch("gui.panel_prospector.open", side_effect=IOError)
+    mocker.patch("mmass.gui.panel_prospector.open", side_effect=IOError)
     mock_bell = mocker.patch("wx.Bell")
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
 
     panel.onSearch(None)
     mock_bell.assert_called_once()

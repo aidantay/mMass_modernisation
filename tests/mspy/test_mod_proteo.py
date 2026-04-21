@@ -1,10 +1,11 @@
-import mspy.blocks as blocks
-import mspy.mod_proteo as mod_proteo
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_sequence as obj_sequence
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.blocks as blocks
+import mmass.mspy.mod_proteo as mod_proteo
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_sequence as obj_sequence
 
 
 # Helper function to create sequences as lists
@@ -255,9 +256,6 @@ class TestCoverage:
             start, end = r
             if start < end:
                 valid_ranges.append((start, end))
-
-        if not valid_ranges:
-            pytest.skip("No valid ranges generated")
 
         result = mod_proteo.coverage(valid_ranges, 100, human=True)
         assert 0.0 <= result <= 100.0

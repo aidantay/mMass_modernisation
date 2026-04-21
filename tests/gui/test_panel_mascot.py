@@ -1,10 +1,11 @@
-import gui.config as config
-import gui.images as images
-import gui.libs as libs
-import gui.panel_mascot
 import pytest
 import wx
-from gui.ids import *
+
+import mmass.gui.config as config
+import mmass.gui.images as images
+import mmass.gui.libs as libs
+from mmass import gui
+from mmass.gui.ids import *
 
 
 @pytest.fixture
@@ -106,12 +107,13 @@ def test_onClose_processing(mocker, mascot_panel):
 
 def test_onToolSelected(mocker, mascot_panel):
     """Verify tool selection logic and UI updates."""
-    # Test cases for each tool
+    import mmass.gui.panel_mascot as mod
+
     tools = [
-        (ID_mascotPMF, "pmf", 1),
-        (ID_mascotMIS, "mis", 2),
-        (ID_mascotSQ, "sq", 3),
-        (ID_mascotQuery, "query", 4),
+        (mod.ID_mascotPMF, "pmf", 1),
+        (mod.ID_mascotMIS, "mis", 2),
+        (mod.ID_mascotSQ, "sq", 3),
+        (mod.ID_mascotQuery, "query", 4),
     ]
 
     for event_id, tool_name, sizer_index in tools:
@@ -316,7 +318,7 @@ def test_checkParams_errors(mocker, mascot_panel):
 
     mascot_panel.paramQuery_value.SetValue("")  # Empty query
 
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_bell = mocker.patch("wx.Bell")
     result = mascot_panel.checkParams()
     assert result is False
@@ -333,9 +335,10 @@ def test_checkParams_errors(mocker, mascot_panel):
 
 def test_getServerParams_success(mocker, mascot_panel):
     """Verify getServerParams successfully parses mascot server config."""
-    # Setup mock server in libs
-    config.mascot["common"]["server"] = "TestServer"
-    libs.mascot["TestServer"] = {
+    import mmass.gui.panel_mascot as mod
+
+    mod.config.mascot["common"]["server"] = "TestServer"
+    mod.libs.mascot["TestServer"] = {
         "host": "localhost",
         "path": "/mascot/",
         "params": "params.txt",
@@ -372,8 +375,10 @@ def test_getServerParams_success(mocker, mascot_panel):
 
 def test_getServerParams_failure(mocker, mascot_panel):
     """Verify getServerParams handles connection failure."""
-    config.mascot["common"]["server"] = "TestServer"
-    libs.mascot["TestServer"] = {"host": "localhost", "path": "/", "params": ""}
+    import mmass.gui.panel_mascot as mod
+
+    mod.config.mascot["common"]["server"] = "TestServer"
+    mod.libs.mascot["TestServer"] = {"host": "localhost", "path": "/", "params": ""}
 
     mocker.patch(
         "http.client.HTTPConnection", side_effect=Exception("Connection Refused")
@@ -386,9 +391,11 @@ def test_getServerParams_failure(mocker, mascot_panel):
 
 def test_updateServerParams_success(mocker, mascot_panel):
     """Verify updateServerParams orchestrates thread and form update."""
+    import mmass.gui.panel_mascot as mod
+
     mascot_panel.server_choice.Set(["TestServer"])
     mascot_panel.server_choice.SetStringSelection("TestServer")
-    libs.mascot["TestServer"] = {"host": "localhost", "path": "/", "params": ""}
+    mod.libs.mascot["TestServer"] = {"host": "localhost", "path": "/", "params": ""}
 
     # Mock currentParams for updateForm to work
     mascot_panel.currentParams = {
@@ -421,9 +428,11 @@ def test_updateServerParams_success(mocker, mascot_panel):
 
 def test_updateServerParams_failure(mocker, mascot_panel):
     """Verify updateServerParams handles server failure with retry dialog."""
+    import mmass.gui.panel_mascot as mod
+
     mascot_panel.server_choice.Set(["TestServer"])
     mascot_panel.server_choice.SetStringSelection("TestServer")
-    libs.mascot["TestServer"] = {"host": "localhost", "path": "/", "params": ""}
+    mod.libs.mascot["TestServer"] = {"host": "localhost", "path": "/", "params": ""}
 
     # Ensure currentParams is None to trigger failure path
     mascot_panel.currentParams = None
@@ -434,7 +443,7 @@ def test_updateServerParams_failure(mocker, mascot_panel):
 
     mocker.patch("threading.Thread", return_value=mock_thread)
     mocker.patch.object(mascot_panel, "onProcessing")
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_dlg.return_value.ShowModal.return_value = wx.ID_CANCEL  # User cancels retry
     mocker.patch("wx.Bell")
 
@@ -617,8 +626,10 @@ def test_makeMGFQuery_sq(mascot_panel):
 
 def test_makeSearchHTML(mocker, mascot_panel):
     """Verify HTML wrapper generation."""
-    config.mascot["common"]["server"] = "Matrix Science"
-    libs.mascot["Matrix Science"] = {
+    import mmass.gui.panel_mascot as mod
+
+    mod.config.mascot["common"]["server"] = "Matrix Science"
+    mod.libs.mascot["Matrix Science"] = {
         "protocol": "http",
         "host": "www.matrixscience.com",
         "path": "/cgi/",
@@ -646,11 +657,11 @@ def test_onSearch(mocker, mascot_panel):
 
     # Mock Path.open and webbrowser
     mock_file_obj = mocker.mock_open()
-    mocker.patch("gui.panel_mascot.Path.open", mock_file_obj)
-    mock_browser_open = mocker.patch("gui.panel_mascot.webbrowser.open")
+    mocker.patch("mmass.gui.panel_mascot.Path.open", mock_file_obj)
+    mock_browser_open = mocker.patch("mmass.gui.panel_mascot.webbrowser.open")
 
     # Mock dlgMessage to avoid hangs if something fails
-    mocker.patch("gui.mwx.dlgMessage")
+    mocker.patch("mmass.gui.mwx.dlgMessage")
 
     mascot_panel.onSearch(None)
 
@@ -666,9 +677,9 @@ def test_onSearch_failure_during_file_op(mocker, mascot_panel):
     mocker.patch.object(mascot_panel, "getParams", return_value=True)
     mocker.patch.object(mascot_panel, "checkParams", return_value=True)
     mocker.patch.object(mascot_panel, "makeSearchHTML", return_value="<html></html>")
-    mocker.patch("gui.panel_mascot.Path.open", side_effect=Exception("Disk Full"))
+    mocker.patch("mmass.gui.panel_mascot.Path.open", side_effect=Exception("Disk Full"))
     mock_bell = mocker.patch("wx.Bell")
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mascot_panel.onSearch(None)
     assert mock_bell.called
     assert mock_dlg.called
@@ -711,7 +722,7 @@ def test_checkParams_extended(mocker, mascot_panel):
     config.mascot["mis"]["msmsTol"] = 0.5
     mascot_panel.paramQuery_value.SetValue("query")
 
-    mocker.patch("gui.mwx.dlgMessage")
+    mocker.patch("mmass.gui.mwx.dlgMessage")
     assert mascot_panel.checkParams() is False
 
     # Test MIS Decoy and Error Tolerant conflict
@@ -764,7 +775,7 @@ def test_onClose_deletes_temp_file(mocker, mascot_panel):
     """Verify onClose attempts to delete the temporary HTML file."""
     mascot_panel.processing = None
     mocker.patch("tempfile.gettempdir", return_value="/tmp")
-    mock_unlink = mocker.patch("gui.panel_mascot.Path.unlink")
+    mock_unlink = mocker.patch("mmass.gui.panel_mascot.Path.unlink")
     mocker.patch.object(mascot_panel, "Destroy")
     mascot_panel.onClose(None)
     assert mock_unlink.called

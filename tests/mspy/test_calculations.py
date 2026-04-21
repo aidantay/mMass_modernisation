@@ -8,13 +8,13 @@ from numpy.testing import assert_allclose
 
 @pytest.fixture(scope="session")
 def calculations():
-    """Fixture to provide the mspy.calculations module."""
+    """Fixture to provide the mmass.mspy.calculations module."""
     try:
-        import mspy.calculations
+        from mmass import mspy
 
         return mspy.calculations
     except ImportError as e:
-        pytest.fail(f"Failed to import mspy.calculations: {e}")
+        pytest.fail(f"Failed to import mmass.mspy.calculations: {e}")
 
 
 # Helper to generate typical mass spectrometry signals: 2D array of doubles, (n, 2)

@@ -70,11 +70,11 @@ def mock_dependencies(mocker):
         sys.modules,
         {
             "images": mock_images,
-            "gui.images": mock_images,
+            "mmass.gui.images": mock_images,
             "mwx": mock_mwx,
-            "gui.mwx": mock_mwx,
-            "mspy": mock_mspy,
-            "mspy.plot": mock_plot,
+            "mmass.gui.mwx": mock_mwx,
+            "mmass.mspy": mock_mspy,
+            "mmass.mspy.plot": mock_plot,
         },
     )
     yield
@@ -82,8 +82,8 @@ def mock_dependencies(mocker):
 
 @pytest.fixture
 def panel(wx_app, mocker):
-    import gui.config as config
-    from gui.panel_spectrum_generator import panelSpectrumGenerator
+    import mmass.gui.config as config
+    from mmass.gui.panel_spectrum_generator import panelSpectrumGenerator
 
     config.spectrumGenerator.update(
         {
@@ -125,7 +125,7 @@ class MockDocument:
 
 @pytest.fixture(autouse=True)
 def reset_config_dict():
-    from gui import config
+    from mmass.gui import config
 
     orig_sg = copy.deepcopy(config.spectrumGenerator)
     orig_s = copy.deepcopy(config.spectrum)
@@ -163,9 +163,11 @@ def test_onStop_idle(panel, mocker):
 
 
 def test_onStop_processing(panel, mocker):
+    import mmass.gui.panel_spectrum_generator as mod
+
     panel.processing = mocker.Mock()
     panel.processing.is_alive.return_value = True
-    mock_stop = mocker.patch("mspy.stop")
+    mock_stop = mocker.patch.object(mod.mspy, "stop")
     panel.onStop(None)
     mock_stop.assert_called_once()
 
@@ -179,7 +181,7 @@ def test_getParams_happy(panel, mocker):
         panel.peakShape_choice, "GetStringSelection", return_value="Symmetrical"
     )
 
-    from gui import config
+    from mmass.gui import config
 
     assert panel.getParams() is True
     assert abs(config.spectrumGenerator["fwhm"] - 0.5) < 1e-6
@@ -193,7 +195,7 @@ def test_getParams_asymmetrical(panel, mocker):
     mocker.patch.object(
         panel.peakShape_choice, "GetStringSelection", return_value="Asymmetrical"
     )
-    from gui import config
+    from mmass.gui import config
 
     assert panel.getParams() is True
     assert config.spectrumGenerator["peakShape"] == "gausslorentzian"
@@ -202,7 +204,7 @@ def test_getParams_asymmetrical(panel, mocker):
 def test_onShowPeaks(panel, mocker):
     mocker.patch.object(panel, "updateSpectrumCanvas")
     mocker.patch.object(panel.showPeaks_check, "GetValue", return_value=True)
-    from gui import config
+    from mmass.gui import config
 
     panel.onShowPeaks(None)
     assert config.spectrumGenerator["showPeaks"] == True
@@ -211,7 +213,7 @@ def test_onShowPeaks(panel, mocker):
 def test_onShowOverlay(panel, mocker):
     mocker.patch.object(panel, "updateSpectrumOverlay")
     mocker.patch.object(panel.showOverlay_check, "GetValue", return_value=True)
-    from gui import config
+    from mmass.gui import config
 
     panel.onShowOverlay(None)
     assert config.spectrumGenerator["showOverlay"] == True
@@ -220,7 +222,7 @@ def test_onShowOverlay(panel, mocker):
 def test_onShowFlipped(panel, mocker):
     mocker.patch.object(panel, "updateSpectrumOverlay")
     mocker.patch.object(panel.showFlipped_check, "GetValue", return_value=True)
-    from gui import config
+    from mmass.gui import config
 
     panel.onShowFlipped(None)
     assert config.spectrumGenerator["showFlipped"] == True
@@ -253,15 +255,21 @@ def test_onApply_with_profile_cancel(panel, mocker):
     doc.spectrum._has_profile = True
     panel.currentDocument = doc
     panel.currentProfile = [1, 2, 3]
-    mock_dlg = mocker.patch("mwx.dlgMessage")
+
+    import mmass.gui.panel_spectrum_generator as mod
+
+    # Patch dlgMessage in the module it's used in
+    mock_dlg = mocker.patch.object(mod.mwx, "dlgMessage")
     mock_dlg_inst = mock_dlg.return_value
     mock_dlg_inst.ShowModal.return_value = wx.ID_CANCEL
+
     panel.onApply(None)
+    # Since dlg.ShowModal() returns ID_CANCEL, it should return BEFORE calling doc.backup
     doc.backup.assert_not_called()
 
 
 def test_updateSpectrumOverlay(panel, mocker):
-    from gui import config
+    from mmass.gui import config
 
     panel.currentProfile = [1, 2, 3]
     config.spectrumGenerator["showOverlay"] = True
@@ -271,13 +279,12 @@ def test_updateSpectrumOverlay(panel, mocker):
 
 
 def test_runSpectrumGenerator_gaussian(panel, mocker):
-    from gui import config
+    import mmass.gui.panel_spectrum_generator as mod
+    from mmass.gui import config
+    from mmass.mspy.obj_peak import peak as Peak
 
     doc = MockDocument(mocker)
-    peak = mocker.Mock()
-    peak.mz = 100.0
-    peak.base = 0.0
-    peak.ai = 1000.0
+    peak = Peak(100.0, 1000.0)
     peak.fwhm = 0.5
     doc.spectrum.peaklist = [peak]
     panel.currentDocument = doc
@@ -285,20 +292,23 @@ def test_runSpectrumGenerator_gaussian(panel, mocker):
     config.spectrumGenerator["peakShape"] = "gaussian"
     config.spectrumGenerator["forceFwhm"] = False
 
-    mock_profile = mocker.patch("mspy.profile", return_value=[1, 2, 3])
-    mock_gaussian = mocker.patch("mspy.gaussian", return_value=[4, 5, 6])
+    mock_profile = mocker.patch.object(
+        mod.mspy, "profile", return_value=[[1, 2], [3, 4]]
+    )
+    mock_gaussian = mocker.patch.object(
+        mod.mspy, "gaussian", return_value=[[4, 5], [6, 7]]
+    )
     panel.runSpectrumGenerator()
     mock_gaussian.assert_called_once()
 
 
 def test_runSpectrumGenerator_lorentzian(panel, mocker):
-    from gui import config
+    import mmass.gui.panel_spectrum_generator as mod
+    from mmass.gui import config
+    from mmass.mspy.obj_peak import peak as Peak
 
     doc = MockDocument(mocker)
-    peak = mocker.Mock()
-    peak.mz = 100.0
-    peak.base = 0.0
-    peak.ai = 1000.0
+    peak = Peak(100.0, 1000.0)
     peak.fwhm = 0.5
     doc.spectrum.peaklist = [peak]
     panel.currentDocument = doc
@@ -307,8 +317,8 @@ def test_runSpectrumGenerator_lorentzian(panel, mocker):
     config.spectrumGenerator["forceFwhm"] = True
     config.spectrumGenerator["fwhm"] = 0.1
 
-    mocker.patch("mspy.profile")
-    mock_lorentzian = mocker.patch("mspy.lorentzian")
+    mocker.patch.object(mod.mspy, "profile", return_value=[[1, 2], [3, 4]])
+    mock_lorentzian = mocker.patch.object(mod.mspy, "lorentzian")
     panel.runSpectrumGenerator()
     mock_lorentzian.assert_called_with(x=100.0, minY=0.0, maxY=1000.0, fwhm=0.1)
 

@@ -5,9 +5,8 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-from gui.ids import *
-
-from gui import config, images, libs, panel_mass_filter
+from mmass.gui import config, images, libs, panel_mass_filter
+from mmass.gui.ids import *
 
 
 @pytest.fixture
@@ -132,7 +131,7 @@ def test_onItemActivated(panel, mocker):
 
 
 def test_onMatch(panel, mock_parent, mocker):
-    mock_panelMatch = mocker.patch("gui.panel_mass_filter.panelMatch")
+    mock_panelMatch = mocker.patch("mmass.gui.panel_mass_filter.panelMatch")
     mock_instance = mock_panelMatch.return_value
 
     # Trigger onMatch

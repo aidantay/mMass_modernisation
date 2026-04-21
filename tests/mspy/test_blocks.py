@@ -1,10 +1,11 @@
 import os
 import xml.dom.minidom
 
-import mspy.blocks as blocks
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+
+import mmass.mspy.blocks as blocks
 
 
 # Backup and restore globals

@@ -2,7 +2,8 @@ import numpy
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-from mspy.mod_envfit import envfit
+
+from mmass.mspy.mod_envfit import envfit
 
 
 @pytest.fixture
@@ -14,7 +15,7 @@ def envfit_obj():
 @pytest.fixture
 def mock_check_force_quit(mocker):
     """Mocks mspy.mod_envfit.CHECK_FORCE_QUIT."""
-    return mocker.patch("mspy.mod_envfit.CHECK_FORCE_QUIT")
+    return mocker.patch("mmass.mspy.mod_envfit.CHECK_FORCE_QUIT")
 
 
 @pytest.fixture
@@ -63,7 +64,7 @@ def test_init_success():
 def test_init_invalid_compound(mocker):
     """Test initialization skip invalid compound."""
     # Mock obj_compound.compound
-    mock_cls = mocker.patch("mspy.mod_envfit.obj_compound.compound")
+    mock_cls = mocker.patch("mmass.mspy.mod_envfit.obj_compound.compound")
 
     # 1st call: loss = obj_compound.compound(loss) in __init__
     mock_loss = mocker.Mock()
@@ -219,7 +220,7 @@ def test_envelope(envfit_obj, mocker):
     envfit_obj.models[1][2] = 50.0
 
     mock_profile = mocker.patch(
-        "mspy.mod_envfit.mod_pattern.profile",
+        "mmass.mspy.mod_envfit.mod_pattern.profile",
         return_value=numpy.array([[18.0, 100.0], [19.0, 50.0]]),
     )
 
@@ -239,8 +240,8 @@ def test_topeaklist(envfit_obj, mocker):
     """Test topeaklist method."""
     mock_topoints = mocker.patch.object(envfit_obj, "topoints", return_value=True)
 
-    from mspy.obj_peak import peak
-    from mspy.obj_peaklist import peaklist
+    from mmass.mspy.obj_peak import peak
+    from mmass.mspy.obj_peaklist import peaklist
 
     pl = peaklist()
     # Ensure peaks are within mzrange of envfit_obj (H2O, charge 1)
@@ -266,13 +267,13 @@ def test_tospectrum_baseline_none(envfit_obj, mocker, dummy_signal):
     """Test tospectrum with baseline=None."""
     # Mock mod_signal.locate to return indices for cropping
     mock_locate = mocker.patch(
-        "mspy.mod_envfit.mod_signal.locate", side_effect=[0, len(dummy_signal)]
+        "mmass.mspy.mod_envfit.mod_signal.locate", side_effect=[0, len(dummy_signal)]
     )
 
     # Mock mod_peakpicking.labelscan to return a mock peaklist
     mock_peaklist = mocker.Mock()
     mock_labelscan = mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
 
     # Mock topeaklist method of envfit
@@ -311,18 +312,18 @@ def test_tospectrum_baseline_provided(envfit_obj, mocker, dummy_signal):
     """Test tospectrum with baseline provided."""
     # Mock dependencies to avoid side effects
     mocker.patch(
-        "mspy.mod_envfit.mod_signal.locate", side_effect=[0, len(dummy_signal)]
+        "mmass.mspy.mod_envfit.mod_signal.locate", side_effect=[0, len(dummy_signal)]
     )
     mock_peaklist = mocker.Mock()
     mock_labelscan = mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
     mock_topeaklist = mocker.patch.object(envfit_obj, "topeaklist", return_value=True)
 
     # Mock mod_signal.subbase
     updated_spectrum = numpy.array([[18.0, 100.0]])
     mock_subbase = mocker.patch(
-        "mspy.mod_envfit.mod_signal.subbase", return_value=updated_spectrum
+        "mmass.mspy.mod_envfit.mod_signal.subbase", return_value=updated_spectrum
     )
 
     # Use a list for baseline to avoid ValueError at 'if baseline != None:' in mod_envfit.py
@@ -378,7 +379,7 @@ def test_makeModels_raster_logic(envfit_obj, mocker):
     # 3. Trigger mz within raster (no continue) -> Hits 305->309
     # Mock mod_pattern.profile to avoid the bug in mod_pattern.py (raster != None)
     mocker.patch(
-        "mspy.mod_envfit.mod_pattern.profile",
+        "mmass.mspy.mod_envfit.mod_pattern.profile",
         return_value=numpy.array([[19.0, 1.0], [20.0, 1.0]]),
     )
     raster = numpy.array([19.0, 20.0])
@@ -390,10 +391,10 @@ def test_makeModels_pattern_generation(envfit_obj, mocker):
     """Test _makeModels pattern generation and reset=False."""
     # Mock compound.pattern and mod_pattern.profile
     mock_pattern_call = mocker.patch(
-        "mspy.obj_compound.compound.pattern", return_value=[(19.018, 1.0)]
+        "mmass.mspy.obj_compound.compound.pattern", return_value=[(19.018, 1.0)]
     )
     mock_profile_call = mocker.patch(
-        "mspy.mod_pattern.profile", return_value=numpy.array([[19.018, 1.0]])
+        "mmass.mspy.mod_pattern.profile", return_value=numpy.array([[19.018, 1.0]])
     )
 
     # Raster covering H2O
@@ -418,10 +419,13 @@ def test_makeModels_pattern_generation(envfit_obj, mocker):
 
 def test_makeModels_no_any_model(envfit_obj, mocker):
     """Test _makeModels when profile returns all zeros (model.any() is False)."""
-    mocker.patch("mspy.obj_compound.compound.pattern", return_value=[(19.018, 1.0)])
+    mocker.patch(
+        "mmass.mspy.obj_compound.compound.pattern", return_value=[(19.018, 1.0)]
+    )
     # Return all zeros for profile
     mocker.patch(
-        "mspy.mod_pattern.profile", return_value=numpy.array([[19.0, 0.0], [20.0, 0.0]])
+        "mmass.mspy.mod_pattern.profile",
+        return_value=numpy.array([[19.0, 0.0], [20.0, 0.0]]),
     )
 
     raster = numpy.array([19.0, 20.0])
@@ -458,21 +462,22 @@ def test_alignData_calibrants(envfit_obj, mocker):
 
     # Mock mod_pattern.profile
     mocker.patch(
-        "mspy.mod_envfit.mod_pattern.profile", return_value=numpy.array([[19.0, 100.0]])
+        "mmass.mspy.mod_envfit.mod_pattern.profile",
+        return_value=numpy.array([[19.0, 100.0]]),
     )
 
     # Mock mod_peakpicking.labelscan to return 3 peaks
-    from mspy.obj_peak import peak
+    from mmass.mspy.obj_peak import peak
 
     mock_peaklist = [peak(19.0, 100.0), peak(20.0, 50.0), peak(21.0, 25.0)]
     mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
 
     # Mock mod_calibration.calibration
     # Return (lambda params, x: x + params[0], [0.0], 0.0)
     mock_cal = mocker.patch(
-        "mspy.mod_envfit.mod_calibration.calibration",
+        "mmass.mspy.mod_envfit.mod_calibration.calibration",
         return_value=(lambda p, x: x + p[0], [0.01], 0.0),
     )
 
@@ -492,7 +497,7 @@ def test_alignData_calibrants(envfit_obj, mocker):
         [[19.01, 100.0], [20.01, 50.0], [21.01, 25.0], [22.01, 10.0]]
     )
     mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
     envfit_obj._alignData()
     assert mock_cal.call_args[1]["model"] == "quadratic"
@@ -515,10 +520,11 @@ def test_alignData_edge_cases(envfit_obj, mocker):
     )
     mocker.patch.object(envfit_obj, "_leastSquare", return_value=[1.0])
     mocker.patch(
-        "mspy.mod_envfit.mod_pattern.profile", return_value=numpy.array([[19.0, 100.0]])
+        "mmass.mspy.mod_envfit.mod_pattern.profile",
+        return_value=numpy.array([[19.0, 100.0]]),
     )
 
-    from mspy.obj_peak import peak
+    from mmass.mspy.obj_peak import peak
     # Tolerance is self.fwhm/1.5 = 0.1/1.5 = 0.066
     # peak(19.0, 100.0)
     # 19.01: error = 0.01 <= 0.066 -> Case B
@@ -529,11 +535,11 @@ def test_alignData_edge_cases(envfit_obj, mocker):
     # Peak list sorted by m/z
     mock_peaklist = [peak(19.0, 100.0), peak(22.0, 50.0)]
     mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
 
     mock_cal = mocker.patch(
-        "mspy.mod_envfit.mod_calibration.calibration",
+        "mmass.mspy.mod_envfit.mod_calibration.calibration",
         return_value=(lambda p, x: x, [0.0], 0.0),
     )
 
@@ -552,7 +558,7 @@ def test_leastSquare_convergence(envfit_obj, mocker):
 
     # Mock solveLinEq to return delta
     mocker.patch(
-        "mspy.mod_envfit.solveLinEq",
+        "mmass.mspy.mod_envfit.solveLinEq",
         side_effect=[
             numpy.array([10.0]),  # 1st iteration: params=50+10=60
             numpy.array([-70.0]),  # 2nd iteration: params=60-70=-10 -> clipped to 0
@@ -585,7 +591,7 @@ def test_leastSquare_divergence(envfit_obj, mocker):
     models = numpy.array([[1.0]])
 
     # Mock solveLinEq
-    mocker.patch("mspy.mod_envfit.solveLinEq", return_value=numpy.array([10.0]))
+    mocker.patch("mmass.mspy.mod_envfit.solveLinEq", return_value=numpy.array([10.0]))
 
     # Mock _chiSquare
     mocker.patch.object(
@@ -621,7 +627,7 @@ def test_leastSquare_iterLimit(envfit_obj, mocker):
     data = numpy.array([100.0])
     models = numpy.array([[1.0]])
 
-    mocker.patch("mspy.mod_envfit.solveLinEq", return_value=numpy.array([1.0]))
+    mocker.patch("mmass.mspy.mod_envfit.solveLinEq", return_value=numpy.array([1.0]))
     # Always returning smaller chi-square but large enough difference to not break
     mocker.patch.object(
         envfit_obj, "_chiSquare", return_value=([1000.0, [10.0]], numpy.array([[1.0]]))
@@ -682,8 +688,8 @@ def test_topeaklist_list_input(envfit_obj, mocker):
 
 def test_topeaklist_fwhm_from_basepeak(envfit_obj, mocker):
     """Test topeaklist getting fwhm from basepeak to hit line 136."""
-    from mspy.obj_peak import peak
-    from mspy.obj_peaklist import peaklist
+    from mmass.mspy.obj_peak import peak
+    from mmass.mspy.obj_peaklist import peaklist
 
     pl = peaklist()
     p = peak(19.01, 100.0)
@@ -725,15 +731,15 @@ def test_alignData_multiple_points_per_peak(envfit_obj, mocker):
     mocker.patch.object(envfit_obj, "_leastSquare", return_value=[1.0])
     envfit_obj.models[0][1] = [(19.0, 1.0), (20.0, 0.5)]
 
-    from mspy.obj_peak import peak
+    from mmass.mspy.obj_peak import peak
 
     mock_peaklist = [peak(19.0, 100.0), peak(20.0, 50.0)]
     mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
 
     mock_cal = mocker.patch(
-        "mspy.mod_envfit.mod_calibration.calibration",
+        "mmass.mspy.mod_envfit.mod_calibration.calibration",
         return_value=(lambda p, x: x, [0.0], 0.0),
     )
 
@@ -756,13 +762,13 @@ def test_alignData_too_few_calibrants(envfit_obj, mocker):
     mocker.patch.object(envfit_obj, "_leastSquare", return_value=[1.0])
     envfit_obj.models[0][1] = [(19.0, 1.0)]
 
-    from mspy.obj_peak import peak
+    from mmass.mspy.obj_peak import peak
 
     mock_peaklist = [peak(19.0, 100.0)]
     mocker.patch(
-        "mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
+        "mmass.mspy.mod_envfit.mod_peakpicking.labelscan", return_value=mock_peaklist
     )
 
-    mock_cal = mocker.patch("mspy.mod_envfit.mod_calibration.calibration")
+    mock_cal = mocker.patch("mmass.mspy.mod_envfit.mod_calibration.calibration")
     envfit_obj._alignData()
     assert not mock_cal.called

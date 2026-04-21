@@ -1,12 +1,13 @@
-import mspy.mod_pattern as mod_pattern
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_compound as obj_compound
-import mspy.obj_peak as obj_peak
-import mspy.obj_peaklist as obj_peaklist
 import numpy
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.mod_pattern as mod_pattern
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_compound as obj_compound
+import mmass.mspy.obj_peak as obj_peak
+import mmass.mspy.obj_peaklist as obj_peaklist
 
 
 # Module-level fixture to reset stopper state
@@ -173,7 +174,7 @@ def test_gaussian_returns_array(mocker):
     # Mock the calculations module
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_gaussian", return_value=mock_result
+        "mmass.mspy.mod_pattern.calculations.signal_gaussian", return_value=mock_result
     )
     result = mod_pattern.gaussian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -184,7 +185,8 @@ def test_lorentzian_returns_array(mocker):
     """Test lorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_lorentzian", return_value=mock_result
+        "mmass.mspy.mod_pattern.calculations.signal_lorentzian",
+        return_value=mock_result,
     )
     result = mod_pattern.lorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -194,7 +196,8 @@ def test_gausslorentzian_returns_array(mocker):
     """Test gausslorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_gausslorentzian", return_value=mock_result
+        "mmass.mspy.mod_pattern.calculations.signal_gausslorentzian",
+        return_value=mock_result,
     )
     result = mod_pattern.gausslorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -209,15 +212,15 @@ def test_gausslorentzian_returns_array(mocker):
 def mock_profile_dependencies(mocker):
     """Mock all external dependencies for profile function."""
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_profile",
+        "mmass.mspy.mod_pattern.calculations.signal_profile",
         return_value=numpy.array([[100.0, 0.0], [100.05, 0.5], [100.1, 1.0]]),
     )
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_profile_to_raster",
+        "mmass.mspy.mod_pattern.calculations.signal_profile_to_raster",
         return_value=numpy.array([[100.0, 0.0], [100.01, 0.3]]),
     )
     mocker.patch(
-        "mspy.mod_pattern.mod_signal.subbase",
+        "mmass.mspy.mod_pattern.mod_signal.subbase",
         side_effect=lambda x, y: x,  # return profile unchanged
     )
 
@@ -414,7 +417,8 @@ def mock_matchpattern_dependencies(mocker):
             return None
 
     mocker.patch(
-        "mspy.mod_pattern.mod_peakpicking.labelpeak", side_effect=labelpeak_side_effect
+        "mmass.mspy.mod_pattern.mod_peakpicking.labelpeak",
+        side_effect=labelpeak_side_effect,
     )
 
 
@@ -542,11 +546,13 @@ def mock_pattern_dependencies(mocker):
     """Mock external dependencies for pattern function."""
     # Mock profile, maxima, and centroid functions
     mocker.patch(
-        "mspy.mod_pattern.profile",
+        "mmass.mspy.mod_pattern.profile",
         return_value=numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]]),
     )
-    mocker.patch("mspy.mod_pattern.mod_signal.maxima", return_value=[[100.02, 1.0]])
-    mocker.patch("mspy.mod_pattern.mod_signal.centroid", return_value=100.020)
+    mocker.patch(
+        "mmass.mspy.mod_pattern.mod_signal.maxima", return_value=[[100.02, 1.0]]
+    )
+    mocker.patch("mmass.mspy.mod_pattern.mod_signal.centroid", return_value=100.020)
 
 
 def test_pattern_coerces_string_to_compound():
@@ -728,7 +734,7 @@ def test_pattern_centroid_refine_within_threshold(mock_pattern_dependencies, moc
     mod_stopper.start()
     # Mock centroid to return value close to isotope m/z
     mocker.patch(
-        "mspy.mod_pattern.mod_signal.centroid",
+        "mmass.mspy.mod_pattern.mod_signal.centroid",
         return_value=100.0201,  # within fwhm/100 = 0.001
     )
     result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)
@@ -740,7 +746,7 @@ def test_pattern_centroid_refine_exceeds_threshold(mock_pattern_dependencies, mo
     mod_stopper.start()
     # Mock centroid to return value far from isotope m/z
     mocker.patch(
-        "mspy.mod_pattern.mod_signal.centroid",
+        "mmass.mspy.mod_pattern.mod_signal.centroid",
         return_value=100.05,  # exceeds fwhm/100 = 0.001
     )
     result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)

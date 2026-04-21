@@ -1,7 +1,8 @@
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given, settings
-from mspy.mod_calibration import _DerivVar, _linearModel, _quadraticModel
+
+from mmass.mspy.mod_calibration import _DerivVar, _linearModel, _quadraticModel
 
 # Step 2: _DerivVar Initialization & Basics Tests
 # -----------------------------------------------
@@ -382,7 +383,8 @@ def test_models_with_derivvar():
 def test_chi_square_basic():
     """Test _chiSquare calculation with simple data."""
     import numpy as np
-    from mspy.mod_calibration import _chiSquare, _DerivVar, _linearModel
+
+    from mmass.mspy.mod_calibration import _chiSquare, _DerivVar, _linearModel
 
     params = (_DerivVar(2.0, 0), _DerivVar(5.0, 1))
     data = [(10.0, 25.0)]
@@ -406,7 +408,7 @@ def test_chi_square_basic():
 
 def test_least_squares_fit_convergence():
     """Test _leastSquaresFit convergence on a simple linear dataset."""
-    from mspy.mod_calibration import _leastSquaresFit, _linearModel
+    from mmass.mspy.mod_calibration import _leastSquaresFit, _linearModel
 
     # Data: y = 2x + 5
     data = [(0.0, 5.0), (1.0, 7.0), (2.0, 9.0)]
@@ -422,10 +424,11 @@ def test_least_squares_fit_convergence():
 def test_least_squares_fit_branches(mocker):
     """Test _leastSquaresFit branches: increased damping and convergence."""
     import numpy as np
-    from mspy.mod_calibration import _DerivVar, _leastSquaresFit, _linearModel
+
+    from mmass.mspy.mod_calibration import _DerivVar, _leastSquaresFit, _linearModel
 
     # We need to control _chiSquare returns to force branches
-    mock_chi_sq = mocker.patch("mspy.mod_calibration._chiSquare")
+    mock_chi_sq = mocker.patch("mmass.mspy.mod_calibration._chiSquare")
 
     # Initial call to _chiSquare (before loop)
     initial_chi_sq = _DerivVar(100.0, [10.0, 1.0])
@@ -468,9 +471,10 @@ def test_least_squares_fit_branches(mocker):
 def test_least_squares_fit_max_iterations(mocker):
     """Test _leastSquaresFit maxIterations break."""
     import numpy as np
-    from mspy.mod_calibration import _DerivVar, _leastSquaresFit, _linearModel
 
-    mock_chi_sq = mocker.patch("mspy.mod_calibration._chiSquare")
+    from mmass.mspy.mod_calibration import _DerivVar, _leastSquaresFit, _linearModel
+
+    mock_chi_sq = mocker.patch("mmass.mspy.mod_calibration._chiSquare")
 
     # Simple side effect that avoids convergence
     def side_effect(model, p, data):
@@ -496,7 +500,7 @@ def test_least_squares_fit_max_iterations(mocker):
 
 def test_calibration_single_point():
     """Test single-point linear calibration bypass."""
-    from mspy.mod_calibration import _linearModel, calibration
+    from mmass.mspy.mod_calibration import _linearModel, calibration
 
     # data = [(measured, reference)]
     data = [(100.0, 100.5)]
@@ -511,7 +515,7 @@ def test_calibration_single_point():
 
 def test_calibration_linear_multi():
     """Test multi-point linear calibration."""
-    from mspy.mod_calibration import _linearModel, calibration
+    from mmass.mspy.mod_calibration import _linearModel, calibration
 
     data = [(100.0, 101.0), (200.0, 201.0)]
     # Clearly y = x + 1.0
@@ -525,7 +529,7 @@ def test_calibration_linear_multi():
 
 def test_calibration_quadratic():
     """Test multi-point quadratic calibration."""
-    from mspy.mod_calibration import _quadraticModel, calibration
+    from mmass.mspy.mod_calibration import _quadraticModel, calibration
 
     # y = 0.5x^2 + 2x + 10
     f = lambda x: 0.5 * x * x + 2 * x + 10
@@ -542,7 +546,7 @@ def test_calibration_quadratic():
 
 def test_calibration_invalid_model_error():
     """Test invalid model string triggers UnboundLocalError."""
-    from mspy.mod_calibration import calibration
+    from mmass.mspy.mod_calibration import calibration
 
     data = [(100.0, 101.0), (200.0, 201.0)]
 

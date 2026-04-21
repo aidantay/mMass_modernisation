@@ -4,8 +4,9 @@ import tempfile
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-from mspy.obj_scan import scan
-from mspy.parser_xy import parseXY
+
+from mmass.mspy.obj_scan import scan
+from mmass.mspy.parser_xy import parseXY
 
 
 @pytest.fixture

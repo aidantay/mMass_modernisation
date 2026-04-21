@@ -13,14 +13,14 @@ if not hasattr(wx, "SAVE"):
 if not hasattr(wx, "OVERWRITE_PROMPT"):
     wx.OVERWRITE_PROMPT = getattr(wx, "FD_OVERWRITE_PROMPT", 0x0002)
 
-import gui.config as config
-import gui.images as images
-from gui.ids import (
+import mmass.gui.config as config
+import mmass.gui.images as images
+from mmass.gui.ids import (
     ID_documentExportImage,
     ID_documentExportPeaklist,
     ID_documentExportSpectrum,
 )
-from gui.panel_document_export import panelDocumentExport
+from mmass.gui.panel_document_export import panelDocumentExport
 
 
 class MockParentFrame(wx.Frame):

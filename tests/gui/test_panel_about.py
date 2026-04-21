@@ -1,9 +1,10 @@
 import importlib
 
-import gui.images as images
-import gui.panel_about
 import pytest
 import wx
+
+import mmass.gui.images as images
+from mmass import gui
 
 
 @pytest.fixture
@@ -39,7 +40,7 @@ def test_frame_type_and_title(mocker):
     # because these are defined at module level.
 
     mocker.patch("wx.Platform", "__WXMAC__")
-    import gui.panel_about as pa
+    import mmass.gui.panel_about as pa
 
     importlib.reload(pa)
     assert pa.frame == wx.Frame
@@ -47,7 +48,7 @@ def test_frame_type_and_title(mocker):
     mocker.stopall()
 
     mocker.patch("wx.Platform", "__WXMSW__")
-    import gui.panel_about as pa
+    import mmass.gui.panel_about as pa
 
     importlib.reload(pa)
     assert pa.frame == wx.MiniFrame
@@ -95,8 +96,8 @@ def test_gui_elements_exist(about_frame):
 
 def test_version_label_regular(wx_app, mock_parent, mocker):
     """Test version label when nightbuild is False."""
-    mocker.patch("gui.config.nightbuild", False)
-    mocker.patch("gui.config.version", "5.5.0")
+    mocker.patch("mmass.gui.config.nightbuild", False)
+    mocker.patch("mmass.gui.config.version", "5.5.0")
     mocker.patch.dict(images.lib, {"iconAbout": wx.Bitmap(1, 1)})
     mocker.patch("wx.RESIZE_BOX", 0, create=True)
     frame_inst = gui.panel_about.panelAbout(mock_parent)
@@ -108,8 +109,8 @@ def test_version_label_regular(wx_app, mock_parent, mocker):
 
 def test_version_label_nightly(wx_app, mock_parent, mocker):
     """Test version label when nightbuild is set."""
-    mocker.patch("gui.config.nightbuild", "20240101")
-    mocker.patch("gui.config.version", "5.5.0")
+    mocker.patch("mmass.gui.config.nightbuild", "20240101")
+    mocker.patch("mmass.gui.config.version", "5.5.0")
     mocker.patch.dict(images.lib, {"iconAbout": wx.Bitmap(1, 1)})
     mocker.patch("wx.RESIZE_BOX", 0, create=True)
     frame_inst = gui.panel_about.panelAbout(mock_parent)

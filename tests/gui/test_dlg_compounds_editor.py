@@ -1,17 +1,18 @@
 import os
 import tempfile
 
-import gui.dlg_compounds_editor as dlg_editor
-import gui.libs as libs
 import pytest
 import wx
-from gui.ids import *
+
+import mmass.gui.dlg_compounds_editor as dlg_editor
+import mmass.gui.libs as libs
+from mmass.gui.ids import *
 
 
 @pytest.fixture
 def compounds_lib(mocker):
     """Fixture to mock libs.compounds and isolate tests."""
-    mocker.patch("gui.libs.compounds", {})
+    mocker.patch("mmass.gui.libs.compounds", {})
     mocked_compounds = libs.compounds
     yield mocked_compounds
 
@@ -21,7 +22,7 @@ def dlg_editor_instance(wx_app, compounds_lib, mocker):
     """Fixture for dlgCompoundsEditor instance."""
     parent = wx.Frame(None)
     # Ensure config values are present for UI formatting
-    mocker.patch("gui.config.main", {"mzDigits": 4})
+    mocker.patch("mmass.gui.config.main", {"mzDigits": 4})
     dlg = dlg_editor.dlgCompoundsEditor(parent)
     yield dlg
     dlg.Destroy()
@@ -179,7 +180,7 @@ def test_dlgCompoundsEditor_onItemSelected(dlg_editor_instance, compounds_lib, m
 
 def test_dlgCompoundsEditor_onAddGroup(dlg_editor_instance, compounds_lib, mocker):
     """Test adding a new compound group."""
-    mock_dlg = mocker.patch("gui.dlg_compounds_editor.dlgGroupName")
+    mock_dlg = mocker.patch("mmass.gui.dlg_compounds_editor.dlgGroupName")
     inst = mock_dlg.return_value
     inst.ShowModal.return_value = wx.ID_OK
     inst.name = "NewGroup"
@@ -190,7 +191,7 @@ def test_dlgCompoundsEditor_onAddGroup(dlg_editor_instance, compounds_lib, mocke
 
     # Test duplicate group name
     inst.name = "NewGroup"
-    mock_msg = mocker.patch("gui.mwx.dlgMessage")
+    mock_msg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_bell = mocker.patch("wx.Bell")
     dlg_editor_instance.onAddGroup(None)
     mock_bell.assert_called_once()
@@ -205,7 +206,7 @@ def test_dlgCompoundsEditor_onRenameGroup(dlg_editor_instance, compounds_lib, mo
     compounds_lib["Group1"] = {"C1": compound}
     dlg_editor_instance.group = "Group1"
 
-    mock_dlg = mocker.patch("gui.dlg_compounds_editor.dlgGroupName")
+    mock_dlg = mocker.patch("mmass.gui.dlg_compounds_editor.dlgGroupName")
     inst = mock_dlg.return_value
     inst.ShowModal.return_value = wx.ID_OK
     inst.name = "RenamedGroup"
@@ -221,7 +222,7 @@ def test_dlgCompoundsEditor_onDeleteGroup(dlg_editor_instance, compounds_lib, mo
     compounds_lib["Group1"] = {}
     dlg_editor_instance.group = "Group1"
 
-    mock_msg = mocker.patch("gui.mwx.dlgMessage")
+    mock_msg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_msg.return_value.ShowModal.return_value = wx.ID_OK
     dlg_editor_instance.onDeleteGroup(None)
     assert "Group1" not in compounds_lib
@@ -253,7 +254,7 @@ def test_dlgCompoundsEditor_onDeleteItem(dlg_editor_instance, compounds_lib, moc
     dlg_editor_instance.group = "Group1"
     dlg_editor_instance.updateItemsList()
 
-    mock_msg = mocker.patch("gui.mwx.dlgMessage")
+    mock_msg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_msg.return_value.ShowModal.return_value = wx.ID_OK
     mocker.patch.object(dlg_editor_instance.itemsList, "getSelected", return_value=[0])
     dlg_editor_instance.onDeleteItem(None)
@@ -322,12 +323,14 @@ def test_dlgCompoundsEditor_onImport_replace_logic(
     mocker.patch.object(
         dlg_editor_instance, "readLibraryXML", return_value=imported_items
     )
-    mock_select_dlg = mocker.patch("gui.dlg_compounds_editor.dlgSelectItemsToImport")
+    mock_select_dlg = mocker.patch(
+        "mmass.gui.dlg_compounds_editor.dlgSelectItemsToImport"
+    )
     mock_select_dlg.return_value.ShowModal.return_value = wx.ID_OK
     mock_select_dlg.return_value.selected = ["Group1"]
 
     # Test 'Replace'
-    mock_msg = mocker.patch("gui.mwx.dlgMessage")
+    mock_msg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_msg.return_value.ShowModal.return_value = ID_dlgReplace
     dlg_editor_instance.onImport(None)
     assert "new" in compounds_lib["Group1"]
@@ -416,7 +419,7 @@ def test_dlgCompoundsEditor_onImport_edge_cases(dlg_editor_instance, mocker):
     mock_file_dlg.return_value.ShowModal.return_value = wx.ID_OK
     mock_file_dlg.return_value.GetPath.return_value = "dummy.xml"
     mocker.patch.object(dlg_editor_instance, "readLibraryXML", return_value=False)
-    mock_msg = mocker.patch("gui.mwx.dlgMessage")
+    mock_msg = mocker.patch("mmass.gui.mwx.dlgMessage")
     dlg_editor_instance.onImport(None)
     mock_msg.assert_called()
 

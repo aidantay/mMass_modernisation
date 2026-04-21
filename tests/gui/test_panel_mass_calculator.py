@@ -7,12 +7,11 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-import gui.config as config
-import gui.doc as doc
-import gui.images as images
-import gui.panel_mass_calculator as panel_mass_calculator
-
-import mspy
+import mmass.gui.config as config
+import mmass.gui.doc as doc
+import mmass.gui.images as images
+import mmass.gui.panel_mass_calculator as panel_mass_calculator
+from mmass import mspy
 
 
 def safe_updateTmpSpectrum(self):
@@ -53,8 +52,8 @@ def patched_config(mocker):
     new_mass_calculator = copy.deepcopy(config.massCalculator)
     new_main = copy.deepcopy(config.main)
 
-    mocker.patch("gui.config.massCalculator", new_mass_calculator)
-    mocker.patch("gui.config.main", new_main)
+    mocker.patch("mmass.gui.config.massCalculator", new_mass_calculator)
+    mocker.patch("mmass.gui.config.main", new_main)
     yield
 
 
@@ -63,7 +62,7 @@ def calculator_panel(wx_app, mock_parent, patched_config, mocker):
     """Fixture for panelMassCalculator instance."""
     # wx_app is a session fixture from conftest.py
     # Patch mspy.plot.canvas to avoid wxAssertionError in headless environment
-    mocker.patch("mspy.plot.canvas")
+    mocker.patch("mmass.mspy.plot.canvas")
     panel = panel_mass_calculator.panelMassCalculator(mock_parent)
 
     # Patch updateTmpSpectrum to avoid numpy comparison ValueError (using 'is' instead of '==')
@@ -459,7 +458,7 @@ def test_getParams_exception(calculator_panel, patched_config, mocker):
 
 def test_onToolSelected_by_event(calculator_panel, mocker):
     """Verify onToolSelected when called via event."""
-    from gui.ids import ID_massCalculatorIonSeries
+    from mmass.gui.panel_mass_calculator import ID_massCalculatorIonSeries
 
     mock_event = mocker.MagicMock()
     mock_event.GetId.return_value = ID_massCalculatorIonSeries
@@ -532,7 +531,7 @@ def test_setData_edge_cases(calculator_panel):
 
 def test_onToolSelected_ids(calculator_panel, mocker):
     """Verify onToolSelected with all possible IDs."""
-    from gui.ids import (
+    from mmass.gui.panel_mass_calculator import (
         ID_massCalculatorIonSeries,
         ID_massCalculatorPattern,
         ID_massCalculatorSummary,

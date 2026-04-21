@@ -1,10 +1,10 @@
 import math
 
-import mspy.mod_basics
-import mspy.obj_compound
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 import pytest
 import wx
 
-from gui import images
+from mmass.gui import images
 
 
 @pytest.fixture
@@ -64,7 +64,7 @@ def test_loadImages_msw(wx_app, clean_images_lib, mocker):
 
 def test_convertImages(mocker):
     """Test convertImages function."""
-    mock_img2py = mocker.patch("gui.images.img2py.main")
+    mock_img2py = mocker.patch("mmass.gui.images.img2py.main")
     # Mock 'open' for Python 3
     mock_open = mocker.patch("builtins.open", mocker.mock_open())
     images.convertImages()

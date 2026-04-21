@@ -36,17 +36,21 @@ def mock_gui_env(mocker):
     Fixture to setup the mocked environment for GUI tests.
     Returns a dictionary of all mocked modules.
     """
-    modules_to_mock = ["mwx", "images", "config", "libs", "mspy", "doc", "ids"]
+    modules_to_mock = ["mwx", "images", "config", "libs", "doc", "ids"]
     mocks = {}
     for mod_name in modules_to_mock:
         m = mocker.MagicMock()
         mocks[mod_name] = m
-        # Also patch sys.modules for any direct imports
-        mocks["gui." + mod_name] = m
-        mocker.patch("gui." + mod_name, m, create=True)
+        # Patch mmass.gui.xxx
+        mocker.patch("mmass.gui." + mod_name, m, create=True)
 
-    mocks["gui.panel_match"] = mocker.MagicMock()
-    mocker.patch("gui.panel_match", mocks["gui.panel_match"], create=True)
+    # Patch mmass.mspy separately as it's not under mmass.gui
+    mock_mspy = mocker.MagicMock()
+    mocks["mmass.mspy"] = mock_mspy
+    mocker.patch("mmass.mspy", mock_mspy, create=True)
+
+    mocks["mmass.gui.panel_match"] = mocker.MagicMock()
+    mocker.patch("mmass.gui.panel_match", mocks["mmass.gui.panel_match"], create=True)
 
     # Setup mock_images.lib
     mocks["images"].lib = MockImagesLib()
@@ -168,10 +172,10 @@ def mock_gui_env(mocker):
     class MockForceQuit(Exception):
         pass
 
-    mock_mspy = mocks["mspy"]
+    mock_mspy = mocks["mmass.mspy"]
     mock_mspy.ForceQuit = MockForceQuit
     mock_mspy.CHECK_FORCE_QUIT = mocker.MagicMock()
-    mocker.patch("mspy.CHECK_FORCE_QUIT", mock_mspy.CHECK_FORCE_QUIT)
+    mocker.patch("mmass.mspy.CHECK_FORCE_QUIT", mock_mspy.CHECK_FORCE_QUIT)
 
     def make_mock_compound(formula):
         comp = mocker.MagicMock()
@@ -181,7 +185,7 @@ def mock_gui_env(mocker):
         return comp
 
     mock_mspy.compound = mocker.MagicMock(side_effect=make_mock_compound)
-    mocker.patch("mspy.compound", mock_mspy.compound)
+    mocker.patch("mmass.mspy.compound", mock_mspy.compound)
 
     # Patch sys.modules
     mocker.patch.dict(sys.modules, mocks)
@@ -198,9 +202,9 @@ def panel_class(mock_gui_env):
     Fixture to import the panel class after mocks are established.
     Forces a reload to ensure mocks are used.
     """
-    if "gui.panel_compounds_search" in sys.modules:
-        del sys.modules["gui.panel_compounds_search"]
-    from gui.panel_compounds_search import panelCompoundsSearch
+    if "mmass.gui.panel_compounds_search" in sys.modules:
+        del sys.modules["mmass.gui.panel_compounds_search"]
+    from mmass.gui.panel_compounds_search import panelCompoundsSearch
 
     return panelCompoundsSearch
 
@@ -231,14 +235,32 @@ def test_init(panel):
 
 
 def test_onToolSelected(panel, mock_gui_env, mocker):
-    mock_ids = mock_gui_env["ids"]
-    mock_evt = mocker.MagicMock()
-    mock_evt.GetId.return_value = mock_ids.ID_compoundsSearchFormula
-    panel.onToolSelected(mock_evt)
+    # Test via tool argument
+    panel.onToolSelected(tool="formula")
     assert panel.currentTool == "formula"
     assert panel.GetTitle() == "Formula Search"
 
-    mock_evt.GetId.return_value = mock_ids.ID_compoundsSearchCompounds
+    panel.onToolSelected(tool="compounds")
+    assert panel.currentTool == "compounds"
+    assert panel.GetTitle() == "Compounds Search"
+
+    # Test via event
+    mock_ids = mock_gui_env["ids"]
+    mock_evt = mocker.MagicMock()
+
+    # We need to make sure panel's global ID_xxx matches our mock_ids.ID_xxx
+    # Since panel is already initialized and it imports from .ids,
+    # we can try to patch the globals in the module.
+    import mmass.gui.panel_compounds_search as mod
+
+    mocker.patch.object(mod, "ID_compoundsSearchFormula", 1002)
+    mocker.patch.object(mod, "ID_compoundsSearchCompounds", 1001)
+
+    mock_evt.GetId.return_value = 1002
+    panel.onToolSelected(mock_evt)
+    assert panel.currentTool == "formula"
+
+    mock_evt.GetId.return_value = 1001
     panel.onToolSelected(mock_evt)
     assert panel.currentTool == "compounds"
 
@@ -258,7 +280,7 @@ def test_getParams(panel, mock_gui_env, mocker):
 
 
 def test_onProcessing(panel, mock_gui_env, mocker):
-    mock_mspy = mock_gui_env["mspy"]
+    mock_mspy = mock_gui_env["mmass.mspy"]
     mock_disabler = mocker.patch("wx.WindowDisabler")
     panel.onProcessing(True)
     assert panel.mainSizer.IsShown(3)
@@ -271,7 +293,7 @@ def test_onProcessing(panel, mock_gui_env, mocker):
 
 
 def test_onStop(panel, mock_gui_env, mocker):
-    mock_mspy = mock_gui_env["mspy"]
+    mock_mspy = mock_gui_env["mmass.mspy"]
     panel.processing = mocker.MagicMock()
     panel.processing.is_alive.return_value = True
     panel.onStop(None)
@@ -288,7 +310,7 @@ def test_onClose(panel, mocker):
 
 
 def test_runGenerateIons(panel, mock_gui_env, mocker):
-    mock_mspy = mock_gui_env["mspy"]
+    mock_mspy = mock_gui_env["mmass.mspy"]
     mock_config = mock_gui_env["config"]
 
     # We need to recreate the mock compound helper because mspy is mocked
@@ -318,7 +340,7 @@ def test_runGenerateIons(panel, mock_gui_env, mocker):
 
 
 def test_runGenerateIons_force_quit(panel, mock_gui_env, mocker):
-    mock_mspy = mock_gui_env["mspy"]
+    mock_mspy = mock_gui_env["mmass.mspy"]
     mock_config = mock_gui_env["config"]
 
     def make_mock_compound(formula):
@@ -346,7 +368,7 @@ def test_runGenerateIons_force_quit(panel, mock_gui_env, mocker):
 
 def test_onGenerate(panel, mock_gui_env, mocker):
     mock_libs = mock_gui_env["libs"]
-    mock_mspy = mock_gui_env["mspy"]
+    mock_mspy = mock_gui_env["mmass.mspy"]
 
     def make_mock_compound(formula):
         comp = mocker.MagicMock()
@@ -398,7 +420,7 @@ def test_onAnnotate(panel, mocker):
 
 def test_onMatch(panel, mocker):
     panel.currentCompounds = [["Water", 18.0, 1, None, "H2O", None, []]]
-    mock_match_cls = mocker.patch("gui.panel_compounds_search.panelMatch")
+    mock_match_cls = mocker.patch("mmass.gui.panel_compounds_search.panelMatch")
     mock_match_panel = mock_match_cls.return_value
     panel.matchPanel = mock_match_panel  # Ensure match=True
     panel.onMatch(mocker.MagicMock())
@@ -511,17 +533,22 @@ def test_updateCompoundsList_matched(panel):
 
 
 def test_onListFilter(panel, mock_gui_env, mocker):
-    mock_ids = mock_gui_env["ids"]
+    import mmass.gui.panel_compounds_search as mod
+
+    mocker.patch.object(mod, "ID_listViewMatched", 1004)
+    mocker.patch.object(mod, "ID_listViewUnmatched", 1005)
+    mocker.patch.object(mod, "ID_listViewAll", 1003)
+
     mock_evt = mocker.MagicMock()
-    mock_evt.GetId.return_value = mock_ids.ID_listViewMatched
+    mock_evt.GetId.return_value = 1004
     panel.onListFilter(mock_evt)
     assert panel._compoundsFilter == 1
 
-    mock_evt.GetId.return_value = mock_ids.ID_listViewUnmatched
+    mock_evt.GetId.return_value = 1005
     panel.onListFilter(mock_evt)
     assert panel._compoundsFilter == -1
 
-    mock_evt.GetId.return_value = mock_ids.ID_listViewAll
+    mock_evt.GetId.return_value = 1003
     panel.onListFilter(mock_evt)
     assert panel._compoundsFilter == 0
 

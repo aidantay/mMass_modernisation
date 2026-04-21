@@ -1,19 +1,18 @@
-import gui.doc
 import numpy
 import pytest
 
-import mspy
+from mmass import gui, mspy
 
 
 @pytest.fixture
 def mock_config(mocker):
     """Fixture to patch gui.config.main and gui.config.replacements."""
     mocker.patch.dict(
-        "gui.config.main",
+        "mmass.gui.config.main",
         {"mzDigits": 4, "intDigits": 0, "ppmDigits": 1, "dataPrecision": 32},
     )
     mocker.patch.dict(
-        "gui.config.replacements",
+        "mmass.gui.config.replacements",
         {
             "sequences": {
                 "sp": {
@@ -428,8 +427,8 @@ def test_document_report(mock_config, sample_spectrum, mocker):
 def test_parseMSD_integration(tmp_path, mock_config, sample_spectrum, mocker):
     """Test parseMSD integration by serializing and deserializing a document."""
     # Mock save methods to avoid side effects during deserialization
-    mocker.patch("mspy.saveMonomers")
-    mocker.patch("mspy.saveModifications")
+    mocker.patch("mmass.mspy.saveMonomers")
+    mocker.patch("mmass.mspy.saveModifications")
 
     doc = gui.doc.document()
     doc.title = "Integration Test"
@@ -541,8 +540,8 @@ def test_parseMSD_helpers(tmp_path, mocker):
     """Test internal helper methods of parseMSD."""
     import xml.dom.minidom
 
-    mocker.patch("mspy.saveMonomers")
-    mocker.patch("mspy.saveModifications")
+    mocker.patch("mmass.mspy.saveMonomers")
+    mocker.patch("mmass.mspy.saveModifications")
 
     # Test _getVersion with mMassDoc tag
     xml_mmassdoc = '<mMassDoc version="1.0"></mMassDoc>'

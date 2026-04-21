@@ -1,7 +1,8 @@
 import importlib
 
-import gui.ids
 import wx
+
+from mmass import gui
 
 
 def test_ids_defined(wx_app):

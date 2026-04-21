@@ -5,11 +5,10 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-import gui.config as config
-from gui.panel_envelope_fit import panelEnvelopeFit
-
-import mspy
-from gui import images
+import mmass.gui.config as config
+from mmass import mspy
+from mmass.gui import images
+from mmass.gui.panel_envelope_fit import panelEnvelopeFit
 
 
 @pytest.fixture
@@ -115,8 +114,8 @@ def mock_config(mocker):
 def panel(wx_app, mock_parent, mock_config, mock_images, mocker):
     """Fixture that instantiates panelEnvelopeFit."""
     # Mock mspy.plot.canvas and container to avoid actual plotting during init
-    mock_canvas = mocker.patch("mspy.plot.canvas")
-    mock_container = mocker.patch("mspy.plot.container")
+    mock_canvas = mocker.patch("mmass.mspy.plot.canvas")
+    mock_container = mocker.patch("mmass.mspy.plot.container")
 
     def canvas_side_effect(parent, *args, **kwargs):
         canvas = wx.Window(parent)
@@ -203,7 +202,7 @@ def test_on_collapse(panel, mocker):
 
 def test_on_stop(panel, mocker):
     """Verify onStop behavior."""
-    mock_stop = mocker.patch("mspy.stop")
+    mock_stop = mocker.patch("mmass.mspy.stop")
     mock_bell = mocker.patch("wx.Bell")
 
     # Case 1: Processing active and alive
@@ -303,7 +302,7 @@ def test_get_params_success(panel, mock_config, mocker):
     panel.relThreshold_value.SetValue("1.0")
     panel.fitToSpectrum_radio.SetValue(True)
 
-    mocker.patch("mspy.compound")
+    mocker.patch("mmass.mspy.compound")
     assert panel.getParams() is True
 
     assert config.envelopeFit["loss"] == "H"
@@ -359,7 +358,7 @@ def test_update_spectrum_canvas(panel, mocker):
     panel.currentFit.model = [7, 8, 9]
     panel.currentFit.envelope.return_value = [10, 11, 12]
 
-    mocker.patch("mspy.plot.points")
+    mocker.patch("mmass.mspy.plot.points")
     mock_append = mocker.patch.object(panel.spectrumContainer, "append")
     mock_draw.reset_mock()
 
@@ -406,7 +405,7 @@ def test_on_processing(panel, mocker):
     mock_show = mocker.patch.object(panel.mainSizer, "Show")
     mock_hide = mocker.patch.object(panel.mainSizer, "Hide")
     mocker.patch.object(panel, "Layout")
-    mock_mspy_start = mocker.patch("mspy.start")
+    mock_mspy_start = mocker.patch("mmass.mspy.start")
 
     # Status True
     panel.onProcessing(True)
@@ -483,7 +482,7 @@ def test_run_envelope_fit_peaklist(panel, mock_config, mocker):
     panel.currentCompound.formula.return_value = "C6H12O6"
     panel.currentDocument = mocker.Mock()
 
-    mock_envfit_class = mocker.patch("mspy.envfit")
+    mock_envfit_class = mocker.patch("mmass.mspy.envfit")
     fit_instance = mock_envfit_class.return_value
     fit_instance.topeaklist.return_value = True
 
@@ -502,7 +501,7 @@ def test_run_envelope_fit_spectrum(panel, mock_config, mocker):
     panel.currentDocument.spectrum.baseline.return_value = [0, 0, 0]
     panel.currentDocument.spectrum.profile = [1, 2, 3]
 
-    mock_envfit_class = mocker.patch("mspy.envfit")
+    mock_envfit_class = mocker.patch("mmass.mspy.envfit")
     fit_instance = mock_envfit_class.return_value
     fit_instance.tospectrum.return_value = True
 
@@ -517,7 +516,7 @@ def test_run_envelope_fit_force_quit(panel, mock_config, mocker):
     panel.currentCompound = mocker.Mock()
     panel.currentCompound.formula.return_value = "C6H12O6"
 
-    mocker.patch("mspy.envfit", side_effect=mspy.ForceQuit)
+    mocker.patch("mmass.mspy.envfit", side_effect=mspy.ForceQuit)
     panel.runEnvelopeFit()
     assert panel.currentFit is None
 
@@ -529,7 +528,7 @@ def test_run_envelope_fit_failure(panel, mock_config, mocker):
     panel.currentCompound.formula.return_value = "C6H12O6"
     panel.currentDocument = mocker.Mock()
 
-    mock_envfit_class = mocker.patch("mspy.envfit")
+    mock_envfit_class = mocker.patch("mmass.mspy.envfit")
     fit_instance = mock_envfit_class.return_value
     fit_instance.topeaklist.return_value = False
 

@@ -1,7 +1,8 @@
-import mspy.mod_signal as mod_signal
-import mspy.mod_stopper as mod_stopper
 import numpy
 import pytest
+
+import mmass.mspy.mod_signal as mod_signal
+import mmass.mspy.mod_stopper as mod_stopper
 
 # ============================================================================
 # FIXTURES

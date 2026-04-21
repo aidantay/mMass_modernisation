@@ -5,7 +5,8 @@ wx = pytest.importorskip("wx")
 import numpy
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-from mspy.plot_canvas import _scaleFont, canvas
+
+from mmass.mspy.plot_canvas import _scaleFont, canvas
 
 
 @pytest.fixture(scope="session")
@@ -1436,7 +1437,7 @@ def test_getBitmap_explicit(patched_canvas, mocker, mock_dc):
 
 def test_printout_basics(mocker):
     """Test printout basic methods."""
-    from mspy.plot_canvas import printout
+    from mmass.mspy.plot_canvas import printout
 
     mock_graph = mocker.Mock()
     po = printout(graph=mock_graph, filterSize=1.5, title="Test Print")
@@ -1450,7 +1451,7 @@ def test_printout_basics(mocker):
 
 def test_printout_OnPrintPage_printing(mocker, mock_dc):
     """Test printout.OnPrintPage in printing mode."""
-    from mspy.plot_canvas import printout
+    from mmass.mspy.plot_canvas import printout
 
     mock_graph = mocker.Mock()
     po = printout(mock_graph, filterSize=2.0)
@@ -1487,7 +1488,7 @@ def test_printout_OnPrintPage_printing(mocker, mock_dc):
 
 def test_printout_OnPrintPage_preview(mocker, mock_dc):
     """Test printout.OnPrintPage in preview mode."""
-    from mspy.plot_canvas import printout
+    from mmass.mspy.plot_canvas import printout
 
     mock_graph = mocker.Mock()
     po = printout(mock_graph, filterSize=2.0)

@@ -1,13 +1,14 @@
 import pytest
 import wx
 
+from mmass import gui
+
 # Monkeypatch wx for missing constants in wxPython 4
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = 0
 
-from gui.panel_periodic_table import panelPeriodicTable
-
-import mspy
+from mmass import mspy
+from mmass.gui.panel_periodic_table import panelPeriodicTable
 
 
 @pytest.fixture
@@ -22,7 +23,6 @@ def mock_parent(wx_app, mocker):
 @pytest.fixture
 def periodic_table(wx_app, mocker, mock_parent):
     # Mock images.lib to avoid loading real images
-    import gui.images
 
     mocker.patch.dict(gui.images.lib, {}, clear=True)
     # We need to fill it with something that can be used as a bitmap

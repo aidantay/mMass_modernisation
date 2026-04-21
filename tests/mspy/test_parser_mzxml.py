@@ -9,7 +9,9 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
-from mspy.parser_mzxml import (
+
+from mmass.mspy import obj_scan
+from mmass.mspy.parser_mzxml import (
     _convertRetentionTime,
     infoHandler,
     parseMZXML,
@@ -18,8 +20,6 @@ from mspy.parser_mzxml import (
     scanlistHandler,
     stopParsing,
 )
-
-from mspy import obj_scan
 
 
 # Test _convertRetentionTime
@@ -359,7 +359,7 @@ def test_parseMZXML_load(mocker, tmpdir):
             "spectrumType": "discrete",
         }
     }
-    mocker.patch("mspy.parser_mzxml.runHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzxml.runHandler", return_value=mock_handler)
     parser.load()
     assert 1 in parser._scanlist
 
@@ -371,7 +371,7 @@ def test_parseMZXML_info(mocker, tmpdir):
     parser = parseMZXML(path)
     mock_handler = mocker.Mock(spec=infoHandler)
     mock_handler.data = {"title": "Test"}
-    mocker.patch("mspy.parser_mzxml.infoHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzxml.infoHandler", return_value=mock_handler)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = stopParsing()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
@@ -395,7 +395,7 @@ def test_parseMZXML_scanlist(mocker, tmpdir):
     parser = parseMZXML(path)
     mock_handler = mocker.Mock(spec=scanlistHandler)
     mock_handler.data = {1: {"scanNumber": 1}}
-    mocker.patch("mspy.parser_mzxml.scanlistHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzxml.scanlistHandler", return_value=mock_handler)
     assert parser.scanlist() == {1: {"scanNumber": 1}}
 
 
@@ -425,7 +425,7 @@ def test_parseMZXML_scan(mocker, tmpdir):
     }
     mock_handler = mocker.Mock(spec=scanHandler)
     mock_handler.data = scan_data
-    mocker.patch("mspy.parser_mzxml.scanHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzxml.scanHandler", return_value=mock_handler)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = stopParsing()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
@@ -441,7 +441,7 @@ def test_parseMZXML_scan_not_found(mocker, tmpdir):
     parser = parseMZXML(path)
     mock_handler = mocker.Mock(spec=scanHandler)
     mock_handler.data = False
-    mocker.patch("mspy.parser_mzxml.scanHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzxml.scanHandler", return_value=mock_handler)
     mocker.patch("xml.sax.make_parser")
     assert parser.scan(1) is False
 

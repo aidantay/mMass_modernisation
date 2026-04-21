@@ -5,7 +5,8 @@ import xml.sax
 
 import numpy
 import pytest
-from mspy.parser_mzdata import parseMZDATA, stopParsing
+
+from mmass.mspy.parser_mzdata import parseMZDATA, stopParsing
 
 
 @pytest.fixture
@@ -92,7 +93,7 @@ def test_stopparsing_exception():
 
 def test_infoHandler():
     """Step 3: Unit Test infoHandler."""
-    from mspy.parser_mzdata import infoHandler
+    from mmass.mspy.parser_mzdata import infoHandler
 
     handler = infoHandler()
 
@@ -133,7 +134,7 @@ def test_infoHandler():
 
 def test_scanlistHandler_edge_cases():
     """Step 4: Unit Test scanlistHandler state and edge cases."""
-    from mspy.parser_mzdata import scanlistHandler
+    from mmass.mspy.parser_mzdata import scanlistHandler
 
     handler = scanlistHandler()
 
@@ -211,7 +212,7 @@ def test_scanlistHandler_edge_cases():
 
 def test_scanHandler_edge_cases():
     """Step 4: Unit Test scanHandler state and edge cases."""
-    from mspy.parser_mzdata import scanHandler
+    from mmass.mspy.parser_mzdata import scanHandler
 
     handler = scanHandler(1)
 
@@ -282,7 +283,7 @@ def test_scanHandler_edge_cases():
 
 def test_runHandler_edge_cases():
     """Step 4: Unit Test runHandler state and edge cases."""
-    from mspy.parser_mzdata import runHandler
+    from mmass.mspy.parser_mzdata import runHandler
 
     handler = runHandler()
 
@@ -555,7 +556,7 @@ def test_parseMZDATA_load(mocker):
             "other": "value2",
         },
     }
-    mocker.patch("mspy.parser_mzdata.runHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.runHandler", return_value=mock_handler)
 
     # Execute load
     parser.load()
@@ -594,7 +595,7 @@ def test_parseMZDATA_info(mocker):
     # Mock infoHandler and its data
     mock_handler = mocker.Mock()
     mock_handler.data = {"title": "Test"}
-    mocker.patch("mspy.parser_mzdata.infoHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.infoHandler", return_value=mock_handler)
 
     # Case 1: stopParsing handling
     mock_sax_parser.parse.side_effect = stopParsing()
@@ -639,7 +640,7 @@ def test_parseMZDATA_scanlist(mocker):
     # Mock scanlistHandler and its data
     mock_handler = mocker.Mock()
     mock_handler.data = {1: {"title": "Scan 1"}}
-    mocker.patch("mspy.parser_mzdata.scanlistHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.scanlistHandler", return_value=mock_handler)
 
     # Case 1: Successful extraction
     sl = parser.scanlist()
@@ -681,7 +682,7 @@ def test_parseMZDATA_scan(mocker):
 
     mock_handler = mocker.Mock()
     mock_handler.data = {2: {"id": 2}}  # scanHandler stores data for the requested ID
-    mocker.patch("mspy.parser_mzdata.scanHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.scanHandler", return_value=mock_handler)
 
     # Successful parse (no exception)
     scan2 = parser.scan(2)
@@ -707,7 +708,7 @@ def test_parseMZDATA_scan(mocker):
 
 def test_scanlistHandler_extra_coverage():
     """Improve coverage for scanlistHandler pass methods."""
-    from mspy.parser_mzdata import scanlistHandler
+    from mmass.mspy.parser_mzdata import scanlistHandler
 
     handler = scanlistHandler()
     handler.endElement("any")
@@ -721,7 +722,7 @@ def test_scanlistHandler_extra_coverage():
 
 def test_infoHandler_extra_coverage():
     """Improve coverage for infoHandler characters."""
-    from mspy.parser_mzdata import infoHandler
+    from mmass.mspy.parser_mzdata import infoHandler
 
     handler = infoHandler()
     handler._isInstrumentName = True
@@ -735,7 +736,7 @@ def test_infoHandler_extra_coverage():
 
 def test_scanHandler_comprehensive_coverage():
     """Hit all remaining branches in scanHandler."""
-    from mspy.parser_mzdata import scanHandler
+    from mmass.mspy.parser_mzdata import scanHandler
 
     handler = scanHandler(1)
 
@@ -822,7 +823,7 @@ def test_scanHandler_comprehensive_coverage():
 
 def test_scanlistHandler_comprehensive_coverage():
     """Hit all remaining branches in scanlistHandler."""
-    from mspy.parser_mzdata import scanlistHandler
+    from mmass.mspy.parser_mzdata import scanlistHandler
 
     handler = scanlistHandler()
 
@@ -849,7 +850,7 @@ def test_scanlistHandler_comprehensive_coverage():
 
 def test_runHandler_comprehensive_coverage():
     """Hit all remaining branches in runHandler."""
-    from mspy.parser_mzdata import runHandler
+    from mmass.mspy.parser_mzdata import runHandler
 
     handler = runHandler()
 
@@ -918,7 +919,7 @@ def test_integration_test_small_mzdata():
 
         pytest.skip("test_small.mzdata not found")
 
-    from mspy.parser_mzdata import parseMZDATA
+    from mmass.mspy.parser_mzdata import parseMZDATA
 
     parser = parseMZDATA(path)
 

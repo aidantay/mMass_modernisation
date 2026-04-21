@@ -1,18 +1,18 @@
 import sys
 
-import gui.config as config
-import gui.images as images
 import pytest
 import wx
 
-import mspy
+import mmass.gui.config as config
+import mmass.gui.images as images
+from mmass import mspy
 
 # Force sys.modules to use these for 'images' and 'config' to avoid duplicates
-# because gui/ modules use 'import images' whereas tests might use 'from gui import images'
+# because gui/ modules use 'import images' whereas tests might use 'from mmass.gui import images'
 sys.modules["images"] = images
 sys.modules["config"] = config
 
-from gui.panel_compare_peaklists import panelComparePeaklists
+from mmass.gui.panel_compare_peaklists import panelComparePeaklists
 
 
 # Populate images.lib
@@ -142,7 +142,7 @@ def test_onClose(panel, mocker):
 
 def test_onStop(panel, mocker):
     """Test onStop behavior."""
-    mocker.patch("mspy.stop")
+    mocker.patch("mmass.mspy.stop")
     mocker.patch("wx.Bell")
 
     # Active thread
@@ -161,7 +161,7 @@ def test_onStop(panel, mocker):
 def test_onProcessing(panel, mocker):
     """Test onProcessing behavior."""
     mock_disabler = mocker.patch("wx.WindowDisabler")
-    mspy_start = mocker.patch("mspy.start")
+    mspy_start = mocker.patch("mmass.mspy.start")
     mocker.patch.object(panel, "Layout")
 
     # Start processing

@@ -109,24 +109,26 @@ def mock_dependencies(wx_app, mocker):
         sys.modules,
         {
             "images": mock_images,
-            "gui.images": mock_images,
+            "mmass.gui.images": mock_images,
             "mwx": mock_mwx,
-            "gui.mwx": mock_mwx,
-            "mspy": mock_mspy,
-            "mspy.plot": mock_plot,
+            "mmass.gui.mwx": mock_mwx,
+            "mmass.mspy": mock_mspy,
+            "mmass.mspy.plot": mock_plot,
         },
     )
 
 
 # Helper to get the panelSpectrum class, ensuring it's imported after mocks are set up
 def get_panel_spectrum():
-    import gui.panel_spectrum as panel_spectrum
+    import mmass.gui.panel_spectrum as panel_spectrum
 
     return panel_spectrum
 
 
 class MockDocument:
     def __init__(self, title="Test Doc", mocker=None):
+        import numpy as np
+
         self.title = title
         self.visible = True
         self.flipped = False
@@ -135,10 +137,11 @@ class MockDocument:
         self.style = "line"
         self.spectrum = mocker.Mock()
         self.spectrum.hasprofile.return_value = True
+        self.spectrum.profile = np.zeros((10, 2))
         self.spectrum.polarity = 1
         self.spectrum.normalization.return_value = 1.0
         self.spectrum.area.return_value = 0.0
-        self.spectrum.baseline.return_value = []
+        self.spectrum.baseline.return_value = np.zeros((10, 2))
         self.backup = mocker.Mock()
 
 
@@ -176,7 +179,7 @@ def panel(wx_app, mock_documents, mocker):
 
 @pytest.fixture(autouse=True)
 def reset_config():
-    import gui.config as config
+    import mmass.gui.config as config
 
     orig_main = copy.deepcopy(config.main)
     orig_spectrum = copy.deepcopy(config.spectrum)
@@ -279,7 +282,7 @@ def test_dlgViewRange(wx_app, mocker):
 
 def test_dlgCanvasProperties(wx_app, mocker):
     panel_spectrum = get_panel_spectrum()
-    import gui.config as config
+    import mmass.gui.config as config
 
     mocker.patch("wx.Dialog.__init__", return_value=None)
     mock_sizer = mocker.Mock()
@@ -362,7 +365,7 @@ def test_makeSpectrumCanvas(panel):
 
 
 def test_makeToolbar(panel):
-    from gui.ids import ID_viewLabels
+    from mmass.gui.ids import ID_viewLabels
 
     # Buttons are created during __init__ via makeGUI -> makeToolbar
     assert isinstance(panel.showLabels_butt, wx.BitmapButton)
@@ -413,11 +416,13 @@ def test_updateCursorInfo_offset(panel):
 
 
 def test_updateCursorInfo_labelenvelope(panel, mocker):
+    import mmass.gui.panel_spectrum as mod
+
     panel.currentTool = "labelenvelope"
     panel.spectrumCanvas.getCursorPosition.return_value = (100.0, 500.0)
     panel.spectrumCanvas.getCharge.return_value = 2
 
-    mocker.patch("mspy.mz", return_value=199.0, create=True)
+    mocker.patch.object(mod.mspy, "mz", return_value=199.0)
     panel.updateCursorInfo()
     label = panel.cursorInfo.GetLabel()
     assert "z: 2" in label
@@ -425,7 +430,8 @@ def test_updateCursorInfo_labelenvelope(panel, mocker):
 
 
 def test_updateCursorInfo_distance_small(panel, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
 
     panel.currentTool = "ruler"
     panel.spectrumCanvas.getCursorPosition.return_value = (1000.0, 500.0)
@@ -433,7 +439,7 @@ def test_updateCursorInfo_distance_small(panel, mocker):
 
     config.main["cursorInfo"] = ["mz", "dist", "z"]
 
-    mocker.patch("mspy.mz", return_value=1000.0, create=True)
+    mocker.patch.object(mod.mspy, "mz", return_value=1000.0)
     panel.updateCursorInfo()
     label = panel.cursorInfo.GetLabel()
     assert "m/z: 1000" in label
@@ -442,7 +448,8 @@ def test_updateCursorInfo_distance_small(panel, mocker):
 
 
 def test_updateCursorInfo_distance_large(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
 
     panel.currentDocument = 0
     panel.currentTool = "ruler"
@@ -451,7 +458,7 @@ def test_updateCursorInfo_distance_large(panel, mock_documents, mocker):
 
     config.main["cursorInfo"] = ["mz", "dist", "z", "cmass", "pmass"]
 
-    mocker.patch("mspy.mz", side_effect=[1000.0, 900.0], create=True)
+    mocker.patch.object(mod.mspy, "mz", side_effect=[1000.0, 900.0])
     panel.updateCursorInfo()
     label = panel.cursorInfo.GetLabel()
     assert "mass (c): 1000" in label
@@ -459,7 +466,7 @@ def test_updateCursorInfo_distance_large(panel, mock_documents, mocker):
 
 
 def test_updateCursorInfo_area(panel, mock_documents):
-    import gui.config as config
+    import mmass.gui.config as config
 
     panel.currentDocument = 0
     panel.currentTool = "ruler"
@@ -485,7 +492,7 @@ def test_onCanvasLMU_labelpeak(panel, mock_documents, mocker):
 
 
 def test_onCanvasLMU_offset(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
 
     panel.currentDocument = 0
     panel.currentTool = "offset"
@@ -499,7 +506,7 @@ def test_onCanvasLMU_offset(panel, mock_documents, mocker):
 
 
 def test_onCanvasProperties(panel, mocker):
-    mock_dlg = mocker.patch("gui.panel_spectrum.dlgCanvasProperties")
+    mock_dlg = mocker.patch("mmass.gui.panel_spectrum.dlgCanvasProperties")
     panel.onCanvasProperties(None)
     mock_dlg.assert_called_once()
     mock_dlg.return_value.ShowModal.assert_called_once()
@@ -523,12 +530,14 @@ def test_setSpectrumProperties(panel, mock_documents):
 
 
 def test_updateCanvasProperties(panel, mock_documents, mocker):
-    import gui.config as config
-    from gui.ids import ID_viewLabels
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
+
+    mocker.patch.object(mod, "ID_viewLabels", 151)
 
     config.spectrum["showLabels"] = True
     mock_set_bitmap = mocker.patch.object(panel.showLabels_butt, "SetBitmapLabel")
-    panel.updateCanvasProperties(ID_viewLabels)
+    panel.updateCanvasProperties(151)
     mock_set_bitmap.assert_called_once()
 
     assert panel.spectrumCanvas.setProperties.called
@@ -537,22 +546,24 @@ def test_updateCanvasProperties(panel, mock_documents, mocker):
 def test_updateTmpSpectrum(panel, mock_documents, mocker):
     panel.currentDocument = 0
     points = [[100.0, 500.0], [200.0, 600.0]]
-    # Patch points() at the module level used by panel_spectrum
-    panel_spectrum = get_panel_spectrum()
-    mock_pts = mocker.patch.object(panel_spectrum.mspy.plot, "points", create=True)
+    # Patch the plot objects that were imported into the module
+    import mmass.gui.panel_spectrum as mod
+
+    mock_pts = mocker.patch.object(mod.plot, "points")
     panel.updateTmpSpectrum(points)
     assert mock_pts.called
 
 
 def test_updateNotationMarks(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
 
     panel.currentDocument = 0
     notations = [(100.0, 500.0, "Label")]
     config.spectrum["showNotations"] = True
-    # Patch annotations() at the module level used by panel_spectrum
-    panel_spectrum = get_panel_spectrum()
-    mock_ann = mocker.patch.object(panel_spectrum.mspy.plot, "annotations", create=True)
+    # Patch the plot objects that were imported into the module
+    import mmass.gui.panel_spectrum as mod
+
+    mock_ann = mocker.patch.object(mod.plot, "annotations")
     panel.updateNotationMarks(notations)
     assert mock_ann.called
 
@@ -584,12 +595,14 @@ def test_deleteSpectrum(panel, mock_documents):
 
 
 def test_labelPeak(panel, mock_documents, mocker):
+    import mmass.gui.panel_spectrum as mod
+
     panel.currentDocument = 0
     mock_documents[0].spectrum.hasprofile.return_value = True
-    mock_documents[0].spectrum.profile = mocker.Mock()
+    # profile and baseline are already numpy arrays from MockDocument update
     mock_documents[0].spectrum.peaklist = mocker.Mock()
 
-    mock_label = mocker.patch("mspy.labelpeak", return_value=mocker.Mock(), create=True)
+    mock_label = mocker.patch.object(mod.mspy, "labelpeak", return_value=mocker.Mock())
     panel.labelPeak((100.0, 0, 110.0, 500.0))
     mock_label.assert_called_once()
     mock_documents[0].spectrum.peaklist.append.assert_called_once()
@@ -597,21 +610,21 @@ def test_labelPeak(panel, mock_documents, mocker):
 
 
 def test_labelPoint(panel, mock_documents, mocker):
+    import mmass.gui.panel_spectrum as mod
+
     panel.currentDocument = 0
     mock_documents[0].spectrum.hasprofile.return_value = True
-    mock_documents[0].spectrum.profile = mocker.Mock()
     mock_documents[0].spectrum.peaklist = mocker.Mock()
 
-    mock_label = mocker.patch(
-        "mspy.labelpoint", return_value=mocker.Mock(), create=True
-    )
+    mock_label = mocker.patch.object(mod.mspy, "labelpoint", return_value=mocker.Mock())
     panel.labelPoint(100.0)
     mock_label.assert_called_once()
     mock_documents[0].spectrum.peaklist.append.assert_called_once()
 
 
 def test_labelEnvelope(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
 
     panel.currentDocument = 0
     mock_documents[0].spectrum.hasprofile.return_value = True
@@ -623,7 +636,7 @@ def test_labelEnvelope(panel, mock_documents, mocker):
         mocker.Mock(mz=101.0, ai=250.0, base=0.0, intensity=250.0, sn=5.0),
     ]
 
-    mocker.patch("mspy.labelpeak", side_effect=peaks, create=True)
+    mocker.patch.object(mod.mspy, "labelpeak", side_effect=peaks)
     panel.labelEnvelope([100.0, 101.0], 1)
     mock_documents[0].spectrum.peaklist.append.assert_called_once()
 
@@ -663,25 +676,29 @@ def test_getCurrentRange(panel):
 
 
 @pytest.mark.parametrize(
-    "id_val, config_key, config_obj",
+    "id_name, config_key, config_obj",
     [
-        (151, "showLabels", "spectrum"),  # ID_viewLabels
-        (152, "showTicks", "spectrum"),  # ID_viewTicks
-        (160, "showNotations", "spectrum"),  # ID_viewNotations
-        (156, "labelAngle", "spectrum"),  # ID_viewLabelAngle
-        (146, "showPosBars", "spectrum"),  # ID_viewPosBars
-        (147, "showGel", "spectrum"),  # ID_viewGel
-        (149, "showTracker", "spectrum"),  # ID_viewTracker
-        (164, "autoscale", "spectrum"),  # ID_viewAutoscale
-        (165, "normalize", "spectrum"),  # ID_viewNormalize
+        ("ID_viewLabels", "showLabels", "spectrum"),
+        ("ID_viewTicks", "showTicks", "spectrum"),
+        ("ID_viewNotations", "showNotations", "spectrum"),
+        ("ID_viewLabelAngle", "labelAngle", "spectrum"),
+        ("ID_viewPosBars", "showPosBars", "spectrum"),
+        ("ID_viewGel", "showGel", "spectrum"),
+        ("ID_viewTracker", "showTracker", "spectrum"),
+        ("ID_viewAutoscale", "autoscale", "spectrum"),
+        ("ID_viewNormalize", "normalize", "spectrum"),
     ],
 )
-def test_updateCanvasProperties_all_ids(panel, id_val, config_key, config_obj):
-    import gui.config as config
+def test_updateCanvasProperties_all_ids(panel, id_name, config_key, config_obj, mocker):
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
+
+    # Patch the ID in the module so it matches what we pass
+    mocker.patch.object(mod, id_name, 999)
 
     cfg = getattr(config, config_obj)
     cfg[config_key] = True
-    panel.updateCanvasProperties(id_val)
+    panel.updateCanvasProperties(999)
     # Check if canvas setProperties was called
     assert panel.spectrumCanvas.setProperties.called
 
@@ -692,7 +709,7 @@ def test_updateCanvasProperties_all_ids(panel, id_val, config_key, config_obj):
 )
 @pytest.mark.parametrize("tracker", [True, False])
 def test_setCurrentTool_all_variants(panel, tool, tracker):
-    import gui.config as config
+    import mmass.gui.config as config
 
     config.spectrum["showTracker"] = tracker
     panel.setCurrentTool(tool)
@@ -714,7 +731,7 @@ def test_onCanvasLMU_flipped(panel, mock_documents, mocker):
 
 
 def test_onCanvasLMU_normalize(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
 
     panel.currentDocument = 0
     panel.currentTool = "labelpeak"
@@ -729,7 +746,7 @@ def test_onCanvasLMU_normalize(panel, mock_documents, mocker):
 
 
 def test_onCanvasLMU_offset_logic(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
 
     panel.currentDocument = 0
     panel.currentTool = "labelpeak"
@@ -775,7 +792,7 @@ def test_onCanvasLMU_deletelabel(panel, mock_documents, mocker):
 
 
 def test_onCanvasLMU_offset_tool(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
 
     panel.currentDocument = 0
     panel.currentTool = "offset"
@@ -790,7 +807,8 @@ def test_onCanvasLMU_offset_tool(panel, mock_documents, mocker):
 
 
 def test_updateCursorInfo_detailed(panel, mock_documents, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
 
     panel.currentDocument = 0
     mock_documents[0].spectrum.polarity = -1
@@ -807,7 +825,7 @@ def test_updateCursorInfo_detailed(panel, mock_documents, mocker):
     config.main["cursorInfo"] = ["mz", "dist", "ppm", "z", "cmass", "pmass", "area"]
     panel.spectrumCanvas.getDistance.return_value = (1.0, 0)
 
-    mocker.patch("mspy.mz", return_value=123.4, create=True)
+    mocker.patch.object(mod.mspy, "mz", return_value=123.4)
     panel.updateCursorInfo()
     label = panel.cursorInfo.GetLabel()
     assert "m/z: 1000" in label
@@ -820,7 +838,10 @@ def test_updateCursorInfo_detailed(panel, mock_documents, mocker):
 
 
 def test_updateCursorInfo_distance_ranges(panel, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
+
+    mocker.patch.object(mod.mspy, "mz", return_value=123.4)
 
     panel.currentTool = "ruler"
     panel.spectrumCanvas.getCursorPosition.return_value = (1000.0, 500.0)
@@ -858,7 +879,8 @@ def test_onCanvasLMU_no_document(panel, mocker):
 @pytest.mark.parametrize("mode", ["1st", "monoisotope", "centroid", "isotopes"])
 @pytest.mark.parametrize("intensity", ["sum", "average"])
 def test_labelEnvelope_all_modes(panel, mock_documents, mode, intensity, mocker):
-    import gui.config as config
+    import mmass.gui.config as config
+    import mmass.gui.panel_spectrum as mod
 
     panel.currentDocument = 0
     mock_documents[0].spectrum.hasprofile.return_value = True
@@ -873,10 +895,10 @@ def test_labelEnvelope_all_modes(panel, mock_documents, mode, intensity, mocker)
         mocker.Mock(mz=101.0, ai=250.0, base=0.0, intensity=250.0, sn=5.0),
     ]
 
-    mocker.patch("mspy.labelpeak", side_effect=peaks, create=True)
-    mock_mono = mocker.patch("mspy.envmono", return_value=mocker.Mock(), create=True)
-    mock_centroid = mocker.patch(
-        "mspy.envcentroid", return_value=mocker.Mock(), create=True
+    mocker.patch.object(mod.mspy, "labelpeak", side_effect=peaks)
+    mock_mono = mocker.patch.object(mod.mspy, "envmono", return_value=mocker.Mock())
+    mock_centroid = mocker.patch.object(
+        mod.mspy, "envcentroid", return_value=mocker.Mock()
     )
 
     panel.labelEnvelope([100.0, 101.0], 1)

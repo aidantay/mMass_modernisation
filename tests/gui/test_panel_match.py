@@ -5,11 +5,9 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-import mspy.plot
-from gui.panel_match import panelMatch
-
-import mspy
-from gui import config, doc, images
+from mmass import mspy
+from mmass.gui import config, doc, images
+from mmass.gui.panel_match import panelMatch
 
 
 @pytest.fixture
@@ -81,10 +79,10 @@ def panel(wx_app, mock_parentTool, mock_mainFrame, mocker):
     mocker.patch.dict(config.main, mock_config_main, clear=True)
     mocker.patch.dict(config.spectrum, mock_config_spectrum, clear=True)
     mocker.patch.dict(images.lib, mock_images_lib, clear=True)
-    mocker.patch("mspy.plot.canvas", side_effect=create_mock_canvas)
-    mocker.patch("mspy.plot.container")
-    mocker.patch("mspy.plot.points")
-    mocker.patch("mspy.plot.spectrum")
+    mocker.patch("mmass.mspy.plot.canvas", side_effect=create_mock_canvas)
+    mocker.patch("mmass.mspy.plot.container")
+    mocker.patch("mmass.mspy.plot.points")
+    mocker.patch("mmass.mspy.plot.spectrum")
 
     # Instantiate panel
     p = panelMatch(mock_parentTool, mock_mainFrame, "massfilter")
@@ -128,7 +126,7 @@ def test_init(wx_app, mock_mainFrame, mocker):
         return p
 
     mocker.patch.dict(images.lib, mock_images_lib, clear=True)
-    mocker.patch("mspy.plot.canvas", side_effect=create_mock_canvas)
+    mocker.patch("mmass.mspy.plot.canvas", side_effect=create_mock_canvas)
 
     for module, expected_title in list(modules.items()):
         p = panelMatch(parent, mock_mainFrame, module)
@@ -142,7 +140,7 @@ def test_onToolSelected(panel, mocker):
     """Verify swapping between 'errors' and 'summary' updates UI visibility."""
 
     # Actually IDs are imported from ids.py
-    from gui.ids import ID_matchErrors, ID_matchSummary
+    from mmass.gui.panel_match import ID_matchErrors, ID_matchSummary
 
     # Case 1: Select summary
     mock_event = mocker.Mock()
@@ -303,7 +301,7 @@ def test_onStop(panel, mocker):
     panel.processing = mocker.Mock()
     panel.processing.is_alive.return_value = True
 
-    mock_stop = mocker.patch("mspy.stop")
+    mock_stop = mocker.patch("mmass.mspy.stop")
     panel.onStop(None)
     mock_stop.assert_called_once()
 
@@ -419,7 +417,7 @@ def test_runMatch_force_quit(panel, mocker):
     panel.currentData = [["label", 100.0, 0.1, [mocker.Mock()]]]
     panel.currentPeaklist = [mspy.peak(mz=100.1, ai=1000)]
 
-    mocker.patch("mspy.CHECK_FORCE_QUIT", side_effect=mspy.ForceQuit)
+    mocker.patch("mmass.mspy.CHECK_FORCE_QUIT", side_effect=mspy.ForceQuit)
     panel.runMatch()
 
     # Assertions
@@ -570,9 +568,9 @@ def test_updateErrorCanvas(panel, mocker):
     panel.currentErrors = [[100.0, 0.1], [200.0, 0.2]]
     panel.currentPeaklist = [mspy.peak(mz=100.0, ai=1000)]
 
-    mock_container = mocker.patch("mspy.plot.container")
-    mock_points = mocker.patch("mspy.plot.points")
-    mock_spectrum = mocker.patch("mspy.plot.spectrum")
+    mock_container = mocker.patch("mmass.mspy.plot.container")
+    mock_points = mocker.patch("mmass.mspy.plot.points")
+    mock_spectrum = mocker.patch("mmass.mspy.plot.spectrum")
     mocker.patch.object(panel, "makeCurrentPeaklist", return_value=[])
 
     # Reset mock to ignore calls during setup

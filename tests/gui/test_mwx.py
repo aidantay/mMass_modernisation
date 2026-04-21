@@ -1,6 +1,7 @@
-import gui.mwx as mwx
 import pytest
 import wx
+
+import mmass.gui.mwx as mwx
 
 
 @pytest.fixture
@@ -13,7 +14,7 @@ def frame(wx_app):
 @pytest.fixture
 def mock_images(mocker):
     mock_lib = {"iconDlg": wx.Bitmap(16, 16)}
-    mocker.patch("gui.images.lib", mock_lib)
+    mocker.patch("mmass.gui.images.lib", mock_lib)
     return mock_lib
 
 
@@ -23,7 +24,8 @@ def test_appInit_mac(mocker):
     try:
         mocker.patch("wx.Platform", "__WXMAC__")
         mocker.patch(
-            "gui.config.main", {"macListCtrlGeneric": True, "reverseScrolling": True}
+            "mmass.gui.config.main",
+            {"macListCtrlGeneric": True, "reverseScrolling": True},
         )
         mocker.patch("wx.SystemOptions.SetOptionInt", create=True)
         mocker.patch("wx.ToolTip.SetDelay")
@@ -305,7 +307,7 @@ def test_scrollTextCtrl_scroll(mocker, frame):
 
 
 def test_formulaCtrl(mocker, frame):
-    mock_compound = mocker.patch("gui.mwx.mspy.compound")
+    mock_compound = mocker.patch("mmass.gui.mwx.mspy.compound")
     ctrl = mwx.formulaCtrl(frame, value="H2O")
 
     # Success

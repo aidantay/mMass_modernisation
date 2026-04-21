@@ -1,6 +1,7 @@
 import pytest
 import wx
-from gui.dlg_modifications_editor import dlgModificationsEditor
+
+from mmass.gui.dlg_modifications_editor import dlgModificationsEditor
 
 
 class MockModification:
@@ -36,7 +37,7 @@ class MockCompound:
 
 @pytest.fixture
 def mock_mspy(mocker):
-    mock_mspy = mocker.patch("gui.dlg_modifications_editor.mspy")
+    mock_mspy = mocker.patch("mmass.gui.dlg_modifications_editor.mspy")
     mock_mspy.modifications = {}
     mock_mspy.modification = mocker.Mock(side_effect=MockModification)
     mock_mspy.compound = MockCompound
@@ -45,14 +46,14 @@ def mock_mspy(mocker):
 
 @pytest.fixture
 def mock_config(mocker):
-    mock_config = mocker.patch("gui.dlg_modifications_editor.config")
+    mock_config = mocker.patch("mmass.gui.dlg_modifications_editor.config")
     mock_config.main = {"mzDigits": 4}
     return mock_config
 
 
 @pytest.fixture
 def mock_mwx(mocker):
-    mock_mwx = mocker.patch("gui.dlg_modifications_editor.mwx")
+    mock_mwx = mocker.patch("mmass.gui.dlg_modifications_editor.mwx")
     # Mock mwx constants
     mock_mwx.LISTCTRL_STYLE_MULTI = wx.LC_REPORT
     mock_mwx.LISTCTRL_SPACE = 5

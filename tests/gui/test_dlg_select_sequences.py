@@ -1,6 +1,7 @@
 import pytest
 import wx
-from gui.dlg_select_sequences import dlgSelectSequences
+
+from mmass.gui.dlg_select_sequences import dlgSelectSequences
 
 
 def mock_list_ctrl_factory(mocker, *args, **kwargs):
@@ -53,7 +54,7 @@ def mock_sequences(mocker):
 def dlg(wx_app, mock_sequences, mocker):
     # Patch mwx.sortListCtrl in the module where it's used
     mocker.patch(
-        "gui.dlg_select_sequences.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_sequences.mwx.sortListCtrl",
         side_effect=lambda *args, **kwargs: mock_list_ctrl_factory(
             mocker, *args, **kwargs
         ),
@@ -134,7 +135,7 @@ def test_updateSequenceList_none_accession(dlg, mock_sequences):
 
 def test_updateSequenceList_empty(wx_app, mocker):
     mocker.patch(
-        "gui.dlg_select_sequences.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_sequences.mwx.sortListCtrl",
         side_effect=lambda *args, **kwargs: mock_list_ctrl_factory(
             mocker, *args, **kwargs
         ),

@@ -1,10 +1,8 @@
-import mspy.mod_basics
-import mspy.mod_formulator
-import mspy.mod_stopper
-import mspy.obj_compound
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 
 # Module-level fixture to reset stopper state
@@ -105,7 +103,7 @@ def test_formulator_mass_negative_after_recalc(mocker):
     """Test formulator returns empty when neutral mass becomes negative."""
     mspy.mod_stopper.start()
     # Mock mz to return a negative value
-    mocker.patch("mspy.mod_basics.mz", return_value=-1.0)
+    mocker.patch("mmass.mspy.mod_basics.mz", return_value=-1.0)
     result = mspy.mod_formulator.formulator(
         0.001, charge=5, agentFormula="H", composition={}
     )
@@ -118,7 +116,7 @@ def test_formulator_units_ppm_window(mocker):
     mspy.mod_stopper.start()
     # Patch _compositions to capture arguments
     spy = mocker.spy(mspy.mod_formulator, "_compositions")
-    mocker.patch("mspy.mod_formulator._compositions", return_value=[])
+    mocker.patch("mmass.mspy.mod_formulator._compositions", return_value=[])
 
     mz_val = 100.0
     tolerance = 10.0

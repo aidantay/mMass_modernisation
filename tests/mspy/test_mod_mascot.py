@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-import mspy.mod_mascot
+from mmass import mspy
 
 # Test data - Sample XML responses
 
@@ -176,7 +176,7 @@ class TestMascotSearch:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.search("test query")
@@ -192,7 +192,7 @@ class TestMascotSearch:
 
         # Mock HTTPConnection to raise exception
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection",
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection",
             side_effect=Exception("Connection refused"),
         )
 
@@ -215,7 +215,7 @@ class TestMascotSearch:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.search("test query")
@@ -236,7 +236,7 @@ class TestMascotSearch:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.search("test query")
@@ -261,7 +261,7 @@ class TestMascotSearch:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         m.search("test query")
@@ -282,7 +282,7 @@ class TestMascotSearch:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         query_data = "BEGIN IONS\nTITLE=test\nEND IONS"
@@ -306,7 +306,7 @@ class TestMascotSearch:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         m.search("test")
@@ -329,7 +329,7 @@ class TestMascotReport:
         """Test report with explicit path parameter."""
         m = mspy.mod_mascot.mascot("testhost.com")
 
-        mock_open = mocker.patch("mspy.mod_mascot.webbrowser.open")
+        mock_open = mocker.patch("mmass.mspy.mod_mascot.webbrowser.open")
 
         m.report(path="F001234567")
 
@@ -345,7 +345,7 @@ class TestMascotReport:
         m = mspy.mod_mascot.mascot("testhost.com")
         m.resultsPath = "F001234567"
 
-        mock_open = mocker.patch("mspy.mod_mascot.webbrowser.open")
+        mock_open = mocker.patch("mmass.mspy.mod_mascot.webbrowser.open")
 
         m.report()
 
@@ -357,7 +357,7 @@ class TestMascotReport:
         """Test report when no path is available (silent failure)."""
         m = mspy.mod_mascot.mascot("testhost.com")
 
-        mock_open = mocker.patch("mspy.mod_mascot.webbrowser.open")
+        mock_open = mocker.patch("mmass.mspy.mod_mascot.webbrowser.open")
 
         # Both path and resultsPath are None
         m.report(path=None)
@@ -370,7 +370,7 @@ class TestMascotReport:
         m = mspy.mod_mascot.mascot("testhost.com")
         m.resultsPath = "old_path"
 
-        mock_open = mocker.patch("mspy.mod_mascot.webbrowser.open")
+        mock_open = mocker.patch("mmass.mspy.mod_mascot.webbrowser.open")
 
         m.report(path="new_path")
 
@@ -405,7 +405,7 @@ class TestMascotFetchall:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.fetchall(path="F001234567")
@@ -427,7 +427,7 @@ class TestMascotFetchall:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.fetchall()
@@ -451,7 +451,7 @@ class TestMascotFetchall:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         m.fetchall(path="F001234567")
@@ -466,7 +466,7 @@ class TestMascotFetchall:
         m.resultsPath = "F001234567"
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection",
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection",
             side_effect=Exception("Connection failed"),
         )
 
@@ -487,7 +487,7 @@ class TestMascotFetchall:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.fetchall()
@@ -507,7 +507,7 @@ class TestMascotFetchall:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.fetchall()
@@ -529,7 +529,7 @@ class TestMascotFetchall:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         m.fetchall()
@@ -860,7 +860,7 @@ class TestMascotParameters:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.parameters()
@@ -877,7 +877,7 @@ class TestMascotParameters:
         m = mspy.mod_mascot.mascot("testhost.com")
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection",
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection",
             side_effect=Exception("Connection error"),
         )
 
@@ -898,7 +898,7 @@ class TestMascotParameters:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.parameters()
@@ -926,7 +926,7 @@ class TestMascotParameters:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.parameters()
@@ -948,7 +948,7 @@ class TestMascotParameters:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.parameters()
@@ -981,7 +981,7 @@ Entry3"""
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         result = m.parameters()
@@ -1003,7 +1003,7 @@ Entry3"""
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         m.parameters()
@@ -1024,7 +1024,7 @@ Entry3"""
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         m.parameters()
@@ -1059,7 +1059,7 @@ class TestMascotIntegration:
         mock_conn.getresponse.side_effect = [search_response, fetchall_response]
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         # Perform search
@@ -1086,7 +1086,7 @@ class TestMascotIntegration:
         mock_conn.getresponse.return_value = mock_response
 
         mocker.patch(
-            "mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
+            "mmass.mspy.mod_mascot.http.client.HTTPConnection", return_value=mock_conn
         )
 
         # Fetch results
@@ -1119,7 +1119,7 @@ class TestMascotIntegration:
         assert len(m.hits) > 0
 
         # Mock webbrowser
-        mock_open = mocker.patch("mspy.mod_mascot.webbrowser.open")
+        mock_open = mocker.patch("mmass.mspy.mod_mascot.webbrowser.open")
 
         # Report with explicit path
         m.report(path="F001234567")

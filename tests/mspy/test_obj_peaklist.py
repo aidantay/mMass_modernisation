@@ -1,9 +1,10 @@
 import hypothesis.strategies as st
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_peak as obj_peak
-import mspy.obj_peaklist as obj_peaklist
 import pytest
 from hypothesis import HealthCheck, given, settings
+
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_peak as obj_peak
+import mmass.mspy.obj_peaklist as obj_peaklist
 
 
 # Module-level fixture to reset stopper state
@@ -743,7 +744,7 @@ class TestPeaklistDeisotope:
     def test_deisotope_calls_mod_peakpicking(self, mocker):
         """B19-false: calls mod_peakpicking.deisotope."""
         pl = make_peaklist((100, 100), (200, 50))
-        mock_deiso = mocker.patch("mspy.mod_peakpicking.deisotope")
+        mock_deiso = mocker.patch("mmass.mspy.mod_peakpicking.deisotope")
         pl.deisotope(maxCharge=2, mzTolerance=0.1)
         mock_deiso.assert_called_once()
         call_kwargs = mock_deiso.call_args[1]
@@ -753,7 +754,7 @@ class TestPeaklistDeisotope:
     def test_deisotope_with_custom_params(self, mocker):
         """deisotope passes custom parameters."""
         pl = make_peaklist((100, 100))
-        mock_deiso = mocker.patch("mspy.mod_peakpicking.deisotope")
+        mock_deiso = mocker.patch("mmass.mspy.mod_peakpicking.deisotope")
         pl.deisotope(maxCharge=3, mzTolerance=0.2, intTolerance=0.3, isotopeShift=0.5)
         call_kwargs = mock_deiso.call_args[1]
         assert call_kwargs["maxCharge"] == 3
@@ -778,7 +779,7 @@ class TestPeaklistDeconvolute:
         """B20-false: calls mod_peakpicking.deconvolute."""
         pl = make_peaklist((100, 100), (200, 50))
         mock_result = obj_peaklist.peaklist([make_peak(100.0, 100.0)])
-        mock_deconv = mocker.patch("mspy.mod_peakpicking.deconvolute")
+        mock_deconv = mocker.patch("mmass.mspy.mod_peakpicking.deconvolute")
         mock_deconv.return_value = mock_result
         pl.deconvolute(massType=0)
         mock_deconv.assert_called_once()
@@ -791,7 +792,7 @@ class TestPeaklistDeconvolute:
         new_peaks = obj_peaklist.peaklist(
             [make_peak(100.0, 100.0), make_peak(200.0, 50.0)]
         )
-        mock_deconv = mocker.patch("mspy.mod_peakpicking.deconvolute")
+        mock_deconv = mocker.patch("mmass.mspy.mod_peakpicking.deconvolute")
         mock_deconv.return_value = new_peaks
         pl.deconvolute()
         assert len(pl) == 2
