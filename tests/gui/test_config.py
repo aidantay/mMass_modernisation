@@ -5,7 +5,7 @@ from xml.parsers.expat import ExpatError
 
 import pytest
 
-from gui import config
+from mmass.gui import config
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ def test_default_values():
 
 
 @pytest.mark.parametrize(
-    "input_str, expected",
+    ("input_str", "expected"),
     [
         ("normal", "normal"),
         ("  trimmed  ", "trimmed"),
@@ -187,7 +187,7 @@ def test_load_config_missing_file():
 def test_save_config_error(tmpdir, mocker):
     """Mock file writing to test error handling in saveConfig."""
     # Use mock to simulate IOError during file open
-    mocker.patch("gui.config.open", side_effect=IOError, create=True)
+    mocker.patch("mmass.gui.config.open", side_effect=IOError, create=True)
     assert config.saveConfig("/any/path/config.xml") is False
 
 

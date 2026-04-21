@@ -55,8 +55,10 @@ def libs(module_mocker):
         },
     }
 
-    module_mocker.patch.dict(sys.modules, {"mspy": mock_mspy, "config": mock_config})
-    from gui import libs
+    module_mocker.patch.dict(
+        sys.modules, {"mmass.mspy": mock_mspy, "config": mock_config}
+    )
+    from mmass.gui import libs
 
     return libs
 
@@ -134,6 +136,9 @@ def test_save_load_presets(tmpdir, clean_libs, libs):
     """Test saving and loading presets."""
     path = str(tmpdir.join("presets.xml"))
 
+    for k in libs.presets:
+        libs.presets[k].clear()
+
     # Modify presets
     libs.presets["operator"]["Test Op"] = {
         "operator": "John Doe",
@@ -167,6 +172,8 @@ def test_save_load_references(tmpdir, clean_libs, libs):
     """Test saving and loading references."""
     path = str(tmpdir.join("references.xml"))
 
+    libs.references.clear()
+
     libs.references["Test Group"] = [("Ref1", 100.1234), ("Ref2", 200.5678)]
 
     assert libs.saveReferences(path) is True
@@ -180,6 +187,8 @@ def test_save_load_references(tmpdir, clean_libs, libs):
 def test_save_load_compounds(tmpdir, clean_libs, mocker, libs):
     """Test saving and loading compounds."""
     path = str(tmpdir.join("compounds.xml"))
+
+    libs.compounds.clear()
 
     mock_compound = mocker.MagicMock()
     mock_compound.expression = "C6H12O6"
@@ -195,7 +204,7 @@ def test_save_load_compounds(tmpdir, clean_libs, mocker, libs):
     mock_new_comp = mocker.MagicMock()
     mock_comp_init.return_value = mock_new_comp
 
-    libs.loadCompounds(path, clear=True)
+    with open(path) as f: print("\n--- XML ---"); print(f.read()); libs.loadCompounds(path, clear=True)
 
     assert "Test Group" in libs.compounds
     assert "Comp1" in libs.compounds["Test Group"]
@@ -207,6 +216,8 @@ def test_save_load_compounds(tmpdir, clean_libs, mocker, libs):
 def test_save_load_mascot(tmpdir, clean_libs, libs):
     """Test saving and loading mascot servers."""
     path = str(tmpdir.join("mascot.xml"))
+
+    libs.mascot.clear()
 
     libs.mascot["Test Server"] = {
         "protocol": "https",
@@ -262,7 +273,7 @@ def test_darwin_initialization(tmpdir, mocker):
         f.write("<presets/>")
 
     # Mock config.confdir and sys.platform
-    mocker.patch("gui.config.confdir", confdir)
+    mocker.patch("mmass.gui.config.confdir", confdir)
     mocker.patch("sys.platform", "darwin")
 
     # Since the logic is at module level, it ran already when we imported gui.libs.
@@ -293,7 +304,7 @@ def test_darwin_copy(tmpdir, mocker):
         with open(os.path.join(configs_dir, item), "w") as f:
             f.write("<test/>")
 
-    mocker.patch("gui.config.confdir", conf_dir)
+    mocker.patch("mmass.gui.config.confdir", conf_dir)
 
     # We also need to mock os.path.join to return paths relative to our tmpdir for 'configs'
     original_join = os.path.join
@@ -307,10 +318,11 @@ def test_darwin_copy(tmpdir, mocker):
 
     # Now reload the module or just re-run the specific block if we can find it
     # But reload is better
-    if "gui.libs" in sys.modules:
-        del sys.modules["gui.libs"]
+    if "mmass.gui.libs" in sys.modules:
+        del sys.modules["mmass.gui.libs"]
 
     # Re-import
+    import mmass.gui.libs as libs_reloaded  # noqa: F401
 
     # Check if files were copied
     for item in (
@@ -332,11 +344,15 @@ def test_mspy_initial_load(tmpdir, mocker):
     # Mock mspy
     mock_mspy_local = mocker.MagicMock()
 
-    mocker.patch("gui.config.confdir", conf_dir)
-    mocker.patch.dict(sys.modules, {"mspy": mock_mspy_local})
+    mocker.patch("mmass.gui.config.confdir", conf_dir)
+    mocker.patch("mmass.mspy", mock_mspy_local)
+    mocker.patch.dict(sys.modules, {"mmass.mspy": mock_mspy_local})
 
-    if "gui.libs" in sys.modules:
-        del sys.modules["gui.libs"]
+    if "mmass.gui.libs" in sys.modules:
+        del sys.modules["mmass.gui.libs"]
+
+    # Re-import
+    import mmass.gui.libs as libs_reloaded  # noqa: F401
 
     # Verify mspy.loadMonomers was called
     # It should be called for monomers.xml, modifications.xml, enzymes.xml

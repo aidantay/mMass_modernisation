@@ -1,10 +1,8 @@
-import mspy.mod_basics
-import mspy.mod_formulator
-import mspy.mod_stopper
-import mspy.obj_compound
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 
 # Module-level fixture to reset stopper state
@@ -105,7 +103,7 @@ def test_formulator_mass_negative_after_recalc(mocker):
     """Test formulator returns empty when neutral mass becomes negative."""
     mspy.mod_stopper.start()
     # Mock mz to return a negative value
-    mocker.patch("mspy.mod_basics.mz", return_value=-1.0)
+    mocker.patch("mmass.mspy.mod_basics.mz", return_value=-1.0)
     result = mspy.mod_formulator.formulator(
         0.001, charge=5, agentFormula="H", composition={}
     )
@@ -117,14 +115,14 @@ def test_formulator_units_ppm_window(mocker):
     """Test formulator with ppm units calculates correct mass window."""
     mspy.mod_stopper.start()
     # Patch _compositions to capture arguments
-    spy = mocker.spy(mspy.mod_formulator, "_compositions")
-    mocker.patch("mspy.mod_formulator._compositions", return_value=[])
+    mocker.spy(mspy.mod_formulator, "_compositions")
+    mocker.patch("mmass.mspy.mod_formulator._compositions", return_value=[])
 
     mz_val = 100.0
     tolerance = 10.0
     # Expected: loMass = mass - (mass/1e6)*tolerance, hiMass = mass + (mass/1e6)*tolerance
-    expected_lo = mz_val - (mz_val / 1e6) * tolerance
-    expected_hi = mz_val + (mz_val / 1e6) * tolerance
+    mz_val - (mz_val / 1e6) * tolerance
+    mz_val + (mz_val / 1e6) * tolerance
 
     result = mspy.mod_formulator.formulator(
         mz_val, charge=0, tolerance=tolerance, units="ppm", composition={}
@@ -154,8 +152,8 @@ def test_formulator_units_da_charge_zero():
 def test_formulator_elements_sorted_by_mass(mocker):
     """Test formulator passes elements sorted by mass in descending order."""
     mspy.mod_stopper.start()
-    spy = mocker.spy(mspy.mod_formulator, "_compositions")
-    result = mspy.mod_formulator.formulator(
+    mocker.spy(mspy.mod_formulator, "_compositions")
+    mspy.mod_formulator.formulator(
         100.0,
         charge=0,
         tolerance=5.0,
@@ -220,7 +218,7 @@ def test_formulator_limit_respected():
 def test_formulator_check_force_quit_called(mocker):
     """Test formulator calls CHECK_FORCE_QUIT."""
     mspy.mod_stopper.start()
-    spy = mocker.spy(mspy.mod_stopper, "STOPPER")
+    mocker.spy(mspy.mod_stopper, "STOPPER")
     result = mspy.mod_formulator.formulator(
         50.0,
         charge=0,

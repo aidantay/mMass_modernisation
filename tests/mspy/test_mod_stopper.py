@@ -1,7 +1,10 @@
-import mspy.mod_stopper
+import contextlib
+
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 # ============================================================================
 # Module-level and function-level fixtures for state isolation
@@ -16,11 +19,11 @@ def reset_stopper_module_start():
     mspy.mod_stopper.start()
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def ensure_stopper_clean():
     """Function-scoped autouse fixture to reset stopper before each test."""
     mspy.mod_stopper.start()
-    yield
+    return
 
 
 # ============================================================================
@@ -210,10 +213,8 @@ def test_stopper_check_true_resets_to_false():
     """Test that check() resets value to False after raising ForceQuit."""
     s = mspy.mod_stopper.stopper()
     s.enable()
-    try:
+    with contextlib.suppress(mspy.mod_stopper.ForceQuit):
         s.check()
-    except mspy.mod_stopper.ForceQuit:
-        pass
     assert s.value is False
 
 
@@ -221,10 +222,8 @@ def test_stopper_check_second_call_does_not_raise():
     """Test that second call to check() does not raise after reset."""
     s = mspy.mod_stopper.stopper()
     s.enable()
-    try:
+    with contextlib.suppress(mspy.mod_stopper.ForceQuit):
         s.check()
-    except mspy.mod_stopper.ForceQuit:
-        pass
     s.check()  # Should not raise
 
 
@@ -277,10 +276,8 @@ def test_stop_then_check_force_quit_raises():
 def test_stop_then_check_force_quit_resets():
     """Test that CHECK_FORCE_QUIT() resets STOPPER after raising."""
     mspy.mod_stopper.stop()
-    try:
+    with contextlib.suppress(mspy.mod_stopper.ForceQuit):
         mspy.mod_stopper.CHECK_FORCE_QUIT()
-    except mspy.mod_stopper.ForceQuit:
-        pass
     assert mspy.mod_stopper.STOPPER.value is False
 
 
@@ -321,10 +318,8 @@ def test_stopper_disable_after_check_reset():
     """Test disable() after check() has reset the value."""
     s = mspy.mod_stopper.stopper()
     s.enable()
-    try:
+    with contextlib.suppress(mspy.mod_stopper.ForceQuit):
         s.check()
-    except mspy.mod_stopper.ForceQuit:
-        pass
     s.disable()
     assert s.value is False
 
@@ -357,10 +352,8 @@ def test_stopper_check_always_resets_value_to_false(enabled):
     if enabled:
         s.enable()
 
-    try:
+    with contextlib.suppress(mspy.mod_stopper.ForceQuit):
         s.check()
-    except mspy.mod_stopper.ForceQuit:
-        pass
 
     # After check(), value must always be False
     assert s.value is False
@@ -405,10 +398,8 @@ def test_check_force_quit_function_references_singleton():
     mspy.mod_stopper.stop()
     assert mspy.mod_stopper.STOPPER.value is True
 
-    try:
+    with contextlib.suppress(mspy.mod_stopper.ForceQuit):
         mspy.mod_stopper.CHECK_FORCE_QUIT()
-    except mspy.mod_stopper.ForceQuit:
-        pass
 
     assert mspy.mod_stopper.STOPPER.value is False
 

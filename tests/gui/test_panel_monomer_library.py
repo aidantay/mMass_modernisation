@@ -5,7 +5,7 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-import gui.panel_monomer_library as panel_lib
+import mmass.gui.panel_monomer_library as panel_lib
 
 
 class MockMonomer:
@@ -24,14 +24,14 @@ def mock_mspy_monomers(mocker):
         "MeOH": MockMonomer("MeOH", "Methanol", "Solvent"),
         "UNK": MockMonomer("UNK", "Unknown", "Other"),
     }
-    mocker.patch("mspy.monomers", monomers)
+    mocker.patch("mmass.mspy.monomers", monomers)
     return monomers
 
 
 @pytest.fixture
 def mock_gui_deps(mocker):
-    mock_mwx = mocker.patch("gui.panel_monomer_library.mwx")
-    mock_images = mocker.patch("gui.panel_monomer_library.images")
+    mock_mwx = mocker.patch("mmass.gui.panel_monomer_library.mwx")
+    mock_images = mocker.patch("mmass.gui.panel_monomer_library.images")
 
     # Setup mock_mwx constants
     mock_mwx.TOOLBAR_HEIGHT = 30
@@ -206,7 +206,7 @@ def test_updateMonomerMap_search(panel, mock_mspy_monomers):
 
 def test_updateMonomerList_empty(panel, mocker):
     """Test updateMonomerList when map is empty."""
-    mocker.patch("mspy.monomers", {})
+    mocker.patch("mmass.mspy.monomers", {})
     panel.updateMonomerList()
     assert panel.monomerMap == []
     # Ensure it doesn't crash and returns early after setDataMap

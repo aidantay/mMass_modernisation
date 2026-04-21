@@ -1,8 +1,8 @@
 import pytest
 import wx
-from gui.dlg_preferences import dlgPreferences
 
-from gui import config
+from mmass.gui import config
+from mmass.gui.dlg_preferences import dlgPreferences
 
 
 @pytest.fixture

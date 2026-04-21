@@ -1,8 +1,9 @@
-import mspy.mod_basics as mod_basics
-import mspy.obj_peak as obj_peak
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+
+import mmass.mspy.mod_basics as mod_basics
+import mmass.mspy.obj_peak as obj_peak
 
 # ============================================================================
 # FIXTURES

@@ -1,10 +1,11 @@
-import mspy.blocks as blocks
-import mspy.mod_proteo as mod_proteo
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_sequence as obj_sequence
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.blocks as blocks
+import mmass.mspy.mod_proteo as mod_proteo
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_sequence as obj_sequence
 
 
 # Helper function to create sequences as lists
@@ -256,9 +257,6 @@ class TestCoverage:
             if start < end:
                 valid_ranges.append((start, end))
 
-        if not valid_ranges:
-            pytest.skip("No valid ranges generated")
-
         result = mod_proteo.coverage(valid_ranges, 100, human=True)
         assert 0.0 <= result <= 100.0
 
@@ -498,7 +496,7 @@ class TestFragment:
         assert len(frags) > 0
 
         # Check that both series are present
-        series = set(f.fragmentSerie for f in frags)
+        series = {f.fragmentSerie for f in frags}
         assert "b" in series
         assert "y" in series
 
@@ -552,11 +550,11 @@ class TestFragment:
         # Check for duplicates using frhash
         frhashes = []
         for frag in frags:
-            frhash = [frag.fragmentSerie] + frag.indexes()
+            frhash = [frag.fragmentSerie, *frag.indexes()]
             frhashes.append(frhash)
 
         # All hashes should be unique
-        assert len(frhashes) == len(set(tuple(h) for h in frhashes))
+        assert len(frhashes) == len({tuple(h) for h in frhashes})
 
     def test_fragment_M_series(self, reset_stopper):
         """Test fragment with M-series (molecular ion)."""
@@ -1000,7 +998,7 @@ class TestFragmentAdditionalCoverage:
         frags_scram = mod_proteo.fragment(s, ["b", "y"], scrambling=True)
 
         # Should have both b and y series
-        series = set(f.fragmentSerie for f in frags_scram)
+        series = {f.fragmentSerie for f in frags_scram}
         assert "b" in series
         assert "y" in series
         assert len(frags_scram) > 0
@@ -1355,7 +1353,7 @@ class TestBranchCoverageTargeted:
             assert f.cTermFormula == "H-1"
 
         # Test singlet with cyclic parent
-        frags_s = mod_proteo.fragmentserie(s, "im", cyclicParent=True)
+        mod_proteo.fragmentserie(s, "im", cyclicParent=True)
         # Singlets with cyclic parent should have both formulas
 
     def test_fragmentserie_n_terminal_both_filters_empty_after_first(

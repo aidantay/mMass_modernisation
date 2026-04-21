@@ -1,20 +1,23 @@
 import os
 import tempfile
+from pathlib import Path
 
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-from mspy.obj_scan import scan
-from mspy.parser_xy import parseXY
+
+from mmass.mspy.obj_scan import scan
+from mmass.mspy.parser_xy import parseXY
 
 
 @pytest.fixture
 def temp_xy_file():
-    fd, path = tempfile.mkstemp(suffix=".xy")
+    fd, path_str = tempfile.mkstemp(suffix=".xy")
     os.close(fd)
-    yield path
-    if os.path.exists(path):
-        os.remove(path)
+    path = Path(path_str)
+    yield path_str
+    if path.exists():
+        path.unlink()
 
 
 def test_init_success(temp_xy_file):
@@ -45,7 +48,7 @@ m/z intensity
 103.3;4000.0
 1.0e2 5.0e3
 """
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write(content)
 
     parser = parseXY(temp_xy_file)
@@ -59,28 +62,28 @@ m/z intensity
 
 
 def test_parseData_empty(temp_xy_file):
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write("")
     parser = parseXY(temp_xy_file)
     assert parser._parseData() == []
 
 
 def test_parseData_only_comments(temp_xy_file):
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write("# comment\nm/z header\n")
     parser = parseXY(temp_xy_file)
     assert parser._parseData() == []
 
 
 def test_parseData_invalid_line(temp_xy_file):
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write("100.0 1000.0\ninvalid line\n")
     parser = parseXY(temp_xy_file)
     assert parser._parseData() is False
 
 
 def test_parseData_single_value(temp_xy_file):
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write("100.0\n")
     parser = parseXY(temp_xy_file)
     assert parser._parseData() is False
@@ -115,7 +118,7 @@ def test_makeScan_discrete(temp_xy_file):
 
 
 def test_scan_success(temp_xy_file):
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write("100.0 1000.0\n")
     parser = parseXY(temp_xy_file)
     s = parser.scan()
@@ -126,7 +129,7 @@ def test_scan_success(temp_xy_file):
 
 
 def test_scan_failure(temp_xy_file):
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write("invalid\n")
     parser = parseXY(temp_xy_file)
     assert parser.scan() is False
@@ -134,7 +137,7 @@ def test_scan_failure(temp_xy_file):
 
 @pytest.fixture
 def small_xy_path():
-    return os.path.join(os.getcwd(), "tests/data/test_small.xy")
+    return str(Path.cwd() / "tests/data/test_small.xy")
 
 
 def test_integration(small_xy_path):
@@ -167,7 +170,7 @@ def test_hypothesis_parseData(temp_xy_file, mz, intensity, sep):
     # Use format that is likely to match the regex
     # Regex: ^([-0-9\.eE+]+)[ \t]*(;|,)?[ \t]*([-0-9\.eE+]*)$
     line = "{}{}{}".format(format(mz, "g"), sep, format(intensity, "g"))
-    with open(temp_xy_file, "w") as f:
+    with Path(temp_xy_file).open("w") as f:
         f.write(line)
 
     parser = parseXY(temp_xy_file)

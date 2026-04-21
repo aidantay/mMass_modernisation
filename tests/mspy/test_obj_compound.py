@@ -1,8 +1,8 @@
-import mspy.mod_basics
-import mspy.obj_compound
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+from mmass import mspy
 
 # ======================================================================
 # STEP 1-2: SMOKE/IMPORT TESTS
@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 
 def test_import_compound():
     """Test that compound class can be imported."""
-    from mspy.obj_compound import compound
+    from mmass.mspy.obj_compound import compound
 
     assert compound is not None
 
@@ -221,7 +221,7 @@ def test_composition_zero_count_removal():
     c2 = mspy.obj_compound.compound("C2H4")
     comp = c2.composition()
     # All counts should be positive
-    for atom, count in list(comp.items()):
+    for _atom, count in list(comp.items()):
         assert count > 0
 
 
@@ -269,7 +269,7 @@ def test_formula_ch_priority():
     c_idx = f.find("C")
     h_idx = f.find("H")
     n_idx = f.find("N")
-    o_idx = f.find("O")
+    f.find("O")
     assert c_idx < n_idx or c_idx == -1
     assert h_idx < n_idx or h_idx == -1
 
@@ -317,7 +317,7 @@ def test_mass_masstype_0():
     """Test mass(massType=0) returns monoisotopic mass."""
     c = mspy.obj_compound.compound("H2O")
     m = c.mass(massType=0)
-    assert isinstance(m, float) or isinstance(m, int)
+    assert isinstance(m, (float, int))
     assert m > 0
 
 
@@ -325,7 +325,7 @@ def test_mass_masstype_1():
     """Test mass(massType=1) returns average mass."""
     c = mspy.obj_compound.compound("H2O")
     m = c.mass(massType=1)
-    assert isinstance(m, float) or isinstance(m, int)
+    assert isinstance(m, (float, int))
     assert m > 0
 
 
@@ -360,7 +360,8 @@ def test_mass_multiple_atoms():
     """Test mass() with multiple atoms."""
     c = mspy.obj_compound.compound("C2H4O")
     m = c.mass()
-    assert m[0] > 0 and m[1] > 0
+    assert m[0] > 0
+    assert m[1] > 0
 
 
 # ======================================================================
@@ -640,8 +641,8 @@ def test_negate_buffer_clearing():
     """Test negate() clears buffers."""
     c = mspy.obj_compound.compound("H2O")
     # Populate buffers
-    comp = c.composition()
-    mass = c.mass()
+    c.composition()
+    c.mass()
 
     # Negate
     c.negate()
@@ -658,7 +659,7 @@ def test_negate_negative_composition():
     c = mspy.obj_compound.compound("C")
     c.negate()
     comp = c.composition()
-    for atom, count in list(comp.items()):
+    for _atom, count in list(comp.items()):
         assert count < 0
 
 
@@ -684,7 +685,7 @@ def test_negate_idempotent():
 def test_reset_clears_composition():
     """Test reset() clears composition buffer."""
     c = mspy.obj_compound.compound("H2O")
-    comp1 = c.composition()
+    c.composition()
     assert c._composition is not None
 
     c.reset()
@@ -695,10 +696,10 @@ def test_reset_clears_all_buffers():
     """Test reset() clears all buffers."""
     c = mspy.obj_compound.compound("H2O")
     # Populate all buffers
-    comp = c.composition()
-    formula = c.formula()
-    mass = c.mass()
-    nom_mass = c.nominalmass()
+    c.composition()
+    c.formula()
+    c.mass()
+    c.nominalmass()
 
     assert c._composition is not None
     assert c._formula is not None
@@ -764,7 +765,7 @@ def test_iadd_clears_buffers():
     """Test __iadd__ clears buffers."""
     c = mspy.obj_compound.compound("H2O")
     # Populate buffers
-    comp = c.composition()
+    c.composition()
     assert c._composition is not None
 
     # Add
@@ -927,7 +928,7 @@ def test_cache_invalidation_on_iadd():
 def test_cache_invalidation_on_negate():
     """Test cache invalidation when using negate()."""
     c = mspy.obj_compound.compound("H2O")
-    comp1 = c.composition()
+    c.composition()
 
     c.negate()
 
@@ -1017,7 +1018,8 @@ def test_compound_mass_precision():
     c = mspy.obj_compound.compound("H2O")
     m = c.mass()
     # Water should be approximately 18
-    assert m[0] > 17 and m[0] < 19
+    assert m[0] > 17
+    assert m[0] < 19
 
 
 def test_composition_order_independence():

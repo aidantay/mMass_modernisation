@@ -5,7 +5,8 @@ import xml.sax
 
 import numpy
 import pytest
-from mspy.parser_mzdata import parseMZDATA, stopParsing
+
+from mmass.mspy.parser_mzdata import parseMZDATA, stopParsing
 
 
 @pytest.fixture
@@ -92,7 +93,7 @@ def test_stopparsing_exception():
 
 def test_infoHandler():
     """Step 3: Unit Test infoHandler."""
-    from mspy.parser_mzdata import infoHandler
+    from mmass.mspy.parser_mzdata import infoHandler
 
     handler = infoHandler()
 
@@ -133,7 +134,7 @@ def test_infoHandler():
 
 def test_scanlistHandler_edge_cases():
     """Step 4: Unit Test scanlistHandler state and edge cases."""
-    from mspy.parser_mzdata import scanlistHandler
+    from mmass.mspy.parser_mzdata import scanlistHandler
 
     handler = scanlistHandler()
 
@@ -211,13 +212,13 @@ def test_scanlistHandler_edge_cases():
 
 def test_scanHandler_edge_cases():
     """Step 4: Unit Test scanHandler state and edge cases."""
-    from mspy.parser_mzdata import scanHandler
+    from mmass.mspy.parser_mzdata import scanHandler
 
     handler = scanHandler(1)
 
     # spectrum match
     handler.startElement("spectrum", {"id": "1"})
-    assert handler._isMatch == True
+    assert handler._isMatch
     assert handler.data["scanNumber"] == 1
 
     # acqSpecification
@@ -238,7 +239,7 @@ def test_scanHandler_edge_cases():
 
     # mzArrayBinary and characters
     handler.startElement("mzArrayBinary", {})
-    assert handler._isMzArray == True
+    assert handler._isMzArray
     handler.characters("ABC")
     handler.characters("DEF")
 
@@ -250,11 +251,11 @@ def test_scanHandler_edge_cases():
 
     handler.endElement("mzArrayBinary")
     assert handler.data["mzData"] == "ABCDEF"
-    assert handler._isMzArray == False
+    assert not handler._isMzArray
 
     # intenArrayBinary
     handler.startElement("intenArrayBinary", {})
-    assert handler._isIntArray == True
+    assert handler._isIntArray
     handler.characters("GHI")
     handler.startElement("data", {"endian": "big", "precision": "32"})
     assert handler.data["intEndian"] == "big"
@@ -265,8 +266,8 @@ def test_scanHandler_edge_cases():
     # spectrum no match
     handler2 = scanHandler(2)
     handler2.startElement("spectrum", {"id": "1"})
-    assert handler2._isMatch == False
-    assert handler2.data == False
+    assert not handler2._isMatch
+    assert not handler2.data
 
     # stopParsing
     with pytest.raises(stopParsing):
@@ -277,12 +278,12 @@ def test_scanHandler_edge_cases():
     handler3.startElement("spectrum", {"id": "3"})
     handler3.startElement("mzArrayBinary", {})
     handler3.endElement("mzArrayBinary")
-    assert handler3.data["mzData"] == None
+    assert handler3.data["mzData"] is None
 
 
 def test_runHandler_edge_cases():
     """Step 4: Unit Test runHandler state and edge cases."""
-    from mspy.parser_mzdata import runHandler
+    from mmass.mspy.parser_mzdata import runHandler
 
     handler = runHandler()
 
@@ -555,7 +556,7 @@ def test_parseMZDATA_load(mocker):
             "other": "value2",
         },
     }
-    mocker.patch("mspy.parser_mzdata.runHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.runHandler", return_value=mock_handler)
 
     # Execute load
     parser.load()
@@ -577,7 +578,7 @@ def test_parseMZDATA_load(mocker):
     # Test SAXException handling
     mock_sax_parser.parse.side_effect = xml.sax.SAXException("Error")
     parser.load()
-    assert parser._scans == False
+    assert not parser._scans
 
 
 def test_parseMZDATA_info(mocker):
@@ -594,7 +595,7 @@ def test_parseMZDATA_info(mocker):
     # Mock infoHandler and its data
     mock_handler = mocker.Mock()
     mock_handler.data = {"title": "Test"}
-    mocker.patch("mspy.parser_mzdata.infoHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.infoHandler", return_value=mock_handler)
 
     # Case 1: stopParsing handling
     mock_sax_parser.parse.side_effect = stopParsing()
@@ -621,8 +622,8 @@ def test_parseMZDATA_info(mocker):
     parser._info = None
     mock_sax_parser.parse.side_effect = xml.sax.SAXException("Error")
     info_error = parser.info()
-    assert info_error == False
-    assert parser._info == False
+    assert not info_error
+    assert not parser._info
 
 
 def test_parseMZDATA_scanlist(mocker):
@@ -639,7 +640,7 @@ def test_parseMZDATA_scanlist(mocker):
     # Mock scanlistHandler and its data
     mock_handler = mocker.Mock()
     mock_handler.data = {1: {"title": "Scan 1"}}
-    mocker.patch("mspy.parser_mzdata.scanlistHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.scanlistHandler", return_value=mock_handler)
 
     # Case 1: Successful extraction
     sl = parser.scanlist()
@@ -656,8 +657,8 @@ def test_parseMZDATA_scanlist(mocker):
     parser._scanlist = None
     mock_sax_parser.parse.side_effect = xml.sax.SAXException("Error")
     sl_error = parser.scanlist()
-    assert sl_error == False
-    assert parser._scanlist == False
+    assert not sl_error
+    assert not parser._scanlist
 
 
 def test_parseMZDATA_scan(mocker):
@@ -681,7 +682,7 @@ def test_parseMZDATA_scan(mocker):
 
     mock_handler = mocker.Mock()
     mock_handler.data = {2: {"id": 2}}  # scanHandler stores data for the requested ID
-    mocker.patch("mspy.parser_mzdata.scanHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzdata.scanHandler", return_value=mock_handler)
 
     # Successful parse (no exception)
     scan2 = parser.scan(2)
@@ -696,18 +697,18 @@ def test_parseMZDATA_scan(mocker):
     # Case 4: SAXException handling
     mock_sax_parser.parse.side_effect = xml.sax.SAXException("Error")
     scan_error = parser.scan(4)
-    assert scan_error == False
+    assert not scan_error
 
     # Case 5: Empty data found (handler.data is empty or False)
     mock_sax_parser.parse.side_effect = None
     mock_handler.data = None
     scan_empty = parser.scan(5)
-    assert scan_empty == False
+    assert not scan_empty
 
 
 def test_scanlistHandler_extra_coverage():
     """Improve coverage for scanlistHandler pass methods."""
-    from mspy.parser_mzdata import scanlistHandler
+    from mmass.mspy.parser_mzdata import scanlistHandler
 
     handler = scanlistHandler()
     handler.endElement("any")
@@ -721,7 +722,7 @@ def test_scanlistHandler_extra_coverage():
 
 def test_infoHandler_extra_coverage():
     """Improve coverage for infoHandler characters."""
-    from mspy.parser_mzdata import infoHandler
+    from mmass.mspy.parser_mzdata import infoHandler
 
     handler = infoHandler()
     handler._isInstrumentName = True
@@ -735,13 +736,13 @@ def test_infoHandler_extra_coverage():
 
 def test_scanHandler_comprehensive_coverage():
     """Hit all remaining branches in scanHandler."""
-    from mspy.parser_mzdata import scanHandler
+    from mmass.mspy.parser_mzdata import scanHandler
 
     handler = scanHandler(1)
 
     # 481->485: id is None
     handler.startElement("spectrum", {})
-    assert handler._isMatch == False
+    assert not handler._isMatch
 
     # 517->exit: attribute (spectrumType) is False
     handler = scanHandler(1)
@@ -822,7 +823,7 @@ def test_scanHandler_comprehensive_coverage():
 
 def test_scanlistHandler_comprehensive_coverage():
     """Hit all remaining branches in scanlistHandler."""
-    from mspy.parser_mzdata import scanlistHandler
+    from mmass.mspy.parser_mzdata import scanlistHandler
 
     handler = scanlistHandler()
 
@@ -849,7 +850,7 @@ def test_scanlistHandler_comprehensive_coverage():
 
 def test_runHandler_comprehensive_coverage():
     """Hit all remaining branches in runHandler."""
-    from mspy.parser_mzdata import runHandler
+    from mmass.mspy.parser_mzdata import runHandler
 
     handler = runHandler()
 
@@ -918,7 +919,7 @@ def test_integration_test_small_mzdata():
 
         pytest.skip("test_small.mzdata not found")
 
-    from mspy.parser_mzdata import parseMZDATA
+    from mmass.mspy.parser_mzdata import parseMZDATA
 
     parser = parseMZDATA(path)
 

@@ -1,7 +1,8 @@
-import os
+from pathlib import Path
 
 import pytest
-from mspy.parser_mgf import parseMGF
+
+from mmass.mspy.parser_mgf import parseMGF
 
 # Step 1: Setup Test Module
 # Step 2: Test Initialization & IO Errors
@@ -9,7 +10,7 @@ from mspy.parser_mgf import parseMGF
 
 def test_init_valid_file():
     """Verify successful instantiation with a valid file."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
     assert parser.path == path
     assert parser._scans is None
@@ -26,7 +27,7 @@ def test_init_invalid_file():
 
 def test_parseData_ioerror(mocker):
     """Verify that _parseData() returns False on OSError during file read."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
 
     # Mocking 'builtins.open' to raise OSError
@@ -43,7 +44,7 @@ def test_parseData_ioerror(mocker):
 
 def test_info():
     """Verify info() returns a dictionary with expected keys and empty strings."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
     info = parser.info()
     expected_keys = [
@@ -63,7 +64,7 @@ def test_info():
 
 def test_load():
     """Verify load() executes and populates _scans."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
     assert parser._scans is None
     parser.load()
@@ -89,7 +90,7 @@ def test_parseData_comments(mocker):
         "END IONS"
     )
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -120,7 +121,7 @@ def test_parseData_headers(mocker):
         "END IONS"
     )
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -155,7 +156,7 @@ def test_parseData_points(mocker):
         "END IONS"
     )
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -180,7 +181,7 @@ def test_parseData_multiple_scans(mocker):
         "END IONS"
     )
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -198,7 +199,7 @@ def test_parseData_multiple_scans(mocker):
 
 def test_scanlist_caching(mocker):
     """Verify calling scanlist() twice relies on populated _scanlist."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
 
     # First call: parses data and populates _scanlist
@@ -217,7 +218,7 @@ def test_scanlist_caching(mocker):
 
 def test_scan_empty(mocker):
     """Verify scan() returns False if no valid scans found."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
     # Mock _parseData to clear _scans
     mocker.patch.object(
@@ -229,7 +230,7 @@ def test_scan_empty(mocker):
 
 def test_scan_default_and_id():
     """Verify retrieving scans with scanID=None (defaults to 0) and scanID=0."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
 
     scan_default = parser.scan(scanID=None)
@@ -242,7 +243,7 @@ def test_scan_default_and_id():
 
 def test_makeScan_peaklist():
     """Verify scan(dataType='peaklist') creates a peaklist scan."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_small.mgf")
+    path = str(Path(__file__).parent / "../data/test_small.mgf")
     parser = parseMGF(path)
 
     # DataType='peaklist'
@@ -254,7 +255,7 @@ def test_makeScan_peaklist():
 
 def test_makeScan_profile():
     """Verify scan(dataType='profile') creates a profile scan."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_small.mgf")
+    path = str(Path(__file__).parent / "../data/test_small.mgf")
     parser = parseMGF(path)
 
     # DataType='profile'
@@ -266,7 +267,7 @@ def test_makeScan_profile():
 
 def test_makeScan_large_data():
     """Verify scan(dataType=None) on large data triggers profile mode."""
-    path = os.path.join(os.path.dirname(__file__), "../data/test_large.mgf")
+    path = str(Path(__file__).parent / "../data/test_large.mgf")
     parser = parseMGF(path)
 
     # DataType=None, points > 3000 should trigger profile
@@ -284,7 +285,7 @@ def test_scan_other_id(mocker):
         "BEGIN IONS\nTITLE=Scan 1\n200.0 2000.0\nEND IONS\n"
     )
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -297,7 +298,7 @@ def test_parseData_empty_file(mocker):
     """Verify _parseData handles a file with no valid scan data."""
     mock_content = "# Only comments\n\n"
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -310,7 +311,7 @@ def test_parseData_unknown_header(mocker):
     """Verify unknown headers are skipped."""
     mock_content = "BEGIN IONS\nUNKNOWN=Value\n100.0 1000.0\nEND IONS"
     path = "mock.mgf"
-    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("mmass.mspy.parser_mgf.os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_content))
 
     parser = parseMGF(path)
@@ -322,7 +323,7 @@ def test_parseData_unknown_header(mocker):
 def test_scan_invalid_id():
     """Verify scan() raises UnboundLocalError when scanID is not found."""
     # This is a known bug in the source code where 'data' remains undefined.
-    path = os.path.join(os.path.dirname(__file__), "../data/test_tiny.mgf")
+    path = str(Path(__file__).parent / "../data/test_tiny.mgf")
     parser = parseMGF(path)
     with pytest.raises(UnboundLocalError):
         parser.scan(scanID=999)

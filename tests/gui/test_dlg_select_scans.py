@@ -1,6 +1,7 @@
 import pytest
 import wx
-from gui.dlg_select_scans import dlgSelectScans
+
+from mmass.gui.dlg_select_scans import dlgSelectScans
 
 
 def mock_list_ctrl_factory(mocker, *args, **kwargs):
@@ -79,7 +80,7 @@ def dlg(wx_app, mock_scans, mocker):
 
     # Mock config
     mocker.patch(
-        "gui.dlg_select_scans.config.spectrum",
+        "mmass.gui.dlg_select_scans.config.spectrum",
         {
             "showMinorTicks": True,
             "axisFontSize": 10,
@@ -87,24 +88,28 @@ def dlg(wx_app, mock_scans, mocker):
             "tickColour": [0, 0, 0],
         },
     )
-    mocker.patch("gui.dlg_select_scans.config.main", {"reverseScrolling": False})
-    mocker.patch("gui.dlg_select_scans.config.colours", [[255, 0, 0], [0, 255, 0]])
+    mocker.patch("mmass.gui.dlg_select_scans.config.main", {"reverseScrolling": False})
+    mocker.patch(
+        "mmass.gui.dlg_select_scans.config.colours", [[255, 0, 0], [0, 255, 0]]
+    )
 
     # Patch mwx.sortListCtrl to return a real ListCtrl but with mock methods
     mocker.patch(
-        "gui.dlg_select_scans.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_scans.mwx.sortListCtrl",
         side_effect=lambda *a, **k: mock_list_ctrl_factory(mocker, *a, **k),
     )
 
     # Patch mspy.plot.canvas to return a real Panel but with mock methods
     mocker.patch(
-        "gui.dlg_select_scans.mspy.plot.canvas",
+        "mmass.gui.dlg_select_scans.plot.canvas",
         side_effect=lambda *a, **k: mock_canvas_factory(mocker, *a, **k),
     )
 
     # Patch points and container
-    mocker.patch("gui.dlg_select_scans.mspy.plot.points", return_value=mocker.Mock())
-    mocker.patch("gui.dlg_select_scans.mspy.plot.container", return_value=mocker.Mock())
+    mocker.patch("mmass.gui.dlg_select_scans.plot.points", return_value=mocker.Mock())
+    mocker.patch(
+        "mmass.gui.dlg_select_scans.plot.container", return_value=mocker.Mock()
+    )
 
     # Patch wx methods
     mocker.patch("wx.Dialog.EndModal")
@@ -211,7 +216,7 @@ def test_updateScanList_none_values(wx_app, mocker):
 
     # Mocking for constructor
     mocker.patch(
-        "gui.dlg_select_scans.config.spectrum",
+        "mmass.gui.dlg_select_scans.config.spectrum",
         {
             "showMinorTicks": True,
             "axisFontSize": 10,
@@ -219,20 +224,20 @@ def test_updateScanList_none_values(wx_app, mocker):
             "tickColour": [0, 0, 0],
         },
     )
-    mocker.patch("gui.dlg_select_scans.config.main", {"reverseScrolling": False})
-    mocker.patch("gui.dlg_select_scans.config.colours", [[255, 0, 0]])
+    mocker.patch("mmass.gui.dlg_select_scans.config.main", {"reverseScrolling": False})
+    mocker.patch("mmass.gui.dlg_select_scans.config.colours", [[255, 0, 0]])
 
     # Use factories
     mocker.patch(
-        "gui.dlg_select_scans.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_scans.mwx.sortListCtrl",
         side_effect=lambda *a, **k: mock_list_ctrl_factory(mocker, *a, **k),
     )
     mocker.patch(
-        "gui.dlg_select_scans.mspy.plot.canvas",
+        "mmass.gui.dlg_select_scans.plot.canvas",
         side_effect=lambda *a, **k: mock_canvas_factory(mocker, *a, **k),
     )
-    mocker.patch("gui.dlg_select_scans.mspy.plot.points")
-    mocker.patch("gui.dlg_select_scans.mspy.plot.container")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.points")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.container")
 
     parent = wx.Frame(None)
     try:
@@ -259,7 +264,7 @@ def test_updateScanList_empty(wx_app, mocker):
     """Test updateScanList with empty scan dictionary (Step 3)."""
     scans = {}
     mocker.patch(
-        "gui.dlg_select_scans.config.spectrum",
+        "mmass.gui.dlg_select_scans.config.spectrum",
         {
             "showMinorTicks": True,
             "axisFontSize": 10,
@@ -267,19 +272,19 @@ def test_updateScanList_empty(wx_app, mocker):
             "tickColour": [0, 0, 0],
         },
     )
-    mocker.patch("gui.dlg_select_scans.config.main", {"reverseScrolling": False})
-    mocker.patch("gui.dlg_select_scans.config.colours", [[255, 0, 0]])
+    mocker.patch("mmass.gui.dlg_select_scans.config.main", {"reverseScrolling": False})
+    mocker.patch("mmass.gui.dlg_select_scans.config.colours", [[255, 0, 0]])
 
     mocker.patch(
-        "gui.dlg_select_scans.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_scans.mwx.sortListCtrl",
         side_effect=lambda *a, **k: mock_list_ctrl_factory(mocker, *a, **k),
     )
     mocker.patch(
-        "gui.dlg_select_scans.mspy.plot.canvas",
+        "mmass.gui.dlg_select_scans.plot.canvas",
         side_effect=lambda *a, **k: mock_canvas_factory(mocker, *a, **k),
     )
-    mocker.patch("gui.dlg_select_scans.mspy.plot.points")
-    mocker.patch("gui.dlg_select_scans.mspy.plot.container")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.points")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.container")
 
     parent = wx.Frame(None)
     try:
@@ -319,7 +324,7 @@ def test_updateChromPlot_few_scans(wx_app, mocker):
         }
 
     mocker.patch(
-        "gui.dlg_select_scans.config.spectrum",
+        "mmass.gui.dlg_select_scans.config.spectrum",
         {
             "showMinorTicks": True,
             "axisFontSize": 10,
@@ -327,19 +332,19 @@ def test_updateChromPlot_few_scans(wx_app, mocker):
             "tickColour": [0, 0, 0],
         },
     )
-    mocker.patch("gui.dlg_select_scans.config.main", {"reverseScrolling": False})
-    mocker.patch("gui.dlg_select_scans.config.colours", [[255, 0, 0]])
+    mocker.patch("mmass.gui.dlg_select_scans.config.main", {"reverseScrolling": False})
+    mocker.patch("mmass.gui.dlg_select_scans.config.colours", [[255, 0, 0]])
 
     mocker.patch(
-        "gui.dlg_select_scans.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_scans.mwx.sortListCtrl",
         side_effect=lambda *a, **k: mock_list_ctrl_factory(mocker, *a, **k),
     )
     mocker.patch(
-        "gui.dlg_select_scans.mspy.plot.canvas",
+        "mmass.gui.dlg_select_scans.plot.canvas",
         side_effect=lambda *a, **k: mock_canvas_factory(mocker, *a, **k),
     )
-    mocker.patch("gui.dlg_select_scans.mspy.plot.points")
-    mocker.patch("gui.dlg_select_scans.mspy.plot.container")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.points")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.container")
 
     parent = wx.Frame(None)
     try:
@@ -369,7 +374,7 @@ def test_updateScanList_invalid_values(wx_app, mocker):
     }
 
     mocker.patch(
-        "gui.dlg_select_scans.config.spectrum",
+        "mmass.gui.dlg_select_scans.config.spectrum",
         {
             "showMinorTicks": True,
             "axisFontSize": 10,
@@ -377,19 +382,19 @@ def test_updateScanList_invalid_values(wx_app, mocker):
             "tickColour": [0, 0, 0],
         },
     )
-    mocker.patch("gui.dlg_select_scans.config.main", {"reverseScrolling": False})
-    mocker.patch("gui.dlg_select_scans.config.colours", [[255, 0, 0]])
+    mocker.patch("mmass.gui.dlg_select_scans.config.main", {"reverseScrolling": False})
+    mocker.patch("mmass.gui.dlg_select_scans.config.colours", [[255, 0, 0]])
 
     mocker.patch(
-        "gui.dlg_select_scans.mwx.sortListCtrl",
+        "mmass.gui.dlg_select_scans.mwx.sortListCtrl",
         side_effect=lambda *a, **k: mock_list_ctrl_factory(mocker, *a, **k),
     )
     mocker.patch(
-        "gui.dlg_select_scans.mspy.plot.canvas",
+        "mmass.gui.dlg_select_scans.plot.canvas",
         side_effect=lambda *a, **k: mock_canvas_factory(mocker, *a, **k),
     )
-    mocker.patch("gui.dlg_select_scans.mspy.plot.points")
-    mocker.patch("gui.dlg_select_scans.mspy.plot.container")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.points")
+    mocker.patch("mmass.gui.dlg_select_scans.plot.container")
 
     parent = wx.Frame(None)
     try:
@@ -520,7 +525,9 @@ def test_getFreeColour_random(dlg, mocker):
 
     # Mock random.randrange to return specific values
     # Each call to getFreeColour will call it 3 times
-    mocker.patch("gui.dlg_select_scans.random.randrange", side_effect=[100, 150, 200])
+    mocker.patch(
+        "mmass.gui.dlg_select_scans.random.randrange", side_effect=[100, 150, 200]
+    )
 
     result = dlg.getFreeColour()
     assert result == [100, 150, 200]

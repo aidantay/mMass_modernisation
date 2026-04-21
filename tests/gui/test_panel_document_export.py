@@ -13,14 +13,14 @@ if not hasattr(wx, "SAVE"):
 if not hasattr(wx, "OVERWRITE_PROMPT"):
     wx.OVERWRITE_PROMPT = getattr(wx, "FD_OVERWRITE_PROMPT", 0x0002)
 
-import gui.config as config
-import gui.images as images
-from gui.ids import (
+import mmass.gui.config as config
+import mmass.gui.images as images
+from mmass.gui.ids import (
     ID_documentExportImage,
     ID_documentExportPeaklist,
     ID_documentExportSpectrum,
 )
-from gui.panel_document_export import panelDocumentExport
+from mmass.gui.panel_document_export import panelDocumentExport
 
 
 class MockParentFrame(wx.Frame):
@@ -350,7 +350,7 @@ def test_onExport_delegation(export_panel, mocker):
     mock_exportImage = mocker.patch.object(export_panel, "onExportImage")
     mock_exportPeaklist = mocker.patch.object(export_panel, "onExportPeaklist")
     mock_exportSpectrum = mocker.patch.object(export_panel, "onExportSpectrum")
-    mock_bell = mocker.patch("wx.Bell")
+    mocker.patch("wx.Bell")
 
     # Test Image delegation
     export_panel.currentTool = "image"
@@ -530,7 +530,7 @@ def test_runExportImage_success(export_panel, mock_parent, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "fmt, expected_type",
+    ("fmt", "expected_type"),
     [
         ("PNG", wx.BITMAP_TYPE_PNG),
         ("TIFF", wx.BITMAP_TYPE_TIF),

@@ -8,13 +8,13 @@ from numpy.testing import assert_allclose
 
 @pytest.fixture(scope="session")
 def calculations():
-    """Fixture to provide the mspy.calculations module."""
+    """Fixture to provide the mmass.mspy.calculations module."""
     try:
-        import mspy.calculations
+        from mmass import mspy
 
         return mspy.calculations
     except ImportError as e:
-        pytest.fail(f"Failed to import mspy.calculations: {e}")
+        pytest.fail(f"Failed to import mmass.mspy.calculations: {e}")
 
 
 # Helper to generate typical mass spectrometry signals: 2D array of doubles, (n, 2)
@@ -313,7 +313,7 @@ class TestGeneration:
         assert_allclose(gl[idx, 1], 100.0, atol=1.0)
 
     @pytest.mark.parametrize(
-        "shape, label",
+        ("shape", "label"),
         [(0, "gaussian"), (1, "lorentzian"), (2, "gauss-lorentzian")],
         ids=["shape-0-gaussian", "shape-1-lorentzian", "shape-2-gausslorentzian"],
     )
@@ -696,7 +696,7 @@ class TestPropertyBased:
         self, calculations, min_comp, max_comp, masses, loMass, hiMass, limit
     ):
         # Ensure min_comp <= max_comp for each element
-        assume(all(mi <= ma for mi, ma in zip(min_comp, max_comp)))
+        assume(all(mi <= ma for mi, ma in zip(min_comp, max_comp, strict=False)))
         res = calculations.formula_composition(
             min_comp, max_comp, masses, loMass, hiMass, limit
         )

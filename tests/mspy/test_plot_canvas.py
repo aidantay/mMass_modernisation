@@ -5,14 +5,14 @@ wx = pytest.importorskip("wx")
 import numpy
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-from mspy.plot_canvas import _scaleFont, canvas
+
+from mmass.mspy.plot_canvas import _scaleFont, canvas
 
 
 @pytest.fixture(scope="session")
 def wx_app():
     """Session-scoped fixture to initialize wx.App for headless UI testing."""
-    app = wx.App(False)
-    yield app
+    return wx.App(False)
     # No explicit app.MainLoop() or app.Exit() needed for these tests
 
 
@@ -103,6 +103,8 @@ def test_drawPointTracker(setup_canvas_for_tracking, mocker):
     for platform in ["__WXMSW__", "__WXMAC__"]:
         mocker.patch("wx.Platform", platform)
         mock_dc.DrawLine.reset_mock()
+        # Reset tracker state to ensure it draws instead of erasing on second iteration
+        canvas._pointTrackerDrawn = False
 
         canvas.drawPointTracker()
 
@@ -158,7 +160,7 @@ def test_scaleFont(wx_app):
 
 
 @pytest.mark.parametrize(
-    "lower, upper",
+    ("lower", "upper"),
     [
         (0.1, 0.2),  # Small range
         (100, 1000),  # Standard range
@@ -244,7 +246,7 @@ def test_coordinate_transformations_roundtrip(canvas_fixture, x, y):
 
 
 @pytest.mark.parametrize(
-    "c1, c2, expected",
+    ("c1", "c2", "expected"),
     [
         # (x1, y1), (x2, y2) -> (x_start, y_start, width, height)
         (
@@ -285,7 +287,7 @@ def test_pointToClientCoord_positive_dimensions(canvas_fixture, c1, c2, expected
 
 
 @pytest.mark.parametrize(
-    "cursor_pos, expected_location",
+    ("cursor_pos", "expected_location"),
     [
         ([0, 0, 50, 50], "plot"),  # Inside (10, 10, 100, 100)
         ([0, 0, 50, 110], "xAxis"),  # x inside, y > 100
@@ -470,7 +472,7 @@ def test_refresh_fullsize(canvas_fixture, mocker):
 def test_clear(canvas_fixture, mocker):
     """Test clear method resets state."""
     # Mock wx components
-    mock_client_dc = mocker.patch("wx.ClientDC")
+    mocker.patch("wx.ClientDC")
     mock_buffered_dc = mocker.patch("wx.BufferedDC")
 
     canvas_fixture.lastDraw = ("dummy", (0, 1), (0, 1))
@@ -553,7 +555,7 @@ def test_onLMD_zoom(canvas_fixture, mocker, mock_event_factory):
 
 
 @pytest.mark.parametrize(
-    "mouseFnLMB, expected_event, draw_method",
+    ("mouseFnLMB", "expected_event", "draw_method"),
     [
         ("point", "point", "drawPointTracker"),
         ("isotopes", "isotopes", "drawIsotopeRuler"),
@@ -1189,7 +1191,7 @@ def test_drawGelView(patched_canvas, mock_dc, mocker):
 
 
 def test_drawTrackerRenderers(patched_canvas, mocker, mock_dc):
-    """Test tracker renderers that use wx.ClientDC and wx.INVERT."""
+    """Test tracker renderers that use wx.ClientDC."""
     # We need to patch wx.ClientDC locally to return our mock_dc
     mocker.patch("wx.ClientDC", return_value=mock_dc)
 
@@ -1200,7 +1202,7 @@ def test_drawTrackerRenderers(patched_canvas, mocker, mock_dc):
     # drawCursorTracker
     mock_dc.DrawLine.reset_mock()
     patched_canvas.drawCursorTracker()
-    mock_dc.SetLogicalFunction.assert_any_call(wx.INVERT)
+    mock_dc.SetLogicalFunction.assert_any_call(wx.COPY)
     assert mock_dc.DrawLine.called
 
     # drawZoomBox
@@ -1370,7 +1372,7 @@ def test_onPaint(patched_canvas, mocker):
 def test_onSize(patched_canvas, mocker):
     """Test onSize interaction."""
     mocker.patch.object(patched_canvas, "GetClientSize", return_value=(800, 600))
-    mock_bitmap = mocker.patch("wx.Bitmap", return_value=mocker.Mock())
+    mocker.patch("wx.Bitmap", return_value=mocker.Mock())
     mock_draw = mocker.patch.object(patched_canvas, "draw")
     mock_clear = mocker.patch.object(patched_canvas, "clear")
 
@@ -1420,7 +1422,7 @@ def test_getBitmap_defaults(patched_canvas, mocker, mock_dc):
 
 def test_getBitmap_explicit(patched_canvas, mocker, mock_dc):
     """Test canvas.getBitmap with explicit arguments."""
-    mock_set_size = mocker.patch.object(patched_canvas, "setSize")
+    mocker.patch.object(patched_canvas, "setSize")
     mock_draw_outside = mocker.patch.object(patched_canvas, "drawOutside")
     mock_refresh = mocker.patch.object(patched_canvas, "refresh")
 
@@ -1436,7 +1438,7 @@ def test_getBitmap_explicit(patched_canvas, mocker, mock_dc):
 
 def test_printout_basics(mocker):
     """Test printout basic methods."""
-    from mspy.plot_canvas import printout
+    from mmass.mspy.plot_canvas import printout
 
     mock_graph = mocker.Mock()
     po = printout(graph=mock_graph, filterSize=1.5, title="Test Print")
@@ -1450,7 +1452,7 @@ def test_printout_basics(mocker):
 
 def test_printout_OnPrintPage_printing(mocker, mock_dc):
     """Test printout.OnPrintPage in printing mode."""
-    from mspy.plot_canvas import printout
+    from mmass.mspy.plot_canvas import printout
 
     mock_graph = mocker.Mock()
     po = printout(mock_graph, filterSize=2.0)
@@ -1487,7 +1489,7 @@ def test_printout_OnPrintPage_printing(mocker, mock_dc):
 
 def test_printout_OnPrintPage_preview(mocker, mock_dc):
     """Test printout.OnPrintPage in preview mode."""
-    from mspy.plot_canvas import printout
+    from mmass.mspy.plot_canvas import printout
 
     mock_graph = mocker.Mock()
     po = printout(mock_graph, filterSize=2.0)
@@ -1510,7 +1512,7 @@ def test_printout_OnPrintPage_preview(mocker, mock_dc):
     assert po.filterSize == 1
     # Check that setSize was called with scaled values
     # plotAreaW was ~1976, now ~1976 * 0.4 = 790.4
-    args, kwargs = mock_graph.setSize.call_args_list[0]
+    args, _kwargs = mock_graph.setSize.call_args_list[0]
     assert args[0] < 800
     assert args[1] < 1200
 
@@ -1530,6 +1532,7 @@ def test_drawPointTracker_detailed(setup_canvas_for_tracking, mocker):
     # Test non-Mac
     mocker.patch("wx.Platform", "__WXMSW__")
     dc.DrawLine.reset_mock()
+    canvas._pointTrackerDrawn = False
     canvas.drawPointTracker()
     # Expect lines for crosshair and vertical line to active curve
     assert dc.DrawLine.call_count >= 2
@@ -1537,6 +1540,7 @@ def test_drawPointTracker_detailed(setup_canvas_for_tracking, mocker):
     # Test Mac
     mocker.patch("wx.Platform", "__WXMAC__")
     dc.DrawLine.reset_mock()
+    canvas._pointTrackerDrawn = False
     canvas.drawPointTracker()
     assert dc.DrawLine.call_count >= 2
 
@@ -1589,6 +1593,7 @@ def test_drawSelectionRect_detailed(setup_canvas_for_tracking):
     # Case 1: Inside bounds
     canvas.cursorPosition = [60.0, 110.0, 60, 110]
     dc.DrawRectangle.reset_mock()
+    canvas._selRectDrawn = False
     canvas.drawSelectionRect()
     # expected x=40, y=90, w=20, h=20
     dc.DrawRectangle.assert_called_with(40, 90, 20, 20)
@@ -1597,6 +1602,7 @@ def test_drawSelectionRect_detailed(setup_canvas_for_tracking):
     # plotCoords = (10, 10, 190, 190)
     canvas.cursorPosition = [250.0, 250.0, 250, 250]
     dc.DrawRectangle.reset_mock()
+    canvas._selRectDrawn = False
     canvas.drawSelectionRect()
     # x2 clipped to maxXPlot-1 = 189
     # y2 clipped to maxYPlot-1 = 189
@@ -1606,6 +1612,7 @@ def test_drawSelectionRect_detailed(setup_canvas_for_tracking):
     # Case 3: Outside bounds (clipped to min)
     canvas.cursorPosition = [0.0, 0.0, 0, 0]
     dc.DrawRectangle.reset_mock()
+    canvas._selRectDrawn = False
     canvas.drawSelectionRect()
     # x2 clipped to minXPlot = 10
     # y2 clipped to minYPlot = 10
@@ -1626,6 +1633,7 @@ def test_drawSelectionRange_detailed(setup_canvas_for_tracking, mocker, platform
     # Case 1: Normal range
     canvas.cursorPosition = [100.0, 90.0, 100, 90]
     dc.DrawLine.reset_mock()
+    canvas._selRangeDrawn = False
     canvas.drawSelectionRange()
     assert dc.DrawLine.called
     assert dc.DrawLine.call_count >= 3
@@ -1633,12 +1641,14 @@ def test_drawSelectionRange_detailed(setup_canvas_for_tracking, mocker, platform
     # Case 2: Capped at minX
     canvas.cursorPosition = [0.0, 90.0, 0, 90]
     dc.DrawLine.reset_mock()
+    canvas._selRangeDrawn = False
     canvas.drawSelectionRange()
     assert dc.DrawLine.called
 
     # Case 3: Capped at maxX
     canvas.cursorPosition = [200.0, 90.0, 200, 90]
     dc.DrawLine.reset_mock()
+    canvas._selRangeDrawn = False
     canvas.drawSelectionRange()
     assert dc.DrawLine.called
 
@@ -1657,6 +1667,7 @@ def test_drawDistanceTracker_detailed(setup_canvas_for_tracking, mocker):
     canvas.mouseFnLMB = "xDistance"
     dc.DrawLine.reset_mock()
     canvas.drawInvertedText.reset_mock()
+    canvas._distanceTrackerDrawn = False
     canvas.drawDistanceTracker()
     # Expect vertical lines at x1 and x2, and a horizontal line at y2
     assert dc.DrawLine.call_count >= 3
@@ -1670,6 +1681,7 @@ def test_drawDistanceTracker_detailed(setup_canvas_for_tracking, mocker):
     canvas.mouseFnLMB = "yDistance"
     dc.DrawLine.reset_mock()
     canvas.drawInvertedText.reset_mock()
+    canvas._distanceTrackerDrawn = False
     canvas.drawDistanceTracker()
     # Expect horizontal lines at y1 and y2, and a vertical line at x2
     assert dc.DrawLine.call_count >= 3
@@ -1681,13 +1693,14 @@ def test_drawDistanceTracker_detailed(setup_canvas_for_tracking, mocker):
     # Case 3: Outside bounds (clipped)
     canvas.cursorPosition = [250.0, 250.0, 250, 250]
     dc.DrawLine.reset_mock()
+    canvas._distanceTrackerDrawn = False
     canvas.drawDistanceTracker()
     # Verify it still draws without error, coordinates should be clipped internally
     assert dc.DrawLine.called
 
 
 @pytest.mark.parametrize(
-    "mouse_fn, expected_event, tracker_name",
+    ("mouse_fn", "expected_event", "tracker_name"),
     [
         ("point", "point", "drawPointTracker"),
         ("isotopes", "isotopes", "drawIsotopeRuler"),
@@ -1705,7 +1718,7 @@ def test_mouse_tracking_state_machine(
     tracker_name,
 ):
     """Test state transitions for additional mouse functions using parametrization."""
-    canvas, dc = setup_canvas_for_tracking
+    canvas, _dc = setup_canvas_for_tracking
     mocker.patch.object(canvas, "FindFocus", return_value=canvas)
 
     canvas.mouseFnLMB = mouse_fn
@@ -1745,7 +1758,7 @@ def test_mouse_tracking_state_machine(
 @pytest.fixture
 def setup_scroll(setup_canvas_for_tracking, mocker):
     """Combined fixture for scroll tests."""
-    canvas, dc = setup_canvas_for_tracking
+    canvas, _dc = setup_canvas_for_tracking
     mock_graphics = mocker.Mock()
     mock_graphics.getBoundingBox.return_value = ((0.0, 0.0), (1000.0, 1000.0))
     canvas.lastDraw = (mock_graphics, (100.0, 200.0), (0.0, 1000.0))
@@ -1787,7 +1800,7 @@ def test_onMScroll_clears_mouse_tracker(setup_scroll, mock_mouse_event_scroll, m
 
 
 @pytest.mark.parametrize(
-    "rotation, reverse, expected_direction",
+    ("rotation", "reverse", "expected_direction"),
     [
         (120, False, 1),
         (-120, False, -1),
@@ -1799,7 +1812,7 @@ def test_onMScroll_scroll_direction(
     setup_scroll, mock_mouse_event_scroll, mocker, rotation, reverse, expected_direction
 ):
     """Step 4: Test Scroll Direction and Inversion."""
-    canvas, mock_graphics = setup_scroll
+    canvas, _mock_graphics = setup_scroll
     mock_mouse_event_scroll.GetWheelRotation.return_value = rotation
     canvas.properties["reverseScrolling"] = reverse
 
@@ -1815,7 +1828,7 @@ def test_onMScroll_scroll_direction(
     expected_minX = 100.0 - 10.0 * expected_direction
     expected_maxX = 200.0 - 10.0 * expected_direction
 
-    args, kwargs = mock_draw.call_args
+    args, _kwargs = mock_draw.call_args
     assert abs(args[1][0] - expected_minX) < 1e-9
     assert abs(args[1][1] - expected_maxX) < 1e-9
 
@@ -1846,7 +1859,7 @@ def test_onMScroll_isotoperuler_charge(setup_scroll, mock_mouse_event_scroll, mo
     mock_mouse_event_scroll.AltDown.return_value = False
     mock_mouse_event_scroll.ControlDown.return_value = False
     canvas.currentCharge = 10
-    mock_draw_tracker = mocker.patch.object(canvas, "drawMouseTracker")
+    mocker.patch.object(canvas, "drawMouseTracker")
 
     canvas.onMScroll(mock_mouse_event_scroll)
     assert canvas.currentCharge == 11
@@ -2107,7 +2120,7 @@ def test_onChar_view_memory_forth(setup_scroll, mocker, mock_event_factory):
 
 def test_onChar_view_memory_empty(setup_scroll, mocker, mock_event_factory):
     """Test onChar for BACK key when history/future is empty."""
-    canvas, mock_graphics = setup_scroll
+    canvas, _mock_graphics = setup_scroll
     mock_draw = mocker.patch.object(canvas, "draw")
 
     # Empty history (length <= 1)
@@ -2288,7 +2301,7 @@ def test_drawIsotopeRuler_with_gel(patched_canvas, mocker, mock_dc):
 
 
 @pytest.mark.parametrize(
-    "direction, expected_poly",
+    ("direction", "expected_poly"),
     [
         ("up", [(150, 251), (147, 258), (153, 258)]),
         ("down", [(150, 251), (147, 244), (153, 244)]),

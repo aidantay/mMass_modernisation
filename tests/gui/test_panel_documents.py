@@ -1,6 +1,7 @@
 import wx
-from gui.ids import *
-from gui.panel_documents import documentsTree, fileDropTarget, panelDocuments
+
+from mmass.gui.ids import *
+from mmass.gui.panel_documents import documentsTree, fileDropTarget, panelDocuments
 
 
 # Dummy data classes to simulate mspy and doc objects without triggering heavy business logic
@@ -132,10 +133,10 @@ def test_documentsTree_core_methods(wx_app, mocker):
     tree = documentsTree(frame, -1)
 
     # Patch doc and mspy classes to match Dummy classes for getItemType
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
 
     # Create dummy data
     doc_data = DummyDocument(title="Doc 1")
@@ -152,9 +153,9 @@ def test_documentsTree_core_methods(wx_app, mocker):
 
     # Get child items
     annots_node, cookie = tree.GetFirstChild(doc_item)  # "Annotations" node
-    annot_item, cookie2 = tree.GetFirstChild(annots_node)  # individual annotation
-    seq_item, cookie3 = tree.GetNextChild(doc_item, cookie)  # sequence item
-    match_item, cookie4 = tree.GetFirstChild(seq_item)  # match item
+    annot_item, _cookie2 = tree.GetFirstChild(annots_node)  # individual annotation
+    seq_item, _cookie3 = tree.GetNextChild(doc_item, cookie)  # sequence item
+    match_item, _cookie4 = tree.GetFirstChild(seq_item)  # match item
 
     # Verify getItemType
     assert tree.getItemType(doc_item) == "document"
@@ -189,10 +190,10 @@ def test_documentsTree_visual_updates(wx_app, mocker):
     tree = documentsTree(frame, -1)
 
     # Patch doc and mspy classes to match Dummy classes for appendDocument
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
 
     # Create dummy data
     doc_data = DummyDocument(title="Doc 1", colour=(255, 0, 0), visible=True)
@@ -243,7 +244,7 @@ def test_panelDocuments_initialization(wx_app, mocker):
 
     # Patch config.main to avoid KeyError
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
@@ -292,14 +293,14 @@ def test_panelDocuments_onKey(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
 
     # Select document and press DELETE
     doc_item = tree.appendDocument(doc_data)
@@ -329,13 +330,13 @@ def test_panelDocuments_onLMD(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
     doc_item = tree.appendDocument(doc_data)
 
     # Mock MouseEvent and HitTest
@@ -366,13 +367,13 @@ def test_panelDocuments_onItemSelecting(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
     doc_item = tree.appendDocument(doc_data)
 
     mock_event = mocker.MagicMock(spec=wx.TreeEvent)
@@ -395,20 +396,20 @@ def test_panelDocuments_onRMU(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
-    mocker.patch("gui.panel_documents.config.spectrum", {"normalize": False})
+    mocker.patch("mmass.gui.panel_documents.config.spectrum", {"normalize": False})
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
     # Mock PopupMenu to avoid actually trying to show it
     panel.PopupMenu = mocker.MagicMock()
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    MockMenu = mocker.patch("gui.panel_documents.wx.Menu")
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    MockMenu = mocker.patch("mmass.gui.panel_documents.wx.Menu")
 
     class MenuTracker:
         def __init__(self):
@@ -458,7 +459,7 @@ def test_panelDocuments_onRMU(wx_app, mocker):
     # Select Annotation and trigger RMU
     tracker.menus = []
     annots_node = tree.getItemByData(doc_data.annotations)
-    annot_item, cookie = tree.GetFirstChild(annots_node)
+    annot_item, _cookie = tree.GetFirstChild(annots_node)
     tree.SelectItem(annot_item)
     panel.onRMU(None)
 
@@ -481,14 +482,14 @@ def test_panelDocuments_API_Synchronization(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
 
     doc_item = tree.appendDocument(doc_data)
 
@@ -549,16 +550,16 @@ def test_panelDocuments_onItemActivated(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
 
     doc_item = tree.appendDocument(doc_data)
     annots_node = tree.getItemByData(doc_data.annotations)
@@ -609,16 +610,16 @@ def test_panelDocuments_onAdd_onDelete(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     panel.PopupMenu = mocker.MagicMock()
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    MockMenu = mocker.patch("gui.panel_documents.wx.Menu")
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    MockMenu = mocker.patch("mmass.gui.panel_documents.wx.Menu")
 
     menu = mocker.MagicMock()
     MockMenu.return_value = menu
@@ -652,19 +653,19 @@ def test_panelDocuments_NotationHandlers(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
-    MockDlg = mocker.patch("gui.panel_documents.dlgNotation")
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
+    MockDlg = mocker.patch("mmass.gui.panel_documents.dlgNotation")
 
-    doc_item = tree.appendDocument(doc_data)
+    tree.appendDocument(doc_data)
     annots_node = tree.getItemByData(doc_data.annotations)
     annot_item, _ = tree.GetFirstChild(annots_node)
     seq_item = tree.getItemByData(seq_data)
@@ -718,21 +719,21 @@ def test_panelDocuments_SendToHandlers(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     mocker.patch(
-        "gui.panel_documents.config.envelopeFit", {"loss": "H", "gain": "H{2}"}
+        "mmass.gui.panel_documents.config.envelopeFit", {"loss": "H", "gain": "H{2}"}
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
 
-    doc_item = tree.appendDocument(doc_data)
+    tree.appendDocument(doc_data)
     seq_item = tree.getItemByData(seq_data)
     annots_node = tree.getItemByData(doc_data.annotations)
     annot_item, _ = tree.GetFirstChild(annots_node)
@@ -801,13 +802,13 @@ def test_panelDocuments_DocumentMethods(wx_app, mocker):
     documents = [doc_data1]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
     doc_item1 = tree.appendDocument(doc_data1)
 
     # appendLastDocument
@@ -841,17 +842,17 @@ def test_panelDocuments_SequenceMethods(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
 
-    doc_item = tree.appendDocument(doc_data)
+    tree.appendDocument(doc_data)
     seq_item1 = tree.getItemByData(seq_data1)
 
     # selectSequence
@@ -892,16 +893,16 @@ def test_panelDocuments_updateSequences(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
 
-    doc_item = tree.appendDocument(doc_data)
+    tree.appendDocument(doc_data)
 
     # Add new sequence
     seq_data2 = DummySequence(title="Seq 2")
@@ -928,23 +929,23 @@ def test_panelDocuments_onDelete_ItemSpecific(wx_app, mocker):
     documents = [doc_data]
 
     mocker.patch(
-        "gui.panel_documents.config.main",
+        "mmass.gui.panel_documents.config.main",
         {"mzDigits": 4, "ppmDigits": 2, "errorUnits": "ppm"},
     )
     panel = panelDocuments(parent, documents)
     panel.PopupMenu = mocker.MagicMock()
     tree = panel.documentTree
 
-    mocker.patch("gui.panel_documents.doc.document", DummyDocument)
-    mocker.patch("gui.panel_documents.mspy.sequence", DummySequence)
-    mocker.patch("gui.panel_documents.doc.annotation", DummyAnnotation)
-    mocker.patch("gui.panel_documents.doc.match", DummyMatch)
-    MockMenu = mocker.patch("gui.panel_documents.wx.Menu")
+    mocker.patch("mmass.gui.panel_documents.doc.document", DummyDocument)
+    mocker.patch("mmass.gui.panel_documents.mspy.sequence", DummySequence)
+    mocker.patch("mmass.gui.panel_documents.doc.annotation", DummyAnnotation)
+    mocker.patch("mmass.gui.panel_documents.doc.match", DummyMatch)
+    MockMenu = mocker.patch("mmass.gui.panel_documents.wx.Menu")
 
     menu = mocker.MagicMock()
     MockMenu.return_value = menu
 
-    doc_item = tree.appendDocument(doc_data)
+    tree.appendDocument(doc_data)
     annots_node = tree.getItemByData(doc_data.annotations)
     annot_item, _ = tree.GetFirstChild(annots_node)
     seq_item = tree.getItemByData(seq_data)

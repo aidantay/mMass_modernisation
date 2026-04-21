@@ -1,9 +1,9 @@
-import gui.config as config
 import pytest
 import wx
-from gui.panel_peak_differences import panelPeakDifferences
 
-import mspy
+import mmass.gui.config as config
+from mmass import mspy
+from mmass.gui.panel_peak_differences import panelPeakDifferences
 
 
 @pytest.fixture
@@ -26,8 +26,8 @@ def mock_monomers(mocker):
     m2.mass = (20.0, 22.0)
 
     monomers = {"A": m1, "B": m2, "X": mocker.Mock(category="other")}
-    mocker.patch("mspy.monomers", monomers)
-    yield monomers
+    mocker.patch("mmass.mspy.monomers", monomers)
+    return monomers
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def panel(wx_app, mock_parent, mock_monomers, mocker):
         "bgrToolbarNoBorder": wx.Bitmap(1, 1),
         "stopper": wx.Bitmap(1, 1),
     }
-    mocker.patch("gui.images.lib", mock_lib)
+    mocker.patch("mmass.gui.images.lib", mock_lib)
     p = panelPeakDifferences(mock_parent)
     yield p
     if p:
@@ -111,7 +111,7 @@ def test_set_data(panel, mocker):
 
 def test_on_processing(panel, mocker):
     mock_disabler = mocker.patch("wx.WindowDisabler", autospec=True)
-    mock_start = mocker.patch("mspy.start")
+    mock_start = mocker.patch("mmass.mspy.start")
 
     # Test status=True
     panel.onProcessing(True)
@@ -129,7 +129,7 @@ def test_on_processing(panel, mocker):
 def test_on_stop(panel, mocker):
     panel.processing = mocker.Mock()
     panel.processing.is_alive.return_value = True
-    mock_stop = mocker.patch("mspy.stop")
+    mock_stop = mocker.patch("mmass.mspy.stop")
     panel.onStop(None)
     mock_stop.assert_called_once()
 
@@ -194,7 +194,9 @@ def test_on_search_success(panel, mocker):
     panel.currentDocument = mock_doc
 
     # Mock threading.Thread to run target synchronously
-    def mock_thread_init(target=None, args=(), kwargs={}):
+    def mock_thread_init(target=None, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
         target(*args, **kwargs)
         return mocker.Mock(is_alive=lambda: False)
 
@@ -311,7 +313,7 @@ def test_run_search_success(panel, mocker):
 def test_run_search_force_quit(panel, mocker):
     panel.currentDocument = mocker.Mock()
     panel.currentDocument.spectrum.peaklist = [mocker.Mock(mz=100.0)]
-    mocker.patch("mspy.CHECK_FORCE_QUIT", side_effect=mspy.ForceQuit)
+    mocker.patch("mmass.mspy.CHECK_FORCE_QUIT", side_effect=mspy.ForceQuit)
     panel.runSearch()
     assert panel.currentDifferences == []
 
@@ -354,7 +356,9 @@ def test_on_search_no_peaklist(panel, mocker):
     mock_doc.spectrum.peaklist = None
     panel.currentDocument = mock_doc
 
-    def mock_thread_init(target=None, args=(), kwargs={}):
+    def mock_thread_init(target=None, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
         target(*args, **kwargs)
         return mocker.Mock(is_alive=lambda: False)
 

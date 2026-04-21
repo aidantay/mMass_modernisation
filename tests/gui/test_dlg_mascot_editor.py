@@ -1,8 +1,8 @@
 import pytest
 import wx
-from gui.dlg_mascot_editor import dlgMascotEditor
 
-from gui import libs, mwx
+from mmass.gui import libs, mwx
+from mmass.gui.dlg_mascot_editor import dlgMascotEditor
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def dialog_fixture(mocker, wx_app):
             "params": "paramsA",
         }
     }
-    mocker.patch.dict("gui.libs.mascot", mock_mascot, clear=True)
+    mocker.patch.dict("mmass.gui.libs.mascot", mock_mascot, clear=True)
 
     # Mock wx components to prevent actual GUI creation
     mocker.patch("wx.Dialog.__init__", return_value=None)
@@ -46,8 +46,8 @@ def dialog_fixture(mocker, wx_app):
 
     # Mock mwx components
     # We patch them in the gui.mwx module which is what's being used
-    mocker.patch("gui.mwx.sortListCtrl")
-    mocker.patch("gui.mwx.dlgMessage")
+    mocker.patch("mmass.gui.mwx.sortListCtrl")
+    mocker.patch("mmass.gui.mwx.dlgMessage")
 
     # Mock parent
     parent = mocker.Mock()
@@ -93,7 +93,7 @@ def test_dialog_initialization(dialog_fixture):
 
 def test_on_item_selected(dialog_fixture, mocker):
     """Verify that onItemSelected updates the editor with server data."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Configure the mock event object
     mock_event = mocker.Mock()
@@ -114,7 +114,7 @@ def test_on_item_selected(dialog_fixture, mocker):
 
 def test_on_add_item_new(dialog_fixture, mocker):
     """Verify that a new server can be added."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Mock getItemData to return new server data
     new_server_data = {
@@ -147,7 +147,7 @@ def test_on_add_item_new(dialog_fixture, mocker):
 
 def test_on_add_item_replace_confirm(dialog_fixture, mocker):
     """Verify that an existing server can be replaced after confirmation."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Mock getItemData to return updated server data for 'Server A'
     updated_server_data = {
@@ -166,7 +166,7 @@ def test_on_add_item_replace_confirm(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to confirm replacement
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_OK
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Call onAddItem
     dialog.onAddItem(None)
@@ -181,7 +181,7 @@ def test_on_add_item_replace_confirm(dialog_fixture, mocker):
 
 def test_on_add_item_replace_cancel(dialog_fixture, mocker):
     """Verify that replacement can be canceled."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     original_data = libs.mascot["Server A"].copy()
 
@@ -195,7 +195,7 @@ def test_on_add_item_replace_cancel(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to cancel replacement
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Call onAddItem
     dialog.onAddItem(None)
@@ -209,7 +209,7 @@ def test_on_add_item_replace_cancel(dialog_fixture, mocker):
 
 def test_on_add_item_invalid_data(dialog_fixture, mocker):
     """Verify that invalid data (missing required fields) is handled."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     initial_count = len(libs.mascot)
 
@@ -225,7 +225,7 @@ def test_on_add_item_invalid_data(dialog_fixture, mocker):
 
 def test_on_delete_item_confirm(dialog_fixture, mocker):
     """Verify that selected items are deleted after confirmation."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Ensure 'Server A' is in libs.mascot
     assert "Server A" in libs.mascot
@@ -239,7 +239,7 @@ def test_on_delete_item_confirm(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to confirm deletion
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_OK
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Spy on clearEditor
     mocker.spy(dialog, "clearEditor")
@@ -260,7 +260,7 @@ def test_on_delete_item_confirm(dialog_fixture, mocker):
 
 def test_on_delete_item_cancel(dialog_fixture, mocker):
     """Verify that deletion can be canceled."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Ensure 'Server A' is in libs.mascot
     assert "Server A" in libs.mascot
@@ -271,7 +271,7 @@ def test_on_delete_item_cancel(dialog_fixture, mocker):
     # Mock mwx.dlgMessage to cancel deletion
     mock_dlg = mocker.Mock()
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
-    mocker.patch("gui.mwx.dlgMessage", return_value=mock_dlg)
+    mocker.patch("mmass.gui.mwx.dlgMessage", return_value=mock_dlg)
 
     # Call onDeleteItem
     dialog.onDeleteItem(None)
@@ -288,7 +288,7 @@ def test_on_delete_item_cancel(dialog_fixture, mocker):
 
 def test_clear_editor(dialog_fixture):
     """Verify that clearEditor resets the editor fields."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Call clearEditor
     dialog.clearEditor()
@@ -305,7 +305,7 @@ def test_clear_editor(dialog_fixture):
 
 def test_get_item_data_success(dialog_fixture):
     """Verify that getItemData returns correct server data when all fields are valid."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Set return values for GetValue mocks
     dialog.itemName_value.GetValue.return_value = "New Server"
@@ -333,7 +333,7 @@ def test_get_item_data_success(dialog_fixture):
 
 def test_get_item_data_fail(dialog_fixture):
     """Verify that getItemData returns False and rings bell when a field is empty."""
-    dialog, parent = dialog_fixture
+    dialog, _parent = dialog_fixture
 
     # Set one GetValue mock to return an empty string
     dialog.itemName_value.GetValue.return_value = ""

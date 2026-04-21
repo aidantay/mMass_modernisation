@@ -1,11 +1,17 @@
 import pytest
 import wx
-from gui.panel_peaklist import dlgCopy, dlgThreshold, fileDropTarget, panelPeaklist
+
+from mmass.gui.panel_peaklist import (
+    dlgCopy,
+    dlgThreshold,
+    fileDropTarget,
+    panelPeaklist,
+)
 
 
 @pytest.fixture
 def mock_config(mocker):
-    mock_conf = mocker.patch("gui.panel_peaklist.config")
+    mock_conf = mocker.patch("mmass.gui.panel_peaklist.config")
     mock_conf.main = {
         "peaklistColumns": ["mz", "ai", "sn", "z"],
         "mzDigits": 4,
@@ -17,7 +23,7 @@ def mock_config(mocker):
 
 @pytest.fixture
 def mock_images(mocker):
-    mock_img = mocker.patch("gui.panel_peaklist.images")
+    mock_img = mocker.patch("mmass.gui.panel_peaklist.images")
     mock_img.lib = {
         "bgrBottombar": wx.Bitmap(1, 1),
         "peaklistAdd": wx.Bitmap(1, 1),
@@ -32,12 +38,12 @@ def mock_images(mocker):
 
 @pytest.fixture
 def mock_mspy(mocker):
-    return mocker.patch("gui.panel_peaklist.mspy")
+    return mocker.patch("mmass.gui.panel_peaklist.mspy")
 
 
 @pytest.fixture
 def mock_doc(mocker):
-    return mocker.patch("gui.panel_peaklist.doc")
+    return mocker.patch("mmass.gui.panel_peaklist.doc")
 
 
 @pytest.fixture
@@ -127,7 +133,7 @@ def test_dlgThreshold_onDelete_valid(real_parent, mocker):
 def test_dlgThreshold_onDelete_invalid(real_parent, mocker):
     dlg = dlgThreshold(real_parent)
     dlg.threshold = None
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     mock_end_modal = mocker.patch.object(dlg, "EndModal")
 
     dlg.onDelete(None)
@@ -467,7 +473,7 @@ def test_panelPeaklist_onAdd(real_parent, mock_config, mock_images, mocker):
     panel = panelPeaklist(real_parent)
 
     # Test with no document
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onAdd(None)
     mock_bell.assert_called_once()
 
@@ -506,7 +512,7 @@ def test_panelPeaklist_onDeleteSelected(real_parent, mock_config, mock_images, m
     panel = panelPeaklist(real_parent)
 
     # Test with no document
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onDeleteSelected(None)
     mock_bell.assert_called_once()
 
@@ -532,7 +538,7 @@ def test_panelPeaklist_onDeleteAll(real_parent, mock_config, mock_images, mocker
     panel = panelPeaklist(real_parent)
 
     # Test with no document
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onDeleteAll(None)
     mock_bell.assert_called_once()
 
@@ -555,7 +561,7 @@ def test_panelPeaklist_onDeleteByThreshold(
     panel = panelPeaklist(real_parent)
 
     # Test with no document
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onDeleteByThreshold(None)
     mock_bell.assert_called_once()
 
@@ -588,7 +594,7 @@ def test_panelPeaklist_onDeleteByThreshold(
     panel.currentDocument = mock_document
 
     # Mock dlgThreshold
-    mock_dlg_cls = mocker.patch("gui.panel_peaklist.dlgThreshold")
+    mock_dlg_cls = mocker.patch("mmass.gui.panel_peaklist.dlgThreshold")
     mock_dlg = mock_dlg_cls.return_value
     mock_dlg.ShowModal.return_value = wx.ID_OK
 
@@ -662,7 +668,7 @@ def test_panelPeaklist_getPeakEditorData_invalid(
     real_parent, mock_config, mock_images, mocker
 ):
     panel = panelPeaklist(real_parent)
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
 
     # Non-float in mz
     panel.peakMz_value.SetValue("invalid")
@@ -683,7 +689,7 @@ def test_panelPeaklist_onAddPeak(real_parent, mock_config, mock_images, mocker):
     panel = panelPeaklist(real_parent)
 
     # No document
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onAddPeak(None)
     mock_bell.assert_called_once()
 
@@ -709,7 +715,7 @@ def test_panelPeaklist_onReplacePeak(real_parent, mock_config, mock_images, mock
     panel = panelPeaklist(real_parent)
 
     # No selection
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onReplacePeak(None)
     mock_bell.assert_called_once()
 
@@ -741,7 +747,7 @@ def test_panelPeaklist_onAnnotate(
     panel = panelPeaklist(real_parent)
 
     # No document or selection
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onAnnotate()
     mock_bell.assert_called_once()
 
@@ -757,7 +763,7 @@ def test_panelPeaklist_onAnnotate(
     panel.selectedPeak = 0
 
     # Mock dlgNotation
-    mock_dlg_cls = mocker.patch("gui.panel_peaklist.dlgNotation")
+    mock_dlg_cls = mocker.patch("mmass.gui.panel_peaklist.dlgNotation")
     mock_dlg = mock_dlg_cls.return_value
     mock_dlg.ShowModal.return_value = wx.ID_OK
 
@@ -787,7 +793,7 @@ def test_panelPeaklist_onItemRMU(real_parent, mock_config, mock_images, mocker):
     panel.currentDocument = mocker.Mock()
     panel.selectedPeak = 0
 
-    mock_menu_cls = mocker.patch("gui.panel_peaklist.wx.Menu")
+    mock_menu_cls = mocker.patch("mmass.gui.panel_peaklist.wx.Menu")
     mock_popup = mocker.patch.object(panel, "PopupMenu")
 
     panel.onItemRMU(mocker.Mock())
@@ -801,7 +807,7 @@ def test_panelPeaklist_onItemRMU(real_parent, mock_config, mock_images, mocker):
 def test_panelPeaklist_onColumnRMU(real_parent, mock_config, mock_images, mocker):
     panel = panelPeaklist(real_parent)
 
-    mock_menu_cls = mocker.patch("gui.panel_peaklist.wx.Menu")
+    mock_menu_cls = mocker.patch("mmass.gui.panel_peaklist.wx.Menu")
     mock_popup = mocker.patch.object(panel, "PopupMenu")
 
     panel.onColumnRMU(mocker.Mock())
@@ -818,7 +824,7 @@ def test_panelPeaklist_onSendToMassToFormula(
     panel = panelPeaklist(real_parent)
 
     # No document or selection
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onSendToMassToFormula()
     mock_bell.assert_called_once()
 
@@ -866,7 +872,7 @@ def test_panelPeaklist_copyToClipboard(real_parent, mock_config, mock_images, mo
     panel.currentDocument = mock_document
 
     # Mock dlgCopy
-    mock_dlg_cls = mocker.patch("gui.panel_peaklist.dlgCopy")
+    mock_dlg_cls = mocker.patch("mmass.gui.panel_peaklist.dlgCopy")
     mock_dlg = mock_dlg_cls.return_value
     mock_dlg.ShowModal.return_value = wx.ID_OK
 
@@ -886,10 +892,10 @@ def test_panelPeaklist_copyToClipboard(real_parent, mock_config, mock_images, mo
     ]
 
     # Mock Clipboard
-    mock_clipboard = mocker.patch("gui.panel_peaklist.wx.TheClipboard")
+    mock_clipboard = mocker.patch("mmass.gui.panel_peaklist.wx.TheClipboard")
     mock_clipboard.Open.return_value = True
 
-    mock_data_obj_cls = mocker.patch("gui.panel_peaklist.wx.TextDataObject")
+    mock_data_obj_cls = mocker.patch("mmass.gui.panel_peaklist.wx.TextDataObject")
     mock_data_obj = mock_data_obj_cls.return_value
 
     panel.copyToClipboard()
@@ -949,7 +955,7 @@ def test_panelPeaklist_onAnnotate_cancel(
     panel.selectedPeak = 0
 
     # Mock dlgNotation
-    mock_dlg_cls = mocker.patch("gui.panel_peaklist.dlgNotation")
+    mock_dlg_cls = mocker.patch("mmass.gui.panel_peaklist.dlgNotation")
     mock_dlg = mock_dlg_cls.return_value
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
 
@@ -966,7 +972,7 @@ def test_panelPeaklist_onDeleteByThreshold_cancel(
     panel.currentDocument = mocker.Mock()
 
     # Mock dlgThreshold
-    mock_dlg_cls = mocker.patch("gui.panel_peaklist.dlgThreshold")
+    mock_dlg_cls = mocker.patch("mmass.gui.panel_peaklist.dlgThreshold")
     mock_dlg = mock_dlg_cls.return_value
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
 
@@ -983,12 +989,12 @@ def test_panelPeaklist_copyToClipboard_cancel(
     mocker.patch.object(panel.peakList, "getSelected", return_value=[0])
 
     # Mock dlgCopy
-    mock_dlg_cls = mocker.patch("gui.panel_peaklist.dlgCopy")
+    mock_dlg_cls = mocker.patch("mmass.gui.panel_peaklist.dlgCopy")
     mock_dlg = mock_dlg_cls.return_value
     mock_dlg.ShowModal.return_value = wx.ID_CANCEL
 
     # Mock Clipboard to ensure it is not opened
-    mock_clipboard = mocker.patch("gui.panel_peaklist.wx.TheClipboard")
+    mock_clipboard = mocker.patch("mmass.gui.panel_peaklist.wx.TheClipboard")
 
     panel.copyToClipboard()
 
@@ -1018,13 +1024,13 @@ def test_panelPeaklist_onDelete(real_parent, mock_config, mock_images, mocker):
     panel = panelPeaklist(real_parent)
 
     # No document
-    mock_bell = mocker.patch("gui.panel_peaklist.wx.Bell")
+    mock_bell = mocker.patch("mmass.gui.panel_peaklist.wx.Bell")
     panel.onDelete(None)
     mock_bell.assert_called_once()
 
     # With document
     panel.currentDocument = mocker.Mock()
-    mock_menu_cls = mocker.patch("gui.panel_peaklist.wx.Menu")
+    mock_menu_cls = mocker.patch("mmass.gui.panel_peaklist.wx.Menu")
     mock_popup = mocker.patch.object(panel, "PopupMenu")
 
     panel.onDelete(None)

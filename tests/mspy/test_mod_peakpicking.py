@@ -1,13 +1,14 @@
-import mspy.mod_peakpicking as mod_peakpicking
-import mspy.mod_signal as mod_signal
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_compound as obj_compound
-import mspy.obj_peak as obj_peak
-import mspy.obj_peaklist as obj_peaklist
 import numpy
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.mod_peakpicking as mod_peakpicking
+import mmass.mspy.mod_signal as mod_signal
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_compound as obj_compound
+import mmass.mspy.obj_peak as obj_peak
+import mmass.mspy.obj_peaklist as obj_peaklist
 
 
 # Module-level fixture to reset stopper state
@@ -28,8 +29,7 @@ def make_gaussian_peak(center=1000.0, width=0.5, height=1000.0, num_points=100):
     """Create a Gaussian peak signal."""
     mz_vals = numpy.linspace(center - 2 * width, center + 2 * width, num_points)
     intensity = height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
-    signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
-    return signal
+    return numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
 
 
 def make_multipeak_signal(peaks, num_points=200):
@@ -45,20 +45,18 @@ def make_multipeak_signal(peaks, num_points=200):
     for center, width, height in peaks:
         intensity += height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
 
-    signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
-    return signal
+    return numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
 
 
 def make_baseline(signal, base_level=10.0, noise_level=1.0):
     """Create a baseline array from a signal."""
-    baseline = numpy.column_stack(
+    return numpy.column_stack(
         [
             signal[:, 0],
             numpy.ones(len(signal)) * base_level,
             numpy.ones(len(signal)) * noise_level,
         ]
     ).astype(numpy.float64)
-    return baseline
 
 
 # ============================================================================
@@ -177,11 +175,11 @@ def test_labelpoint_edge_mz_value():
     signal = make_gaussian_peak(center=1000.0, width=0.5)
 
     # Very small but positive m/z
-    peak = mod_peakpicking.labelpoint(signal, 0.001)
+    mod_peakpicking.labelpoint(signal, 0.001)
     # Should handle gracefully
 
     # Very large m/z
-    peak = mod_peakpicking.labelpoint(signal, 100000.0)
+    mod_peakpicking.labelpoint(signal, 100000.0)
     # Should return None (outside signal range)
 
 
@@ -284,7 +282,7 @@ def test_labelpeak_boundary_indices():
     """Test labelpeak when peak is at signal boundary (LPK-B10)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5)
     # Try to label at extreme positions
-    peak = mod_peakpicking.labelpeak(signal, minX=signal[0][0], maxX=signal[1][0])
+    mod_peakpicking.labelpeak(signal, minX=signal[0][0], maxX=signal[1][0])
 
 
 def test_labelpeak_recursive_call():
@@ -983,7 +981,7 @@ def test_envcentroid_isotopes_with_zero_intensity():
     ]
     peaklist = obj_peaklist.peaklist(peaks)
 
-    result = mod_peakpicking.envcentroid(peaklist)
+    mod_peakpicking.envcentroid(peaklist)
     # Should handle gracefully
 
 
@@ -1011,7 +1009,7 @@ def test_labelscan_force_quit_in_centroiding(reset_stopper):
     mod_stopper.stop()
 
     try:
-        peaklist = mod_peakpicking.labelscan(signal, pickingHeight=0.75)
+        mod_peakpicking.labelscan(signal, pickingHeight=0.75)
         # May raise ForceQuit
     except mod_stopper.ForceQuit:
         pass  # Expected
@@ -1049,7 +1047,7 @@ def test_deconvolute_force_quit(reset_stopper):
     mod_stopper.stop()
 
     try:
-        result = mod_peakpicking.deconvolute(peaklist)
+        mod_peakpicking.deconvolute(peaklist)
         # May raise ForceQuit
     except mod_stopper.ForceQuit:
         pass  # Expected
@@ -1086,7 +1084,7 @@ def test_labelpeak_range_mode_overlaps_boundary():
     """Test labelpeak range mode when centroid overlaps signal boundary (LPK-B10)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
     # Use a range that forces indexing to boundary
-    peak = mod_peakpicking.labelpeak(signal, minX=signal[0][0], maxX=signal[-1][0])
+    mod_peakpicking.labelpeak(signal, minX=signal[0][0], maxX=signal[-1][0])
     # Should handle boundary conditions
 
 
@@ -1256,7 +1254,7 @@ def test_labelpeak_exact_mz_with_range_recursive():
 def test_labelpeak_range_exceeds_boundary():
     """Test labelpeak range exceeds signal boundaries (LPK-B15)."""
     signal = make_gaussian_peak(center=1000.0, width=0.5, height=1000.0)
-    peak = mod_peakpicking.labelpeak(
+    mod_peakpicking.labelpeak(
         signal, minX=signal[0][0] - 10, maxX=signal[-1][0] + 10, pickingHeight=0.75
     )
     # Should handle gracefully
@@ -1333,7 +1331,7 @@ def test_labelpoint_intensity_equals_baseline():
     )
 
     # Call labelpoint - should return None due to flat signal (ai <= base after noise calculation)
-    peak = mod_peakpicking.labelpoint(signal, 1000.0)
+    mod_peakpicking.labelpoint(signal, 1000.0)
     # Peak may be None if the noise-based baseline calculation results in ai <= base
     # This tests the unreachable line 96 path (needs signal design where ai <= base)
 

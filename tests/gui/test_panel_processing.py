@@ -6,11 +6,10 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = 0
 
-from gui.ids import *
-from gui.panel_processing import dlgPresetsName, panelProcessing
-
-import mspy
-from gui import config, doc, libs
+from mmass import mspy
+from mmass.gui import config, doc, libs
+from mmass.gui.ids import *
+from mmass.gui.panel_processing import dlgPresetsName, panelProcessing
 
 
 @pytest.fixture
@@ -69,8 +68,8 @@ def mock_images(mocker):
     mock_lib = mocker.MagicMock()
     mock_lib.__getitem__.return_value = wx.Bitmap(1, 1)
     # Patch in multiple places to ensure coverage
-    mocker.patch("gui.images.lib", mock_lib)
-    from gui import images as img_mod
+    mocker.patch("mmass.gui.images.lib", mock_lib)
+    from mmass.gui import images as img_mod
 
     img_mod.lib = mock_lib
     return mock_lib
@@ -102,8 +101,8 @@ def panel(mock_parent, mock_config, mock_images, mocker):
     # Mock Slider.SetTickFreq because it might have incompatible signature in some wx versions
     mocker.patch("wx.Slider.SetTickFreq")
 
-    mocker.patch("mspy.start")
-    mocker.patch("mspy.stop")
+    mocker.patch("mmass.mspy.start")
+    mocker.patch("mmass.mspy.stop")
     p = panelProcessing(mock_parent)
     yield p
     if p:
@@ -117,23 +116,26 @@ def test_init(panel):
     assert panel.currentDocument is None
 
 
-def test_onToolSelected(panel, mock_images):
+def test_onToolSelected(panel, mock_images, mocker):
     """Test switching between tools."""
+    import mmass.gui.panel_processing as mod
+
     tools = [
-        (ID_processingMath, "Math Operations"),
-        (ID_processingCrop, "Crop"),
-        (ID_processingBaseline, "Baseline Correction"),
-        (ID_processingSmoothing, "Smoothing"),
-        (ID_processingPeakpicking, "Peak Picking"),
-        (ID_processingDeisotoping, "Deisotoping"),
-        (ID_processingDeconvolution, "Deconvolution"),
-        (ID_processingBatch, "Batch Processing"),
+        ("ID_processingMath", "math"),
+        ("ID_processingCrop", "crop"),
+        ("ID_processingBaseline", "baseline"),
+        ("ID_processingSmoothing", "smoothing"),
+        ("ID_processingPeakpicking", "peakpicking"),
+        ("ID_processingDeisotoping", "deisotoping"),
+        ("ID_processingDeconvolution", "deconvolution"),
+        ("ID_processingBatch", "batch"),
     ]
 
-    for tool_id, expected_title in tools:
-        evt = wx.CommandEvent(wx.EVT_BUTTON.typeId, tool_id)
+    for id_name, tool_str in tools:
+        real_id = getattr(mod, id_name)
+        evt = wx.CommandEvent(wx.EVT_BUTTON.typeId, int(real_id))
         panel.onToolSelected(evt)
-        assert panel.GetTitle() == expected_title
+        assert panel.currentTool == tool_str
 
 
 def test_onClose(panel, mocker):
@@ -356,11 +358,11 @@ def test_onPresetsSelected(panel, mocker):
 def test_onPresetsSave(panel, mocker):
     """Test saving presets."""
     # Mock dlgPresetsName
-    mock_dlg = mocker.patch("gui.panel_processing.dlgPresetsName")
+    mock_dlg = mocker.patch("mmass.gui.panel_processing.dlgPresetsName")
     mock_dlg.return_value.ShowModal.return_value = wx.ID_OK
     mock_dlg.return_value.name = "NewPreset"
 
-    save_mock = mocker.patch("gui.libs.savePresets")
+    save_mock = mocker.patch("mmass.gui.libs.savePresets")
 
     # Ensure getParams returns True
     mocker.patch.object(panel, "getParams", return_value=True)
@@ -463,7 +465,7 @@ def test_onPreview_baseline(panel, mocker, sync_thread):
     doc_obj.spectrum.baseline.return_value = numpy.array([[100, 5], [200, 5]])
     panel.currentDocument = doc_obj
 
-    mocker.patch("mspy.subbase", return_value=numpy.array([[100, 5], [200, 15]]))
+    mocker.patch("mmass.mspy.subbase", return_value=numpy.array([[100, 5], [200, 15]]))
 
     panel.onPreview(None)
 
@@ -480,7 +482,7 @@ def test_onPreview_smoothing(panel, mocker, sync_thread):
     doc_obj.spectrum.profile = numpy.array([[100, 10], [200, 20]])
     panel.currentDocument = doc_obj
 
-    mocker.patch("mspy.smooth", return_value=numpy.array([[100, 11], [200, 19]]))
+    mocker.patch("mmass.mspy.smooth", return_value=numpy.array([[100, 11], [200, 19]]))
 
     panel.onPreview(None)
 
@@ -527,8 +529,12 @@ def test_onPreview_math(panel, mocker, sync_thread):
     doc_obj.spectrum.profile = numpy.array([[100, 10], [200, 20]])
     panel.currentDocument = doc_obj
 
-    mocker.patch("mspy.normalize", return_value=numpy.array([[100, 0.1], [200, 0.2]]))
-    mocker.patch("mspy.multiply", return_value=numpy.array([[100, 10], [200, 20]]))
+    mocker.patch(
+        "mmass.mspy.normalize", return_value=numpy.array([[100, 0.1], [200, 0.2]])
+    )
+    mocker.patch(
+        "mmass.mspy.multiply", return_value=numpy.array([[100, 10], [200, 20]])
+    )
 
     panel.onPreview(None)
 
@@ -732,7 +738,7 @@ def test_onApply_deconvolution(panel, mocker, sync_thread):
     panel.currentDocument = doc_obj
 
     # Mock copy.deepcopy in the module it is used
-    mocker.patch("gui.panel_processing.copy.deepcopy", return_value=doc_obj)
+    mocker.patch("mmass.gui.panel_processing.copy.deepcopy", return_value=doc_obj)
 
     panel.onApply(None)
 
@@ -820,7 +826,7 @@ def test_onStop(panel, mocker):
     panel.processing = mocker.Mock()
     panel.processing.is_alive.return_value = True
 
-    stop_mock = mocker.patch("mspy.stop")
+    stop_mock = mocker.patch("mmass.mspy.stop")
     panel.onStop(None)
     stop_mock.assert_called_once()
 
@@ -832,7 +838,7 @@ def test_checkIsotopeMassTolerance(panel, mocker):
     config.processing["deisotoping"]["massTolerance"] = 0.5
 
     # 0.5 * 10 = 5.0 > 1.0 (limit)
-    dlg_mock = mocker.patch("gui.panel_processing.mwx.dlgMessage")
+    dlg_mock = mocker.patch("mmass.gui.panel_processing.mwx.dlgMessage")
     dlg_mock.return_value.ShowModal.return_value = wx.ID_NO
     assert panel.checkIsotopeMassTolerance() is False
     dlg_mock.assert_called()
@@ -846,7 +852,7 @@ def test_checkChargedPeaks(panel, mocker):
     doc_obj.spectrum.peaklist = [peak]
     panel.currentDocument = doc_obj
 
-    dlg_mock = mocker.patch("gui.panel_processing.mwx.dlgMessage")
+    dlg_mock = mocker.patch("mmass.gui.panel_processing.mwx.dlgMessage")
     dlg_mock.return_value.ShowModal.return_value = wx.ID_OK
     assert panel.checkChargedPeaks() is False  # returns False because no charged peaks
     dlg_mock.assert_called()

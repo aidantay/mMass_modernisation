@@ -1,7 +1,10 @@
-import gui.config as config
+import contextlib
+
 import pytest
 import wx
-from gui.panel_mass_defect_plot import panelMassDefectPlot
+
+import mmass.gui.config as config
+from mmass.gui.panel_mass_defect_plot import panelMassDefectPlot
 
 
 @pytest.fixture
@@ -17,18 +20,16 @@ def mock_parent(wx_app):
 def panel(wx_app, mock_parent, mocker):
     """Fixture to provide a panelMassDefectPlot instance."""
     # Mock canvas methods that cause issues in headless/unrealized state
-    mocker.patch("mspy.plot_canvas.canvas.onSize", return_value=None)
-    mocker.patch("mspy.plot_canvas.canvas.draw", return_value=None)
+    mocker.patch("mmass.mspy.plot_canvas.canvas.onSize", return_value=None)
+    mocker.patch("mmass.mspy.plot_canvas.canvas.draw", return_value=None)
     p = panelMassDefectPlot(mock_parent)
     # Ensure plotBuffer exists because canvas expects it
     p.plotCanvas.plotBuffer = wx.Bitmap(1, 1)
     p.plotCanvas.lastDraw = None
     yield p
     if p:
-        try:
+        with contextlib.suppress(BaseException):
             p.Destroy()
-        except:
-            pass
 
 
 def test_initialization(panel):
@@ -80,7 +81,7 @@ def test_initialization(panel):
         config.massDefectPlot["showNotations"]
     )
     assert (
-        panel.showAllDocuments_check.GetValue() == False
+        not panel.showAllDocuments_check.GetValue()
     )  # Hardcoded to False in makeControlbar
 
 

@@ -1,5 +1,9 @@
 import pytest
-import wx
+
+try:
+    import wx
+except ImportError:
+    import tests.gui.dummy_wx as wx
 
 
 @pytest.fixture(scope="session")
@@ -10,7 +14,7 @@ def wx_app():
     app = wx.App(False)
 
     # Initialize images
-    from gui import images
+    from mmass.gui import images
 
     try:
         # Patch wx.Image.SetOptionInt if it's missing (happens in some wx versions)
@@ -38,7 +42,7 @@ def wx_app():
             if key not in images.lib:
                 images.lib[key] = dummy_bitmap
 
-    yield app
+    return app
     # wx.App objects are cleaned up by the Python garbage collector
     # and don't typically require explicit termination in unit tests.
 

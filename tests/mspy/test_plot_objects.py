@@ -7,10 +7,11 @@ import numpy
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
-from mspy.obj_peak import peak
-from mspy.obj_peaklist import peaklist
-from mspy.obj_scan import scan
-from mspy.plot_objects import (
+
+from mmass.mspy.obj_peak import peak
+from mmass.mspy.obj_peaklist import peaklist
+from mmass.mspy.obj_scan import scan
+from mmass.mspy.plot_objects import (
     _filterPoints,
     _scaleAndShift,
     _scaleFont,
@@ -27,8 +28,7 @@ from mspy.plot_objects import (
 @pytest.fixture(scope="session")
 def wx_app():
     """Session-scoped fixture to initialize wx.App for headless UI testing."""
-    app = wx.App(False)
-    yield app
+    return wx.App(False)
 
 
 # DATA FIXTURES
@@ -145,7 +145,7 @@ class TestScaleFont:
         assert scaled_font.GetFamily() in (wx.SWISS, wx.FONTFAMILY_SWISS, 70, 74)
         assert scaled_font.GetStyle() == wx.FONTSTYLE_ITALIC
         assert scaled_font.GetWeight() == wx.FONTWEIGHT_BOLD
-        assert scaled_font.GetUnderlined() == True
+        assert scaled_font.GetUnderlined()
         assert scaled_font.GetFaceName() == "Arial"
 
     def test_scaleFont_no_face(self, wx_app):
@@ -435,7 +435,8 @@ class TestContainer:
         cont = container([spec])
         bbox = cont.getBoundingBox()
         # Should return default bbox
-        assert bbox[0][0] == 0 and bbox[1][0] == 1
+        assert bbox[0][0] == 0
+        assert bbox[1][0] == 1
 
     def test_container_getBoundingBox_equal_x_padding(self, simple_scan):
         """Test getBoundingBox adds padding when min==max X."""
@@ -553,22 +554,22 @@ class TestContainer:
         """Test _checkFreeSpace with left-to-right label (curX1 < curX2)."""
         cont = container([])
         # Non-overlapping labels (curY2 < curY1)
-        assert cont._checkFreeSpace((10, 40, 30, 20), []) == True
+        assert cont._checkFreeSpace((10, 40, 30, 20), [])
         # Overlapping in X and Y (curY2 < curY1, occY2 < occY1)
-        assert cont._checkFreeSpace((10, 40, 30, 20), [(15, 35, 25, 25)]) == False
+        assert not cont._checkFreeSpace((10, 40, 30, 20), [(15, 35, 25, 25)])
 
     def test_container_checkFreeSpace_right_to_left(self):
         """Test _checkFreeSpace with right-to-left label (curX1 > curX2)."""
         cont = container([])
         # Non-overlapping labels (curX1 > curX2, curY1 > curY2)
-        assert cont._checkFreeSpace((30, 40, 10, 20), []) == True
+        assert cont._checkFreeSpace((30, 40, 10, 20), [])
         # Overlapping when flipped (occX2 < occX1, occY1 < occY2)
-        assert cont._checkFreeSpace((20, 40, 10, 20), [(25, 25, 15, 35)]) == False
+        assert not cont._checkFreeSpace((20, 40, 10, 20), [(25, 25, 15, 35)])
 
     def test_container_checkFreeSpace_no_overlap_y(self):
         """Test _checkFreeSpace with no Y overlap."""
         cont = container([])
-        assert cont._checkFreeSpace((10, 20, 30, 25), [(10, 50, 30, 60)]) == True
+        assert cont._checkFreeSpace((10, 20, 30, 25), [(10, 50, 30, 60)])
 
     def test_container_draw_reverse_logic(
         self, simple_scan, mock_dc, default_printer_scale
@@ -595,7 +596,8 @@ class TestContainer:
         # Test with infinite/invalid rect (simulated)
         # We need a real object but with a mock getBoundingBox
         class MockObj:
-            properties = {"visible": True}
+            def __init__(self):
+                self.properties = {"visible": True}
 
             def getBoundingBox(self, *args, **kwargs):
                 return [numpy.array([float("inf"), 0]), numpy.array([1, 1])]
@@ -683,14 +685,14 @@ class TestAnnotations:
         """Test annotations properties dictionary."""
         annot = annotations(simple_annotations_data)
         assert "visible" in annot.properties
-        assert annot.properties["visible"] == True
+        assert annot.properties["visible"]
 
     def test_annotations_setProperties(self, simple_annotations_data):
         """Test setProperties method."""
         annot = annotations(simple_annotations_data)
         annot.setProperties(visible=False, showPoints=False)
-        assert annot.properties["visible"] == False
-        assert annot.properties["showPoints"] == False
+        assert not annot.properties["visible"]
+        assert not annot.properties["showPoints"]
 
     def test_annotations_setNormalization(self, simple_annotations_data):
         """Test setNormalization method."""
@@ -710,7 +712,7 @@ class TestAnnotations:
     def test_annotations_getBoundingBox_empty(self):
         """Test getBoundingBox with empty annotations."""
         annot = annotations([])
-        assert annot.getBoundingBox() == False
+        assert not annot.getBoundingBox()
 
     def test_annotations_getBoundingBox_angles(self, simple_annotations_data):
         """Test getBoundingBox with different angles to hit branches."""
@@ -719,12 +721,12 @@ class TestAnnotations:
                 simple_annotations_data, labelAngle=angle, showLabels=True
             )
             bbox = annot.getBoundingBox()
-            assert bbox != False
+            assert bbox
 
         # Test showLabels=False
         annot = annotations(simple_annotations_data, showLabels=False)
         bbox = annot.getBoundingBox()
-        assert bbox != False
+        assert bbox
 
     def test_annotations_getBoundingBox_with_offset(self, simple_annotations_data):
         """Test getBoundingBox applies xOffset and yOffset."""
@@ -749,14 +751,14 @@ class TestAnnotations:
         annot = annotations(simple_annotations_data)
         annot.cropPoints(0, 1)  # No points in this range
         # It still returns full bbox because self.points is not empty
-        assert annot.getBoundingBox() != False
+        assert annot.getBoundingBox()
 
     def test_annotations_getBoundingBox_hidden(self, simple_annotations_data):
         """Test getBoundingBox when visible is False."""
         annot = annotations(simple_annotations_data)
         annot.properties["visible"] = False
         # It still returns bbox because getBoundingBox doesn't check visible
-        assert annot.getBoundingBox() != False
+        assert annot.getBoundingBox()
 
     def test_annotations_getBoundingBox_flipped(self, simple_annotations_data):
         """Test getBoundingBox with flipped=True."""
@@ -880,14 +882,14 @@ class TestPoints:
         """Test points properties."""
         pts = points(simple_points_data, legend="Test Series")
         assert pts.properties["legend"] == "Test Series"
-        assert pts.properties["showLines"] == True
+        assert pts.properties["showLines"]
 
     def test_points_setProperties(self, simple_points_data):
         """Test setProperties method."""
         pts = points(simple_points_data)
         pts.setProperties(legend="Updated", showLines=False)
         assert pts.properties["legend"] == "Updated"
-        assert pts.properties["showLines"] == False
+        assert not pts.properties["showLines"]
 
     def test_points_normalization(self, simple_points_data):
         """Test normalization calculation."""
@@ -897,31 +899,31 @@ class TestPoints:
     def test_points_getBoundingBox_empty(self):
         """Test getBoundingBox with empty points."""
         pts = points([])
-        assert pts.getBoundingBox() == False
+        assert not pts.getBoundingBox()
 
     def test_points_getBoundingBox_basic(self, simple_points_data):
         """Test getBoundingBox with data."""
         pts = points(simple_points_data)
         bbox = pts.getBoundingBox()
-        assert bbox != False
+        assert bbox
 
     def test_points_getBoundingBox_combinations(self, simple_points_data):
         """Test points.getBoundingBox with various options."""
         # exactFit=True
         pts = points(simple_points_data, exactFit=True)
-        assert pts.getBoundingBox() != False
+        assert pts.getBoundingBox()
 
         # absolute=True
         pts = points(simple_points_data)
-        assert pts.getBoundingBox(absolute=True) != False
+        assert pts.getBoundingBox(absolute=True)
 
         # normalized=True
         pts = points(simple_points_data, normalized=True)
-        assert pts.getBoundingBox() != False
+        assert pts.getBoundingBox()
 
         # flipped=True
         pts = points(simple_points_data, flipped=True)
-        assert pts.getBoundingBox() != False
+        assert pts.getBoundingBox()
 
     def test_points_getLegend(self, simple_points_data):
         """Test getLegend returns legend with colour."""
@@ -1045,14 +1047,14 @@ class TestSpectrum:
         """Test spectrum properties."""
         spec = spectrum(simple_scan, legend="Test MS")
         assert spec.properties["legend"] == "Test MS"
-        assert spec.properties["showSpectrum"] == True
+        assert spec.properties["showSpectrum"]
 
     def test_spectrum_setProperties(self, simple_scan):
         """Test setProperties method."""
         spec = spectrum(simple_scan)
         spec.setProperties(legend="Updated", visible=False)
         assert spec.properties["legend"] == "Updated"
-        assert spec.properties["visible"] == False
+        assert not spec.properties["visible"]
 
     def test_spectrum_normalization(
         self, simple_scan, profile_only_scan, peaklist_only_scan, empty_scan
@@ -1071,7 +1073,7 @@ class TestSpectrum:
         """Test getBoundingBox with empty spectrum."""
         spec = spectrum(empty_scan)
         bbox = spec.getBoundingBox()
-        assert bbox == False
+        assert not bbox
 
     def test_spectrum_getBoundingBox_with_spectrum(self, simple_scan):
         """Test getBoundingBox with spectrum data."""
@@ -1098,10 +1100,10 @@ class TestSpectrum:
         spec = spectrum(simple_scan, showLabels=True)
         # angle 0
         spec.properties["labelAngle"] = 0
-        assert spec.getBoundingBox() != False
+        assert spec.getBoundingBox()
         # angle 90
         spec.properties["labelAngle"] = 90
-        assert spec.getBoundingBox() != False
+        assert spec.getBoundingBox()
 
     def test_spectrum_getBoundingBox_combinations(self, simple_scan):
         """Test combinations of showSpectrum, showLabels, showTicks."""
@@ -1109,34 +1111,34 @@ class TestSpectrum:
         spec = spectrum(
             simple_scan, showSpectrum=True, showLabels=False, showTicks=False
         )
-        assert spec.getBoundingBox() != False
+        assert spec.getBoundingBox()
 
         # showSpectrum=False, others True
         spec = spectrum(
             simple_scan, showSpectrum=False, showLabels=True, showTicks=True
         )
-        assert spec.getBoundingBox() != False
+        assert spec.getBoundingBox()
 
         # All False
         spec = spectrum(
             simple_scan, showSpectrum=False, showLabels=False, showTicks=False
         )
-        assert spec.getBoundingBox() == False
+        assert not spec.getBoundingBox()
 
         # Absolute=True
         spec = spectrum(simple_scan, showSpectrum=True)
-        assert spec.getBoundingBox(absolute=True) != False
+        assert spec.getBoundingBox(absolute=True)
 
     def test_container_getBoundingBox_edge_cases(self, simple_scan):
         """Test container.getBoundingBox edge cases."""
         # 1 visible object
         spec = spectrum(simple_scan)
         cont = container([spec])
-        assert cont.getBoundingBox() != False
+        assert cont.getBoundingBox()
 
         # 0 visible objects (already tested but being sure)
         spec.properties["visible"] = False
-        assert cont.getBoundingBox() != False
+        assert cont.getBoundingBox()
 
     def test_spectrum_getLegend_spectrum(self, simple_scan):
         """Test getLegend returns spectrum colour when showSpectrum=True."""
@@ -1247,23 +1249,23 @@ class TestSpectrum:
         # showSpectrum=True, showLabels=False
         spec.properties["showSpectrum"] = True
         spec.properties["showLabels"] = False
-        bbox = spec.getBoundingBox()
+        spec.getBoundingBox()
 
         # showSpectrum=False, showLabels=True
         spec.properties["showSpectrum"] = False
         spec.properties["showLabels"] = True
         spec.properties["labelAngle"] = 0
-        bbox = spec.getBoundingBox()
+        spec.getBoundingBox()
         spec.properties["labelAngle"] = 90
-        bbox = spec.getBoundingBox()
+        spec.getBoundingBox()
 
         # flipped and normalized
         spec.properties["flipped"] = True
         spec.properties["normalized"] = True
-        bbox = spec.getBoundingBox()
+        spec.getBoundingBox()
 
         # minX, maxX
-        bbox = spec.getBoundingBox(minX=100.5, maxX=101.5)
+        spec.getBoundingBox(minX=100.5, maxX=101.5)
 
     def test_spectrum_getLegend_advanced(self, simple_scan):
         """Test spectrum.getLegend with various options."""
@@ -1290,7 +1292,7 @@ class TestSpectrum:
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         spec.draw(mock_dc, default_printer_scale)
 
-    def test_spectrum_makeLabels_variants(
+    def test_spectrum_makeLabels_variants_exhaustive(
         self, simple_scan, mock_dc, default_printer_scale
     ):
         """Test spectrum.makeLabels with angle 0 and flipped branches."""
@@ -1391,7 +1393,7 @@ class TestSpectrum:
         spec.scaleAndShift((1.0, 1.0), (0.0, 0.0))
         gelCoords = [0, 10, 100, 100, 100, 100]  # plotY1 == plotY2 (indices 2 and 4)
         result = spec._drawSpectrumGel(mock_dc, gelCoords, 50, default_printer_scale)
-        assert result == False
+        assert not result
 
     def test_spectrum_overflow_handling(
         self, simple_scan, mocker, default_printer_scale
@@ -1483,7 +1485,7 @@ class TestIntegration:
         cont.scaleAndShift((1.0, 1.0), (0.0, 0.0))
 
         # Get legend
-        legend = cont.getLegend()
+        cont.getLegend()
 
         # Draw
         cont.draw(mock_dc, default_printer_scale, False, False)

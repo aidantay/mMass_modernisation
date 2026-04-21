@@ -2,11 +2,12 @@ import os
 import shutil
 import tempfile
 
-import mspy.mod_stopper as mod_stopper
-import mspy.mod_utils as mod_utils
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.mod_utils as mod_utils
 
 # ============================================================================
 # FIXTURES
@@ -101,7 +102,7 @@ class TestLoad:
             f.write("100.0\t1000.0\n")
             f.write("200.0\t2000.0\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -120,7 +121,7 @@ class TestLoad:
         with open(asc_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -140,7 +141,7 @@ class TestLoad:
                 '<?xml version="1.0"?>\n<mzData xmlns="http://psi.hupo.org/ms/mzdata">\n'
             )
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZDATA")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZDATA")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -160,7 +161,7 @@ class TestLoad:
                 '<?xml version="1.0"?>\n<mzXML xmlns="http://sashimi.sourceforge.net/schema_revision">\n'
             )
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZXML")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZXML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -180,7 +181,7 @@ class TestLoad:
                 '<?xml version="1.0"?>\n<mzML xmlns="http://psi.hupo.org/ms/mzml">\n'
             )
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZML")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -218,7 +219,7 @@ class TestLoad:
         with open(xy_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
@@ -235,13 +236,13 @@ class TestLoad:
         with open(mzdata_path, "w") as f:
             f.write("<mzData></mzData>")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZDATA")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZDATA")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(mzdata_path, scanID=42)
+        mod_utils.load(mzdata_path, scanID=42)
 
         mock_instance.scan.assert_called_once_with(42)
 
@@ -251,13 +252,13 @@ class TestLoad:
         with open(xy_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(xy_path, dataType="discrete")
+        mod_utils.load(xy_path, dataType="discrete")
 
         mock_instance.scan.assert_called_once_with("discrete")
 
@@ -267,13 +268,13 @@ class TestLoad:
         with open(mgf_path, "w") as f:
             f.write("BEGIN IONS\nEND IONS\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMGF")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMGF")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(mgf_path, scanID=5, dataType="continuous")
+        mod_utils.load(mgf_path, scanID=5, dataType="continuous")
 
         # MGF parser should receive scanID, not dataType
         mock_instance.scan.assert_called_once_with(5)
@@ -284,13 +285,13 @@ class TestLoad:
         with open(mzxml_path, "w") as f:
             f.write("<mzXML></mzXML>")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZXML")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZXML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(mzxml_path, scanID=10)
+        mod_utils.load(mzxml_path, scanID=10)
 
         mock_instance.scan.assert_called_once_with(10)
 
@@ -300,13 +301,13 @@ class TestLoad:
         with open(mzml_path, "w") as f:
             f.write("<mzML></mzML>")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZML")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
-        result = mod_utils.load(mzml_path, scanID=15)
+        mod_utils.load(mzml_path, scanID=15)
 
         mock_instance.scan.assert_called_once_with(15)
 
@@ -317,7 +318,7 @@ class TestLoad:
             f.write("<mzData></mzData>")
 
         mock_scan_obj = {"data": "mock_scan"}
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZDATA")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZDATA")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_instance.scan.return_value = mock_scan_obj
@@ -332,14 +333,14 @@ class TestLoad:
         with open(xy_path, "w") as f:
             f.write("invalid_data")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_instance.scan.return_value = False
 
         result = mod_utils.load(xy_path)
 
-        assert result == False
+        assert not result
 
     def test_load_default_scanid_is_none(self, tmp_dir, mocker):
         """Test that load uses None as default scanID when not provided."""
@@ -347,14 +348,14 @@ class TestLoad:
         with open(mzxml_path, "w") as f:
             f.write("<mzXML></mzXML>")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMZXML")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMZXML")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
         # Call without scanID parameter
-        result = mod_utils.load(mzxml_path)
+        mod_utils.load(mzxml_path)
 
         # Should be called with None
         mock_instance.scan.assert_called_once_with(None)
@@ -365,14 +366,14 @@ class TestLoad:
         with open(xy_path, "w") as f:
             f.write("100.0\t1000.0\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseXY")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseXY")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan = mocker.MagicMock()
         mock_instance.scan.return_value = mock_scan
 
         # Call without dataType parameter
-        result = mod_utils.load(xy_path)
+        mod_utils.load(xy_path)
 
         # Should be called with 'continuous'
         mock_instance.scan.assert_called_once_with("continuous")
@@ -383,7 +384,7 @@ class TestLoad:
         with open(mgf_path, "w") as f:
             f.write("BEGIN IONS\nTITLE=Test\nEND IONS\n")
 
-        mock_parser_class = mocker.patch("mspy.mod_utils.parseMGF")
+        mock_parser_class = mocker.patch("mmass.mspy.mod_utils.parseMGF")
         mock_instance = mocker.MagicMock()
         mock_parser_class.return_value = mock_instance
         mock_scan_obj = {"ms_level": 2}
@@ -429,7 +430,7 @@ class TestSave:
         assert len(lines) == 3
 
         # Check format is correct (floats with tabs)
-        for i, line in enumerate(lines):
+        for _i, line in enumerate(lines):
             parts = line.split("\t")
             assert len(parts) == 2
             # Values should be floats

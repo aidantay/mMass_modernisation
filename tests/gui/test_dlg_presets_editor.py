@@ -1,9 +1,10 @@
 import copy
 
-import gui.libs as libs
 import pytest
 import wx
-from gui.dlg_presets_editor import dlgPresetsEditor
+
+import mmass.gui.libs as libs
+from mmass.gui.dlg_presets_editor import dlgPresetsEditor
 
 MOCK_PRESETS = {
     "processing": {"Preset A": {"crop": True}, "Preset B": {"crop": False}},
@@ -24,9 +25,9 @@ def presets_editor(gui_app, mocker):
     test_presets = copy.deepcopy(MOCK_PRESETS)
 
     # Patching gui.libs.presets because it's imported as 'libs' in dlg_presets_editor
-    mocker.patch("gui.libs.presets", test_presets)
+    mocker.patch("mmass.gui.libs.presets", test_presets)
     # Mock UI elements that could block or make noise
-    mock_dlg = mocker.patch("gui.mwx.dlgMessage")
+    mock_dlg = mocker.patch("mmass.gui.mwx.dlgMessage")
     mock_bell = mocker.patch("wx.Bell")
     parent = wx.Frame(None)
     dlg = dlgPresetsEditor(parent)
@@ -87,7 +88,7 @@ def test_update_list_empty(presets_editor, mocker):
     - Verify itemsList has 0 items.
     - Verify itemsMap has 0 items.
     """
-    mocker.patch("gui.libs.presets", {})
+    mocker.patch("mmass.gui.libs.presets", {})
     presets_editor.updateItemsList()
     assert presets_editor.itemsList.GetItemCount() == 0
     assert len(presets_editor.itemsMap) == 0

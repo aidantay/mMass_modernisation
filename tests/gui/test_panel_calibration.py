@@ -1,19 +1,19 @@
 import collections
 
-import gui.config as config
-import gui.images as images
-import gui.libs as libs
 import pytest
 import wx
-from gui.ids import *
 
-import mspy
+import mmass.gui.config as config
+import mmass.gui.images as images
+import mmass.gui.libs as libs
+from mmass import mspy
+from mmass.gui.ids import *
 
 # Patch wx for compatibility with legacy code
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = wx.RESIZE_BORDER
 
-from gui.panel_calibration import panelCalibration
+from mmass.gui.panel_calibration import panelCalibration
 
 
 @pytest.fixture
@@ -28,8 +28,7 @@ def mock_mspy_dependencies(monkeypatch, mocker):
     def delta_side_effect(mz1, mz2, units):
         if units == "Da":
             return mz1 - mz2
-        else:
-            return (mz1 - mz2) / (mz2 if mz2 != 0 else 1.0) * 1e6
+        return (mz1 - mz2) / (mz2 if mz2 != 0 else 1.0) * 1e6
 
     mock_delta = mocker.Mock(side_effect=delta_side_effect)
     monkeypatch.setattr(mspy, "delta", mock_delta)

@@ -1,7 +1,8 @@
 import pytest
 import wx
-from gui.ids import *
-from gui.panel_document_info import dlgPresetsName, panelDocumentInfo
+
+from mmass.gui.ids import *
+from mmass.gui.panel_document_info import dlgPresetsName, panelDocumentInfo
 
 
 @pytest.fixture
@@ -53,7 +54,7 @@ def panel(wx_app, mocker, mock_parent):
 
     # Mock images.lib
     mocker.patch(
-        "gui.images.lib",
+        "mmass.gui.images.lib",
         {
             "bgrToolbar": wx.Bitmap(1, 1),
             "documentInfoSummaryOff": wx.Bitmap(1, 1),
@@ -168,7 +169,9 @@ def test_onSave_no_document(panel):
 
 
 def test_onPresets(panel, mocker):
-    mocker.patch("gui.panel_document_info.libs.presets", {"operator": {"Preset 1": {}}})
+    mocker.patch(
+        "mmass.gui.panel_document_info.libs.presets", {"operator": {"Preset 1": {}}}
+    )
     mocker.patch.object(panel, "PopupMenu")
     mocker.patch("wx.Menu")
     panel.onPresets(None)
@@ -191,7 +194,8 @@ def test_onPresetsSelected(panel, mocker):
     evt.GetId.return_value = 123
 
     mocker.patch(
-        "gui.panel_document_info.libs.presets", {"operator": {"Preset 1": preset_data}}
+        "mmass.gui.panel_document_info.libs.presets",
+        {"operator": {"Preset 1": preset_data}},
     )
     panel.onPresetsSelected(evt)
     assert panel.operator_value.GetValue() == "Op1"
@@ -203,11 +207,11 @@ def test_onPresetsSelected(panel, mocker):
 def test_onPresetsSave(panel, mocker):
     panel.operator_value.SetValue("Op1")
 
-    mock_dlg_class = mocker.patch("gui.panel_document_info.dlgPresetsName")
+    mock_dlg_class = mocker.patch("mmass.gui.panel_document_info.dlgPresetsName")
     mock_presets = mocker.patch(
-        "gui.panel_document_info.libs.presets", {"operator": {}}
+        "mmass.gui.panel_document_info.libs.presets", {"operator": {}}
     )
-    mock_save = mocker.patch("gui.panel_document_info.libs.savePresets")
+    mock_save = mocker.patch("mmass.gui.panel_document_info.libs.savePresets")
 
     mock_dlg = mock_dlg_class.return_value
     mock_dlg.ShowModal.return_value = wx.ID_OK
@@ -222,9 +226,9 @@ def test_onPresetsSave(panel, mocker):
 
 def test_onPresetsSave_cancel(panel, mocker):
     mocker.patch(
-        "gui.panel_document_info.dlgPresetsName"
+        "mmass.gui.panel_document_info.dlgPresetsName"
     ).return_value.ShowModal.return_value = wx.ID_CANCEL
-    mock_save = mocker.patch("gui.libs.savePresets")
+    mock_save = mocker.patch("mmass.gui.libs.savePresets")
 
     panel.onPresetsSave(None)
     mock_save.assert_not_called()
@@ -265,7 +269,7 @@ def test_onToolSelected_other(panel, mocker):
 
 
 def test_onPresets_empty(panel, mocker):
-    mocker.patch("gui.libs.presets", {"operator": {}})
+    mocker.patch("mmass.gui.libs.presets", {"operator": {}})
     mocker.patch.object(panel, "PopupMenu")
     mocker.patch("wx.Menu")
     panel.onPresets(None)

@@ -5,9 +5,10 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-from gui.ids import *
+import contextlib
 
-from gui import config, images, libs, panel_mass_filter
+from mmass.gui import config, images, libs, panel_mass_filter
+from mmass.gui.ids import *
 
 
 @pytest.fixture
@@ -18,10 +19,8 @@ def mock_parent(wx_app, mocker):
     parent.onToolsCalibration = mocker.MagicMock()
     yield parent
     if parent:
-        try:
+        with contextlib.suppress(RuntimeError):
             parent.Destroy()
-        except (wx.PyDeadObjectError, RuntimeError):
-            pass
 
 
 @pytest.fixture
@@ -56,10 +55,8 @@ def panel(wx_app, mock_parent, mocker):
     p = panel_mass_filter.panelMassFilter(mock_parent)
     yield p
     if p:
-        try:
+        with contextlib.suppress(RuntimeError):
             p.Destroy()
-        except (wx.PyDeadObjectError, RuntimeError):
-            pass
 
 
 def test_init(panel):
@@ -132,7 +129,7 @@ def test_onItemActivated(panel, mocker):
 
 
 def test_onMatch(panel, mock_parent, mocker):
-    mock_panelMatch = mocker.patch("gui.panel_mass_filter.panelMatch")
+    mock_panelMatch = mocker.patch("mmass.gui.panel_mass_filter.panelMatch")
     mock_instance = mock_panelMatch.return_value
 
     # Trigger onMatch
@@ -225,7 +222,7 @@ def test_updateReferencesList(panel, mocker):
     mocker.patch.object(panel.referencesList, "SetItemData")
     mocker.patch.object(panel.referencesList, "sort")
     mock_color = mocker.patch.object(panel.referencesList, "SetItemTextColour")
-    mock_font = mocker.patch.object(panel.referencesList, "SetItemFont")
+    mocker.patch.object(panel.referencesList, "SetItemFont")
 
     panel.updateReferencesList()
 

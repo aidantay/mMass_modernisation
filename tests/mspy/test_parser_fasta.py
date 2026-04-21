@@ -1,6 +1,6 @@
-import mspy.obj_sequence
-import mspy.parser_fasta
 import pytest
+
+from mmass import mspy
 
 
 def test_init_success():

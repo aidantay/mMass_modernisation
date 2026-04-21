@@ -20,18 +20,18 @@ def notation():
 @pytest.fixture
 def mock_deps(mocker):
     # Mock mspy and config in the module
-    m_mspy = mocker.patch("gui.dlg_notation.mspy")
-    m_config = mocker.patch("gui.dlg_notation.config")
+    m_mspy = mocker.patch("mmass.gui.dlg_notation.mspy")
+    m_config = mocker.patch("mmass.gui.dlg_notation.config")
     m_config.main = {"mzDigits": 4}
 
     # Mock wx.Bell to avoid actual sound and for assertions
-    m_bell = mocker.patch("gui.dlg_notation.wx.Bell")
+    m_bell = mocker.patch("mmass.gui.dlg_notation.wx.Bell")
 
     return m_mspy, m_config, m_bell
 
 
 def test_init(wx_app, mock_deps, notation):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
     dlg = dlgNotation(None, notation)
     try:
@@ -44,14 +44,14 @@ def test_init(wx_app, mock_deps, notation):
         assert dlg.formula_value.GetValue() == "H2O"
         assert dlg.theoreticalMZ_value.GetValue() == "18.010565"
         assert dlg.charge_value.GetValue() == "1"
-        assert dlg.radical_check.GetValue() == False
-        assert dlg.mzByUser_radio.GetValue() == True
+        assert not dlg.radical_check.GetValue()
+        assert dlg.mzByUser_radio.GetValue()
     finally:
         dlg.Destroy()
 
 
 def test_setData_empty(wx_app, mock_deps):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
     notation = MockNotation()
     notation.formula = None
@@ -68,9 +68,9 @@ def test_setData_empty(wx_app, mock_deps):
 
 
 def test_onOK_success(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
-    m_mspy, m_config, m_bell = mock_deps
+    m_mspy, _m_config, m_bell = mock_deps
 
     dlg = dlgNotation(None, notation)
     try:
@@ -99,9 +99,9 @@ def test_onOK_success(wx_app, mock_deps, notation, mocker):
 
 
 def test_onOK_validation_failures(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
-    m_mspy, m_config, m_bell = mock_deps
+    m_mspy, _m_config, m_bell = mock_deps
 
     dlg = dlgNotation(None, notation)
     try:
@@ -141,9 +141,9 @@ def test_onOK_validation_failures(wx_app, mock_deps, notation, mocker):
 
 
 def test_onOK_empty_optional_fields(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
-    m_mspy, m_config, m_bell = mock_deps
+    _m_mspy, _m_config, _m_bell = mock_deps
 
     dlg = dlgNotation(None, notation)
     try:
@@ -166,28 +166,28 @@ def test_onOK_empty_optional_fields(wx_app, mock_deps, notation, mocker):
 
 
 def test_onMassType(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
     dlg = dlgNotation(None, notation)
     try:
         # Manual mode
         dlg.mzByUser_radio.SetValue(True)
         dlg.onMassType()
-        assert dlg.theoreticalMZ_value.IsEnabled() == True
+        assert dlg.theoreticalMZ_value.IsEnabled()
 
         # Automatic mode (calls onFormula)
         dlg.mzByFormulaMo_radio.SetValue(True)
         mock_onFormula = mocker.patch.object(dlg, "onFormula")
         dlg.onMassType()
-        assert dlg.mzByUser_radio.GetValue() == False
-        assert dlg.theoreticalMZ_value.IsEnabled() == False
+        assert not dlg.mzByUser_radio.GetValue()
+        assert not dlg.theoreticalMZ_value.IsEnabled()
         mock_onFormula.assert_called_once()
     finally:
         dlg.Destroy()
 
 
 def test_onFormula_manual_mode(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
     dlg = dlgNotation(None, notation)
     try:
@@ -203,7 +203,7 @@ def test_onFormula_manual_mode(wx_app, mock_deps, notation, mocker):
 
 
 def test_onFormula_empty_fields(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
     dlg = dlgNotation(None, notation)
     try:
@@ -225,9 +225,9 @@ def test_onFormula_empty_fields(wx_app, mock_deps, notation, mocker):
 
 
 def test_onFormula_calculations(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
-    m_mspy, m_config, m_bell = mock_deps
+    m_mspy, _m_config, _m_bell = mock_deps
 
     dlg = dlgNotation(None, notation)
     try:
@@ -261,9 +261,9 @@ def test_onFormula_calculations(wx_app, mock_deps, notation, mocker):
 
 
 def test_onFormula_error(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
-    m_mspy, m_config, m_bell = mock_deps
+    m_mspy, _m_config, _m_bell = mock_deps
 
     dlg = dlgNotation(None, notation)
     try:
@@ -280,7 +280,7 @@ def test_onFormula_error(wx_app, mock_deps, notation, mocker):
 
 
 def test_onFormula_evt_skip(wx_app, mock_deps, notation, mocker):
-    from gui.dlg_notation import dlgNotation
+    from mmass.gui.dlg_notation import dlgNotation
 
     dlg = dlgNotation(None, notation)
     try:

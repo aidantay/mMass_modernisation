@@ -1,6 +1,7 @@
 import pytest
 import wx
-from gui.dlg_clipboard_editor import dlgClipboardEditor
+
+from mmass.gui.dlg_clipboard_editor import dlgClipboardEditor
 
 
 @pytest.fixture

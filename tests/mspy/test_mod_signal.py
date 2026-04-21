@@ -1,7 +1,8 @@
-import mspy.mod_signal as mod_signal
-import mspy.mod_stopper as mod_stopper
 import numpy
 import pytest
+
+import mmass.mspy.mod_signal as mod_signal
+import mmass.mspy.mod_stopper as mod_stopper
 
 # ============================================================================
 # FIXTURES
@@ -25,8 +26,7 @@ def make_gaussian_peak(center=1000.0, width=0.5, height=1000.0, num_points=100):
     """Create a Gaussian peak signal."""
     mz_vals = numpy.linspace(center - 2 * width, center + 2 * width, num_points)
     intensity = height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
-    signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
-    return signal
+    return numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
 
 
 def make_multipeak_signal(peaks, num_points=200):
@@ -41,20 +41,18 @@ def make_multipeak_signal(peaks, num_points=200):
     for center, width, height in peaks:
         intensity += height * numpy.exp(-0.5 * ((mz_vals - center) / width) ** 2)
 
-    signal = numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
-    return signal
+    return numpy.column_stack([mz_vals, intensity]).astype(numpy.float64)
 
 
 def make_baseline(signal, base_level=10.0, noise_level=1.0):
     """Create a baseline array from a signal."""
-    baseline = numpy.column_stack(
+    return numpy.column_stack(
         [
             signal[:, 0],
             numpy.ones(len(signal)) * base_level,
             numpy.ones(len(signal)) * noise_level,
         ]
     ).astype(numpy.float64)
-    return baseline
 
 
 def make_empty_signal():
@@ -475,7 +473,7 @@ class TestArea:
 
     def test_area_baseline_type_check(self):
         """area checks baseline type during parameter validation."""
-        signal = make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
+        make_gaussian_peak(center=1000.0, width=0.5, num_points=100)
         # Test type checking - non-ndarray baseline raises TypeError
         # Note: The function has a bug with ndarray baseline comparison (baseline != None)
         # which is a source code issue, not a test issue

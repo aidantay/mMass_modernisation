@@ -1,7 +1,8 @@
-import mspy.blocks as blocks
 import pytest
-from mspy.obj_compound import compound as original_compound
-from mspy.obj_sequence import sequence
+
+import mmass.mspy.blocks as blocks
+from mmass.mspy.obj_compound import compound as original_compound
+from mmass.mspy.obj_sequence import sequence
 
 
 def test_import_sequence():

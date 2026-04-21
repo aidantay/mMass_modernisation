@@ -1,14 +1,14 @@
 import math
 
-import mspy.mod_basics
-import mspy.obj_compound
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
+from mmass import mspy
+
 
 @pytest.mark.parametrize(
-    "measured, counted, unit, expected",
+    ("measured", "counted", "unit", "expected"),
     [
         (1000.1, 1000.0, "ppm", 100.0),
         (1000.1, 1000.0, "Da", 0.1),
@@ -31,7 +31,7 @@ def test_delta_invalid_unit():
 
 
 @pytest.mark.parametrize(
-    "mass, rounding, expected",
+    ("mass", "rounding", "expected"),
     [
         (1.1, "floor", 1.0),
         (1.9, "floor", 1.0),
@@ -179,7 +179,6 @@ def test_mz_current_charge():
 
 def test_mz_electron():
     """Test mz function with electron as agent."""
-    mass = 1000.0
     # agentFormula='e' uses ELECTRON_MASS directly
     expected = (1000.0 + mspy.mod_basics.ELECTRON_MASS * 1) / 1.0
     assert mspy.mod_basics.mz(

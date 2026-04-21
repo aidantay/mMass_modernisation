@@ -3,13 +3,14 @@ import struct
 import xml.sax
 import zlib
 
-import mspy.obj_scan as obj_scan
-import mspy.parser_mzml as parser_mzml
 import numpy as np
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
+
+import mmass.mspy.obj_scan as obj_scan
+import mmass.mspy.parser_mzml as parser_mzml
 
 
 def test_parseScanNumber_valid():
@@ -41,7 +42,7 @@ def test_parseScanNumber_exception_handling(mocker):
     mock_match.group.return_value = "not_an_int"
 
     # Patch the pattern object itself in the module
-    mock_pattern = mocker.patch("mspy.parser_mzml.SCAN_NUMBER_PATTERN")
+    mock_pattern = mocker.patch("mmass.mspy.parser_mzml.SCAN_NUMBER_PATTERN")
     mock_pattern.search.return_value = mock_match
 
     assert parser_mzml._parseScanNumber("scan=something") is None
@@ -329,7 +330,7 @@ def test_scanHandler():
     assert handler.data["mzCompression"] == "zlib"
     assert handler.data["intData"] == "encoded_int_data"
     assert handler.data["intPrecision"] == 32
-    assert handler.data["intCompression"] == None
+    assert handler.data["intCompression"] is None
     assert handler.data["precursorCharge"] == 3
 
     # Check stopParsing on matching scan end
@@ -351,7 +352,7 @@ def test_scanHandler_no_match():
     handler.endElement("binaryDataArray")
     handler.endElement("spectrum")
 
-    assert handler.data == False
+    assert not handler.data
 
 
 def test_scanHandler_any_match():
@@ -359,7 +360,7 @@ def test_scanHandler_any_match():
     handler = parser_mzml.scanHandler(scanID=None)
 
     handler.startElement("spectrum", {"id": "scan=10"})
-    assert handler._isMatch == True
+    assert handler._isMatch
     assert handler.data["scanNumber"] == 10
 
 
@@ -397,7 +398,7 @@ def test_runHandler():
     assert handler.data[1]["mzPrecision"] == 32
     assert handler.data[2]["intData"] == "int2"
     assert handler.data[2]["intPrecision"] == 64
-    assert handler.data[2]["intCompression"] == None
+    assert handler.data[2]["intCompression"] is None
 
 
 def test_parseMZML_init_error():
@@ -441,23 +442,23 @@ def test_parseMZML_sax_exception(mocker):
     parser = parser_mzml.parseMZML("dummy_path")
 
     # Mock open and sax parser
-    mocker.patch("mspy.parser_mzml.open", mocker.mock_open(), create=True)
+    mocker.patch("mmass.mspy.parser_mzml.open", mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = xml.sax.SAXException("Test Exception")
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
 
     # Test load()
     parser.load()
-    assert parser._scans == False
+    assert not parser._scans
 
     # Test info()
-    assert parser.info() == False
+    assert not parser.info()
 
     # Test scanlist()
-    assert parser.scanlist() == False
+    assert not parser.scanlist()
 
     # Test scan()
-    assert parser.scan(1) == False
+    assert not parser.scan(1)
 
 
 def test_parseMZML_info_stopParsing(mocker):
@@ -469,10 +470,10 @@ def test_parseMZML_info_stopParsing(mocker):
     mock_data = {"title": "Test Info"}
     mock_handler = mocker.Mock()
     mock_handler.data = mock_data
-    mocker.patch("mspy.parser_mzml.infoHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzml.infoHandler", return_value=mock_handler)
 
     # Mock open and sax parser to raise stopParsing
-    mocker.patch("mspy.parser_mzml.open", mocker.mock_open(), create=True)
+    mocker.patch("mmass.mspy.parser_mzml.open", mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = parser_mzml.stopParsing()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
@@ -490,10 +491,10 @@ def test_parseMZML_scanlist_success(mocker):
     mock_data = {1: {"title": "Scan 1"}}
     mock_handler = mocker.Mock()
     mock_handler.data = mock_data
-    mocker.patch("mspy.parser_mzml.scanlistHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzml.scanlistHandler", return_value=mock_handler)
 
     # Mock open and sax parser
-    mocker.patch("mspy.parser_mzml.open", mocker.mock_open(), create=True)
+    mocker.patch("mmass.mspy.parser_mzml.open", mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
 
@@ -522,10 +523,10 @@ def test_parseMZML_load_success(mocker):
     # Mock runHandler and its data
     mock_handler = mocker.Mock()
     mock_handler.data = mock_scans
-    mocker.patch("mspy.parser_mzml.runHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzml.runHandler", return_value=mock_handler)
 
     # Mock open and sax parser
-    mocker.patch("mspy.parser_mzml.open", mocker.mock_open(), create=True)
+    mocker.patch("mmass.mspy.parser_mzml.open", mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
 
@@ -545,14 +546,14 @@ def test_parseMZML_scan_not_found(mocker):
     # Mock scanHandler to return False
     mock_handler = mocker.Mock()
     mock_handler.data = False
-    mocker.patch("mspy.parser_mzml.scanHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzml.scanHandler", return_value=mock_handler)
 
     # Mock open and sax parser
-    mocker.patch("mspy.parser_mzml.open", mocker.mock_open(), create=True)
+    mocker.patch("mmass.mspy.parser_mzml.open", mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
 
-    assert parser.scan(999) == False
+    assert not parser.scan(999)
 
 
 def test_parseMZML_scan_stopParsing(mocker):
@@ -569,10 +570,10 @@ def test_parseMZML_scan_stopParsing(mocker):
     }
     mock_handler = mocker.Mock()
     mock_handler.data = mock_data
-    mocker.patch("mspy.parser_mzml.scanHandler", return_value=mock_handler)
+    mocker.patch("mmass.mspy.parser_mzml.scanHandler", return_value=mock_handler)
 
     # Mock open and sax parser to raise stopParsing
-    mocker.patch("mspy.parser_mzml.open", mocker.mock_open(), create=True)
+    mocker.patch("mmass.mspy.parser_mzml.open", mocker.mock_open(), create=True)
     mock_sax_parser = mocker.Mock()
     mock_sax_parser.parse.side_effect = parser_mzml.stopParsing()
     mocker.patch("xml.sax.make_parser", return_value=mock_sax_parser)
@@ -693,7 +694,7 @@ def test_parseMZML_load_integration():
     parser = parser_mzml.parseMZML(path)
 
     parser.load()
-    assert parser._scans != False
+    assert parser._scans
     assert 1 in parser._scans
     assert parser._scans[1]["scanNumber"] == 1
     assert 1 in parser._scanlist
@@ -704,7 +705,7 @@ def test_infoHandler_branches():
     # Part 1: fileDescription
     handler = parser_mzml.infoHandler()
     handler.startElement("fileDescription", {})
-    assert handler._isDescription == True
+    assert handler._isDescription
 
     handler.startElement("cvParam", {"accession": "MS:1000580", "name": "Title"})
     assert handler.data["title"] == "Title"
@@ -726,7 +727,7 @@ def test_infoHandler_branches():
     # Part 2: instrumentConfiguration (fresh handler because source doesn't reset _isDescription)
     handler = parser_mzml.infoHandler()
     handler.startElement("instrumentConfiguration", {})
-    assert handler._isConfig == True
+    assert handler._isConfig
 
     handler.startElement("cvParam", {"accession": "MS:1000169", "name": "Instrument"})
     assert handler.data["instrument"] == "Instrument"
@@ -838,16 +839,16 @@ def test_scanHandler_branches():
 
     # Matching spectrum without ID and defaultArrayLength
     handler.startElement("spectrum", {})
-    assert handler._isMatch == False
+    assert not handler._isMatch
 
     # Matching spectrum
     handler.startElement("spectrum", {"id": "scan=1", "defaultArrayLength": "100"})
-    assert handler._isMatch == True
+    assert handler._isMatch
     assert handler.data["pointsCount"] == 100
 
     # Precursor with spectrumRef
     handler.startElement("precursor", {"spectrumRef": "scan=0"})
-    assert handler._isPrecursor == True
+    assert handler._isPrecursor
     assert handler.data["parentScanNumber"] == 0
 
     # Precursor without spectrumRef
@@ -865,11 +866,11 @@ def test_scanHandler_branches():
 
     # BinaryDataArray
     handler.startElement("binaryDataArray", {})
-    assert handler._isBinaryDataArray == True
+    assert handler._isBinaryDataArray
 
     # Binary
     handler.startElement("binary", {})
-    assert handler._isData == True
+    assert handler._isData
     handler.characters("data")
     handler.endElement("binary")
 
@@ -882,7 +883,7 @@ def test_scanHandler_branches():
     handler.startElement("cvParam", {"name": "zlib compression"})
     assert handler.tmpCompression == "zlib"
     handler.startElement("cvParam", {"name": "no compression"})
-    assert handler.tmpCompression == None
+    assert handler.tmpCompression is None
 
     handler.startElement("cvParam", {"name": "m/z array"})
     assert handler.tmpArrayType == "mzArray"
@@ -932,9 +933,9 @@ def test_scanHandler_branches():
     # Non-matching spectrum
     handler.scanID = 2
     handler.startElement("spectrum", {"id": "scan=1"})
-    assert handler._isMatch == False
+    assert not handler._isMatch
     handler.endElement("spectrum")
-    assert handler._isMatch == False
+    assert not handler._isMatch
 
 
 def test_runHandler_branches():

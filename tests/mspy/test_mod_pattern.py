@@ -1,12 +1,13 @@
-import mspy.mod_pattern as mod_pattern
-import mspy.mod_stopper as mod_stopper
-import mspy.obj_compound as obj_compound
-import mspy.obj_peak as obj_peak
-import mspy.obj_peaklist as obj_peaklist
 import numpy
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+
+import mmass.mspy.mod_pattern as mod_pattern
+import mmass.mspy.mod_stopper as mod_stopper
+import mmass.mspy.obj_compound as obj_compound
+import mmass.mspy.obj_peak as obj_peak
+import mmass.mspy.obj_peaklist as obj_peaklist
 
 
 # Module-level fixture to reset stopper state
@@ -173,7 +174,7 @@ def test_gaussian_returns_array(mocker):
     # Mock the calculations module
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_gaussian", return_value=mock_result
+        "mmass.mspy.mod_pattern.calculations.signal_gaussian", return_value=mock_result
     )
     result = mod_pattern.gaussian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -184,7 +185,8 @@ def test_lorentzian_returns_array(mocker):
     """Test lorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_lorentzian", return_value=mock_result
+        "mmass.mspy.mod_pattern.calculations.signal_lorentzian",
+        return_value=mock_result,
     )
     result = mod_pattern.lorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -194,7 +196,8 @@ def test_gausslorentzian_returns_array(mocker):
     """Test gausslorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_gausslorentzian", return_value=mock_result
+        "mmass.mspy.mod_pattern.calculations.signal_gausslorentzian",
+        return_value=mock_result,
     )
     result = mod_pattern.gausslorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
     assert isinstance(result, numpy.ndarray)
@@ -209,15 +212,15 @@ def test_gausslorentzian_returns_array(mocker):
 def mock_profile_dependencies(mocker):
     """Mock all external dependencies for profile function."""
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_profile",
+        "mmass.mspy.mod_pattern.calculations.signal_profile",
         return_value=numpy.array([[100.0, 0.0], [100.05, 0.5], [100.1, 1.0]]),
     )
     mocker.patch(
-        "mspy.mod_pattern.calculations.signal_profile_to_raster",
+        "mmass.mspy.mod_pattern.calculations.signal_profile_to_raster",
         return_value=numpy.array([[100.0, 0.0], [100.01, 0.3]]),
     )
     mocker.patch(
-        "mspy.mod_pattern.mod_signal.subbase",
+        "mmass.mspy.mod_pattern.mod_signal.subbase",
         side_effect=lambda x, y: x,  # return profile unchanged
     )
 
@@ -353,7 +356,7 @@ def test_profile_raster_calls_signal_profile_to_raster(
             obj_peak.peak(mz=100.0, ai=1000.0),
         ]
     )
-    result = mod_pattern.profile(pl, raster=None)
+    mod_pattern.profile(pl, raster=None)
     spy.assert_called_once()
 
 
@@ -365,7 +368,7 @@ def test_profile_no_raster_calls_signal_profile(mock_profile_dependencies, mocke
             obj_peak.peak(mz=100.0, ai=1000.0),
         ]
     )
-    result = mod_pattern.profile(pl, raster=None)
+    mod_pattern.profile(pl, raster=None)
     spy.assert_called_once()
 
 
@@ -408,13 +411,12 @@ def mock_matchpattern_dependencies(mocker):
     def labelpeak_side_effect(signal, mz, pickingHeight, baseline):
         # Return a peak if mz is near 18.01
         if 18.0 <= mz <= 18.02:
-            peak = obj_peak.peak(mz=mz, ai=1000.0)
-            return peak
-        else:
-            return None
+            return obj_peak.peak(mz=mz, ai=1000.0)
+        return None
 
     mocker.patch(
-        "mspy.mod_pattern.mod_peakpicking.labelpeak", side_effect=labelpeak_side_effect
+        "mmass.mspy.mod_pattern.mod_peakpicking.labelpeak",
+        side_effect=labelpeak_side_effect,
     )
 
 
@@ -447,7 +449,7 @@ def test_matchpattern_none_baseline_skipped(mock_matchpattern_dependencies):
     """Test matchpattern with None baseline skips baseline check (MP-B4)."""
     signal = numpy.array([[18.01, 1000.0], [19.01, 500.0]])
     pattern = [[18.01, 1.0]]
-    result = mod_pattern.matchpattern(signal, pattern, baseline=None)
+    mod_pattern.matchpattern(signal, pattern, baseline=None)
     # Should complete without error
 
 
@@ -457,7 +459,7 @@ def test_matchpattern_accepts_ndarray_baseline(mock_matchpattern_dependencies):
     pattern = [[18.01, 1.0]]
     # Note: Due to Python 2.7 numpy comparison issue, baseline=None is used
     # The actual code has a bug with ndarray baseline comparison
-    result = mod_pattern.matchpattern(signal, pattern, baseline=None)
+    mod_pattern.matchpattern(signal, pattern, baseline=None)
     # Should complete without error
 
 
@@ -473,7 +475,7 @@ def test_matchpattern_proceeds_for_nonempty_signal(mock_matchpattern_dependencie
     """Test matchpattern proceeds for non-empty signal (MP-B7)."""
     signal = numpy.array([[18.01, 1000.0]])
     pattern = [[18.01, 1.0]]
-    result = mod_pattern.matchpattern(signal, pattern)
+    mod_pattern.matchpattern(signal, pattern)
     # Should compute RMS
 
 
@@ -490,7 +492,7 @@ def test_matchpattern_appends_zero_for_missing_peak(mock_matchpattern_dependenci
     """Test matchpattern appends 0.0 when labelpeak returns None (MP-B9)."""
     signal = numpy.array([[50.0, 1000.0]])
     pattern = [[50.0, 1.0], [51.0, 0.5]]  # 51.0 won't be found
-    result = mod_pattern.matchpattern(signal, pattern)
+    mod_pattern.matchpattern(signal, pattern)
     # Some peaks found, some missing
 
 
@@ -512,7 +514,7 @@ def test_matchpattern_normalizes_by_basepeak(mock_matchpattern_dependencies):
     """Test matchpattern normalizes peaklist by basepeak (MP-B10)."""
     signal = numpy.array([[18.01, 1000.0], [18.02, 500.0]])
     pattern = [[18.01, 1.0]]
-    result = mod_pattern.matchpattern(signal, pattern)
+    mod_pattern.matchpattern(signal, pattern)
     # Should normalize by basepeak
 
 
@@ -520,7 +522,7 @@ def test_matchpattern_rms_multiple_isotopes(mock_matchpattern_dependencies):
     """Test matchpattern RMS with multiple isotopes divides by len-1 (MP-B12)."""
     signal = numpy.array([[18.01, 1000.0], [19.01, 500.0]])
     pattern = [[18.01, 1.0], [19.01, 0.5]]
-    result = mod_pattern.matchpattern(signal, pattern)
+    mod_pattern.matchpattern(signal, pattern)
     # RMS computed with denominator = len(pattern) - 1 = 1
 
 
@@ -528,7 +530,7 @@ def test_matchpattern_rms_single_isotope(mock_matchpattern_dependencies):
     """Test matchpattern RMS with single isotope no division (MP-B13)."""
     signal = numpy.array([[18.01, 1000.0]])
     pattern = [[18.01, 1.0]]
-    result = mod_pattern.matchpattern(signal, pattern)
+    mod_pattern.matchpattern(signal, pattern)
     # RMS is raw squared difference (no division)
 
 
@@ -542,11 +544,13 @@ def mock_pattern_dependencies(mocker):
     """Mock external dependencies for pattern function."""
     # Mock profile, maxima, and centroid functions
     mocker.patch(
-        "mspy.mod_pattern.profile",
+        "mmass.mspy.mod_pattern.profile",
         return_value=numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]]),
     )
-    mocker.patch("mspy.mod_pattern.mod_signal.maxima", return_value=[[100.02, 1.0]])
-    mocker.patch("mspy.mod_pattern.mod_signal.centroid", return_value=100.020)
+    mocker.patch(
+        "mmass.mspy.mod_pattern.mod_signal.maxima", return_value=[[100.02, 1.0]]
+    )
+    mocker.patch("mmass.mspy.mod_pattern.mod_signal.centroid", return_value=100.020)
 
 
 def test_pattern_coerces_string_to_compound():
@@ -728,7 +732,7 @@ def test_pattern_centroid_refine_within_threshold(mock_pattern_dependencies, moc
     mod_stopper.start()
     # Mock centroid to return value close to isotope m/z
     mocker.patch(
-        "mspy.mod_pattern.mod_signal.centroid",
+        "mmass.mspy.mod_pattern.mod_signal.centroid",
         return_value=100.0201,  # within fwhm/100 = 0.001
     )
     result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)
@@ -740,7 +744,7 @@ def test_pattern_centroid_refine_exceeds_threshold(mock_pattern_dependencies, mo
     mod_stopper.start()
     # Mock centroid to return value far from isotope m/z
     mocker.patch(
-        "mspy.mod_pattern.mod_signal.centroid",
+        "mmass.mspy.mod_pattern.mod_signal.centroid",
         return_value=100.05,  # exceeds fwhm/100 = 0.001
     )
     result = mod_pattern.pattern("H2O", fwhm=0.1, threshold=0.01, real=True)
@@ -831,7 +835,7 @@ def test_normalize_zero_abundances():
     # The code assumes at least one non-zero item
     data = [[100.0, 0.0]]
     try:
-        result = mod_pattern._normalize(data)
+        mod_pattern._normalize(data)
         # Behavior depends on implementation
     except (ZeroDivisionError, ValueError):
         # Acceptable if function raises

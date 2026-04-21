@@ -1,10 +1,11 @@
 import os
 import xml.dom.minidom
 
-import mspy.blocks as blocks
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+
+import mmass.mspy.blocks as blocks
 
 
 # Backup and restore globals
@@ -120,7 +121,9 @@ def test_escape_property(text):
     escaped = blocks._escape(text)
     # Basic check: special chars should not be present literally if they were in input
     for char, entity in zip(
-        ["&", '"', "'", "<", ">"], ["&amp;", "&quot;", "&apos;", "&lt;", "&gt;"]
+        ["&", '"', "'", "<", ">"],
+        ["&amp;", "&quot;", "&apos;", "&lt;", "&gt;"],
+        strict=False,
     ):
         if char in text:
             assert entity in escaped or char not in escaped
@@ -282,7 +285,7 @@ def test_load_clear_false(tmpdir):
 
 def test_monomer_losses_parsing():
     # specifically test losses parsing in loadMonomers
-    doc = xml.dom.minidom.parseString(
+    xml.dom.minidom.parseString(
         '<mspyMonomers><monomer abbr="X" name="X" formula="H" losses="H2O;NH3" /></mspyMonomers>'
     )
     # We can't easily call loadMonomers with a DOM, but we can test the monomer object creation
@@ -292,14 +295,5 @@ def test_monomer_losses_parsing():
 
 def test_enzyme_xml_parsing():
     # Test CDATA and other XML features in enzymes
-    xml_str = """<?xml version="1.0" encoding="utf-8" ?>
-    <mspyEnzymes version="1.0">
-      <enzyme name="Test">
-        <expression><![CDATA[[K][^P]]]></expression>
-        <formula nTerm="H" cTerm="OH" />
-        <allowMods before="1" after="0" />
-      </enzyme>
-    </mspyEnzymes>
-    """
     # This is tested via loadEnzymes on a file
     pass

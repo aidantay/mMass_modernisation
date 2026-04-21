@@ -1,9 +1,9 @@
-import gui.config as config
-import gui.dlg_monomers_editor as dlg_editor
 import pytest
 import wx
 
-import mspy
+import mmass.gui.config as config
+import mmass.gui.dlg_monomers_editor as dlg_editor
+from mmass import mspy
 
 
 class MockMonomer:
@@ -27,7 +27,7 @@ class MockCompound:
     def mass(self):
         if self.formula == "H2O":
             return (18.01056, 18.01528)
-        elif self.formula == "CH4":
+        if self.formula == "CH4":
             return (16.0313, 16.0425)
         return (0.0, 0.0)
 
@@ -44,10 +44,12 @@ def mock_mspy(mocker):
             "UsedMon", "CH4", [], name="Used Monomer", category="Used"
         ),
     }
-    mocker.patch("mspy.monomers", initial_monomers)
-    mocked_monomer_class = mocker.patch("mspy.monomer", side_effect=MockMonomer)
-    mocked_compound_class = mocker.patch("mspy.compound", side_effect=MockCompound)
-    yield mocker.Mock(
+    mocker.patch("mmass.mspy.monomers", initial_monomers)
+    mocked_monomer_class = mocker.patch("mmass.mspy.monomer", side_effect=MockMonomer)
+    mocked_compound_class = mocker.patch(
+        "mmass.mspy.compound", side_effect=MockCompound
+    )
+    return mocker.Mock(
         monomers=initial_monomers,
         monomer=mocked_monomer_class,
         compound=mocked_compound_class,
@@ -57,15 +59,14 @@ def mock_mspy(mocker):
 @pytest.fixture
 def mock_config(mocker):
     """Mock config.main['mzDigits']."""
-    mocker.patch("gui.config.main", {"mzDigits": 4})
-    yield config.main
+    mocker.patch("mmass.gui.config.main", {"mzDigits": 4})
+    return config.main
 
 
 @pytest.fixture
 def mock_mwx(mocker):
     """Mock mwx components."""
-    mocked_dlg = mocker.patch("gui.mwx.dlgMessage")
-    yield mocked_dlg
+    return mocker.patch("mmass.gui.mwx.dlgMessage")
 
 
 @pytest.fixture

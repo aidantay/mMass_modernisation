@@ -5,11 +5,10 @@ import wx
 if not hasattr(wx, "RESIZE_BOX"):
     wx.RESIZE_BOX = getattr(wx, "RESIZE_BORDER", 0)
 
-from gui.ids import *
-from gui.panel_sequence import panelSequence
-
-import mspy
-from gui import config, mwx
+from mmass import mspy
+from mmass.gui import config, mwx
+from mmass.gui.ids import *
+from mmass.gui.panel_sequence import panelSequence
 
 
 class MockParent(wx.Frame):
@@ -160,11 +159,11 @@ def test_onSequenceType(panel, mocker):
 def test_onSequenceCyclic(panel):
     panel.sequenceCyclic_check.SetValue(True)
     panel.onSequenceCyclic(None)
-    assert panel.currentSequence.cyclic == True
+    assert panel.currentSequence.cyclic
 
     panel.sequenceCyclic_check.SetValue(False)
     panel.onSequenceCyclic(None)
-    assert panel.currentSequence.cyclic == False
+    assert not panel.currentSequence.cyclic
 
 
 def test_modifications(panel, mocker):
@@ -223,10 +222,10 @@ def test_processing_digestion(panel, mocker):
     peptide = mspy.sequence("MAGA")
     peptide.history = [["digest", 0, 3]]
     peptide.miscleavages = 0
-    mocker.patch("mspy.digest", return_value=[peptide])
+    mocker.patch("mmass.mspy.digest", return_value=[peptide])
 
     mocker.patch.object(panel, "getParams", return_value=True)
-    mocker.patch("mspy.coverage", return_value=50.0)
+    mocker.patch("mmass.mspy.coverage", return_value=50.0)
     config.sequence["digest"]["lowMass"] = 0
 
     panel.onDigest(None)
@@ -253,9 +252,9 @@ def test_processing_fragmentation(panel, mocker):
     frag = mspy.sequence("MA")
     frag.history = [["fragment", 0, 1]]
     frag.fragmentFiltered = False
-    mocker.patch("mspy.fragment", return_value=[frag])
-    mocker.patch("mspy.fragmentlosses", return_value=[])
-    mocker.patch("mspy.fragmentgains", return_value=[])
+    mocker.patch("mmass.mspy.fragment", return_value=[frag])
+    mocker.patch("mmass.mspy.fragmentlosses", return_value=[])
+    mocker.patch("mmass.mspy.fragmentgains", return_value=[])
 
     mocker.patch.object(panel, "getParams", return_value=True)
 
