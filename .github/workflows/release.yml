@@ -1,0 +1,83 @@
+name: Build Cross-Platform Executables
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags (e.g., v1.0)
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        # Define the operating systems to build on
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.13'
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-22.04 wxpython
+          fi
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        shell: bash
+        run: |
+          # --onefile creates a single executable
+          # --windowed prevents a console from popping up (for GUI apps)
+          # --name to clarify the output file
+          if [ "${{ runner.os }}" = "macOS" ]; then
+              pyinstaller --onefile --windowed --name "mMass-macOS" --paths src src/mmass/mmass.py
+              cd dist && zip -r ../mMass-macOS.zip "mMass-macOS.app"
+          elif [ "${{ runner.os }}" = "Windows" ]; then
+              pyinstaller --onefile --windowed --name "mMass-Windows" --paths src src/mmass/mmass.py
+              mv dist/mMass-Windows.exe ./mMass-Windows.exe
+          else
+              pyinstaller --onefile --name "mMass-Linux" --paths src src/mmass/mmass.py
+              mv dist/mMass-Linux ./mMass-Linux
+          fi
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mMass-${{ matrix.os }}
+          # Path points to the renamed files in the root or zip
+          path: |
+            mMass-Windows.exe
+            mMass-macOS.zip
+            mMass-Linux
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Crucial for uploading to Releases
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./all-artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # This finds all files in the artifact folder and uploads them
+          files: ./all-artifacts/**/*
+          # Use the tag name as the release title
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
