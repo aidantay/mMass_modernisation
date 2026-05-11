@@ -16,35 +16,35 @@
 # -------------------------------------------------------------------------
 
 # load libs
+from __future__ import annotations
+
 import contextlib
-import os.path
 import re
 from copy import deepcopy
+from pathlib import Path
 
 # load objects
 from . import obj_peak, obj_peaklist, obj_scan
 
-# load stopper
 
 # PARSE MGF DATA
 # --------------
 
-
-class parseMGF:
+class ParseMGF:
     """Parse data from MGF."""
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
         self._scans = None
         self._scanlist = None
 
         # check path
-        if not os.path.exists(path):
-            raise OSError("File not found! --> " + self.path)
+        if not self.path.exists():
+            raise OSError(f"File not found! --> {self.path}")
 
     # ----
 
-    def load(self):
+    def load(self) -> None:
         """Load all scans into memory."""
         self._parseData()
 
@@ -52,7 +52,6 @@ class parseMGF:
 
     def info(self):
         """Get document info."""
-
         return {
             "title": "",
             "operator": "",
@@ -67,7 +66,6 @@ class parseMGF:
 
     def scanlist(self):
         """Get list of all scans in the document."""
-
         # use preloaded data if available
         if self._scanlist:
             return self._scanlist
@@ -81,7 +79,6 @@ class parseMGF:
 
     def scan(self, scanID=None, dataType=None):
         """Get spectrum from document."""
-
         # parse file
         if not self._scans:
             self._parseData()
@@ -101,16 +98,15 @@ class parseMGF:
 
     # ----
 
-    def _parseData(self):
+    def _parseData(self) -> bool | None:
         """Parse data."""
-
         # clear buffers
         self._scans = {}
         self._scanlist = None
 
         # open document
         try:
-            with open(self.path, encoding="utf-8") as document:
+            with self.path.open(encoding="utf-8") as document:
                 rawData = document.readlines()
         except OSError:
             return False
@@ -199,19 +195,18 @@ class parseMGF:
 
     def _makeScan(self, scanData, dataType):
         """Make scan object from raw data."""
-
-        # parse data as peaklist (discrete points)
+        # parse data as Peaklist (discrete points)
         if dataType == "peaklist" or (
             dataType is None and len(scanData["data"]) < 3000
         ):
             buff = []
             for point in scanData["data"]:
-                buff.append(obj_peak.peak(point[0], point[1]))
-            scan = obj_scan.scan(peaklist=obj_peaklist.peaklist(buff))
+                buff.append(obj_peak.Peak(point[0], point[1]))
+            scan = obj_scan.Scan(peaklist=obj_peaklist.Peaklist(buff))
 
         # parse data as spectrum (continuous line)
         else:
-            scan = obj_scan.scan(profile=scanData["data"])
+            scan = obj_scan.Scan(profile=scanData["data"])
 
         # set metadata
         scan.title = scanData["title"]

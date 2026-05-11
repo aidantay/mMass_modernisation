@@ -16,8 +16,6 @@
 # -------------------------------------------------------------------------
 
 # load libs
-from typing import Any
-
 import wx
 
 from mmass import mspy
@@ -29,10 +27,10 @@ from . import config, mwx
 # --------------------
 
 
-class dlgModificationsEditor(wx.Dialog):
+class DlgModificationsEditor(wx.Dialog):
     """Edit modifications library."""
 
-    def __init__(self, parent: Any) -> None:
+    def __init__(self, parent: wx.Window) -> None:
         super().__init__(
             parent,
             id=wx.ID_ANY,
@@ -61,7 +59,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def makeGUI(self) -> wx.BoxSizer:
         """Make GUI elements."""
-
         # make GUI elements
         self.makeItemsList()
         editor = self.makeItemEditor()
@@ -82,9 +79,8 @@ class dlgModificationsEditor(wx.Dialog):
 
     def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, wx.ID_ANY, size=(841, 250), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -111,7 +107,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def makeItemEditor(self) -> wx.StaticBoxSizer:
         """Make items editor."""
-
         mainSizer = wx.StaticBoxSizer(wx.VERTICAL, self, label="")
 
         # make elements
@@ -134,13 +129,13 @@ class dlgModificationsEditor(wx.Dialog):
         self.itemTermSpecifity_choice.SetStringSelection("None")
 
         itemGainFormula_label = wx.StaticText(self, wx.ID_ANY, "Gain formula:")
-        self.itemGainFormula_value = mwx.formulaCtrl(
+        self.itemGainFormula_value = mwx.FormulaCtrl(
             self, wx.ID_ANY, "", size=(150, -1)
         )
         self.itemGainFormula_value.Bind(wx.EVT_TEXT, self.onFormulaEdited)
 
         itemLossFormula_label = wx.StaticText(self, wx.ID_ANY, "Loss formula:")
-        self.itemLossFormula_value = mwx.formulaCtrl(
+        self.itemLossFormula_value = mwx.FormulaCtrl(
             self, wx.ID_ANY, "", size=(150, -1)
         )
         self.itemLossFormula_value.Bind(wx.EVT_TEXT, self.onFormulaEdited)
@@ -219,7 +214,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def onItemSelected(self, evt: wx.ListEvent) -> None:
         """Update item editor with selected item."""
-
         # get selected item
         name = evt.GetText()
         mod = mspy.modifications[name]
@@ -242,7 +236,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def onAddItem(self, _evt: wx.CommandEvent) -> None:
         """Add/replace item."""
-
         # get item data
         itemData = self.getItemData()
         if not itemData:
@@ -257,7 +250,7 @@ class dlgModificationsEditor(wx.Dialog):
                 (wx.ID_CANCEL, "Cancel", 80, False, 15),
                 (wx.ID_OK, "Replace", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() != wx.ID_OK:
                 dlg.Destroy()
                 return
@@ -274,7 +267,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def onDeleteItem(self, _evt: wx.CommandEvent) -> None:
         """Remove selected items."""
-
         # delete?
         title = "Do you really want to delete selected modifications?"
         message = "Modification definitions will be lost."
@@ -282,7 +274,7 @@ class dlgModificationsEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -296,7 +288,7 @@ class dlgModificationsEditor(wx.Dialog):
                 del mspy.modifications[name]
             else:
                 wx.Bell()
-                dlg = mwx.dlgMessage(
+                dlg = mwx.DlgMessage(
                     self,
                     title='Modification "'
                     + name
@@ -321,7 +313,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def updateItemsMap(self) -> None:
         """Update items map."""
-
         self.itemsMap = []
 
         # make map
@@ -343,7 +334,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def updateItemsList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateItemsMap()
         self.itemsList.DeleteAllItems()
@@ -378,15 +368,14 @@ class dlgModificationsEditor(wx.Dialog):
 
     def updateFormulaMass(self) -> None:
         """Update formula mass."""
-
         # get formula
         gain = self.itemGainFormula_value.GetValue()
         loss = self.itemLossFormula_value.GetValue()
 
         # show formula masses
         try:
-            gain = mspy.compound(gain)
-            loss = mspy.compound(loss)
+            gain = mspy.Compound(gain)
+            loss = mspy.Compound(loss)
             gainMass = gain.mass()
             lossMass = loss.mass()
             self.itemMoMass_value.SetValue(str(gainMass[0] - lossMass[0]))
@@ -400,7 +389,6 @@ class dlgModificationsEditor(wx.Dialog):
 
     def clearEditor(self) -> None:
         """Clear item editor."""
-
         # update editor
         self.itemName_value.SetValue("")
         self.itemDescription_value.SetValue("")
@@ -413,9 +401,8 @@ class dlgModificationsEditor(wx.Dialog):
 
     # ----
 
-    def getItemData(self) -> Any:
+    def getItemData(self) -> mspy.Modification | bool:
         """Get formated item data."""
-
         # get data
         name = self.itemName_value.GetValue()
         description = self.itemDescription_value.GetValue()
@@ -439,7 +426,7 @@ class dlgModificationsEditor(wx.Dialog):
 
         # make compound
         try:
-            modification = mspy.modification(
+            modification = mspy.Modification(
                 name=name,
                 gainFormula=gainFormula,
                 lossFormula=lossFormula,

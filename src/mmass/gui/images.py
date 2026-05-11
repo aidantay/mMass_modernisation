@@ -16,6 +16,8 @@
 # -------------------------------------------------------------------------
 
 # load libs
+from pathlib import Path
+
 import wx
 from wx.tools import img2py
 
@@ -25,9 +27,8 @@ from wx.tools import img2py
 lib = {}
 
 
-def loadImages():
+def loadImages() -> None:
     """Load images from lib."""
-
     # load image library
     if wx.Platform == "__WXMAC__":
         from . import images_lib_mac as images_lib
@@ -648,18 +649,16 @@ def loadImages():
 # ----
 
 
-def convertImages():
+def convertImages() -> None:
     """Convert an image to PNG format and embed it in a Python file."""
-
     # get libs to import images
     imp = "#load libs\nfrom wx.lib.embeddedimage import PyEmbeddedImage\n\n\n"
 
     # convert images
     for platform in ("mac", "msw", "gtk"):
         # create file
-        imageFile = open("images_lib_" + platform + ".py", "w")
-        imageFile.write(imp)
-        imageFile.close()
+        image_lib_path = Path(f"images_lib_{platform}.py")
+        image_lib_path.write_text(imp, encoding="utf-8")
 
         # make commands
         commands = [

@@ -17,28 +17,26 @@
 
 # load libs
 import contextlib
-import os.path
 import tempfile
 import threading
 import webbrowser
+from pathlib import Path
 
 import wx
 
 from mmass import mspy
 
-from . import config, images, mwx
-
 # load modules
-from .ids import *
+from . import config, ids, images, mwx
 
 # FLOATING PANEL WITH MASS TO FORMULA TOOL
 # ----------------------------------------
 
 
-class panelMassToFormula(wx.Frame):
+class PanelMassToFormula(wx.Frame):
     """Mass to formula tool."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -62,9 +60,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbars
         toolbar = self.makeToolbar()
         controlbar1 = self.makeControlbar1()
@@ -96,9 +93,8 @@ class panelMassToFormula(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -111,7 +107,7 @@ class panelMassToFormula(wx.Frame):
             "",
             size=(120, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.mass_value.Bind(wx.EVT_TEXT_ENTER, self.onGenerate)
 
@@ -122,7 +118,7 @@ class panelMassToFormula(wx.Frame):
             -1,
             str(config.massToFormula["charge"]),
             size=(40, -1),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
 
         choices = ["M", "M*", "H+", "Na+", "K+", "Li+", "NH4+"]
@@ -143,7 +139,7 @@ class panelMassToFormula(wx.Frame):
             str(config.massToFormula["tolerance"]),
             size=(50, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.tolerance_value.Bind(wx.EVT_TEXT_ENTER, self.onGenerate)
 
@@ -193,9 +189,8 @@ class panelMassToFormula(wx.Frame):
 
     def makeControlbar1(self):
         """Make composition controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self,
             -1,
             images.lib["bgrControlbarBorder"],
@@ -205,13 +200,13 @@ class panelMassToFormula(wx.Frame):
         # make controls
         formulaMin_label = wx.StaticText(panel, -1, "Minimal formula:")
         formulaMin_label.SetFont(wx.SMALL_FONT)
-        self.formulaMin_value = mwx.formulaCtrl(
+        self.formulaMin_value = mwx.FormulaCtrl(
             panel, -1, config.massToFormula["formulaMin"], size=(150, -1)
         )
 
         formulaMax_label = wx.StaticText(panel, -1, "Maximal formula:")
         formulaMax_label.SetFont(wx.SMALL_FONT)
-        self.formulaMax_value = mwx.formulaCtrl(
+        self.formulaMax_value = mwx.FormulaCtrl(
             panel, -1, config.massToFormula["formulaMax"], size=(150, -1)
         )
 
@@ -236,9 +231,8 @@ class panelMassToFormula(wx.Frame):
 
     def makeControlbar2(self):
         """Make rules controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -296,11 +290,10 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def makeFormulaeList(self):
+    def makeFormulaeList(self) -> None:
         """Make compounds list."""
-
         # init list
-        self.formulaeList = mwx.sortListCtrl(
+        self.formulaeList = mwx.SortListCtrl(
             self, -1, size=(751, 250), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.formulaeList.SetFont(wx.SMALL_FONT)
@@ -333,11 +326,10 @@ class panelMassToFormula(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -362,9 +354,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Destroy this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -375,9 +366,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -398,9 +388,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -408,23 +397,21 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Show selected mass in spectrum canvas."""
-
         mz = self.currentFormulae[evt.GetData()][2]
         self.parent.updateMassPoints([mz])
 
     # ----
 
-    def onItemActivated(self, evt):
+    def onItemActivated(self, evt) -> None:
         """Show isotopic pattern for selected compound."""
         self.onItemSendToMassCalculator(evt)
 
     # ----
 
-    def onItemSendToMassCalculator(self, evt):
+    def onItemSendToMassCalculator(self, evt) -> None:
         """Show isotopic pattern for selected compound."""
-
         # get data
         selected = self.formulaeList.getSelected()
         if selected:
@@ -449,9 +436,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onItemSearch(self, evt):
+    def onItemSearch(self, evt) -> None:
         """Make query and send formula to selected database."""
-
         # get selected formula
         selected = self.formulaeList.getSelected()
         if selected:
@@ -462,15 +448,15 @@ class panelMassToFormula(wx.Frame):
             return
 
         # get selected server
-        if evt.GetId() == ID_massToFormulaSearchPubChem:
+        if evt.GetId() == ids.ID_massToFormulaSearchPubChem:
             server = "PubChem"
-        elif evt.GetId() == ID_massToFormulaSearchChemSpider:
+        elif evt.GetId() == ids.ID_massToFormulaSearchChemSpider:
             server = "ChemSpider"
-        elif evt.GetId() == ID_massToFormulaSearchMETLIN:
+        elif evt.GetId() == ids.ID_massToFormulaSearchMETLIN:
             server = "METLIN"
-        elif evt.GetId() == ID_massToFormulaSearchHMDB:
+        elif evt.GetId() == ids.ID_massToFormulaSearchHMDB:
             server = "HMDB"
-        elif evt.GetId() == ID_massToFormulaSearchLipidMaps:
+        elif evt.GetId() == ids.ID_massToFormulaSearchLipidMaps:
             server = "Lipid MAPS"
         else:
             wx.Bell()
@@ -481,14 +467,12 @@ class panelMassToFormula(wx.Frame):
 
         # run search
         try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_formula_search.html")
-            htmlFile = open(path, "wb")
-            htmlFile.write(htmlData.encode("utf-8"))
-            htmlFile.close()
-            webbrowser.open("file://" + path, autoraise=1)
-        except:
+            path = Path(tempfile.gettempdir()) / "mmass_formula_search.html"
+            path.write_bytes(htmlData.encode("utf-8"))
+            webbrowser.open(path.as_uri(), autoraise=1)
+        except Exception:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Unable to send data to " + server + " server.",
                 message="Unknown error occured while creating the search page.",
@@ -498,9 +482,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onItemCopyFormula(self, evt):
+    def onItemCopyFormula(self, evt) -> None:
         """Copy selected compound formula into clipboard."""
-
         # get data
         selected = self.formulaeList.getSelected()
         if selected:
@@ -521,9 +504,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onListKey(self, evt):
+    def onListKey(self, evt) -> None:
         """Export list if Ctrl+C."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -537,33 +519,32 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onListRMU(self, evt):
+    def onListRMU(self, evt) -> None:
         """Show filter pop-up menu on lists."""
-
         # popup menu
         menu = wx.Menu()
-        menu.Append(ID_listSendToMassCalculator, "Show Isotopic Pattern", "")
+        menu.Append(ids.ID_listSendToMassCalculator, "Show Isotopic Pattern", "")
         menu.AppendSeparator()
-        menu.Append(ID_massToFormulaSearchPubChem, "Search in PubChem", "")
-        menu.Append(ID_massToFormulaSearchChemSpider, "Search in ChemSpider", "")
-        menu.Append(ID_massToFormulaSearchMETLIN, "Search in METLIN", "")
-        menu.Append(ID_massToFormulaSearchHMDB, "Search in HMDB", "")
-        menu.Append(ID_massToFormulaSearchLipidMaps, "Search in Lipid MAPS", "")
+        menu.Append(ids.ID_massToFormulaSearchPubChem, "Search in PubChem", "")
+        menu.Append(ids.ID_massToFormulaSearchChemSpider, "Search in ChemSpider", "")
+        menu.Append(ids.ID_massToFormulaSearchMETLIN, "Search in METLIN", "")
+        menu.Append(ids.ID_massToFormulaSearchHMDB, "Search in HMDB", "")
+        menu.Append(ids.ID_massToFormulaSearchLipidMaps, "Search in Lipid MAPS", "")
         menu.AppendSeparator()
-        menu.Append(ID_listCopyFormula, "Copy Formula")
-        menu.Append(ID_listCopy, "Copy List")
+        menu.Append(ids.ID_listCopyFormula, "Copy Formula")
+        menu.Append(ids.ID_listCopy, "Copy List")
 
         # bind events
         self.Bind(
-            wx.EVT_MENU, self.onItemSendToMassCalculator, id=ID_listSendToMassCalculator
+            wx.EVT_MENU, self.onItemSendToMassCalculator, id=ids.ID_listSendToMassCalculator
         )
-        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ID_massToFormulaSearchPubChem)
-        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ID_massToFormulaSearchChemSpider)
-        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ID_massToFormulaSearchMETLIN)
-        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ID_massToFormulaSearchHMDB)
-        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ID_massToFormulaSearchLipidMaps)
-        self.Bind(wx.EVT_MENU, self.onItemCopyFormula, id=ID_listCopyFormula)
-        self.Bind(wx.EVT_MENU, self.onListCopy, id=ID_listCopy)
+        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ids.ID_massToFormulaSearchPubChem)
+        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ids.ID_massToFormulaSearchChemSpider)
+        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ids.ID_massToFormulaSearchMETLIN)
+        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ids.ID_massToFormulaSearchHMDB)
+        self.Bind(wx.EVT_MENU, self.onItemSearch, id=ids.ID_massToFormulaSearchLipidMaps)
+        self.Bind(wx.EVT_MENU, self.onItemCopyFormula, id=ids.ID_listCopyFormula)
+        self.Bind(wx.EVT_MENU, self.onListCopy, id=ids.ID_listCopy)
 
         # show menu
         self.PopupMenu(menu)
@@ -572,15 +553,14 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onListCopy(self, evt=None):
+    def onListCopy(self, evt=None) -> None:
         """Copy items into clipboard."""
         self.formulaeList.copyToClipboard()
 
     # ----
 
-    def onGenerate(self, evt=None):
+    def onGenerate(self, evt=None) -> None:
         """Generate formulae."""
-
         # check processing
         if self.processing:
             return
@@ -600,7 +580,7 @@ class panelMassToFormula(wx.Frame):
             message = "Neutral mass of your specified ion is too high ({:.0f} Da max).".format(
                 config.massToFormula["massLimit"]
             )
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self, title="Neutral mass is too high.", message=message
             )
             dlg.ShowModal()
@@ -632,7 +612,7 @@ class panelMassToFormula(wx.Frame):
             and len(self.currentFormulae) >= config.massToFormula["countLimit"]
         ):
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Maximum number of formulae reached.",
                 message="The internal limit for number of formulae has been reached.\nPlease note that your formula could be missing.",
@@ -642,9 +622,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onUnitsChanged(self, evt):
+    def onUnitsChanged(self, evt) -> None:
         """Set current units and update data."""
-
         # get units
         config.massToFormula["units"] = "ppm"
         if self.unitsDa_radio.GetValue():
@@ -662,9 +641,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def onApplyRules(self, evt=None):
+    def onApplyRules(self, evt=None) -> None:
         """Filter current compounds by selected rules."""
-
         # get rules
         self.getRules()
 
@@ -681,9 +659,8 @@ class panelMassToFormula(wx.Frame):
         tolerance=None,
         units=None,
         agentFormula=None,
-    ):
+    ) -> None:
         """Set data."""
-
         # set new document
         self.currentDocument = document
 
@@ -724,9 +701,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             self.currentMass = float(self.mass_value.GetValue())
@@ -749,15 +725,14 @@ class panelMassToFormula(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def getRules(self):
+    def getRules(self) -> None:
         """Get current rules to be applied."""
-
         config.massToFormula["rules"] = []
 
         if self.ruleHC_check.GetValue():
@@ -777,9 +752,8 @@ class panelMassToFormula(wx.Frame):
 
     # ----
 
-    def runGenerator(self):
+    def runGenerator(self) -> None:
         """Generate formula for given mass."""
-
         # run task
         try:
             self.currentFormulae = []
@@ -830,7 +804,7 @@ class panelMassToFormula(wx.Frame):
                     }
 
             # add user-specified compositions
-            minComposition = mspy.compound(
+            minComposition = mspy.Compound(
                 config.massToFormula["formulaMin"]
             ).composition()
             for el in minComposition:
@@ -839,7 +813,7 @@ class panelMassToFormula(wx.Frame):
                 else:
                     composition[el] = [minComposition[el], minComposition[el]]
 
-            maxComposition = mspy.compound(
+            maxComposition = mspy.Compound(
                 config.massToFormula["formulaMax"]
             ).composition()
             for el in maxComposition:
@@ -864,7 +838,7 @@ class panelMassToFormula(wx.Frame):
             buff = []
             for formula in formulae:
                 # make compound
-                cmpd = mspy.compound(formula)
+                cmpd = mspy.Compound(formula)
                 mass = cmpd.mass(0)
                 mz = cmpd.mz(
                     config.massToFormula["charge"],
@@ -905,14 +879,13 @@ class panelMassToFormula(wx.Frame):
             self.currentFormulae = buff
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def updateFormulaeList(self):
+    def updateFormulaeList(self) -> None:
         """Update formulae list."""
-
         # clear previous data and set new
         self.formulaeList.DeleteAllItems()
         self.formulaeList.setDataMap(self.currentFormulae)
@@ -970,7 +943,6 @@ class panelMassToFormula(wx.Frame):
 
     def compareIsotopicPattern(self, compound, charge, ionization, shift=0.0):
         """Compare theoretical and real isotopic pattern."""
-
         # check document
         if (
             self.currentDocument is None
@@ -1032,7 +1004,6 @@ class panelMassToFormula(wx.Frame):
 
     def applyRules(self, compound):
         """Apply current rules."""
-
         HC = (config.massToFormula["HCMin"], config.massToFormula["HCMax"])
         NOPSC = (
             config.massToFormula["NCMax"],
@@ -1052,8 +1023,8 @@ class panelMassToFormula(wx.Frame):
     # ----
 
     def makeSearchHTML(self, server, formula):
+        # ruff: disable[E501]
         """Format data to HMDB html."""
-
         # get script
         script = config.massToFormula[server.replace(" ", "") + "Script"]
 
@@ -1135,18 +1106,16 @@ class panelMassToFormula(wx.Frame):
         buff += '      <p id="note">Press the <strong>Search</strong> button if data was not sent automatically.</p>\n'
         buff += '      <p id="button"><input type="submit" value="Search" /></p>\n'
         buff += "    </div>\n\n"
-
         buff += "  </form>\n"
         buff += "</body>\n"
         buff += "</html>\n"
-
+        # ruff: enable[E501]
         return buff
 
     # ----
 
     def checkMassLimit(self):
         """Check maximim neutral mass allowed."""
-
         # get agent charge
         agentCharge = 1
         if config.massToFormula["ionization"] == "e":
@@ -1168,7 +1137,6 @@ class panelMassToFormula(wx.Frame):
 
     def _escape(self, text):
         """Clear special characters such as <> etc."""
-
         text = text.strip()
         search = ("&", '"', "'", "<", ">")
         replace = ("&amp;", "&quot;", "&#39;", "&lt;", "&gt;")

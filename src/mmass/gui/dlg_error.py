@@ -29,10 +29,10 @@ from . import config, images, mwx
 # ------------
 
 
-class dlgError(wx.Dialog):
+class DlgError(wx.Dialog):
     """Show exception message."""
 
-    def __init__(self, parent, exception=""):
+    def __init__(self, parent: wx.Window | None, exception: str = "") -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -82,9 +82,8 @@ class dlgError(wx.Dialog):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> wx.Sizer:
         """Make GUI elements."""
-
         # make elements
         self.exception_value = wx.TextCtrl(
             self, -1, self.exception, size=(400, 250), style=wx.TE_MULTILINE
@@ -137,7 +136,7 @@ class dlgError(wx.Dialog):
 
     # ----
 
-    def onQuit(self, evt):
+    def onQuit(self, evt: wx.Event) -> None:
         """Quit application."""
         sys.exit()
 

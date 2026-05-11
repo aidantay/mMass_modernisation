@@ -16,25 +16,24 @@
 # -------------------------------------------------------------------------
 
 # load libs
-from typing import Any
-
 import wx
 
 from mmass import mspy
 
 # load modules
-from . import config, mwx
+from . import config, doc, mwx
 
 # NOTATION LABEL
 # --------------
 
 
-class dlgNotation(wx.Dialog):
+class DlgNotation(wx.Dialog):
     """Set notation label."""
 
-    def __init__(self, parent: Any, notation: Any, button: str = "Add") -> None:
+    def __init__(self, parent: wx.Window, notation: "doc.Annotation", button: str = "Add") -> None:
         # initialize document frame
-        super().__init__(parent, -1, "Notation", style=wx.DEFAULT_DIALOG_STYLE)
+        super().__init__(parent, wx.ID_ANY, "Notation", style=wx.DEFAULT_DIALOG_STYLE)
+
 
         self.notation = notation
         self.button = button
@@ -56,26 +55,25 @@ class dlgNotation(wx.Dialog):
 
     def makeGUI(self) -> wx.BoxSizer:
         """Make GUI elements."""
-
-        labelBox = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
-        formulaBox = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
+        labelBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.HORIZONTAL)
+        formulaBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.HORIZONTAL)
 
         # make elements
-        label_label = wx.StaticText(self, -1, "Label:", style=wx.ALIGN_RIGHT)
+        label_label = wx.StaticText(self, wx.ID_ANY, "Label:", style=wx.ALIGN_RIGHT)
         self.label_value = wx.TextCtrl(
-            self, -1, "", size=(300, -1), style=wx.TE_PROCESS_ENTER
+            self, wx.ID_ANY, "", size=(300, -1), style=wx.TE_PROCESS_ENTER
         )
         self.label_value.Bind(wx.EVT_TEXT_ENTER, self.onOK)
 
-        formula_label = wx.StaticText(self, -1, "Formula:", style=wx.ALIGN_RIGHT)
-        self.formula_value = mwx.formulaCtrl(
-            self, -1, "", size=(300, -1), style=wx.TE_PROCESS_ENTER
+        formula_label = wx.StaticText(self, wx.ID_ANY, "Formula:", style=wx.ALIGN_RIGHT)
+        self.formula_value = mwx.FormulaCtrl(
+            self, wx.ID_ANY, "", size=(300, -1), style=wx.TE_PROCESS_ENTER
         )
         self.formula_value.Bind(wx.EVT_TEXT, self.onFormula)
         self.formula_value.Bind(wx.EVT_TEXT_ENTER, self.onOK)
 
         theoreticalMZ_label = wx.StaticText(
-            self, -1, "Theoretical m/z:", style=wx.ALIGN_RIGHT
+            self, wx.ID_ANY, "Theoretical m/z:", style=wx.ALIGN_RIGHT
         )
         self.theoreticalMZ_value = wx.TextCtrl(
             self,
@@ -83,35 +81,35 @@ class dlgNotation(wx.Dialog):
             "",
             size=(120, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("float"),
+            validator=mwx.Validator("float"),
         )
         self.theoreticalMZ_value.Bind(wx.EVT_TEXT_ENTER, self.onOK)
 
-        charge_label = wx.StaticText(self, -1, " z:")
+        charge_label = wx.StaticText(self, wx.ID_ANY, " z:")
         self.charge_value = wx.TextCtrl(
             self,
             -1,
             "",
             size=(30, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
         self.charge_value.Bind(wx.EVT_TEXT, self.onFormula)
         self.charge_value.Bind(wx.EVT_TEXT_ENTER, self.onOK)
 
-        self.radical_check = wx.CheckBox(self, -1, "M*", size=(50, -1))
+        self.radical_check = wx.CheckBox(self, wx.ID_ANY, "M*", size=(50, -1))
         self.radical_check.Bind(wx.EVT_CHECKBOX, self.onMassType)
 
-        self.mzByUser_radio = wx.RadioButton(self, -1, "Manual", style=wx.RB_GROUP)
+        self.mzByUser_radio = wx.RadioButton(self, wx.ID_ANY, "Manual", style=wx.RB_GROUP)
         self.mzByUser_radio.SetFont(wx.SMALL_FONT)
         self.mzByUser_radio.Bind(wx.EVT_RADIOBUTTON, self.onMassType)
         self.mzByUser_radio.SetValue(True)
 
-        self.mzByFormulaMo_radio = wx.RadioButton(self, -1, "Mo")
+        self.mzByFormulaMo_radio = wx.RadioButton(self, wx.ID_ANY, "Mo")
         self.mzByFormulaMo_radio.SetFont(wx.SMALL_FONT)
         self.mzByFormulaMo_radio.Bind(wx.EVT_RADIOBUTTON, self.onMassType)
 
-        self.mzByFormulaAv_radio = wx.RadioButton(self, -1, "Av")
+        self.mzByFormulaAv_radio = wx.RadioButton(self, wx.ID_ANY, "Av")
         self.mzByFormulaAv_radio.SetFont(wx.SMALL_FONT)
         self.mzByFormulaAv_radio.Bind(wx.EVT_RADIOBUTTON, self.onMassType)
 
@@ -165,7 +163,6 @@ class dlgNotation(wx.Dialog):
 
     def makeButtons(self) -> wx.BoxSizer:
         """Make buttons."""
-
         # make items
         cancel_butt = wx.Button(self, wx.ID_CANCEL, "Cancel")
         ok_butt = wx.Button(self, wx.ID_OK, self.button)
@@ -183,7 +180,6 @@ class dlgNotation(wx.Dialog):
 
     def setData(self) -> None:
         """Set data to elements."""
-
         # set label
         self.label_value.SetValue(self.notation.label)
 
@@ -207,7 +203,6 @@ class dlgNotation(wx.Dialog):
 
     def onOK(self, _evt: wx.CommandEvent | None = None) -> None:
         """Get label."""
-
         # get data
         label = self.label_value.GetValue()
         formula = self.formula_value.GetValue()
@@ -225,7 +220,7 @@ class dlgNotation(wx.Dialog):
         # get formula
         if formula:
             try:
-                mspy.compound(formula)
+                mspy.Compound(formula)
                 self.notation.formula = formula
             except Exception:
                 wx.Bell()
@@ -266,7 +261,6 @@ class dlgNotation(wx.Dialog):
 
     def onMassType(self, _evt: wx.CommandEvent | None = None) -> None:
         """Mass type changed."""
-
         if self.mzByUser_radio.GetValue():
             self.theoreticalMZ_value.Enable(True)
         else:
@@ -277,7 +271,6 @@ class dlgNotation(wx.Dialog):
 
     def onFormula(self, evt: wx.CommandEvent | None = None) -> None:
         """Check formula and calculate m/z."""
-
         if evt is not None:
             evt.Skip()
 
@@ -295,7 +288,7 @@ class dlgNotation(wx.Dialog):
 
         # get m/z from formula
         try:
-            compound = mspy.compound(formula)
+            compound = mspy.Compound(formula)
             charge = int(charge)
             if radical:
                 mz = compound.mz(charge=charge, agentFormula="e", agentCharge=-1)

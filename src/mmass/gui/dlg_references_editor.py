@@ -17,25 +17,24 @@
 
 # load libs
 import copy
+import pathlib
 import xml.dom.minidom
 
 import wx
 
 from mmass import mspy
 
-from . import libs, mwx
-
 # load modules
-from .ids import ID_dlgReplace, ID_dlgReplaceAll, ID_dlgSkip
+from . import ids, libs, mwx
 
 # REFERENCE MASSES EDITOR
 # -----------------------
 
 
-class dlgReferencesEditor(wx.Dialog):
+class DlgReferencesEditor(wx.Dialog):
     """Edit reference masses library."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -65,7 +64,6 @@ class dlgReferencesEditor(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make GUI elements
         groups = self.makeGroupEditor()
         self.makeItemsList()
@@ -83,7 +81,6 @@ class dlgReferencesEditor(wx.Dialog):
 
     def makeGroupEditor(self):
         """Make group editor."""
-
         # make elements
         self.groupName_choice = wx.Choice(self, wx.ID_ANY, size=(-1, mwx.CHOICE_HEIGHT))
         self.groupName_choice.Bind(wx.EVT_CHOICE, self.onGroupSelected)
@@ -112,11 +109,10 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def makeItemsList(self):
+    def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, wx.ID_ANY, size=(601, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -137,7 +133,6 @@ class dlgReferencesEditor(wx.Dialog):
 
     def makeItemEditor(self):
         """Make items editor."""
-
         mainSizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.VERTICAL)
 
         # make elements
@@ -175,9 +170,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onGroupSelected(self, _evt=None):
+    def onGroupSelected(self, _evt=None) -> None:
         """Update items for selected group."""
-
         # get selected group
         group = self.groupName_choice.GetStringSelection()
         if group in libs.references:
@@ -191,9 +185,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Update item editor with selected item."""
-
         # get selected item
         index = evt.GetData()
         description = self.itemsMap[index][0]
@@ -205,9 +198,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onImport(self, _evt):
+    def onImport(self, _evt) -> None:
         """Import items from xml library."""
-
         # show open file dialog
         wildcard = "Library files|*.xml;*.XML"
         dlg = wx.FileDialog(
@@ -217,7 +209,7 @@ class dlgReferencesEditor(wx.Dialog):
             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
         )
         if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
+            path = pathlib.Path(dlg.GetPath())
             dlg.Destroy()
         else:
             dlg.Destroy()
@@ -227,7 +219,7 @@ class dlgReferencesEditor(wx.Dialog):
         importedItems = self.readLibraryXML(path)
         if importedItems is False:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Unrecognized library format.",
                 message="Specified file is not a valid reference library.",
@@ -237,7 +229,7 @@ class dlgReferencesEditor(wx.Dialog):
             return
         if importedItems == {}:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="No data to import.",
                 message="Specified library contains no data.",
@@ -247,7 +239,7 @@ class dlgReferencesEditor(wx.Dialog):
             return
 
         # select groups to import
-        dlg = dlgSelectItemsToImport(self, importedItems)
+        dlg = DlgSelectItemsToImport(self, importedItems)
         if dlg.ShowModal() == wx.ID_OK:
             selected = dlg.selected
             dlg.Destroy()
@@ -266,19 +258,19 @@ class dlgReferencesEditor(wx.Dialog):
                 title = f'Group entitled "{item}"\nis already in you library. Do you want to replace it?'
                 message = "All references within this group will be lost."
                 buttons = [
-                    (ID_dlgReplaceAll, "Replace All", 120, False, 40),
-                    (ID_dlgSkip, "Skip", 80, False, 15),
-                    (ID_dlgReplace, "Replace", 80, True, 0),
+                    (ids.ID_dlgReplaceAll, "Replace All", 120, False, 40),
+                    (ids.ID_dlgSkip, "Skip", 80, False, 15),
+                    (ids.ID_dlgReplace, "Replace", 80, True, 0),
                 ]
-                dlg = mwx.dlgMessage(self, title, message, buttons)
+                dlg = mwx.DlgMessage(self, title, message, buttons)
                 ID = dlg.ShowModal()
-                if ID_dlgSkip == ID:
+                if ids.ID_dlgSkip == ID:
                     continue
-                if ID_dlgReplaceAll == ID:
+                if ids.ID_dlgReplaceAll == ID:
                     replaceAll = True
                     libs.references[item] = importedItems[item]
                     selectAfter = item
-                elif ID_dlgReplace == ID:
+                elif ids.ID_dlgReplace == ID:
                     libs.references[item] = importedItems[item]
                     selectAfter = item
 
@@ -289,11 +281,10 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onAddGroup(self, _evt):
+    def onAddGroup(self, _evt) -> None:
         """Add new group."""
-
         # get group name
-        dlg = dlgGroupName(self)
+        dlg = DlgGroupName(self)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -304,7 +295,7 @@ class dlgReferencesEditor(wx.Dialog):
         # check group name
         if name in libs.compounds:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Group with the same name already exists.",
                 message="Type a different name.",
@@ -323,16 +314,15 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onRenameGroup(self, _evt):
+    def onRenameGroup(self, _evt) -> None:
         """Rename selected group."""
-
         # check group
         if not self.group:
             wx.Bell()
             return
 
         # get group name
-        dlg = dlgGroupName(self, self.group)
+        dlg = DlgGroupName(self, self.group)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -345,7 +335,7 @@ class dlgReferencesEditor(wx.Dialog):
             return
         if name in libs.compounds:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Group with the same name already exists.",
                 message="Type a different name.",
@@ -366,9 +356,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onDeleteGroup(self, _evt):
+    def onDeleteGroup(self, _evt) -> None:
         """Delete selected group."""
-
         # check group
         if not self.group:
             wx.Bell()
@@ -381,7 +370,7 @@ class dlgReferencesEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -397,9 +386,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onAddItem(self, _evt):
+    def onAddItem(self, _evt) -> None:
         """Add item."""
-
         # check group
         if not self.group:
             wx.Bell()
@@ -419,9 +407,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def onDeleteItem(self, _evt):
+    def onDeleteItem(self, _evt) -> None:
         """Remove selected items."""
-
         # check group
         if not self.group:
             wx.Bell()
@@ -434,7 +421,7 @@ class dlgReferencesEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -456,9 +443,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def updateGroups(self):
+    def updateGroups(self) -> None:
         """Update groups combo."""
-
         # clear groups
         self.groupName_choice.Clear()
 
@@ -472,9 +458,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsMap(self):
+    def updateItemsMap(self) -> None:
         """Update items map."""
-
         self.itemsMap = []
 
         # check group
@@ -486,9 +471,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsList(self):
+    def updateItemsList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateItemsMap()
         self.itemsList.DeleteAllItems()
@@ -509,15 +493,14 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def updateFormulaMass(self):
+    def updateFormulaMass(self) -> None:
         """Update formula mass."""
-
         # get formula
         formula = self.itemFormula_value.GetValue()
 
         # show formula masses
         try:
-            formula = mspy.compound(formula)
+            formula = mspy.Compound(formula)
             mass = formula.mass()
             self.itemMoMass_value.SetValue(str(mass[0]))
             self.itemAvMass_value.SetValue(str(mass[1]))
@@ -528,9 +511,8 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def clearEditor(self):
+    def clearEditor(self) -> None:
         """Clear item editor."""
-
         # update editor
         self.itemDescription_value.SetValue("")
         self.itemMass_value.SetValue("")
@@ -539,7 +521,6 @@ class dlgReferencesEditor(wx.Dialog):
 
     def getItemData(self):
         """Get formated item data."""
-
         # get data
         description = self.itemDescription_value.GetValue()
         mass = self.itemMass_value.GetValue()
@@ -560,14 +541,13 @@ class dlgReferencesEditor(wx.Dialog):
 
     # ----
 
-    def readLibraryXML(self, path):
+    def readLibraryXML(self, path: pathlib.Path) -> dict | bool:
         """Read xml library."""
-
         references = {}
 
         # parse XML file
         try:
-            document = xml.dom.minidom.parse(path)
+            document = xml.dom.minidom.parse(str(path))
         except Exception:
             return False
 
@@ -594,7 +574,6 @@ class dlgReferencesEditor(wx.Dialog):
 
     def _getNodeText(self, node):
         """Get text from node list."""
-
         buff = ""
         for child in node.childNodes:
             if child.nodeType == child.TEXT_NODE:
@@ -605,10 +584,10 @@ class dlgReferencesEditor(wx.Dialog):
     # ----
 
 
-class dlgGroupName(wx.Dialog):
+class DlgGroupName(wx.Dialog):
     """Set group name."""
 
-    def __init__(self, parent, name=""):
+    def __init__(self, parent, name="") -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, wx.ID_ANY, "Group Name", style=wx.DEFAULT_DIALOG_STYLE
@@ -630,7 +609,6 @@ class dlgGroupName(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(
             wx.StaticBox(self, wx.ID_ANY, ""), wx.HORIZONTAL
         )
@@ -665,9 +643,8 @@ class dlgGroupName(wx.Dialog):
 
     # ----
 
-    def onOK(self, _evt):
+    def onOK(self, _evt) -> None:
         """Get name."""
-
         self.name = self.name_value.GetValue()
         if self.name:
             self.EndModal(wx.ID_OK)
@@ -677,10 +654,10 @@ class dlgGroupName(wx.Dialog):
     # ----
 
 
-class dlgSelectItemsToImport(wx.Dialog):
+class DlgSelectItemsToImport(wx.Dialog):
     """Select items to import."""
 
-    def __init__(self, parent, items):
+    def __init__(self, parent, items) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -710,7 +687,6 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make GUI elements
         self.makeItemsList()
         buttons = self.makeButtons()
@@ -731,7 +707,6 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     def makeButtons(self):
         """Make buttons."""
-
         # make items
         cancel_butt = wx.Button(self, wx.ID_CANCEL, "Cancel")
         import_butt = wx.Button(self, wx.ID_OK, "Import")
@@ -746,11 +721,10 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def makeItemsList(self):
+    def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, wx.ID_ANY, size=(461, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -769,9 +743,8 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def updateItemsList(self):
+    def updateItemsList(self) -> None:
         """Set data to items list."""
-
         # set data map
         self.itemsMap = []
         for _x, item in enumerate(self.items):
@@ -789,17 +762,15 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def onItemActivated(self, _evt):
+    def onItemActivated(self, _evt) -> None:
         """Import selected item."""
-
         self.selected = self.getSelecedItems()
         self.EndModal(wx.ID_OK)
 
     # ----
 
-    def onImport(self, _evt):
+    def onImport(self, _evt) -> None:
         """Check selected items and quit."""
-
         # get selection
         self.selected = self.getSelecedItems()
         if self.selected:
@@ -811,7 +782,6 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     def getSelecedItems(self):
         """Get selected items."""
-
         # get selected items
         keys = []
         for item in self.itemsList.getSelected():

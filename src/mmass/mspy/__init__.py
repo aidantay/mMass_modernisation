@@ -15,34 +15,127 @@
 #     main directory of the program.
 # -------------------------------------------------------------------------
 
-# load stopper
 # load building blocks
-from .blocks import *
+from .blocks import (
+    Element,
+    Enzyme,
+    Fragment,
+    Modification,
+    Monomer,
+    blocksdir,
+    elements,
+    enzymes,
+    fragments,
+    loadEnzymes,
+    loadModifications,
+    loadMonomers,
+    modifications,
+    monomers,
+    saveEnzymes,
+    saveModifications,
+    saveMonomers,
+    xml,
+)
 
 # load modules
-from .mod_basics import *
-from .mod_calibration import *
-from .mod_envfit import *
-from .mod_formulator import *
-from .mod_mascot import *
-from .mod_pattern import *
-from .mod_peakpicking import *
-from .mod_proteo import *
-from .mod_signal import *
-from .mod_stopper import *
-from .mod_utils import *
+from .mod_basics import (
+    ELECTRON_MASS,
+    delta,
+    frules,
+    math,
+    md,
+    mz,
+    nominalmass,
+    rdbe,
+)
+from .mod_calibration import calibration
+from .mod_envfit import (
+    EnvFit,
+    mod_calibration,
+    mod_pattern,
+    mod_peakpicking,
+    mod_signal,
+    obj_compound,
+    obj_peaklist,
+)
+from .mod_formulator import calculations, formulator, mod_basics
+from .mod_mascot import Mascot, http, webbrowser
+from .mod_pattern import (
+    gaussian,
+    gausslorentzian,
+    lorentzian,
+    matchpattern,
+    pattern,
+    profile,
+)
+from .mod_peakpicking import (
+    AVERAGE_AMINO,
+    AVERAGE_BASE,
+    ISOTOPE_DISTANCE,
+    averagine,
+    copy,
+    deconvolute,
+    deisotope,
+    envcentroid,
+    envmono,
+    labelpeak,
+    labelpoint,
+    labelscan,
+    obj_peak,
+    patternLookupTable,
+)
+from .mod_proteo import (
+    coverage,
+    digest,
+    fragmentgains,
+    fragmentlosses,
+    fragmentserie,
+    itertools,
+    obj_sequence,
+)
+from .mod_signal import (
+    area,
+    baseline,
+    basepeak,
+    boundaries,
+    centroid,
+    combine,
+    crop,
+    intensity,
+    interpolate,
+    locate,
+    maxima,
+    movaver,
+    multiply,
+    noise,
+    normalize,
+    offset,
+    overlay,
+    savgol,
+    smooth,
+    subbase,
+    subtract,
+    width,
+)
+from .mod_stopper import CHECK_FORCE_QUIT, STOPPER, ForceQuitError, Stopper, start, stop
+from .mod_utils import load, save
 
 # load objects
-from .obj_compound import *
-from .obj_peak import *
-from .obj_peaklist import *
-from .obj_scan import *
-from .obj_sequence import *
-from .parser_fasta import parseFASTA
-from .parser_mgf import parseMGF
-from .parser_mzdata import parseMZDATA
-from .parser_mzml import parseMZML
-from .parser_mzxml import parseMZXML
+from .obj_compound import Compound
+from .obj_peak import Peak
+from .obj_peaklist import Peaklist
+from .obj_scan import (
+    Scan,
+)
+from .obj_sequence import (
+    Sequence,
+    blocks,
+)
+from .parser_fasta import ParseFASTA
+from .parser_mgf import ParseMGF
+from .parser_mzdata import ParseMZData
+from .parser_mzml import ParseMZML
+from .parser_mzxml import ParseMZXML
 
 # load parsers
-from .parser_xy import parseXY
+from .parser_xy import ParseXY

@@ -21,19 +21,17 @@ import wx
 from mmass import mspy
 from mmass.mspy import plot
 
-from . import config, images, mwx
-
 # load modules
-from .ids import *
+from . import config, ids, images, mwx
 
 # SPECTRUM PANEL WITH CANVAS AND TOOLBAR
 # --------------------------------------
 
 
-class panelSpectrum(wx.Panel):
+class PanelSpectrum(wx.Panel):
     """Make spectrum panel."""
 
-    def __init__(self, parent, documents):
+    def __init__(self, parent, documents) -> None:
         wx.Panel.__init__(
             self, parent, -1, size=(100, 100), style=wx.NO_FULL_REPAINT_ON_RESIZE
         )
@@ -48,10 +46,10 @@ class panelSpectrum(wx.Panel):
         self.currentTool = "ruler"
 
         # init container
-        self.container = plot.container([])
-        obj = plot.points([], showInGel=False)
+        self.container = plot.Container([])
+        obj = plot.Points([], showInGel=False)
         self.container.append(obj)
-        obj = plot.points([], showInGel=False)
+        obj = plot.Points([], showInGel=False)
         self.container.append(obj)
 
         # make GUI
@@ -62,9 +60,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make GUI elements."""
-
         # init spectrum canvas
         self.makeSpectrumCanvas()
 
@@ -82,11 +79,10 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def makeSpectrumCanvas(self):
+    def makeSpectrumCanvas(self) -> None:
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.spectrumCanvas = plot.canvas(self, style=mwx.PLOTCANVAS_STYLE_PANEL)
+        self.spectrumCanvas = plot.Canvas(self, style=mwx.PLOTCANVAS_STYLE_PANEL)
         self.spectrumCanvas.draw(self.container)
 
         # set default params
@@ -138,16 +134,15 @@ class panelSpectrum(wx.Panel):
         self.spectrumCanvas.Bind(wx.EVT_LEFT_UP, self.onCanvasLMU)
 
         # set DnD
-        dropTarget = fileDropTarget(self.parent.onDocumentDropped)
+        dropTarget = FileDropTarget(self.parent.onDocumentDropped)
         self.spectrumCanvas.SetDropTarget(dropTarget)
 
     # ----
 
     def makeToolbar(self):
         """Make bottom toolbar."""
-
         # init toolbar panel
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrBottombar"], size=(-1, mwx.BOTTOMBAR_HEIGHT)
         )
 
@@ -157,7 +152,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.showLabels_butt = wx.BitmapButton(
             panel,
-            ID_viewLabels,
+            ids.ID_viewLabels,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -170,7 +165,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.showTicks_butt = wx.BitmapButton(
             panel,
-            ID_viewTicks,
+            ids.ID_viewTicks,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -183,7 +178,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.showNotations_butt = wx.BitmapButton(
             panel,
-            ID_viewNotations,
+            ids.ID_viewNotations,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -197,7 +192,7 @@ class panelSpectrum(wx.Panel):
         )[bool(config.spectrum["labelAngle"])]
         self.labelAngle_butt = wx.BitmapButton(
             panel,
-            ID_viewLabelAngle,
+            ids.ID_viewLabelAngle,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -210,7 +205,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.showPosBars_butt = wx.BitmapButton(
             panel,
-            ID_viewPosBars,
+            ids.ID_viewPosBars,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -223,7 +218,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.showGel_butt = wx.BitmapButton(
             panel,
-            ID_viewGel,
+            ids.ID_viewGel,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -236,7 +231,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.showTracker_butt = wx.BitmapButton(
             panel,
-            ID_viewTracker,
+            ids.ID_viewTracker,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -249,7 +244,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.autoscale_butt = wx.BitmapButton(
             panel,
-            ID_viewAutoscale,
+            ids.ID_viewAutoscale,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -262,7 +257,7 @@ class panelSpectrum(wx.Panel):
         ]
         self.normalize_butt = wx.BitmapButton(
             panel,
-            ID_viewNormalize,
+            ids.ID_viewNormalize,
             image,
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -273,7 +268,7 @@ class panelSpectrum(wx.Panel):
         # make processing toolset
         self.toolsRuler_butt = wx.BitmapButton(
             panel,
-            ID_toolsRuler,
+            ids.ID_toolsRuler,
             images.lib["spectrumRulerOff"],
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -283,7 +278,7 @@ class panelSpectrum(wx.Panel):
 
         self.toolsLabelPeak_butt = wx.BitmapButton(
             panel,
-            ID_toolsLabelPeak,
+            ids.ID_toolsLabelPeak,
             images.lib["spectrumLabelPeakOff"],
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -293,7 +288,7 @@ class panelSpectrum(wx.Panel):
 
         self.toolsLabelPoint_butt = wx.BitmapButton(
             panel,
-            ID_toolsLabelPoint,
+            ids.ID_toolsLabelPoint,
             images.lib["spectrumLabelPointOff"],
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -303,7 +298,7 @@ class panelSpectrum(wx.Panel):
 
         self.toolsLabelEnvelope_butt = wx.BitmapButton(
             panel,
-            ID_toolsLabelEnvelope,
+            ids.ID_toolsLabelEnvelope,
             images.lib["spectrumLabelEnvelopeOff"],
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -313,7 +308,7 @@ class panelSpectrum(wx.Panel):
 
         self.toolsDeleteLabel_butt = wx.BitmapButton(
             panel,
-            ID_toolsDeleteLabel,
+            ids.ID_toolsDeleteLabel,
             images.lib["spectrumDeleteLabelOff"],
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -323,7 +318,7 @@ class panelSpectrum(wx.Panel):
 
         self.toolsOffset_butt = wx.BitmapButton(
             panel,
-            ID_toolsOffset,
+            ids.ID_toolsOffset,
             images.lib["spectrumOffsetOff"],
             size=(mwx.BOTTOMBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -439,27 +434,24 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def onCanvasMMotion(self, evt):
+    def onCanvasMMotion(self, evt) -> None:
         """Update cursor info on mouse motion."""
-
         # update cursor
         self.spectrumCanvas.onMMotion(evt)
         self.updateCursorInfo()
 
     # ----
 
-    def onCanvasMScroll(self, evt):
+    def onCanvasMScroll(self, evt) -> None:
         """Update cursor info on mouse scroll."""
-
         # update cursor
         self.spectrumCanvas.onMScroll(evt)
         self.updateCursorInfo()
 
     # ----
 
-    def onCanvasLMU(self, evt):
+    def onCanvasLMU(self, evt) -> None:
         """Process selected mouse function."""
-
         # check document
         if self.currentDocument is None:
             evt.Skip()
@@ -530,71 +522,69 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def onCanvasProperties(self, evt=None):
+    def onCanvasProperties(self, evt=None) -> None:
         """Show canvas properties dialog."""
-
         # raise dialog
-        dlg = dlgCanvasProperties(self.parent, self.updateCanvasProperties)
+        dlg = DlgCanvasProperties(self.parent, self.updateCanvasProperties)
         dlg.ShowModal()
         dlg.Destroy()
 
     # ----
 
-    def onCursorInfoRMU(self, evt):
+    def onCursorInfoRMU(self, evt) -> None:
         """Set items to show in cursor info."""
-
         # only while active spectrum ruler
         if self.currentTool != "ruler":
             return
 
         # popup menu
         menu = wx.Menu()
-        menu.Append(ID_viewSpectrumRulerMz, "m/z", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewSpectrumRulerDist, "Distance", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewSpectrumRulerPpm, "ppm", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewSpectrumRulerZ, "Charge", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewSpectrumRulerCursorMass, "Mass (c)", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewSpectrumRulerParentMass, "Mass (p)", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewSpectrumRulerArea, "Area", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerMz, "m/z", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerDist, "Distance", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerPpm, "ppm", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerZ, "Charge", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerCursorMass, "Mass (c)", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerParentMass, "Mass (p)", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewSpectrumRulerArea, "Area", "", wx.ITEM_CHECK)
 
         # set values
-        menu.Check(ID_viewSpectrumRulerMz, bool("mz" in config.main["cursorInfo"]))
-        menu.Check(ID_viewSpectrumRulerDist, bool("dist" in config.main["cursorInfo"]))
-        menu.Check(ID_viewSpectrumRulerPpm, bool("ppm" in config.main["cursorInfo"]))
-        menu.Check(ID_viewSpectrumRulerZ, bool("z" in config.main["cursorInfo"]))
+        menu.Check(ids.ID_viewSpectrumRulerMz, bool("mz" in config.main["cursorInfo"]))
+        menu.Check(ids.ID_viewSpectrumRulerDist, bool("dist" in config.main["cursorInfo"]))
+        menu.Check(ids.ID_viewSpectrumRulerPpm, bool("ppm" in config.main["cursorInfo"]))
+        menu.Check(ids.ID_viewSpectrumRulerZ, bool("z" in config.main["cursorInfo"]))
         menu.Check(
-            ID_viewSpectrumRulerCursorMass, bool("cmass" in config.main["cursorInfo"])
+            ids.ID_viewSpectrumRulerCursorMass, bool("cmass" in config.main["cursorInfo"])
         )
         menu.Check(
-            ID_viewSpectrumRulerParentMass, bool("pmass" in config.main["cursorInfo"])
+            ids.ID_viewSpectrumRulerParentMass, bool("pmass" in config.main["cursorInfo"])
         )
-        menu.Check(ID_viewSpectrumRulerArea, bool("area" in config.main["cursorInfo"]))
+        menu.Check(ids.ID_viewSpectrumRulerArea, bool("area" in config.main["cursorInfo"]))
 
         # set events
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ID_viewSpectrumRulerMz
+            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ids.ID_viewSpectrumRulerMz
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ID_viewSpectrumRulerDist
+            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ids.ID_viewSpectrumRulerDist
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ID_viewSpectrumRulerPpm
+            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ids.ID_viewSpectrumRulerPpm
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ID_viewSpectrumRulerZ
-        )
-        self.Bind(
-            wx.EVT_MENU,
-            self.parent.onViewSpectrumRuler,
-            id=ID_viewSpectrumRulerCursorMass,
+            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ids.ID_viewSpectrumRulerZ
         )
         self.Bind(
             wx.EVT_MENU,
             self.parent.onViewSpectrumRuler,
-            id=ID_viewSpectrumRulerParentMass,
+            id=ids.ID_viewSpectrumRulerCursorMass,
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ID_viewSpectrumRulerArea
+            wx.EVT_MENU,
+            self.parent.onViewSpectrumRuler,
+            id=ids.ID_viewSpectrumRulerParentMass,
+        )
+        self.Bind(
+            wx.EVT_MENU, self.parent.onViewSpectrumRuler, id=ids.ID_viewSpectrumRulerArea
         )
 
         self.PopupMenu(menu)
@@ -602,9 +592,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def setCurrentTool(self, tool):
+    def setCurrentTool(self, tool) -> None:
         """Slect spectrum tool."""
-
         # set current tool
         self.currentTool = tool
 
@@ -675,9 +664,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def setSpectrumProperties(self, docIndex):
+    def setSpectrumProperties(self, docIndex) -> None:
         """Set spectrum properties."""
-
         # check document
         if docIndex is None:
             return
@@ -732,64 +720,63 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def setCanvasRange(self, xAxis=None, yAxis=None):
+    def setCanvasRange(self, xAxis=None, yAxis=None) -> None:
         """Set canvas range."""
         self.spectrumCanvas.zoom(xAxis, yAxis)
 
     # ----
 
-    def updateCanvasProperties(self, ID=None, refresh=True):
+    def updateCanvasProperties(self, ID=None, refresh=True) -> None:
         """Update canvas properties."""
-
         # update button image
         if ID is not None:
-            if ID_viewLabels == ID:
+            if ids.ID_viewLabels == ID:
                 image = (
                     images.lib["spectrumLabelsOff"],
                     images.lib["spectrumLabelsOn"],
                 )[bool(config.spectrum["showLabels"])]
                 self.showLabels_butt.SetBitmapLabel(image)
-            elif ID_viewTicks == ID:
+            elif ids.ID_viewTicks == ID:
                 image = (images.lib["spectrumTicksOff"], images.lib["spectrumTicksOn"])[
                     bool(config.spectrum["showTicks"])
                 ]
                 self.showTicks_butt.SetBitmapLabel(image)
-            elif ID_viewNotations == ID:
+            elif ids.ID_viewNotations == ID:
                 image = (
                     images.lib["spectrumNotationsOff"],
                     images.lib["spectrumNotationsOn"],
                 )[bool(config.spectrum["showNotations"])]
                 self.showNotations_butt.SetBitmapLabel(image)
-            elif ID_viewLabelAngle == ID:
+            elif ids.ID_viewLabelAngle == ID:
                 image = (
                     images.lib["spectrumLabelAngleOff"],
                     images.lib["spectrumLabelAngleOn"],
                 )[bool(config.spectrum["labelAngle"])]
                 self.labelAngle_butt.SetBitmapLabel(image)
-            elif ID_viewPosBars == ID:
+            elif ids.ID_viewPosBars == ID:
                 image = (
                     images.lib["spectrumPosBarsOff"],
                     images.lib["spectrumPosBarsOn"],
                 )[bool(config.spectrum["showPosBars"])]
                 self.showPosBars_butt.SetBitmapLabel(image)
-            elif ID_viewGel == ID:
+            elif ids.ID_viewGel == ID:
                 image = (images.lib["spectrumGelOff"], images.lib["spectrumGelOn"])[
                     bool(config.spectrum["showGel"])
                 ]
                 self.showGel_butt.SetBitmapLabel(image)
-            elif ID_viewTracker == ID:
+            elif ids.ID_viewTracker == ID:
                 image = (
                     images.lib["spectrumTrackerOff"],
                     images.lib["spectrumTrackerOn"],
                 )[bool(config.spectrum["showTracker"])]
                 self.showTracker_butt.SetBitmapLabel(image)
-            elif ID_viewAutoscale == ID:
+            elif ids.ID_viewAutoscale == ID:
                 image = (
                     images.lib["spectrumAutoscaleOff"],
                     images.lib["spectrumAutoscaleOn"],
                 )[bool(config.spectrum["autoscale"])]
                 self.autoscale_butt.SetBitmapLabel(image)
-            elif ID_viewNormalize == ID:
+            elif ids.ID_viewNormalize == ID:
                 image = (
                     images.lib["spectrumNormalizeOff"],
                     images.lib["spectrumNormalizeOn"],
@@ -857,9 +844,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def updateCursorInfo(self):
-        """Update cursor info on MS scan canvas"""
-
+    def updateCursorInfo(self) -> None:
+        """Update cursor info on MS scan canvas."""
         label = ""
 
         # get spectrum polarity
@@ -977,9 +963,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def updateTmpSpectrum(self, points, flipped=False, refresh=True):
+    def updateTmpSpectrum(self, points, flipped=False, refresh=True) -> None:
         """Set new data to tmp spectrum."""
-
         self.currentTmpSpectrum = points
         self.currentTmpSpectrumFlip = flipped
 
@@ -1010,7 +995,7 @@ class panelSpectrum(wx.Panel):
                 flipped = self.documents[self.currentDocument].flipped
 
         # make tmp spectrum
-        obj = plot.points(
+        obj = plot.Points(
             points=points,
             normalized=config.spectrum["normalize"],
             flipped=flipped,
@@ -1037,9 +1022,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def updateNotationMarks(self, notations, refresh=True):
+    def updateNotationMarks(self, notations, refresh=True) -> None:
         """Set new data to notation marks."""
-
         self.currentNotationMarks = notations
 
         # check spectrum and view option
@@ -1074,7 +1058,7 @@ class panelSpectrum(wx.Panel):
             wx.FONTWEIGHT_NORMAL,
             0,
         )
-        obj = plot.annotations(
+        obj = plot.Annotations(
             points=notations,
             normalized=config.spectrum["normalize"],
             flipped=flipped,
@@ -1106,12 +1090,11 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def updateSpectrum(self, docIndex, refresh=True):
+    def updateSpectrum(self, docIndex, refresh=True) -> None:
         """Reload spectrum data."""
-
         # make spectrum
         docData = self.documents[docIndex]
-        spectrum = plot.spectrum(docData.spectrum)
+        spectrum = plot.Spectrum(docData.spectrum)
 
         # update container
         self.container[docIndex + 2] = spectrum
@@ -1125,9 +1108,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def updateSpectrumProperties(self, docIndex, refresh=True):
+    def updateSpectrumProperties(self, docIndex, refresh=True) -> None:
         """Update all spectrum properties."""
-
         # update spectrum properties
         self.setSpectrumProperties(docIndex)
 
@@ -1143,9 +1125,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def selectSpectrum(self, docIndex, refresh=True):
+    def selectSpectrum(self, docIndex, refresh=True) -> None:
         """Set document as active."""
-
         # hide labels on last active document
         if self.currentDocument is not None:
             self.container[self.currentDocument + 2].setProperties(
@@ -1180,15 +1161,14 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def appendLastSpectrum(self, refresh=True):
+    def appendLastSpectrum(self, refresh=True) -> None:
         """Append new spectrum to container."""
-
         # get document
         docIndex = len(self.documents) - 1
         docData = self.documents[docIndex]
 
         # append spectrum
-        spectrum = plot.spectrum(docData.spectrum)
+        spectrum = plot.Spectrum(docData.spectrum)
         self.container.append(spectrum)
 
         # set spectrum properties
@@ -1200,9 +1180,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def deleteSpectrum(self, docIndex, refresh=True):
+    def deleteSpectrum(self, docIndex, refresh=True) -> None:
         """Remove selected spectrum from container."""
-
         # remove spectrum
         del self.container[docIndex + 2]
 
@@ -1219,15 +1198,14 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def highlightPoints(self, points):
+    def highlightPoints(self, points) -> None:
         """Highlight specified points in the spectrum."""
         self.spectrumCanvas.highlightXPoints(points)
 
     # ----
 
-    def labelPeak(self, selection):
+    def labelPeak(self, selection) -> None:
         """Label peak in selection."""
-
         # check document
         if (
             self.currentDocument is None
@@ -1266,9 +1244,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def labelPoint(self, mz):
+    def labelPoint(self, mz) -> None:
         """Label point at position."""
-
         # check document
         if (
             self.currentDocument is None
@@ -1305,9 +1282,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def labelEnvelope(self, isotopes, charge):
+    def labelEnvelope(self, isotopes, charge) -> None:
         """Label isotopes."""
-
         # check document
         if (
             self.currentDocument is None
@@ -1374,7 +1350,7 @@ class panelSpectrum(wx.Panel):
                 ai = base + sumIntensity / len(isotopes)
                 sn = (ai - base) * basepeak.sn / (basepeak.ai - basepeak.base)
 
-            peak = mspy.peak(
+            peak = mspy.Peak(
                 mz=peaks[0].mz,
                 ai=ai,
                 base=base,
@@ -1424,9 +1400,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def deleteLabel(self, selection):
+    def deleteLabel(self, selection) -> None:
         """Delete all labels within selection."""
-
         # check document
         if self.currentDocument is None:
             return
@@ -1449,9 +1424,8 @@ class panelSpectrum(wx.Panel):
 
     # ----
 
-    def refresh(self, fullsize=False):
+    def refresh(self, fullsize=False) -> None:
         """Redraw spectrum."""
-
         # check for flipped documents and update canvas symmetry
         self.spectrumCanvas.setProperties(ySymmetry=False)
         for docData in self.documents:
@@ -1483,10 +1457,10 @@ class panelSpectrum(wx.Panel):
     # ----
 
 
-class dlgCanvasProperties(wx.Dialog):
+class DlgCanvasProperties(wx.Dialog):
     """Set canvas properties."""
 
-    def __init__(self, parent, onChangeFn):
+    def __init__(self, parent, onChangeFn) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self,
@@ -1511,7 +1485,6 @@ class dlgCanvasProperties(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make canvas params
         mzDigits_label = wx.StaticText(self, -1, "m/z precision:")
         self.mzDigits_slider = wx.Slider(
@@ -1642,9 +1615,8 @@ class dlgCanvasProperties(wx.Dialog):
 
     # ----
 
-    def onChange(self, evt):
+    def onChange(self, evt) -> None:
         """Set parameter and update canvas while scrolling."""
-
         # get canvas params
         config.main["mzDigits"] = self.mzDigits_slider.GetValue()
         config.main["intDigits"] = self.intDigits_slider.GetValue()
@@ -1660,10 +1632,10 @@ class dlgCanvasProperties(wx.Dialog):
     # ----
 
 
-class dlgViewRange(wx.Dialog):
+class DlgViewRange(wx.Dialog):
     """Set canvas view range."""
 
-    def __init__(self, parent, data):
+    def __init__(self, parent, data) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, -1, "Mass Range", style=wx.DEFAULT_DIALOG_STYLE
@@ -1685,7 +1657,6 @@ class dlgViewRange(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
 
         # make elements
@@ -1696,7 +1667,7 @@ class dlgViewRange(wx.Dialog):
             str(self.data[0]),
             size=(100, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("float"),
+            validator=mwx.Validator("float"),
         )
         self.minX_value.Bind(wx.EVT_TEXT_ENTER, self.onOK)
 
@@ -1707,7 +1678,7 @@ class dlgViewRange(wx.Dialog):
             str(self.data[1]),
             size=(100, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("float"),
+            validator=mwx.Validator("float"),
         )
         self.maxX_value.Bind(wx.EVT_TEXT_ENTER, self.onOK)
 
@@ -1749,9 +1720,8 @@ class dlgViewRange(wx.Dialog):
 
     # ----
 
-    def onOK(self, evt=None):
+    def onOK(self, evt=None) -> None:
         """Get values."""
-
         # get data
         try:
             minX = float(self.minX_value.GetValue())
@@ -1761,16 +1731,16 @@ class dlgViewRange(wx.Dialog):
                 self.EndModal(wx.ID_OK)
             else:
                 wx.Bell()
-        except:
+        except Exception:
             wx.Bell()
 
     # ----
 
 
-class dlgSpectrumOffset(wx.Dialog):
+class DlgSpectrumOffset(wx.Dialog):
     """Set spectrum offset."""
 
-    def __init__(self, parent, offset):
+    def __init__(self, parent, offset) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -1795,7 +1765,6 @@ class dlgSpectrumOffset(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.VERTICAL)
 
         # make elements
@@ -1806,7 +1775,7 @@ class dlgSpectrumOffset(wx.Dialog):
             str(self.offset[1]),
             size=(120, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("float"),
+            validator=mwx.Validator("float"),
         )
         self.offset_value.Bind(wx.EVT_TEXT, self.onChange)
         self.offset_value.Bind(wx.EVT_TEXT_ENTER, self.onOffset)
@@ -1839,20 +1808,18 @@ class dlgSpectrumOffset(wx.Dialog):
 
     # ----
 
-    def onChange(self, evt):
+    def onChange(self, evt) -> None:
         """Check data."""
-
         # get data
         try:
             self.offset = [0, float(self.offset_value.GetValue())]
-        except:
+        except Exception:
             self.offset = None
 
     # ----
 
-    def onOffset(self, evt):
+    def onOffset(self, evt) -> None:
         """Offset."""
-
         # check value and end
         if self.offset is not None:
             self.EndModal(wx.ID_OK)
@@ -1868,16 +1835,16 @@ class dlgSpectrumOffset(wx.Dialog):
     # ----
 
 
-class fileDropTarget(wx.FileDropTarget):
+class FileDropTarget(wx.FileDropTarget):
     """Generic drop target for files."""
 
-    def __init__(self, fn):
+    def __init__(self, fn) -> None:
         wx.FileDropTarget.__init__(self)
         self.fn = fn
 
     # ----
 
-    def OnDropFiles(self, x, y, paths):
+    def OnDropFiles(self, x, y, paths) -> None:
         """Open dropped files."""
         self.fn(paths=paths)
 

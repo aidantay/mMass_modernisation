@@ -25,19 +25,17 @@ import wx
 from mmass import mspy
 from mmass.mspy import plot
 
-from . import config, doc, images, mwx
-
 # load modules
-from .ids import *
+from . import config, doc, ids, images, mwx
 
 # FLOATING PANEL WITH MASSCALC TOOLS
 # ----------------------------------
 
 
-class panelMassCalculator(wx.Frame):
+class PanelMassCalculator(wx.Frame):
     """Mass calculator tools."""
 
-    def __init__(self, parent, tool="pattern"):
+    def __init__(self, parent, tool="pattern") -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -67,9 +65,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -98,16 +95,15 @@ class panelMassCalculator(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make buttons
         self.summary_butt = wx.BitmapButton(
             panel,
-            ID_massCalculatorSummary,
+            ids.ID_massCalculatorSummary,
             images.lib["massCalculatorSummaryOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -117,7 +113,7 @@ class panelMassCalculator(wx.Frame):
 
         self.ionseries_butt = wx.BitmapButton(
             panel,
-            ID_massCalculatorIonSeries,
+            ids.ID_massCalculatorIonSeries,
             images.lib["massCalculatorIonSeriesOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -127,7 +123,7 @@ class panelMassCalculator(wx.Frame):
 
         self.pattern_butt = wx.BitmapButton(
             panel,
-            ID_massCalculatorPattern,
+            ids.ID_massCalculatorPattern,
             images.lib["massCalculatorPatternOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -137,7 +133,7 @@ class panelMassCalculator(wx.Frame):
 
         # make compound fields
         compound_label = wx.StaticText(panel, -1, "Formula:")
-        self.compound_value = mwx.formulaCtrl(
+        self.compound_value = mwx.FormulaCtrl(
             panel, -1, "", size=(250, -1), style=wx.TE_PROCESS_ENTER
         )
         compound_label.SetFont(wx.SMALL_FONT)
@@ -184,7 +180,6 @@ class panelMassCalculator(wx.Frame):
 
     def makeSummaryPanel(self):
         """Make compound summary panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -229,9 +224,8 @@ class panelMassCalculator(wx.Frame):
 
     def makeIonseriesPanel(self):
         """Make controls for ionseries."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -254,7 +248,7 @@ class panelMassCalculator(wx.Frame):
             -1,
             str(config.massCalculator["ionseriesAgentCharge"]),
             size=(40, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
         self.ionseriesAgentCharge_value.SetFont(wx.SMALL_FONT)
         self.ionseriesAgentCharge_value.Bind(wx.EVT_TEXT, self.onCompoundChanged)
@@ -311,16 +305,15 @@ class panelMassCalculator(wx.Frame):
 
     def makePatternPanel(self):
         """Make controls for pattern simulation."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
         # make controls
         self.patternCollapse_butt = wx.BitmapButton(
             ctrlPanel,
-            ID_massCalculatorCollapse,
+            ids.ID_massCalculatorCollapse,
             images.lib["arrowsDown"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -342,7 +335,7 @@ class panelMassCalculator(wx.Frame):
 
         patternFwhm_label = wx.StaticText(ctrlPanel, -1, "FWHM:")
         patternFwhm_label.SetFont(wx.SMALL_FONT)
-        self.patternFwhm_value = mwx.scrollTextCtrl(
+        self.patternFwhm_value = mwx.ScrollTextCtrl(
             ctrlPanel,
             -1,
             str(config.massCalculator["patternFwhm"]),
@@ -356,7 +349,7 @@ class panelMassCalculator(wx.Frame):
 
         patternIntensity_label = wx.StaticText(ctrlPanel, -1, "Intensity:")
         patternIntensity_label.SetFont(wx.SMALL_FONT)
-        self.patternIntensity_value = mwx.scrollTextCtrl(
+        self.patternIntensity_value = mwx.ScrollTextCtrl(
             ctrlPanel,
             -1,
             str(config.massCalculator["patternIntensity"]),
@@ -369,7 +362,7 @@ class panelMassCalculator(wx.Frame):
 
         patternBaseline_label = wx.StaticText(ctrlPanel, -1, "Baseline:")
         patternBaseline_label.SetFont(wx.SMALL_FONT)
-        self.patternBaseline_value = mwx.scrollTextCtrl(
+        self.patternBaseline_value = mwx.ScrollTextCtrl(
             ctrlPanel,
             -1,
             str(config.massCalculator["patternBaseline"]),
@@ -382,7 +375,7 @@ class panelMassCalculator(wx.Frame):
 
         patternShift_label = wx.StaticText(ctrlPanel, -1, "Shift:")
         patternShift_label.SetFont(wx.SMALL_FONT)
-        self.patternShift_value = mwx.scrollTextCtrl(
+        self.patternShift_value = mwx.ScrollTextCtrl(
             ctrlPanel,
             -1,
             "0",
@@ -436,11 +429,10 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def makeIonsList(self):
+    def makeIonsList(self) -> None:
         """Make ions list."""
-
         # init list
-        self.ionsList = mwx.sortListCtrl(
+        self.ionsList = mwx.SortListCtrl(
             self, -1, size=(531, 200), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.ionsList.SetFont(wx.SMALL_FONT)
@@ -461,14 +453,13 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def makePatternCanvas(self):
+    def makePatternCanvas(self) -> None:
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.patternCanvas = plot.canvas(
+        self.patternCanvas = plot.Canvas(
             self, size=(550, 300), style=mwx.PLOTCANVAS_STYLE_PANEL
         )
-        self.patternCanvas.draw(plot.container([]))
+        self.patternCanvas.draw(plot.Container([]))
 
         # set default params
         self.patternCanvas.setProperties(xLabel="m/z")
@@ -504,27 +495,26 @@ class panelMassCalculator(wx.Frame):
         )
         self.patternCanvas.setProperties(axisFont=axisFont)
 
-        self.patternCanvas.draw(plot.container([]))
+        self.patternCanvas.draw(plot.Container([]))
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
         self.parent.updateTmpSpectrum(None)
         self.Destroy()
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_massCalculatorSummary:
+            if evt.GetId() == ids.ID_massCalculatorSummary:
                 tool = "summary"
-            elif evt.GetId() == ID_massCalculatorIonSeries:
+            elif evt.GetId() == ids.ID_massCalculatorIonSeries:
                 tool = "ionseries"
-            elif evt.GetId() == ID_massCalculatorPattern:
+            elif evt.GetId() == ids.ID_massCalculatorPattern:
                 tool = "pattern"
 
         # set current tool
@@ -569,9 +559,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onCollapse(self, evt):
+    def onCollapse(self, evt) -> None:
         """Show / hide isotopic pattern panel."""
-
         # Show / hide panel
         if self.patternSizer.IsShown(1):
             self.patternSizer.Hide(1)
@@ -588,9 +577,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onCompoundChanged(self, evt=None):
+    def onCompoundChanged(self, evt=None) -> None:
         """Recalc all if compound changed."""
-
         if evt is not None:
             evt.Skip()
 
@@ -623,9 +611,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onPatternChanged(self, evt=None):
+    def onPatternChanged(self, evt=None) -> None:
         """Recalc pattern if params changed."""
-
         # get all params
         if not self.getParams():
             self.currentPattern = None
@@ -650,9 +637,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onProfileChanged(self, evt=None):
+    def onProfileChanged(self, evt=None) -> None:
         """Shift tmp profile."""
-
         # check pattern
         if self.currentPattern is None:
             return
@@ -675,9 +661,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onIonSelected(self, evt):
+    def onIonSelected(self, evt) -> None:
         """Recalculate pattern and show selected ion in the spectrum."""
-
         # get selected ion
         self.currentIon = self.currentIons[evt.GetData()]
 
@@ -686,9 +671,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onListKey(self, evt):
+    def onListKey(self, evt) -> None:
         """Export list if Ctrl+C."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -702,9 +686,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def onSave(self, evt):
+    def onSave(self, evt) -> None:
         """Save current pattern as doument."""
-
         # check data
         if self.currentPatternScan is None or self.currentCompound is None:
             wx.Bell()
@@ -719,7 +702,7 @@ class panelMassCalculator(wx.Frame):
             ion = "[M]"
 
         # make document
-        document = doc.document()
+        document = doc.Document()
         document.dirty = True
         document.title = f"{self.currentCompound.formula()} {ion}"
         document.spectrum = copy.deepcopy(self.currentPatternScan)
@@ -732,7 +715,7 @@ class panelMassCalculator(wx.Frame):
             agentCharge=config.massCalculator["ionseriesAgentCharge"],
         )
         document.annotations.append(
-            doc.annotation(
+            doc.Annotation(
                 label="monoisotopic m/z",
                 mz=mz[0],
                 ai=config.massCalculator["patternIntensity"],
@@ -740,7 +723,7 @@ class panelMassCalculator(wx.Frame):
             )
         )
         document.annotations.append(
-            doc.annotation(
+            doc.Annotation(
                 label="average m/z",
                 mz=mz[1],
                 ai=config.massCalculator["patternIntensity"],
@@ -772,9 +755,8 @@ class panelMassCalculator(wx.Frame):
         fwhm=None,
         intensity=None,
         baseline=None,
-    ):
+    ) -> None:
         """Set formula and charge."""
-
         # clear current data
         self.currentCompound = None
         self.currentIons = None
@@ -858,9 +840,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool:
         """Get all params from dialog."""
-
         # try to get values
         try:
             # compound
@@ -893,14 +874,14 @@ class panelMassCalculator(wx.Frame):
             if self.patternPeakShape_choice.GetStringSelection() == "Asymmetrical":
                 config.massCalculator["patternPeakShape"] = "gausslorentzian"
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
         # check compound
         try:
-            self.currentCompound = mspy.compound(compound)
-        except:
+            self.currentCompound = mspy.Compound(compound)
+        except Exception:
             return False
 
         if not self.currentCompound.isvalid():
@@ -910,9 +891,9 @@ class panelMassCalculator(wx.Frame):
         # check charging agent
         try:
             if ionseriesAgent != "e":
-                mspy.compound(ionseriesAgent)
+                mspy.Compound(ionseriesAgent)
             config.massCalculator["ionseriesAgent"] = ionseriesAgent
-        except:
+        except Exception:
             return False
 
         if ionseriesAgent == "e":
@@ -936,9 +917,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def updateSummary(self):
+    def updateSummary(self) -> None:
         """Calculate summary for curent compound."""
-
         # check current compound
         if self.currentCompound is None:
             self.summaryFormula_value.SetValue("")
@@ -957,9 +937,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def updateIonsList(self):
+    def updateIonsList(self) -> None:
         """Update current ions list."""
-
         self.currentIon = None
 
         # clear previous data and set new
@@ -992,11 +971,10 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def updatePatternCanvas(self, rescale=True):
+    def updatePatternCanvas(self, rescale=True) -> None:
         """Show current profile and peaks in pattern canvas."""
-
         # make spectra container
-        container = plot.container([])
+        container = plot.Container([])
 
         # check data
         if self.currentPatternScan is None:
@@ -1024,7 +1002,7 @@ class panelMassCalculator(wx.Frame):
             wx.FONTWEIGHT_NORMAL,
             0,
         )
-        spectrum = plot.spectrum(
+        spectrum = plot.Spectrum(
             self.currentPatternScan,
             legend=legend,
             spectrumColour=(16, 71, 185),
@@ -1042,7 +1020,7 @@ class panelMassCalculator(wx.Frame):
         # add individual peaks to container
         if self.currentPatternPeaks is not None:
             for peak in self.currentPatternPeaks:
-                spectrum = plot.points(
+                spectrum = plot.Points(
                     peak,
                     lineColour=(50, 140, 0),
                     showLines=True,
@@ -1067,9 +1045,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def updateTmpSpectrum(self):
+    def updateTmpSpectrum(self) -> None:
         """Show current profile in the main canvas."""
-
         # check data
         if self.currentPatternProfile is None:
             self.parent.updateTmpSpectrum(None)
@@ -1085,9 +1062,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def runIonSeries(self):
+    def runIonSeries(self) -> None:
         """Calculate ion series for current compound."""
-
         self.currentIons = None
         self.currentIon = None
 
@@ -1121,29 +1097,13 @@ class panelMassCalculator(wx.Frame):
                     config.massCalculator["ionseriesPolarity"] == 1
                     and config.massCalculator["ionseriesAgentCharge"] > 0
                 ):
-                    iontype = "[M+%d%s] %d+" % (
-                        i,
-                        config.massCalculator["ionseriesAgent"],
-                        abs(charge),
-                    )
+                    iontype = f'[M+{i}{config.massCalculator["ionseriesAgent"]}] {abs(charge)}+'
                 elif config.massCalculator["ionseriesPolarity"] == 1:
-                    iontype = "[M-%d%s] %d+" % (
-                        i,
-                        config.massCalculator["ionseriesAgent"],
-                        abs(charge),
-                    )
+                    iontype = f'[M-{i}{config.massCalculator["ionseriesAgent"]}] {abs(charge)}+'
                 elif config.massCalculator["ionseriesAgentCharge"] < 0:
-                    iontype = "[M+%d%s] %d-" % (
-                        i,
-                        config.massCalculator["ionseriesAgent"],
-                        abs(charge),
-                    )
+                    iontype = f'[M+{i}{config.massCalculator["ionseriesAgent"]}] {abs(charge)}-'
                 else:
-                    iontype = "[M-%d%s] %d-" % (
-                        i,
-                        config.massCalculator["ionseriesAgent"],
-                        abs(charge),
-                    )
+                    iontype = f'[M-{i}{config.massCalculator["ionseriesAgent"]}] {abs(charge)}-'
 
                 # get mz
                 mz = mspy.mz(
@@ -1165,15 +1125,14 @@ class panelMassCalculator(wx.Frame):
                     break
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentIons = None
             self.currentIon = None
 
     # ----
 
-    def runPattern(self):
+    def runPattern(self) -> None:
         """Calculate isotopic pattern."""
-
         self.currentPattern = None
         self.currentPatternProfile = None
         self.currentPatternPeaks = None
@@ -1200,7 +1159,7 @@ class panelMassCalculator(wx.Frame):
             self.makeProfile()
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentPattern = None
             self.currentPatternProfile = None
             self.currentPatternPeaks = None
@@ -1208,9 +1167,8 @@ class panelMassCalculator(wx.Frame):
 
     # ----
 
-    def makeProfile(self):
+    def makeProfile(self) -> None:
         """Generate pattern profile."""
-
         self.currentPatternProfile = None
         self.currentPatternPeaks = None
         self.currentPatternScan = None
@@ -1253,9 +1211,9 @@ class panelMassCalculator(wx.Frame):
             )
             if abs(mz - centroid) < config.massCalculator["patternFwhm"] / 20:
                 mz = centroid
-            peak = mspy.peak(mz=mz, ai=isotope[1], base=shift, charge=charge)
+            peak = mspy.Peak(mz=mz, ai=isotope[1], base=shift, charge=charge)
             peaklist.append(peak)
-        peaklist = mspy.peaklist(peaklist)
+        peaklist = mspy.Peaklist(peaklist)
 
         # make individual peak shapes
         self.currentPatternPeaks = []
@@ -1294,7 +1252,7 @@ class panelMassCalculator(wx.Frame):
                     self.currentPatternPeaks.append(peak)
 
         # make scan object
-        self.currentPatternScan = mspy.scan(
+        self.currentPatternScan = mspy.Scan(
             profile=self.currentPatternProfile, peaklist=peaklist
         )
 

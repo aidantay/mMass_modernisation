@@ -19,7 +19,6 @@
 import base64
 import contextlib
 import copy
-import os
 import re
 import struct
 import sys
@@ -40,10 +39,10 @@ from . import config
 # ------------------
 
 
-class document:
+class Document:
     """Document object definition."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.format = "mSD"
         self.title = ""
         self.path = ""
@@ -55,7 +54,7 @@ class document:
         self.instrument = ""
         self.notes = ""
 
-        self.spectrum = mspy.scan()
+        self.spectrum = mspy.Scan()
         self.annotations = []
         self.sequences = []
 
@@ -74,9 +73,8 @@ class document:
 
     # ----
 
-    def backup(self, items=None):
+    def backup(self, items=None) -> None:
         """Backup current state for undo."""
-
         self.undo = items
 
         # delete old
@@ -102,7 +100,6 @@ class document:
 
     def restore(self):
         """Revert to last stored state."""
-
         # check undo
         if not self.undo:
             return False
@@ -130,9 +127,8 @@ class document:
 
     # ----
 
-    def sortAnnotations(self):
+    def sortAnnotations(self) -> None:
         """Sort annotations by m/z."""
-
         buff = []
         for item in self.annotations:
             buff.append((item.mz, item))
@@ -152,9 +148,8 @@ class document:
 
     # ----
 
-    def sortSequences(self):
+    def sortSequences(self) -> None:
         """Sort sequences by titles."""
-
         # get sequences
         sequences = []
         for sequence in self.sequences:
@@ -168,9 +163,8 @@ class document:
 
     # ----
 
-    def sortSequenceMatches(self):
+    def sortSequenceMatches(self) -> None:
         """Sort sequence matches by m/z."""
-
         for sequence in self.sequences:
             buff = []
             for item in sequence.matches:
@@ -185,7 +179,6 @@ class document:
 
     def msd(self):
         """Make mSD XML."""
-
         buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
         buff += '<mSD version="2.2">\n\n'
 
@@ -233,9 +226,9 @@ class document:
                 if peak.sn is not None:
                     attributes += f' sn="{peak.sn:.3f}"'
                 if peak.charge is not None:
-                    attributes += ' charge="%d"' % peak.charge
+                    attributes += f' charge="{peak.charge}"'
                 if peak.isotope is not None:
-                    attributes += ' isotope="%d"' % peak.isotope
+                    attributes += f' isotope="{peak.isotope}"'
                 if peak.fwhm is not None:
                     attributes += f' fwhm="{peak.fwhm:.6f}"'
                 if peak.group:
@@ -249,7 +242,7 @@ class document:
             for annot in self.annotations:
                 attributes = f'peakMZ="{annot.mz:.6f}" peakIntensity="{annot.ai:.6f}" peakBaseline="{annot.base:.6f}"'
                 if annot.charge is not None:
-                    attributes += ' charge="%d"' % annot.charge
+                    attributes += f' charge="{annot.charge}"'
                 if annot.radical:
                     attributes += ' radical="1"'
                 if annot.theoretical is not None:
@@ -265,9 +258,7 @@ class document:
             for index, sequence in enumerate(self.sequences):
                 buff += f'    <sequence index="{index}">\n'
                 buff += f"      <title>{self._escape(sequence.title)}</title>\n"
-                buff += "      <accession>{}</accession>\n".format(
-                    self._escape(sequence.accession)
-                )
+                buff += f"      <accession>{self._escape(sequence.accession)}</accession>\n"
 
                 attributes = f'type="{sequence.chainType}"'
                 if sequence.cyclic:
@@ -305,7 +296,7 @@ class document:
                     for match in sequence.matches:
                         attributes = f'peakMZ="{match.mz:.6f}" peakIntensity="{match.ai:.6f}" peakBaseline="{match.base:.6f}"'
                         if match.charge is not None:
-                            attributes += ' charge="%d"' % match.charge
+                            attributes += f' charge="{match.charge}"'
                         if match.radical:
                             attributes += ' radical="1"'
                         if match.theoretical is not None:
@@ -313,9 +304,8 @@ class document:
                         if match.formula is not None:
                             attributes += f' formula="{match.formula}"'
                         if match.sequenceRange is not None:
-                            attributes += ' sequenceRange="%d-%d"' % tuple(
-                                match.sequenceRange
-                            )
+                            start, end = match.sequenceRange
+                            attributes += f' sequenceRange="{start}-{end}"'
                         if match.fragmentSerie is not None:
                             attributes += f' fragmentSerie="{match.fragmentSerie}"'
                         if match.fragmentIndex is not None:
@@ -334,7 +324,6 @@ class document:
 
     def report(self, image=None):
         """Get HTML report."""
-
         mzFormat = "%0." + repr(config.main["mzDigits"]) + "f"
         intFormat = "%0." + repr(config.main["intDigits"]) + "f"
         ppmFormat = "%0." + repr(config.main["ppmDigits"]) + "f"
@@ -489,7 +478,7 @@ class document:
                 matchedInt = self._getMatchedIntensity(
                     self.spectrum.peaklist, sequence.matches
                 )
-                tableID = "tableSequenceMatches%d" % x
+                tableID = f"tableSequenceMatches{x}"
 
                 cyclic = ""
                 if sequence.cyclic:
@@ -611,7 +600,6 @@ class document:
 
     def _escape(self, text):
         """Clear special characters such as <> etc."""
-
         text = text.strip()
         search = ("&", '"', "'", "<", ">")
         replace = ("&amp;", "&quot;", "&#39;", "&lt;", "&gt;")
@@ -624,7 +612,6 @@ class document:
 
     def _convertSpectrum(self, spectrum, precision="f"):
         """Convert spectrum data to compressed binary format coded by base64."""
-
         # get precision
         if precision == 32:
             precision = "f"
@@ -652,7 +639,6 @@ class document:
 
     def _formatSequence(self, sequence):
         """Format sequence for report."""
-
         # get coverage
         coverage = len(sequence) * [0]
         for m in sequence.matches:
@@ -686,7 +672,6 @@ class document:
 
     def _formatModifications(self, sequence):
         """Format sequence modifications for report."""
-
         buff = []
 
         format = "%0." + repr(config.main["mzDigits"]) + "f"
@@ -725,7 +710,6 @@ class document:
 
     def _getSequenceCoverage(self, sequence):
         """Get sequence coverage from matches."""
-
         # get ranges
         ranges = []
         for m in sequence.matches:
@@ -743,7 +727,6 @@ class document:
 
     def _getMatchedIntensity(self, peaklist, matches):
         """Get total matched intensity."""
-
         # get total intensity
         totalInt = 0
         buff = {}
@@ -771,7 +754,6 @@ class document:
 
     def _replaceLabelIDs(self, section, label):
         """Replace IDs with links in annotations."""
-
         # replace IDs
         for name in config.replacements[section]:
             self._currentReplacement = (section, name)
@@ -783,9 +765,8 @@ class document:
 
     # ----
 
-    def _replaceIDs(self, matchobj):
+    def _replaceIDs(self, matchobj) -> str:
         """Replace IDs to links."""
-
         section, name = self._currentReplacement
         url = config.replacements[section][name]["url"] % matchobj.group(1)
         return f'<a href="{url}" title="More information...">{matchobj.group(0)}</a>'
@@ -797,7 +778,7 @@ class document:
 # -----------------
 
 
-class annotation:
+class Annotation:
     """Annotation object definition."""
 
     def __init__(
@@ -810,7 +791,7 @@ class annotation:
         radical=None,
         theoretical=None,
         formula=None,
-    ):
+    ) -> None:
         self.label = label
         self.mz = mz
         self.ai = ai
@@ -824,7 +805,6 @@ class annotation:
 
     def delta(self, units):
         """Get error in specified units."""
-
         if self.theoretical is not None:
             return mspy.delta(self.mz, self.theoretical, units)
         return None
@@ -836,7 +816,7 @@ class annotation:
 # ---------------------
 
 
-class match:
+class Match:
     """Match object definition."""
 
     def __init__(
@@ -849,7 +829,7 @@ class match:
         radical=None,
         theoretical=None,
         formula=None,
-    ):
+    ) -> None:
         self.label = label
         self.mz = mz
         self.ai = ai
@@ -867,7 +847,6 @@ class match:
 
     def delta(self, units):
         """Get error in specified units."""
-
         if self.theoretical is not None:
             return mspy.delta(self.mz, self.theoretical, units)
         return None
@@ -879,17 +858,17 @@ class match:
 # -----------------
 
 
-class parseMSD:
+class ParseMSD:
     """Parse data from mSD files."""
 
-    def __init__(self, path):
+    def __init__(self, path) -> None:
         self.path = path
         self.errors = []
         self._version = None
         self._parsedData = None
 
         # init new document
-        self.document = document()
+        self.document = Document()
         self.document.format = "mSD"
         self.document.path = path
 
@@ -897,7 +876,6 @@ class parseMSD:
 
     def getDocument(self):
         """Get document."""
-
         self.errors = []
 
         # parse data
@@ -914,8 +892,7 @@ class parseMSD:
             self.handleSpectrum()
             self.handlePeaklist_10()
             self.handleSequences_10()
-            _dirName, fileName = os.path.split(self.path)
-            self.document.title = fileName[:-4]
+            self.document.title = Path(self.path).stem
         else:
             self.handleDescription()
             self.handleSpectrum()
@@ -929,7 +906,6 @@ class parseMSD:
 
     def getSequences(self):
         """Get list of available sequences."""
-
         self.errors = []
 
         # parse data
@@ -961,9 +937,8 @@ class parseMSD:
 
     # CURRENT HANDLERS
 
-    def handleDescription(self):
+    def handleDescription(self) -> None:
         """Get document info."""
-
         # get description
         descriptionTags = self._parsedData.getElementsByTagName("description")
         if descriptionTags:
@@ -997,9 +972,8 @@ class parseMSD:
 
     # ----
 
-    def handleSpectrum(self):
+    def handleSpectrum(self) -> bool | None:
         """Get spectrum data."""
-
         # get spectrum
         spectrumTags = self._parsedData.getElementsByTagName("spectrum")
         if spectrumTags:
@@ -1100,9 +1074,8 @@ class parseMSD:
 
     # ----
 
-    def handlePeaklist(self):
+    def handlePeaklist(self) -> None:
         """Get peaklist."""
-
         peaklist = []
 
         # get peaklist
@@ -1141,7 +1114,7 @@ class parseMSD:
                     continue
 
                 # make peak
-                peak = mspy.peak(
+                peak = mspy.Peak(
                     mz=mz,
                     ai=ai,
                     base=base,
@@ -1154,14 +1127,13 @@ class parseMSD:
                 peaklist.append(peak)
 
         # add peaklist to document
-        peaklist = mspy.peaklist(peaklist)
+        peaklist = mspy.Peaklist(peaklist)
         self.document.spectrum.setpeaklist(peaklist)
 
     # ----
 
-    def handleAnnotations(self):
+    def handleAnnotations(self) -> None:
         """Get annotations."""
-
         # get annotations
         annotationsTags = self._parsedData.getElementsByTagName("annotations")
         if annotationsTags:
@@ -1192,7 +1164,7 @@ class parseMSD:
                     if annotationTag.hasAttribute("formula"):
                         formula = annotationTag.getAttribute("formula")
 
-                    annot = annotation(
+                    annot = Annotation(
                         label=label,
                         mz=mz,
                         ai=ai,
@@ -1215,9 +1187,8 @@ class parseMSD:
 
     # ----
 
-    def handleSequences(self):
+    def handleSequences(self) -> None:
         """Get sequences."""
-
         # get sequences
         sequencesTags = self._parsedData.getElementsByTagName("sequences")
         if sequencesTags:
@@ -1231,7 +1202,6 @@ class parseMSD:
 
     def handleSequence(self, sequenceTag):
         """Get sequence."""
-
         # get title
         title = ""
         titleTags = sequenceTag.getElementsByTagName("title")
@@ -1268,7 +1238,7 @@ class parseMSD:
 
         # make sequence
         try:
-            sequence = mspy.sequence(
+            sequence = mspy.Sequence(
                 chain,
                 title=title,
                 accession=accession,
@@ -1310,7 +1280,6 @@ class parseMSD:
 
     def handleSequenceMatches(self, sequenceTag):
         """Get sequence amtches."""
-
         # get matches
         matches = []
         matchTags = sequenceTag.getElementsByTagName("match")
@@ -1351,7 +1320,7 @@ class parseMSD:
                 if matchTag.hasAttribute("fragmentIndex"):
                     fragmentIndex = int(matchTag.getAttribute("fragmentIndex"))
 
-                m = match(
+                m = Match(
                     label=label,
                     mz=mz,
                     ai=ai,
@@ -1377,9 +1346,8 @@ class parseMSD:
 
     # OLDER VERSIONS
 
-    def handlePeaklist_10(self):
+    def handlePeaklist_10(self) -> None:
         """Get peaklist from mSD version 1.0."""
-
         peaklist = []
 
         # get peaklist
@@ -1398,24 +1366,23 @@ class parseMSD:
                     continue
 
                 # make peak
-                peak = mspy.peak(mz=mz, ai=ai)
+                peak = mspy.Peak(mz=mz, ai=ai)
                 peaklist.append(peak)
 
                 # make annotation
                 if annot:
                     self.document.annotations.append(
-                        annotation(label=annot, mz=mz, ai=ai)
+                        Annotation(label=annot, mz=mz, ai=ai)
                     )
 
         # add peaklist to document
-        peaklist = mspy.peaklist(peaklist)
+        peaklist = mspy.Peaklist(peaklist)
         self.document.spectrum.setpeaklist(peaklist)
 
     # ----
 
-    def handleSequences_10(self):
+    def handleSequences_10(self) -> None:
         """Get sequences from mSD version 1.0."""
-
         # get sequences
         sequencesTags = self._parsedData.getElementsByTagName("sequences")
         if sequencesTags:
@@ -1429,7 +1396,6 @@ class parseMSD:
 
     def handleSequence_10(self, sequenceTag):
         """Get sequence from mSD version 1.0."""
-
         # get title
         title = ""
         titleTags = sequenceTag.getElementsByTagName("title")
@@ -1444,7 +1410,7 @@ class parseMSD:
 
         # make sequence
         try:
-            sequence = mspy.sequence(chain, title=title)
+            sequence = mspy.Sequence(chain, title=title)
             sequence.matches = []
         except Exception:
             self.errors.append("Unknown monomers in sequence data.")
@@ -1475,7 +1441,6 @@ class parseMSD:
 
     def _convertDataPoints(self, data, compression, precision="f", endian="<"):
         """Convert spectrum data points."""
-
         try:
             # convert from base64
             data = base64.b64decode(data)
@@ -1496,7 +1461,6 @@ class parseMSD:
 
     def _getVersion(self):
         """Get mSD format version."""
-
         # mSD document
         mSDTags = self._parsedData.getElementsByTagName("mSD")
         if mSDTags:
@@ -1512,7 +1476,6 @@ class parseMSD:
 
     def _getNodeText(self, node):
         """Get text from node list."""
-
         # get text
         buff = ""
         for node in node.childNodes:
@@ -1529,9 +1492,8 @@ class parseMSD:
 
     # ----
 
-    def _addMonomer(self, abbr, formula, losses=None, name="", category=""):
+    def _addMonomer(self, abbr, formula, losses=None, name="", category="") -> bool | None:
         """Add monomer to library."""
-
         # check data
         if losses is None:
             losses = []
@@ -1540,34 +1502,33 @@ class parseMSD:
 
         # add new monomer
         try:
-            monomer = mspy.monomer(
+            monomer = mspy.Monomer(
                 abbr=abbr, formula=formula, losses=losses, name=name, category=category
             )
             mspy.monomers[abbr] = monomer
-            mspy.saveMonomers(Path(config.confdir) / "monomers.xml")
+            mspy.saveMonomers(config.confdir / "monomers.xml")
             return True
         except Exception:
             return False
 
     # ----
 
-    def _addModification(self, name, gainFormula, lossFormula, aminoSpecifity=""):
+    def _addModification(self, name, gainFormula, lossFormula, aminoSpecifity="") -> bool | None:
         """Add modification to library."""
-
         # check data
         if not name or not (gainFormula or lossFormula):
             return False
 
         # add new modification
         try:
-            modification = mspy.modification(
+            modification = mspy.Modification(
                 name=name,
                 gainFormula=gainFormula,
                 lossFormula=lossFormula,
                 aminoSpecifity=aminoSpecifity,
             )
             mspy.modifications[name] = modification
-            mspy.saveModifications(Path(config.confdir) / "modifications.xml")
+            mspy.saveModifications(config.confdir / "modifications.xml")
             return True
         except Exception:
             return False

@@ -18,17 +18,16 @@
 # load libs
 import wx
 
-from . import images, libs, mwx
-from .ids import *
+from . import ids, images, libs, mwx
 
 # FLOATING PANEL WITH DOCUMENT INFO
 # ---------------------------------
 
 
-class panelDocumentInfo(wx.Frame):
+class PanelDocumentInfo(wx.Frame):
     """Document info tools."""
 
-    def __init__(self, parent, tool="summary"):
+    def __init__(self, parent, tool="summary") -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -53,9 +52,8 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -84,16 +82,15 @@ class panelDocumentInfo(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make buttons
         self.summary_butt = wx.BitmapButton(
             panel,
-            ID_documentInfoSummary,
+            ids.ID_documentInfoSummary,
             images.lib["documentInfoSummaryOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -103,7 +100,7 @@ class panelDocumentInfo(wx.Frame):
 
         self.spectrum_butt = wx.BitmapButton(
             panel,
-            ID_documentInfoSpectrum,
+            ids.ID_documentInfoSpectrum,
             images.lib["documentInfoSpectrumOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -113,7 +110,7 @@ class panelDocumentInfo(wx.Frame):
 
         self.notes_butt = wx.BitmapButton(
             panel,
-            ID_documentInfoNotes,
+            ids.ID_documentInfoNotes,
             images.lib["documentInfoNotesOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -162,7 +159,6 @@ class panelDocumentInfo(wx.Frame):
 
     def makeSummaryPanel(self):
         """Document summary panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -227,37 +223,36 @@ class panelDocumentInfo(wx.Frame):
 
     def makeSpectrumPanel(self):
         """Spectrum info panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
         scanNumber_label = wx.StaticText(panel, -1, "Scan ID:")
         self.scanNumber_value = wx.TextCtrl(
-            panel, -1, "", size=(180, -1), validator=mwx.validator("intPos")
+            panel, -1, "", size=(180, -1), validator=mwx.Validator("intPos")
         )
         self.scanNumber_value.Bind(wx.EVT_TEXT, self.onSave)
 
         retentionTime_label = wx.StaticText(panel, -1, "Retention time:")
         self.retentionTime_value = wx.TextCtrl(
-            panel, -1, "", size=(180, -1), validator=mwx.validator("floatPos")
+            panel, -1, "", size=(180, -1), validator=mwx.Validator("floatPos")
         )
         self.retentionTime_value.Bind(wx.EVT_TEXT, self.onSave)
 
         msLevel_label = wx.StaticText(panel, -1, "MS level:")
         self.msLevel_value = wx.TextCtrl(
-            panel, -1, "", size=(180, -1), validator=mwx.validator("intPos")
+            panel, -1, "", size=(180, -1), validator=mwx.Validator("intPos")
         )
         self.msLevel_value.Bind(wx.EVT_TEXT, self.onSave)
 
         precursorMZ_label = wx.StaticText(panel, -1, "Precursor m/z:")
         self.precursorMZ_value = wx.TextCtrl(
-            panel, -1, "", size=(180, -1), validator=mwx.validator("floatPos")
+            panel, -1, "", size=(180, -1), validator=mwx.Validator("floatPos")
         )
         self.precursorMZ_value.Bind(wx.EVT_TEXT, self.onSave)
 
         precursorCharge_label = wx.StaticText(panel, -1, "Precursor charge:")
         self.precursorCharge_value = wx.TextCtrl(
-            panel, -1, "", size=(180, -1), validator=mwx.validator("int")
+            panel, -1, "", size=(180, -1), validator=mwx.Validator("int")
         )
         self.precursorCharge_value.Bind(wx.EVT_TEXT, self.onSave)
 
@@ -320,7 +315,6 @@ class panelDocumentInfo(wx.Frame):
 
     def makeNotesPanel(self):
         """Document notes panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -346,22 +340,21 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Destroy this frame."""
         self.Destroy()
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_documentInfoSummary:
+            if evt.GetId() == ids.ID_documentInfoSummary:
                 tool = "summary"
-            elif evt.GetId() == ID_documentInfoSpectrum:
+            elif evt.GetId() == ids.ID_documentInfoSpectrum:
                 tool = "spectrum"
-            elif evt.GetId() == ID_documentInfoNotes:
+            elif evt.GetId() == ids.ID_documentInfoNotes:
                 tool = "notes"
 
         # set current tool
@@ -403,9 +396,8 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def onPresets(self, evt):
+    def onPresets(self, evt) -> None:
         """Show presets."""
-
         # get presets
         presets = list(libs.presets["operator"].keys())
         presets.sort()
@@ -426,9 +418,8 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def onPresetsSelected(self, evt):
+    def onPresetsSelected(self, evt) -> None:
         """Load selected presets."""
-
         # get presets
         item = self.presets_popup.FindItemById(evt.GetId())
         presets = libs.presets["operator"][item.GetText()]
@@ -441,11 +432,10 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def onPresetsSave(self, evt):
+    def onPresetsSave(self, evt) -> None:
         """Save current params as presets."""
-
         # get presets name
-        dlg = dlgPresetsName(self)
+        dlg = DlgPresetsName(self)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -467,9 +457,8 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def onSave(self, evt):
+    def onSave(self, evt) -> None:
         """Save data."""
-
         # check document
         if not self.currentDocument:
             wx.Bell()
@@ -492,33 +481,33 @@ class panelDocumentInfo(wx.Frame):
             self.currentDocument.spectrum.scanNumber = int(
                 self.scanNumber_value.GetValue()
             )
-        except:
+        except Exception:
             self.currentDocument.spectrum.scanNumber = None
 
         try:
             self.currentDocument.spectrum.retentionTime = float(
                 self.retentionTime_value.GetValue()
             )
-        except:
+        except Exception:
             self.currentDocument.spectrum.retentionTime = None
 
         try:
             self.currentDocument.spectrum.msLevel = int(self.msLevel_value.GetValue())
-        except:
+        except Exception:
             self.currentDocument.spectrum.msLevel = None
 
         try:
             self.currentDocument.spectrum.precursorMZ = float(
                 self.precursorMZ_value.GetValue()
             )
-        except:
+        except Exception:
             self.currentDocument.spectrum.precursorMZ = None
 
         try:
             self.currentDocument.spectrum.precursorCharge = int(
                 self.precursorCharge_value.GetValue()
             )
-        except:
+        except Exception:
             self.currentDocument.spectrum.precursorCharge = None
 
         if self.polarity_choice.GetStringSelection() == "Positive":
@@ -533,9 +522,8 @@ class panelDocumentInfo(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set document
         self.currentDocument = document
 
@@ -596,10 +584,10 @@ class panelDocumentInfo(wx.Frame):
     # ----
 
 
-class dlgPresetsName(wx.Dialog):
+class DlgPresetsName(wx.Dialog):
     """Set presets name."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, -1, "Preset Name", style=wx.DEFAULT_DIALOG_STYLE
@@ -621,7 +609,6 @@ class dlgPresetsName(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
 
         # make elements
@@ -654,9 +641,8 @@ class dlgPresetsName(wx.Dialog):
 
     # ----
 
-    def onOK(self, evt):
+    def onOK(self, evt) -> None:
         """Get name."""
-
         self.name = self.name_value.GetValue()
         if self.name:
             self.EndModal(wx.ID_OK)

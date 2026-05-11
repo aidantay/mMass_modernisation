@@ -31,10 +31,10 @@ from . import config, images, mwx
 # -------------------------------------------
 
 
-class panelSpectrumGenerator(wx.Frame):
+class PanelSpectrumGenerator(wx.Frame):
     """Spectrum generator tool."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -53,16 +53,15 @@ class panelSpectrumGenerator(wx.Frame):
         self.currentPeaks = None
 
         # init container
-        self.spectrumContainer = plot.container([])
+        self.spectrumContainer = plot.Container([])
 
         # make gui items
         self.makeGUI()
         self.Bind(wx.EVT_CLOSE, self.onClose)
         # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
         controlbar = self.makeControlbar()
@@ -91,9 +90,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -117,7 +115,7 @@ class panelSpectrumGenerator(wx.Frame):
             -1,
             str(config.spectrumGenerator["fwhm"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         self.forceFwhm_check = wx.CheckBox(panel, -1, "Force")
@@ -131,7 +129,7 @@ class panelSpectrumGenerator(wx.Frame):
             -1,
             str(config.spectrumGenerator["points"]),
             size=(60, -1),
-            validator=mwx.validator("intPos"),
+            validator=mwx.Validator("intPos"),
         )
 
         noise_label = wx.StaticText(panel, -1, "Noise width:")
@@ -141,7 +139,7 @@ class panelSpectrumGenerator(wx.Frame):
             -1,
             str(config.spectrumGenerator["noise"]),
             size=(80, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         self.generate_butt = wx.Button(
@@ -186,9 +184,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     def makeControlbar(self):
         """Make controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -240,9 +237,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     def makeSpectrumCanvas(self):
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.spectrumCanvas = plot.canvas(
+        self.spectrumCanvas = plot.Canvas(
             self, size=(700, 350), style=mwx.PLOTCANVAS_STYLE_PANEL
         )
 
@@ -270,11 +266,10 @@ class panelSpectrumGenerator(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -299,9 +294,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Close panel."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -312,9 +306,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -335,9 +328,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -345,9 +337,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onGenerate(self, evt):
+    def onGenerate(self, evt) -> None:
         """Generate compounds ions."""
-
         # check processing
         if self.processing:
             return
@@ -393,9 +384,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onApply(self, evt):
+    def onApply(self, evt) -> None:
         """Apply current profile to current document."""
-
         # check data and document
         if self.currentDocument is None or self.currentProfile is None:
             wx.Bell()
@@ -411,7 +401,7 @@ class panelSpectrumGenerator(wx.Frame):
                 (wx.ID_CANCEL, "Cancel", 80, False, 15),
                 (wx.ID_OK, "Apply", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() != wx.ID_OK:
                 dlg.Destroy()
                 return
@@ -429,9 +419,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onCollapse(self, evt):
+    def onCollapse(self, evt) -> None:
         """Collapse spectrum panel."""
-
         # Show / hide panel
         if self.mainSizer.IsShown(2):
             self.mainSizer.Hide(2)
@@ -448,9 +437,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onShowPeaks(self, evt):
+    def onShowPeaks(self, evt) -> None:
         """Show / hide individual peaks."""
-
         # get value
         config.spectrumGenerator["showPeaks"] = self.showPeaks_check.GetValue()
 
@@ -459,9 +447,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onShowOverlay(self, evt):
+    def onShowOverlay(self, evt) -> None:
         """Show / hide profile overlay in main viewer."""
-
         # get value
         config.spectrumGenerator["showOverlay"] = self.showOverlay_check.GetValue()
 
@@ -470,9 +457,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def onShowFlipped(self, evt):
+    def onShowFlipped(self, evt) -> None:
         """Flip profile overlay in main viewer."""
-
         # get value
         config.spectrumGenerator["showFlipped"] = self.showFlipped_check.GetValue()
 
@@ -481,9 +467,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set data."""
-
         # set new document
         self.currentDocument = document
         self.currentProfile = None
@@ -495,9 +480,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             config.spectrumGenerator["fwhm"] = abs(float(self.fwhm_value.GetValue()))
@@ -511,15 +495,14 @@ class panelSpectrumGenerator(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def updateCanvasProperties(self, refresh=True):
+    def updateCanvasProperties(self, refresh=True) -> None:
         """Set current canvas properties."""
-
         # set common properties
         self.spectrumCanvas.setProperties(xLabel=config.spectrum["xLabel"])
         self.spectrumCanvas.setProperties(yLabel=config.spectrum["yLabel"])
@@ -580,9 +563,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def updateSpectrumCanvas(self, rescale=True):
+    def updateSpectrumCanvas(self, rescale=True) -> None:
         """Show current profile and peaks in canvas."""
-
         # clear container
         self.spectrumContainer.empty()
 
@@ -607,8 +589,8 @@ class panelSpectrumGenerator(wx.Frame):
             wx.FONTWEIGHT_NORMAL,
             0,
         )
-        spectrum = plot.spectrum(
-            scan=mspy.scan(profile=profile, peaklist=peaklist),
+        spectrum = plot.Spectrum(
+            scan=mspy.Scan(profile=profile, peaklist=peaklist),
             spectrumColour=(16, 71, 185),
             tickColour=(255, 0, 0),
             showPoints=config.spectrum["showDataPoints"],
@@ -624,7 +606,7 @@ class panelSpectrumGenerator(wx.Frame):
         # add individual peaks to container
         if config.spectrumGenerator["showPeaks"] and self.currentPeaks is not None:
             for peak in self.currentPeaks:
-                spectrum = plot.points(
+                spectrum = plot.Points(
                     points=peak,
                     lineColour=(50, 140, 0),
                     showLines=True,
@@ -646,9 +628,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def updateSpectrumOverlay(self):
+    def updateSpectrumOverlay(self) -> None:
         """Show / hide profile overlay in main viewer."""
-
         # update tmp spectrum
         if self.currentProfile is None or not config.spectrumGenerator["showOverlay"]:
             self.parent.updateTmpSpectrum(None)
@@ -659,9 +640,8 @@ class panelSpectrumGenerator(wx.Frame):
 
     # ----
 
-    def runSpectrumGenerator(self):
+    def runSpectrumGenerator(self) -> None:
         """Generate spectrum."""
-
         self.currentProfile = None
         self.currentPeaks = None
 
@@ -706,7 +686,7 @@ class panelSpectrumGenerator(wx.Frame):
                 self.currentPeaks.append(points)
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentProfile = None
             self.currentPeaks = None
 

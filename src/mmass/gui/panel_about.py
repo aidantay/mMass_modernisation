@@ -18,10 +18,8 @@
 # load libs
 import wx
 
-from . import config, images, mwx
-
 # load modules
-from .ids import *
+from . import config, ids, images, mwx
 
 # ABOUT mMass PANEL
 # -----------------
@@ -34,7 +32,7 @@ else:
     frameTitle = "About mMass"
 
 
-class panelAbout(frame):
+class PanelAbout(frame):
     """About mMass."""
 
     def __init__(self, parent: wx.Window) -> None:
@@ -63,7 +61,6 @@ class panelAbout(frame):
 
     def makeGUI(self) -> wx.Sizer:
         """Make panel gui."""
-
         # make elements
         panel = wx.Panel(self, -1)
 
@@ -88,13 +85,13 @@ class panelAbout(frame):
         copyright = wx.StaticText(panel, -1, "(c) 2005-2013 Martin Strohalm")
         copyright.SetFont(wx.SMALL_FONT)
 
-        homepage_butt = wx.Button(panel, ID_helpHomepage, "Homepage", size=(150, -1))
+        homepage_butt = wx.Button(panel, ids.ID_helpHomepage, "Homepage", size=(150, -1))
         homepage_butt.Bind(wx.EVT_BUTTON, self.parent.onLibraryLink)
 
-        donate_butt = wx.Button(panel, ID_helpDonate, "Make a Donation", size=(150, -1))
+        donate_butt = wx.Button(panel, ids.ID_helpDonate, "Make a Donation", size=(150, -1))
         donate_butt.Bind(wx.EVT_BUTTON, self.parent.onLibraryLink)
 
-        cite_butt = wx.Button(panel, ID_helpCite, "How to Cite", size=(150, -1))
+        cite_butt = wx.Button(panel, ids.ID_helpCite, "How to Cite", size=(150, -1))
         cite_butt.Bind(wx.EVT_BUTTON, self.parent.onLibraryLink)
 
         # pack elements into panel sizer

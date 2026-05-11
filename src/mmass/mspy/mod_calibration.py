@@ -19,18 +19,16 @@
 import numpy
 from numpy.linalg import solve as solveLinEq
 
-# load stopper
-
 # DATA RE-CALIBRATION
 # -------------------
 
 
 def calibration(data, model="linear"):
     """Calculate calibration constants for given references.
+
     data (list or (measured mass, reference mass)) - calibration data
     model ('linear' or 'quadratic') - fitting model
     """
-
     # single point calibration
     if model == "linear" and len(data) == 1:
         shift = data[0][1] - data[0][0]
@@ -56,7 +54,6 @@ def calibration(data, model="linear"):
 
 def _linearModel(params, x):
     """Function for linear model."""
-
     a, b = params
     return a * x + b
 
@@ -66,7 +63,6 @@ def _linearModel(params, x):
 
 def _quadraticModel(params, x):
     """Function for quadratic model."""
-
     a, b, c = params
     return a * x * x + b * x + c
 
@@ -75,11 +71,11 @@ def _quadraticModel(params, x):
 
 
 def _leastSquaresFit(model, parameters, data, maxIterations=None, limit=1e-7):
-    """General non-linear least-squares fit using the
+    """General non-linear least-squares fit using the.
+
     Levenberg-Marquardt algorithm and automatic derivatives.
     Originally developed by Konrad Hinsen.
     """
-
     n_param = len(parameters)
     p = ()
     i = 0
@@ -121,7 +117,6 @@ def _leastSquaresFit(model, parameters, data, maxIterations=None, limit=1e-7):
 
 def _chiSquare(model, parameters, data):
     """Count chi-square."""
-
     n_param = len(parameters)
     alpha = numpy.zeros((n_param, n_param))
 
@@ -141,9 +136,9 @@ def _chiSquare(model, parameters, data):
 class _DerivVar:
     """This module provides automatic differentiation for functions with any number of variables."""
 
-    def __init__(self, value, index=0):
+    def __init__(self, value, index=0) -> None:
         self.value = value
-        if type(index) == type([]):
+        if isinstance(index, list):
             self.deriv = index
         else:
             self.deriv = index * [0] + [1]

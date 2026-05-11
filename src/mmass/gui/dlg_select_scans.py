@@ -16,6 +16,7 @@
 # -------------------------------------------------------------------------
 
 # load libs
+import contextlib
 import datetime
 import random
 
@@ -30,10 +31,10 @@ from . import config, mwx
 # ---------------------
 
 
-class dlgSelectScans(wx.Dialog):
+class DlgSelectScans(wx.Dialog):
     """Select scans from multiscan files."""
 
-    def __init__(self, parent, scans):
+    def __init__(self, parent, scans) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -72,7 +73,6 @@ class dlgSelectScans(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make GUI elements
         self.makeScanList()
         self.makeChromPlot()
@@ -101,7 +101,6 @@ class dlgSelectScans(wx.Dialog):
 
     def makeButtons(self):
         """Make buttons."""
-
         # make items
         cancel_butt = wx.Button(self, wx.ID_CANCEL, "Cancel")
         open_butt = wx.Button(self, wx.ID_OK, "Open Selected")
@@ -117,11 +116,10 @@ class dlgSelectScans(wx.Dialog):
 
     # ----
 
-    def makeScanList(self):
+    def makeScanList(self) -> None:
         """Make list for scans."""
-
         # init list
-        self.scanList = mwx.sortListCtrl(
+        self.scanList = mwx.SortListCtrl(
             self, wx.ID_ANY, size=(656, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.scanList.SetFont(wx.SMALL_FONT)
@@ -148,11 +146,10 @@ class dlgSelectScans(wx.Dialog):
 
     # ----
 
-    def makeChromPlot(self):
+    def makeChromPlot(self) -> None:
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.chromCanvas = plot.canvas(
+        self.chromCanvas = plot.Canvas(
             self, size=(-1, 200), style=mwx.PLOTCANVAS_STYLE_DIALOG
         )
 
@@ -187,13 +184,12 @@ class dlgSelectScans(wx.Dialog):
 
         self.chromCanvas.Bind(wx.EVT_LEFT_UP, self.onCanvasLMU)
 
-        self.chromCanvas.draw(plot.container([]))
+        self.chromCanvas.draw(plot.Container([]))
 
     # ----
 
-    def updateScanList(self):
+    def updateScanList(self) -> None:
         """Set data to scan list."""
-
         # set data map
         self.scanMap = []
         for _scanID, scan in sorted(self.scans.items()):
@@ -216,10 +212,8 @@ class dlgSelectScans(wx.Dialog):
         for row, (_scanID, scan) in enumerate(sorted(self.scans.items())):
             retentionTime = ""
             if scan["retentionTime"] is not None:
-                try:  # noqa: SIM105
+                with contextlib.suppress(Exception):
                     retentionTime = f"{scan['retentionTime'] / 60:.2f} ({datetime.timedelta(seconds=round(scan['retentionTime']))})"
-                except Exception:
-                    pass
 
             msLevel = ""
             if scan["msLevel"] is not None:
@@ -227,10 +221,8 @@ class dlgSelectScans(wx.Dialog):
 
             precursorMZ = ""
             if scan["precursorMZ"] is not None:
-                try:  # noqa: SIM105
+                with contextlib.suppress(Exception):
                     precursorMZ = f"{scan['precursorMZ']:.4f}"
-                except Exception:
-                    pass
 
             precursorCharge = ""
             if scan["precursorCharge"] is not None:
@@ -241,24 +233,18 @@ class dlgSelectScans(wx.Dialog):
 
             mzRange = ""
             if scan["lowMZ"] is not None and scan["highMZ"] is not None:
-                try:  # noqa: SIM105
+                with contextlib.suppress(Exception):
                     mzRange = f"{scan['lowMZ']:.0f}-{scan['highMZ']:.0f}"
-                except Exception:
-                    pass
 
             totIonCurrent = ""
             if scan["totIonCurrent"] is not None:
-                try:  # noqa: SIM105
+                with contextlib.suppress(Exception):
                     totIonCurrent = f"{scan['totIonCurrent']:.0f}"
-                except Exception:
-                    pass
 
             pointsCount = ""
             if scan["pointsCount"] is not None:
-                try:  # noqa: SIM105
+                with contextlib.suppress(Exception):
                     pointsCount = str(scan["pointsCount"])
-                except Exception:
-                    pass
 
             self.scanList.InsertItem(row, str(scan["scanNumber"]))
             self.scanList.SetItem(row, 1, retentionTime)
@@ -276,10 +262,9 @@ class dlgSelectScans(wx.Dialog):
 
     # ----
 
-    def updateChromPlot(self):
+    def updateChromPlot(self) -> None:
         """Update chromatograms."""
-
-        container = plot.container([])
+        container = plot.Container([])
 
         # get data
         ticData = []
@@ -295,7 +280,7 @@ class dlgSelectScans(wx.Dialog):
         # make objects
         if len(ticData) > 10:
             ticData.sort()
-            obj = plot.points(
+            obj = plot.Points(
                 ticData,
                 lineColour=(16, 71, 185),
                 legend="TIC (MS)",
@@ -309,7 +294,7 @@ class dlgSelectScans(wx.Dialog):
 
         if len(bpcData) > 10:
             ticData.sort()
-            obj = plot.points(
+            obj = plot.Points(
                 bpcData,
                 lineColour=(50, 140, 0),
                 legend="BPC (MS)",
@@ -326,9 +311,8 @@ class dlgSelectScans(wx.Dialog):
 
     # ----
 
-    def onItemSelected(self, _evt):
+    def onItemSelected(self, _evt) -> None:
         """Show selected scans in chromatogram."""
-
         # check chromatogram
         if not self.showChromCanvas:
             return
@@ -346,17 +330,15 @@ class dlgSelectScans(wx.Dialog):
 
     # ----
 
-    def onItemActivated(self, _evt):
+    def onItemActivated(self, _evt) -> None:
         """Open selected scans."""
-
         self.selected = self.getSelecedScans()
         self.EndModal(wx.ID_OK)
 
     # ----
 
-    def onCanvasLMU(self, evt):
+    def onCanvasLMU(self, evt) -> None:
         """Show nearest scan."""
-
         # check chromatogram
         if not self.showChromCanvas:
             return
@@ -395,9 +377,8 @@ class dlgSelectScans(wx.Dialog):
 
     # ----
 
-    def onOpen(self, _evt):
+    def onOpen(self, _evt) -> None:
         """Check selected scan."""
-
         # get selection
         self.selected = self.getSelecedScans()
         if self.selected:
@@ -409,7 +390,6 @@ class dlgSelectScans(wx.Dialog):
 
     def getSelecedScans(self):
         """Get scan numbers for selected scans."""
-
         # get selected items
         selected = []
         i = -1
@@ -432,7 +412,6 @@ class dlgSelectScans(wx.Dialog):
 
     def getFreeColour(self):
         """Get free colour from config or generate random."""
-
         # get colour from config
         for colour in config.colours:
             if colour not in self.usedColours:

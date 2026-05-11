@@ -29,10 +29,10 @@ from . import mwx
 # --------------
 
 
-class dlgEnzymesEditor(wx.Dialog):
+class DlgEnzymesEditor(wx.Dialog):
     """Edit enzymes library."""
 
-    def __init__(self, parent):
+    def __init__(self, parent: wx.Window | None) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -41,7 +41,7 @@ class dlgEnzymesEditor(wx.Dialog):
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
 
-        self.itemsMap = []
+        self.itemsMap: list[tuple[str, str, str, str, bool, bool]] = []
 
         # make GUI
         sizer = self.makeGUI()
@@ -58,9 +58,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> wx.Sizer:
         """Make GUI elements."""
-
         # make GUI elements
         self.makeItemsList()
         editor = self.makeItemEditor()
@@ -79,11 +78,10 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def makeItemsList(self):
+    def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, -1, size=(741, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -106,9 +104,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def makeItemEditor(self):
+    def makeItemEditor(self) -> wx.Sizer:
         """Make items editor."""
-
         mainSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.VERTICAL)
 
         # make elements
@@ -119,10 +116,10 @@ class dlgEnzymesEditor(wx.Dialog):
         self.itemExpression_value = wx.TextCtrl(self, -1, "", size=(200, -1))
 
         itemCTerm_label = wx.StaticText(self, -1, "C-term formula:")
-        self.itemCTerm_value = mwx.formulaCtrl(self, -1, "", size=(200, -1))
+        self.itemCTerm_value = mwx.FormulaCtrl(self, -1, "", size=(200, -1))
 
         itemNTerm_label = wx.StaticText(self, -1, "N-term formula:")
-        self.itemNTerm_value = mwx.formulaCtrl(self, -1, "", size=(200, -1))
+        self.itemNTerm_value = mwx.FormulaCtrl(self, -1, "", size=(200, -1))
 
         self.itemModsBefore_check = wx.CheckBox(
             self, -1, "Allow modification before cut"
@@ -176,9 +173,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt: wx.Event) -> None:
         """Update item editor with selected item."""
-
         # get selected item
         name = evt.GetText()
         enzyme = mspy.enzymes[name]
@@ -193,9 +189,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def onAddItem(self, evt):
+    def onAddItem(self, evt: wx.Event) -> None:
         """Add/replace item."""
-
         # get item data
         itemData = self.getItemData()
         if not itemData:
@@ -212,7 +207,7 @@ class dlgEnzymesEditor(wx.Dialog):
                 (wx.ID_CANCEL, "Cancel", 80, False, 15),
                 (wx.ID_OK, "Replace", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() != wx.ID_OK:
                 dlg.Destroy()
                 return
@@ -227,9 +222,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def onDeleteItem(self, evt):
+    def onDeleteItem(self, evt: wx.Event) -> None:
         """Remove selected items."""
-
         # delete?
         title = "Do you really want to delete selected enzymes?"
         message = "Enzyme definitions will be lost."
@@ -237,7 +231,7 @@ class dlgEnzymesEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -255,9 +249,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsMap(self):
+    def updateItemsMap(self) -> None:
         """Update items map."""
-
         self.itemsMap = []
 
         # make map
@@ -275,9 +268,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsList(self):
+    def updateItemsList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateItemsMap()
         self.itemsList.DeleteAllItems()
@@ -312,9 +304,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def clearEditor(self):
+    def clearEditor(self) -> None:
         """Clear item editor."""
-
         # update editor
         self.itemName_value.SetValue("")
         self.itemExpression_value.SetValue("")
@@ -325,9 +316,8 @@ class dlgEnzymesEditor(wx.Dialog):
 
     # ----
 
-    def getItemData(self):
+    def getItemData(self) -> mspy.Enzyme | bool:
         """Get formated item data."""
-
         # get data
         name = self.itemName_value.GetValue()
         expression = self.itemExpression_value.GetValue()
@@ -344,7 +334,7 @@ class dlgEnzymesEditor(wx.Dialog):
         # make enzyme
         try:
             re.compile(expression)
-            enzyme = mspy.enzyme(
+            enzyme = mspy.Enzyme(
                 name=name,
                 expression=expression,
                 cTermFormula=cTermFormula,

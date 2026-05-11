@@ -525,7 +525,7 @@ def signal_lorentzian(
 def signal_gausslorentzian(
     x: float, minY: float, maxY: float, fwhm: float, points: int
 ) -> np.ndarray:
-    """Models a hybrid peak (Gaussian on the left, Lorentzian on the right)."""
+    """Models a hybrid Peak (Gaussian on the left, Lorentzian on the right)."""
     minX = x - 5.0 * fwhm
     maxX = x + 10.0 * fwhm
     current_x = np.linspace(minX, maxX, points, endpoint=False, dtype=np.double)
@@ -647,8 +647,8 @@ def _formula_generator(
     pos: int,
     results: list[list[int]],
 ) -> None:
-    """
-    Recursive helper to generate chemical compositions within a mass range.
+    """Recursive helper to generate chemical compositions within a mass range.
+
     Matches logic in calculations.c.
     """
     elcount = len(current_comp)
@@ -692,8 +692,8 @@ def formula_composition(
     hi_mass: float,
     limit: int,
 ) -> list[list[int]]:
-    """
-    Generate chemical compositions within a given mass range.
+    """Generate chemical compositions within a given mass range.
+
     Matches logic in calculations.c.
     """
     results: list[list[int]] = []

@@ -12,6 +12,7 @@ dependencies:
   - pytest-mock
   - pytest-timeout
   - pytest-xdist
+  - pytest-randomly
   - hypothesis
   - ruff
   - mypy

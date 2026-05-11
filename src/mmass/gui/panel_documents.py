@@ -20,18 +20,17 @@ import wx
 
 from mmass import mspy
 
-from . import config, doc, images, mwx
-from .dlg_notation import dlgNotation
-from .ids import *
+from . import config, doc, ids, images, mwx
+from .dlg_notation import DlgNotation
 
 # DOCUMENTS PANEL
 # --------------
 
 
-class panelDocuments(wx.Panel):
+class PanelDocuments(wx.Panel):
     """Make documents panel."""
 
-    def __init__(self, parent, documents):
+    def __init__(self, parent, documents) -> None:
         wx.Panel.__init__(self, parent, -1, size=(150, -1))
 
         self.parent = parent
@@ -42,9 +41,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make GUI elements."""
-
         # make documents tree
         self.makeDocumentTree()
 
@@ -64,9 +62,8 @@ class panelDocuments(wx.Panel):
 
     def makeToolbar(self):
         """Make bottom toolbar."""
-
         # init toolbar panel
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrBottombar"], size=(-1, mwx.BOTTOMBAR_HEIGHT)
         )
 
@@ -112,11 +109,10 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def makeDocumentTree(self):
+    def makeDocumentTree(self) -> None:
         """Make documents tree."""
-
         # init tree
-        self.documentTree = documentsTree(self, -1, size=(175, -1))
+        self.documentTree = DocumentsTree(self, -1, size=(175, -1))
 
         # bind events
         self.documentTree.Bind(wx.EVT_TREE_KEY_DOWN, self.onKey)
@@ -128,14 +124,13 @@ class panelDocuments(wx.Panel):
         self.documentTree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.onItemActivated)
 
         # set DnD
-        dropTarget = fileDropTarget(self.parent.onDocumentDropped)
+        dropTarget = FileDropTarget(self.parent.onDocumentDropped)
         self.documentTree.SetDropTarget(dropTarget)
 
     # ----
 
-    def onKey(self, evt):
+    def onKey(self, evt) -> None:
         """Delete selected item."""
-
         # get key
         key = evt.GetKeyCode()
         keyEvt = evt.GetKeyEvent()
@@ -166,9 +161,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onLMD(self, evt):
+    def onLMD(self, evt) -> None:
         """Enable / disable document."""
-
         # get item
         item, flags = self.documentTree.HitTest(evt.GetPosition())
 
@@ -192,17 +186,15 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onRMD(self, evt):
+    def onRMD(self, evt) -> None:
         """Right mouse down."""
-
         if wx.Platform == "__WXMAC__":
             evt.Skip()
 
     # ----
 
-    def onRMU(self, evt):
+    def onRMU(self, evt) -> None:
         """Show popup menu."""
-
         # get selected item
         item = self.documentTree.GetSelection()
         itemType = self.documentTree.getItemType(item)
@@ -221,196 +213,196 @@ class panelDocuments(wx.Panel):
         # popup menu
         menu = wx.Menu()
         if itemType == "document":
-            menu.Append(ID_sequenceNew, "Add Sequence...")
+            menu.Append(ids.ID_sequenceNew, "Add sequence...")
             menu.AppendSeparator()
-            menu.Append(ID_documentInfo, "Notes and Information...")
-            menu.Append(ID_documentNotationsDelete, "Delete All Notations")
+            menu.Append(ids.ID_documentInfo, "Notes and Information...")
+            menu.Append(ids.ID_documentNotationsDelete, "Delete All Notations")
             menu.AppendSeparator()
-            menu.Append(ID_documentColour, "Change Colour...")
+            menu.Append(ids.ID_documentColour, "Change Colour...")
             style = wx.Menu()
-            style.Append(ID_documentStyleSolid, "Solid", "", wx.ITEM_RADIO)
-            style.Append(ID_documentStyleDot, "Dotted", "", wx.ITEM_RADIO)
-            style.Append(ID_documentStyleDash, "Dashed", "", wx.ITEM_RADIO)
-            style.Append(ID_documentStyleDotDash, "Dot and Dash", "", wx.ITEM_RADIO)
-            menu.Append(ID_documentStyle, "Line Style", style)
+            style.Append(ids.ID_documentStyleSolid, "Solid", "", wx.ITEM_RADIO)
+            style.Append(ids.ID_documentStyleDot, "Dotted", "", wx.ITEM_RADIO)
+            style.Append(ids.ID_documentStyleDash, "Dashed", "", wx.ITEM_RADIO)
+            style.Append(ids.ID_documentStyleDotDash, "Dot and Dash", "", wx.ITEM_RADIO)
+            menu.Append(ids.ID_documentStyle, "Line Style", style)
             menu.AppendSeparator()
-            menu.Append(ID_documentFlip, "Flip Spectrum")
-            menu.Append(ID_documentOffset, "Offset Spectrum...")
-            menu.Append(ID_documentClearOffset, "Clear Offset")
+            menu.Append(ids.ID_documentFlip, "Flip Spectrum")
+            menu.Append(ids.ID_documentOffset, "Offset Spectrum...")
+            menu.Append(ids.ID_documentClearOffset, "Clear Offset")
             menu.AppendSeparator()
-            menu.Append(ID_documentDuplicate, "Duplicate Document")
+            menu.Append(ids.ID_documentDuplicate, "Duplicate Document")
             menu.AppendSeparator()
-            menu.Append(ID_documentClose, "Close Document")
-            menu.Append(ID_documentCloseAll, "Close All Documents")
+            menu.Append(ids.ID_documentClose, "Close Document")
+            menu.Append(ids.ID_documentCloseAll, "Close All Documents")
 
             if config.spectrum["normalize"]:
-                menu.Enable(ID_documentOffset, False)
+                menu.Enable(ids.ID_documentOffset, False)
             if itemData.offset == [0, 0]:
-                menu.Enable(ID_documentClearOffset, False)
+                menu.Enable(ids.ID_documentClearOffset, False)
 
             if not itemData.spectrum.hasprofile():
-                menu.Enable(ID_documentStyle, False)
+                menu.Enable(ids.ID_documentStyle, False)
             elif itemData.style == wx.DOT:
-                style.Check(ID_documentStyleDot, True)
+                style.Check(ids.ID_documentStyleDot, True)
             elif itemData.style == wx.SHORT_DASH:
-                style.Check(ID_documentStyleDash, True)
+                style.Check(ids.ID_documentStyleDash, True)
             elif itemData.style == wx.DOT_DASH:
-                style.Check(ID_documentStyleDotDash, True)
+                style.Check(ids.ID_documentStyleDotDash, True)
             else:
-                style.Check(ID_documentStyleSolid, True)
+                style.Check(ids.ID_documentStyleSolid, True)
 
         elif itemType == "annotations":
             menu.Append(
-                ID_documentAnnotationsCalibrateBy, "Calibrate by Annotations..."
+                ids.ID_documentAnnotationsCalibrateBy, "Calibrate by Annotations..."
             )
             menu.AppendSeparator()
-            menu.Append(ID_documentAnnotationsDelete, "Delete All Annotations")
+            menu.Append(ids.ID_documentAnnotationsDelete, "Delete All Annotations")
 
             if not itemData:
-                menu.Enable(ID_documentAnnotationsDelete, False)
-                menu.Enable(ID_documentAnnotationsCalibrateBy, False)
+                menu.Enable(ids.ID_documentAnnotationsDelete, False)
+                menu.Enable(ids.ID_documentAnnotationsCalibrateBy, False)
 
         elif itemType == "annotation":
-            menu.Append(ID_documentAnnotationEdit, "Edit Annotation...")
+            menu.Append(ids.ID_documentAnnotationEdit, "Edit Annotation...")
             menu.AppendSeparator()
             menu.Append(
-                ID_documentAnnotationSendToMassCalculator, "Show Isotopic Pattern..."
+                ids.ID_documentAnnotationSendToMassCalculator, "Show Isotopic Pattern..."
             )
             menu.Append(
-                ID_documentAnnotationSendToMassToFormula, "Send to Mass to Formula..."
+                ids.ID_documentAnnotationSendToMassToFormula, "Send to Mass to Formula..."
             )
             menu.Append(
-                ID_documentAnnotationSendToEnvelopeFit, "Send to Envelope Fit..."
+                ids.ID_documentAnnotationSendToEnvelopeFit, "Send to Envelope Fit..."
             )
             menu.AppendSeparator()
             menu.Append(
-                ID_documentAnnotationsCalibrateBy, "Calibrate by Annotations..."
+                ids.ID_documentAnnotationsCalibrateBy, "Calibrate by Annotations..."
             )
             menu.AppendSeparator()
-            menu.Append(ID_documentAnnotationDelete, "Delete Annotation")
-            menu.Append(ID_documentAnnotationsDelete, "Delete All Annotations")
+            menu.Append(ids.ID_documentAnnotationDelete, "Delete Annotation")
+            menu.Append(ids.ID_documentAnnotationsDelete, "Delete All Annotations")
 
             if not itemData.formula:
-                menu.Enable(ID_documentAnnotationSendToMassCalculator, False)
-                menu.Enable(ID_documentAnnotationSendToEnvelopeFit, False)
+                menu.Enable(ids.ID_documentAnnotationSendToMassCalculator, False)
+                menu.Enable(ids.ID_documentAnnotationSendToEnvelopeFit, False)
 
         elif itemType == "sequence":
-            menu.Append(ID_sequenceEditor, "Edit Sequence...")
-            menu.Append(ID_sequenceModifications, "Edit Modifications...")
+            menu.Append(ids.ID_sequenceEditor, "Edit sequence...")
+            menu.Append(ids.ID_sequenceModifications, "Edit Modifications...")
             menu.AppendSeparator()
-            menu.Append(ID_sequenceDigest, "Digest Protein...")
-            menu.Append(ID_sequenceFragment, "Fragment Peptide...")
-            menu.Append(ID_sequenceSearch, "Mass Search...")
+            menu.Append(ids.ID_sequenceDigest, "Digest Protein...")
+            menu.Append(ids.ID_sequenceFragment, "Fragment Peptide...")
+            menu.Append(ids.ID_sequenceSearch, "Mass Search...")
             menu.AppendSeparator()
-            menu.Append(ID_sequenceSendToMassCalculator, "Show Isotopic Pattern...")
-            menu.Append(ID_sequenceSendToEnvelopeFit, "Send to Envelope Fit...")
+            menu.Append(ids.ID_sequenceSendToMassCalculator, "Show Isotopic Pattern...")
+            menu.Append(ids.ID_sequenceSendToEnvelopeFit, "Send to Envelope Fit...")
             menu.AppendSeparator()
-            menu.Append(ID_sequenceMatchesCalibrateBy, "Calibrate by Matches...")
+            menu.Append(ids.ID_sequenceMatchesCalibrateBy, "Calibrate by Matches...")
             menu.AppendSeparator()
-            menu.Append(ID_sequenceMatchesDelete, "Delete All Matches")
-            menu.Append(ID_sequenceDelete, "Delete Sequence")
+            menu.Append(ids.ID_sequenceMatchesDelete, "Delete All Matches")
+            menu.Append(ids.ID_sequenceDelete, "Delete Sequence")
 
             if not itemData.matches:
-                menu.Enable(ID_sequenceMatchesCalibrateBy, False)
-                menu.Enable(ID_sequenceMatchesDelete, False)
+                menu.Enable(ids.ID_sequenceMatchesCalibrateBy, False)
+                menu.Enable(ids.ID_sequenceMatchesDelete, False)
 
         elif itemType == "match":
-            menu.Append(ID_sequenceMatchEdit, "Edit Match...")
+            menu.Append(ids.ID_sequenceMatchEdit, "Edit Match...")
             menu.AppendSeparator()
             menu.Append(
-                ID_sequenceMatchSendToMassCalculator, "Show Isotopic Pattern..."
+                ids.ID_sequenceMatchSendToMassCalculator, "Show Isotopic Pattern..."
             )
-            menu.Append(ID_sequenceMatchSendToEnvelopeFit, "Send to Envelope Fit...")
+            menu.Append(ids.ID_sequenceMatchSendToEnvelopeFit, "Send to Envelope Fit...")
             menu.AppendSeparator()
-            menu.Append(ID_sequenceMatchesCalibrateBy, "Calibrate by Matches...")
+            menu.Append(ids.ID_sequenceMatchesCalibrateBy, "Calibrate by Matches...")
             menu.AppendSeparator()
-            menu.Append(ID_sequenceMatchDelete, "Delete Sequence Match")
-            menu.Append(ID_sequenceMatchesDelete, "Delete All Matches")
+            menu.Append(ids.ID_sequenceMatchDelete, "Delete Sequence Match")
+            menu.Append(ids.ID_sequenceMatchesDelete, "Delete All Matches")
 
             if not itemData.formula:
-                menu.Enable(ID_sequenceMatchSendToMassCalculator, False)
-                menu.Enable(ID_sequenceMatchSendToEnvelopeFit, False)
+                menu.Enable(ids.ID_sequenceMatchSendToMassCalculator, False)
+                menu.Enable(ids.ID_sequenceMatchSendToEnvelopeFit, False)
 
         # bind events
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentInfo, id=ID_documentInfo)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentColour, id=ID_documentColour)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ID_documentStyleSolid)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ID_documentStyleDot)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ID_documentStyleDash)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ID_documentStyleDotDash)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentFlip, id=ID_documentFlip)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentOffset, id=ID_documentOffset)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentOffset, id=ID_documentClearOffset)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentInfo, id=ids.ID_documentInfo)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentColour, id=ids.ID_documentColour)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ids.ID_documentStyleSolid)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ids.ID_documentStyleDot)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ids.ID_documentStyleDash)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentStyle, id=ids.ID_documentStyleDotDash)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentFlip, id=ids.ID_documentFlip)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentOffset, id=ids.ID_documentOffset)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentOffset, id=ids.ID_documentClearOffset)
         self.Bind(
             wx.EVT_MENU,
             self.parent.onDocumentNotationsDelete,
-            id=ID_documentNotationsDelete,
+            id=ids.ID_documentNotationsDelete,
         )
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentDuplicate, id=ID_documentDuplicate)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentClose, id=ID_documentClose)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentCloseAll, id=ID_documentCloseAll)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentDuplicate, id=ids.ID_documentDuplicate)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentClose, id=ids.ID_documentClose)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentCloseAll, id=ids.ID_documentCloseAll)
 
-        self.Bind(wx.EVT_MENU, self.onNotationEdit, id=ID_documentAnnotationEdit)
+        self.Bind(wx.EVT_MENU, self.onNotationEdit, id=ids.ID_documentAnnotationEdit)
         self.Bind(
             wx.EVT_MENU,
             self.onSendToMassCalculator,
-            id=ID_documentAnnotationSendToMassCalculator,
+            id=ids.ID_documentAnnotationSendToMassCalculator,
         )
         self.Bind(
             wx.EVT_MENU,
             self.onSendToMassToFormula,
-            id=ID_documentAnnotationSendToMassToFormula,
+            id=ids.ID_documentAnnotationSendToMassToFormula,
         )
         self.Bind(
             wx.EVT_MENU,
             self.onSendToEnvelopeFit,
-            id=ID_documentAnnotationSendToEnvelopeFit,
+            id=ids.ID_documentAnnotationSendToEnvelopeFit,
         )
         self.Bind(
             wx.EVT_MENU,
             self.parent.onDocumentAnnotationsCalibrateBy,
-            id=ID_documentAnnotationsCalibrateBy,
+            id=ids.ID_documentAnnotationsCalibrateBy,
         )
-        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ID_documentAnnotationDelete)
+        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ids.ID_documentAnnotationDelete)
         self.Bind(
             wx.EVT_MENU,
             self.parent.onDocumentAnnotationsDelete,
-            id=ID_documentAnnotationsDelete,
+            id=ids.ID_documentAnnotationsDelete,
         )
 
-        self.Bind(wx.EVT_MENU, self.parent.onSequenceNew, id=ID_sequenceNew)
-        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ID_sequenceEditor)
-        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ID_sequenceModifications)
-        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ID_sequenceDigest)
-        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ID_sequenceFragment)
-        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ID_sequenceSearch)
+        self.Bind(wx.EVT_MENU, self.parent.onSequenceNew, id=ids.ID_sequenceNew)
+        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ids.ID_sequenceEditor)
+        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ids.ID_sequenceModifications)
+        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ids.ID_sequenceDigest)
+        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ids.ID_sequenceFragment)
+        self.Bind(wx.EVT_MENU, self.parent.onToolsSequence, id=ids.ID_sequenceSearch)
         self.Bind(
-            wx.EVT_MENU, self.onSendToMassCalculator, id=ID_sequenceSendToMassCalculator
+            wx.EVT_MENU, self.onSendToMassCalculator, id=ids.ID_sequenceSendToMassCalculator
         )
         self.Bind(
-            wx.EVT_MENU, self.onSendToEnvelopeFit, id=ID_sequenceSendToEnvelopeFit
+            wx.EVT_MENU, self.onSendToEnvelopeFit, id=ids.ID_sequenceSendToEnvelopeFit
         )
-        self.Bind(wx.EVT_MENU, self.parent.onSequenceDelete, id=ID_sequenceDelete)
+        self.Bind(wx.EVT_MENU, self.parent.onSequenceDelete, id=ids.ID_sequenceDelete)
 
-        self.Bind(wx.EVT_MENU, self.onNotationEdit, id=ID_sequenceMatchEdit)
+        self.Bind(wx.EVT_MENU, self.onNotationEdit, id=ids.ID_sequenceMatchEdit)
         self.Bind(
             wx.EVT_MENU,
             self.onSendToMassCalculator,
-            id=ID_sequenceMatchSendToMassCalculator,
+            id=ids.ID_sequenceMatchSendToMassCalculator,
         )
         self.Bind(
-            wx.EVT_MENU, self.onSendToEnvelopeFit, id=ID_sequenceMatchSendToEnvelopeFit
+            wx.EVT_MENU, self.onSendToEnvelopeFit, id=ids.ID_sequenceMatchSendToEnvelopeFit
         )
         self.Bind(
             wx.EVT_MENU,
             self.parent.onSequenceMatchesCalibrateBy,
-            id=ID_sequenceMatchesCalibrateBy,
+            id=ids.ID_sequenceMatchesCalibrateBy,
         )
-        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ID_sequenceMatchDelete)
+        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ids.ID_sequenceMatchDelete)
         self.Bind(
             wx.EVT_MENU,
             self.parent.onSequenceMatchesDelete,
-            id=ID_sequenceMatchesDelete,
+            id=ids.ID_sequenceMatchesDelete,
         )
 
         self.PopupMenu(menu)
@@ -419,9 +411,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onItemSelecting(self, evt):
+    def onItemSelecting(self, evt) -> None:
         """Selecting item."""
-
         # do not allow to select disabled documents
         item = evt.GetItem()
         if self.documentTree.getItemIndent(item):
@@ -432,9 +423,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Selected item."""
-
         # get item
         item = evt.GetItem()
         itemType = self.documentTree.getItemType(item)
@@ -469,9 +459,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onItemActivated(self, evt):
+    def onItemActivated(self, evt) -> None:
         """Activated item."""
-
         # get item
         item = evt.GetItem()
         itemType = self.documentTree.getItemType(item)
@@ -499,33 +488,32 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onAdd(self, evt):
+    def onAdd(self, evt) -> None:
         """Add button pressed."""
-
         # get selected item
         item = self.documentTree.GetSelection()
         indent = self.documentTree.getItemIndent(item)
 
         # popup menu
         menu = wx.Menu()
-        menu.Append(ID_sequenceNew, "New Sequence...")
+        menu.Append(ids.ID_sequenceNew, "New sequence...")
         menu.AppendSeparator()
-        menu.Append(ID_documentNew, "New Document")
-        menu.Append(ID_documentNewFromClipboard, "New from Clipboard")
+        menu.Append(ids.ID_documentNew, "New Document")
+        menu.Append(ids.ID_documentNewFromClipboard, "New from Clipboard")
         menu.AppendSeparator()
-        menu.Append(ID_documentOpen, "Open Document...")
+        menu.Append(ids.ID_documentOpen, "Open Document...")
 
-        menu.Enable(ID_sequenceNew, bool(indent))
+        menu.Enable(ids.ID_sequenceNew, bool(indent))
 
         # set events
-        self.Bind(wx.EVT_MENU, self.parent.onSequenceNew, id=ID_sequenceNew)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentNew, id=ID_documentNew)
+        self.Bind(wx.EVT_MENU, self.parent.onSequenceNew, id=ids.ID_sequenceNew)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentNew, id=ids.ID_documentNew)
         self.Bind(
             wx.EVT_MENU,
             self.parent.onDocumentNewFromClipboard,
-            id=ID_documentNewFromClipboard,
+            id=ids.ID_documentNewFromClipboard,
         )
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentOpen, id=ID_documentOpen)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentOpen, id=ids.ID_documentOpen)
 
         self.PopupMenu(menu)
         menu.Destroy()
@@ -533,56 +521,55 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onDelete(self, evt):
+    def onDelete(self, evt) -> None:
         """Delete button pressed."""
-
         # make menu
         menu = wx.Menu()
-        menu.Append(ID_documentAnnotationDelete, "Delete Annotation")
-        menu.Append(ID_documentAnnotationsDelete, "Delete All Annotations")
+        menu.Append(ids.ID_documentAnnotationDelete, "Delete Annotation")
+        menu.Append(ids.ID_documentAnnotationsDelete, "Delete All Annotations")
         menu.AppendSeparator()
-        menu.Append(ID_sequenceDelete, "Delete Sequence")
-        menu.Append(ID_sequenceMatchDelete, "Delete Sequence Match")
-        menu.Append(ID_sequenceMatchesDelete, "Delete All Matches")
+        menu.Append(ids.ID_sequenceDelete, "Delete Sequence")
+        menu.Append(ids.ID_sequenceMatchDelete, "Delete Sequence Match")
+        menu.Append(ids.ID_sequenceMatchesDelete, "Delete All Matches")
         menu.AppendSeparator()
-        menu.Append(ID_documentNotationsDelete, "Delete All Notations")
+        menu.Append(ids.ID_documentNotationsDelete, "Delete All Notations")
         menu.AppendSeparator()
-        menu.Append(ID_documentClose, "Close Document")
-        menu.Append(ID_documentCloseAll, "Close All Documents")
+        menu.Append(ids.ID_documentClose, "Close Document")
+        menu.Append(ids.ID_documentCloseAll, "Close All Documents")
 
         # disable items
-        menu.Enable(ID_documentAnnotationDelete, False)
-        menu.Enable(ID_documentAnnotationsDelete, False)
-        menu.Enable(ID_sequenceDelete, False)
-        menu.Enable(ID_sequenceMatchDelete, False)
-        menu.Enable(ID_sequenceMatchesDelete, False)
-        menu.Enable(ID_documentNotationsDelete, False)
-        menu.Enable(ID_documentClose, False)
-        menu.Enable(ID_documentCloseAll, bool(self.documents))
+        menu.Enable(ids.ID_documentAnnotationDelete, False)
+        menu.Enable(ids.ID_documentAnnotationsDelete, False)
+        menu.Enable(ids.ID_sequenceDelete, False)
+        menu.Enable(ids.ID_sequenceMatchDelete, False)
+        menu.Enable(ids.ID_sequenceMatchesDelete, False)
+        menu.Enable(ids.ID_documentNotationsDelete, False)
+        menu.Enable(ids.ID_documentClose, False)
+        menu.Enable(ids.ID_documentCloseAll, bool(self.documents))
 
         # bind events
-        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ID_documentAnnotationDelete)
+        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ids.ID_documentAnnotationDelete)
         self.Bind(
             wx.EVT_MENU,
             self.parent.onDocumentAnnotationsDelete,
-            id=ID_documentAnnotationsDelete,
+            id=ids.ID_documentAnnotationsDelete,
         )
 
-        self.Bind(wx.EVT_MENU, self.parent.onSequenceDelete, id=ID_sequenceDelete)
-        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ID_sequenceMatchDelete)
+        self.Bind(wx.EVT_MENU, self.parent.onSequenceDelete, id=ids.ID_sequenceDelete)
+        self.Bind(wx.EVT_MENU, self.onNotationDelete, id=ids.ID_sequenceMatchDelete)
         self.Bind(
             wx.EVT_MENU,
             self.parent.onSequenceMatchesDelete,
-            id=ID_sequenceMatchesDelete,
+            id=ids.ID_sequenceMatchesDelete,
         )
 
         self.Bind(
             wx.EVT_MENU,
             self.parent.onDocumentNotationsDelete,
-            id=ID_documentNotationsDelete,
+            id=ids.ID_documentNotationsDelete,
         )
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentClose, id=ID_documentClose)
-        self.Bind(wx.EVT_MENU, self.parent.onDocumentCloseAll, id=ID_documentCloseAll)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentClose, id=ids.ID_documentClose)
+        self.Bind(wx.EVT_MENU, self.parent.onDocumentCloseAll, id=ids.ID_documentCloseAll)
 
         # get selected item
         item = self.documentTree.GetSelection()
@@ -593,23 +580,23 @@ class panelDocuments(wx.Panel):
             seqIndex = self._getSequenceIndex(item)
 
             if self.documents[docIndex].annotations:
-                menu.Enable(ID_documentAnnotationsDelete, True)
+                menu.Enable(ids.ID_documentAnnotationsDelete, True)
             if itemType == "annotation":
-                menu.Enable(ID_documentAnnotationDelete, True)
-                menu.Enable(ID_documentAnnotationsDelete, True)
+                menu.Enable(ids.ID_documentAnnotationDelete, True)
+                menu.Enable(ids.ID_documentAnnotationsDelete, True)
             if itemType == "sequence":
-                menu.Enable(ID_sequenceDelete, True)
+                menu.Enable(ids.ID_sequenceDelete, True)
             if (
                 itemType == "sequence"
                 and self.documents[docIndex].sequences[seqIndex].matches
             ):
-                menu.Enable(ID_sequenceMatchesDelete, True)
+                menu.Enable(ids.ID_sequenceMatchesDelete, True)
             if itemType == "match":
-                menu.Enable(ID_sequenceMatchDelete, True)
-                menu.Enable(ID_sequenceMatchesDelete, True)
+                menu.Enable(ids.ID_sequenceMatchDelete, True)
+                menu.Enable(ids.ID_sequenceMatchesDelete, True)
             if itemType is not None:
-                menu.Enable(ID_documentNotationsDelete, True)
-                menu.Enable(ID_documentClose, True)
+                menu.Enable(ids.ID_documentNotationsDelete, True)
+                menu.Enable(ids.ID_documentClose, True)
 
         self.PopupMenu(menu)
         menu.Destroy()
@@ -617,16 +604,15 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onNotationEdit(self, evt=None):
+    def onNotationEdit(self, evt=None) -> None:
         """Edit selected annotation or sequence match."""
-
         # get selected item
         item = self.documentTree.GetSelection()
         itemType = self.documentTree.getItemType(item)
         itemData = self.documentTree.GetItemData(item)
 
         # show dialog
-        dlg = dlgNotation(self.parent, itemData, button="Update")
+        dlg = DlgNotation(self.parent, itemData, button="Update")
         if dlg.ShowModal() == wx.ID_OK:
             dlg.Destroy()
 
@@ -640,9 +626,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onNotationDelete(self, evt=None):
+    def onNotationDelete(self, evt=None) -> None:
         """Delete selected annotation or sequence match."""
-
         # get index
         item = self.documentTree.GetSelection()
         itemType = self.documentTree.getItemType(item)
@@ -661,9 +646,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onSendToMassCalculator(self, evt=None):
+    def onSendToMassCalculator(self, evt=None) -> None:
         """Send selected item to Mass Calculator panel."""
-
         # get selected item
         item = self.documentTree.GetSelection()
         itemType = self.documentTree.getItemType(item)
@@ -690,9 +674,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onSendToMassToFormula(self, evt=None):
+    def onSendToMassToFormula(self, evt=None) -> None:
         """Send selected item to Mass To Formula panel."""
-
         # get selected item
         item = self.documentTree.GetSelection()
         self.documentTree.getItemType(item)
@@ -710,9 +693,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def onSendToEnvelopeFit(self, evt=None):
+    def onSendToEnvelopeFit(self, evt=None) -> None:
         """Send selected item to envelope fit panel."""
-
         # get selected item
         item = self.documentTree.GetSelection()
         itemType = self.documentTree.getItemType(item)
@@ -744,9 +726,8 @@ class panelDocuments(wx.Panel):
 
     # DOCUMENT
 
-    def selectDocument(self, docIndex):
-        """Select document"""
-
+    def selectDocument(self, docIndex) -> None:
+        """Select document."""
         # deselect all documents
         if docIndex is None:
             self.documentTree.Unselect()
@@ -763,9 +744,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def appendLastDocument(self):
+    def appendLastDocument(self) -> None:
         """Append document."""
-
         # get last document
         docData = self.documents[-1]
 
@@ -774,9 +754,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def deleteDocument(self, docIndex):
+    def deleteDocument(self, docIndex) -> None:
         """Delete selected document."""
-
         # check document
         if docIndex is None:
             return
@@ -786,9 +765,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def enableDocument(self, docIndex, enable):
+    def enableDocument(self, docIndex, enable) -> None:
         """Enable/disable selected document."""
-
         # check document
         if docIndex is None:
             return
@@ -802,9 +780,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def updateDocumentTitle(self, docIndex):
+    def updateDocumentTitle(self, docIndex) -> None:
         """Update document title."""
-
         # check document
         if docIndex is None:
             return
@@ -823,9 +800,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def updateDocumentColour(self, docIndex):
+    def updateDocumentColour(self, docIndex) -> None:
         """Update bullet of selected document."""
-
         # check document
         if docIndex is None:
             return
@@ -839,9 +815,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def updateAnnotations(self, docIndex, expand=None):
+    def updateAnnotations(self, docIndex, expand=None) -> None:
         """Set new annotations for document."""
-
         # check document
         if docIndex is None:
             return
@@ -875,9 +850,8 @@ class panelDocuments(wx.Panel):
 
     # SEQUENCE
 
-    def selectSequence(self, docIndex, seqIndex):
-        """Select sequence"""
-
+    def selectSequence(self, docIndex, seqIndex) -> None:
+        """Select sequence."""
         # check index
         if docIndex is None or seqIndex is None:
             return
@@ -891,9 +865,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def appendLastSequence(self, docIndex):
+    def appendLastSequence(self, docIndex) -> None:
         """Append new sequence to the tree."""
-
         # check document
         if docIndex is None:
             return
@@ -910,9 +883,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def deleteSequence(self, docIndex, seqIndex):
+    def deleteSequence(self, docIndex, seqIndex) -> None:
         """Delete selected sequence."""
-
         # check document
         if docIndex is None or seqIndex is None:
             return
@@ -931,9 +903,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def updateSequenceTitle(self, docIndex, seqIndex):
+    def updateSequenceTitle(self, docIndex, seqIndex) -> None:
         """Set new label for sequence."""
-
         # check document
         if docIndex is None or seqIndex is None:
             return
@@ -947,9 +918,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def updateSequenceMatches(self, docIndex, seqIndex, expand=False):
+    def updateSequenceMatches(self, docIndex, seqIndex, expand=False) -> None:
         """Set new matches for sequence."""
-
         # check document
         if docIndex is None or seqIndex is None:
             return
@@ -981,9 +951,8 @@ class panelDocuments(wx.Panel):
 
     # ----
 
-    def updateSequences(self, docIndex):
+    def updateSequences(self, docIndex) -> None:
         """Set new sequences for current document."""
-
         # check document
         if docIndex is None:
             return
@@ -1021,7 +990,6 @@ class panelDocuments(wx.Panel):
 
     def getSelectedItemType(self):
         """Get selected item type."""
-
         item = self.documentTree.GetSelection()
         return self.documentTree.getItemType(item)
 
@@ -1029,7 +997,6 @@ class panelDocuments(wx.Panel):
 
     def _getDocumentIndex(self, item):
         """Get parent document index."""
-
         docItem = self.documentTree.getParentItem(item, 1)
         docData = self.documentTree.GetItemData(docItem)
 
@@ -1041,7 +1008,6 @@ class panelDocuments(wx.Panel):
 
     def _getAnnotationIndex(self, item):
         """Get annotation index."""
-
         docIndex = self._getDocumentIndex(item)
         annotData = self.documentTree.GetItemData(item)
 
@@ -1053,7 +1019,6 @@ class panelDocuments(wx.Panel):
 
     def _getSequenceIndex(self, item):
         """Get parent sequence index."""
-
         docIndex = self._getDocumentIndex(item)
         seqItem = self.documentTree.getParentItem(item, 2)
         seqData = self.documentTree.GetItemData(seqItem)
@@ -1066,7 +1031,6 @@ class panelDocuments(wx.Panel):
 
     def _getMatchIndex(self, item):
         """Get match index."""
-
         docIndex = self._getDocumentIndex(item)
         seqIndex = self._getSequenceIndex(item)
         matchData = self.documentTree.GetItemData(item)
@@ -1078,10 +1042,10 @@ class panelDocuments(wx.Panel):
     # ----
 
 
-class documentsTree(wx.TreeCtrl):
+class DocumentsTree(wx.TreeCtrl):
     """Documents tree."""
 
-    def __init__(self, parent, id, size=(-1, -1), style=mwx.DOCTREE_STYLE):
+    def __init__(self, parent, id, size=(-1, -1), style=mwx.DOCTREE_STYLE) -> None:
         wx.TreeCtrl.__init__(self, parent, id, size=size, style=style)
 
         self.parent = parent
@@ -1103,7 +1067,6 @@ class documentsTree(wx.TreeCtrl):
 
     def getItemIndent(self, item):
         """Get indent of selected item."""
-
         # check item
         if not item.IsOk():
             return False
@@ -1120,24 +1083,23 @@ class documentsTree(wx.TreeCtrl):
 
     # ----
 
-    def getItemType(self, item):
+    def getItemType(self, item) -> str | None:
         """Get current item type."""
-
         # check item
         if not item.IsOk() or item is self.GetRootItem():
             return None
 
         # get item type
         data = self.GetItemData(item)
-        if isinstance(data, doc.document):
+        if isinstance(data, doc.Document):
             return "document"
         if isinstance(data, list):
             return "annotations"
-        if isinstance(data, doc.annotation):
+        if isinstance(data, doc.Annotation):
             return "annotation"
-        if isinstance(data, mspy.sequence):
+        if isinstance(data, mspy.Sequence):
             return "sequence"
-        if isinstance(data, doc.match):
+        if isinstance(data, doc.Match):
             return "match"
         return None
 
@@ -1145,7 +1107,6 @@ class documentsTree(wx.TreeCtrl):
 
     def getItemByData(self, data, root=None, cookie=0):
         """Get item by its data."""
-
         # get root
         if root is None:
             root = self.GetRootItem()
@@ -1175,7 +1136,6 @@ class documentsTree(wx.TreeCtrl):
 
     def getParentItem(self, item, level):
         """Get parent item for selected item and level."""
-
         # get item
         for _x in range(level, self.getItemIndent(item)):
             item = self.GetItemParent(item)
@@ -1184,9 +1144,8 @@ class documentsTree(wx.TreeCtrl):
 
     # ----
 
-    def enableItemTree(self, item, enable=True):
+    def enableItemTree(self, item, enable=True) -> None:
         """Enable/disable all children recursively."""
-
         # enable current item
         self.enableItem(item, enable)
 
@@ -1205,9 +1164,8 @@ class documentsTree(wx.TreeCtrl):
 
     # ---
 
-    def enableItem(self, item, enable=True):
+    def enableItem(self, item, enable=True) -> None:
         """Enable document and all children."""
-
         # get item indent
         itemType = self.getItemType(item)
         if not itemType:
@@ -1255,7 +1213,6 @@ class documentsTree(wx.TreeCtrl):
 
     def appendDocument(self, docData):
         """Append document to tree."""
-
         # add bullet
         bullet = self._makeColourBullet(docData.colour, True)
         docData.bulletIndex = self.bullets.Add(bullet)
@@ -1290,7 +1247,6 @@ class documentsTree(wx.TreeCtrl):
 
     def appendSequence(self, item, seqData):
         """Append sequence to tree."""
-
         # add sequence
         seqItem = self.AppendItem(item, seqData.title)
         self.SetItemImage(seqItem, 4, wx.TreeItemIcon_Normal)
@@ -1306,7 +1262,6 @@ class documentsTree(wx.TreeCtrl):
 
     def appendNotation(self, item, notationData):
         """Append notation to tree."""
-
         # get mz
         mz = round(notationData.mz, config.main["mzDigits"])
 
@@ -1337,18 +1292,16 @@ class documentsTree(wx.TreeCtrl):
 
     # ----
 
-    def deleteItemByData(self, data):
+    def deleteItemByData(self, data) -> None:
         """Delete item by data."""
-
         item = self.getItemByData(data)
         if item:
             self.Delete(item)
 
     # ----
 
-    def highlightDocument(self, item):
+    def highlightDocument(self, item) -> None:
         """Highlight parent document."""
-
         # unbold all documents
         child, cookie = self.GetFirstChild(self.GetRootItem())
         while child.IsOk():
@@ -1362,9 +1315,8 @@ class documentsTree(wx.TreeCtrl):
 
     # ----
 
-    def updateDocumentColour(self, item):
+    def updateDocumentColour(self, item) -> None:
         """Set new bullet colour."""
-
         # add bullet
         item = self.getParentItem(item, 1)
         docData = self.GetItemData(item)
@@ -1377,9 +1329,8 @@ class documentsTree(wx.TreeCtrl):
 
     # ----
 
-    def _resetBullets(self):
+    def _resetBullets(self) -> None:
         """Erase all bullets and make defaults."""
-
         self.bullets.RemoveAll()
         self.bullets.Add(images.lib["bulletsDocument"])
         self.bullets.Add(self._makeColourBullet((150, 150, 150), False))
@@ -1394,7 +1345,6 @@ class documentsTree(wx.TreeCtrl):
 
     def _makeColourBullet(self, colour, filled=True):
         """Make bullet bitmap with specified colour."""
-
         # create empty bitmap
         bitmap = wx.Bitmap(13, 12)
         dc = wx.MemoryDC()
@@ -1423,16 +1373,16 @@ class documentsTree(wx.TreeCtrl):
     # ----
 
 
-class fileDropTarget(wx.FileDropTarget):
+class FileDropTarget(wx.FileDropTarget):
     """Generic drop target for files."""
 
-    def __init__(self, fn):
+    def __init__(self, fn) -> None:
         wx.FileDropTarget.__init__(self)
         self.fn = fn
 
     # ----
 
-    def OnDropFiles(self, x, y, paths):
+    def OnDropFiles(self, x, y, paths) -> None:
         """Open dropped files."""
         self.fn(paths=paths)
 

@@ -27,7 +27,6 @@ from mmass import mspy
 from . import config, images
 
 # load modules
-from .ids import *
 
 # GUI CONSTANTS
 # -------------
@@ -195,9 +194,8 @@ elif wx.Platform == "__WXGTK__":
 # ------------------
 
 
-def appInit():
+def appInit() -> None:
     """Run after application initialize."""
-
     # set MAC
     if wx.Platform == "__WXMAC__":
         wx.SystemOptions.SetOptionInt(
@@ -220,10 +218,10 @@ def appInit():
 # -------------------
 
 
-class bgrPanel(wx.Panel):
+class BgrPanel(wx.Panel):
     """Simple panel with image background."""
 
-    def __init__(self, parent, id, image, size=(-1, -1)):
+    def __init__(self, parent, id, image, size=(-1, -1)) -> None:
         wx.Panel.__init__(self, parent, id, size=size)
         self.SetMinSize(size)
 
@@ -234,7 +232,7 @@ class bgrPanel(wx.Panel):
 
     # ----
 
-    def _onPaint(self, event=None):
+    def _onPaint(self, event=None) -> None:
         # create paint surface
         dc = wx.PaintDC(self)
         # dc.Clear()
@@ -246,7 +244,7 @@ class bgrPanel(wx.Panel):
     # ----
 
 
-class sortListCtrl(wx.ListCtrl):
+class SortListCtrl(wx.ListCtrl):
     """ListCtrl with automatic sorter."""
 
     def __init__(
@@ -256,7 +254,7 @@ class sortListCtrl(wx.ListCtrl):
         pos=wx.DefaultPosition,
         size=wx.DefaultSize,
         style=wx.LC_REPORT,
-    ):
+    ) -> None:
         wx.ListCtrl.__init__(self, parent, id, pos, size, style)
 
         self._data = None
@@ -278,7 +276,6 @@ class sortListCtrl(wx.ListCtrl):
 
     def OnGetItemText(self, row, col):
         """Get text for selected cell."""
-
         if self._getItemTextFn is not None:
             return self._getItemTextFn(row, col)
         return str(self._data[row][col])
@@ -287,7 +284,6 @@ class sortListCtrl(wx.ListCtrl):
 
     def OnGetItemAttr(self, row):
         """Get attributes for selected cell."""
-
         # get user defined attr
         attr = None
         if self._getItemAttrFn is not None:
@@ -313,14 +309,13 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def OnGetItemImage(self, row):
+    def OnGetItemImage(self, row) -> int:
         return -1
 
     # ----
 
-    def _onColClick(self, evt):
+    def _onColClick(self, evt) -> None:
         """Sort data by this column."""
-
         # check data
         if not self._data:
             return
@@ -338,9 +333,8 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def _sort(self, col, direction):
+    def _sort(self, col, direction) -> None:
         """Sort list."""
-
         # unselect all items
         self.unselectAll()
 
@@ -366,7 +360,6 @@ class sortListCtrl(wx.ListCtrl):
 
     def _sortItems(self, item1, item2):
         """Sort items."""
-
         a = item1[self._currentColumn]
         b = item2[self._currentColumn]
         comp = (a > b) - (a < b)
@@ -381,7 +374,6 @@ class sortListCtrl(wx.ListCtrl):
 
     def _columnSorter(self, key1, key2):
         """Sort data."""
-
         # check data
         if not self._data:
             return self._currentDirection
@@ -404,33 +396,32 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def setItemTextFn(self, fn):
+    def setItemTextFn(self, fn) -> None:
         """Set OnGetItemText callback."""
         self._getItemTextFn = fn
 
     # ----
 
-    def setItemAttrFn(self, fn):
+    def setItemAttrFn(self, fn) -> None:
         """Set OnGetItemAttr callback."""
         self._getItemAttrFn = fn
 
     # ----
 
-    def setSecondarySortColumn(self, col):
+    def setSecondarySortColumn(self, col) -> None:
         """Set secondary column to sort by."""
         self._secondarySortColumn = col
 
     # ----
 
-    def setDataMap(self, data):
+    def setDataMap(self, data) -> None:
         """Set data."""
         self._data = data
 
     # ----
 
-    def setAltColour(self, colour):
+    def setAltColour(self, colour) -> None:
         """Set alternate background colour."""
-
         if colour:
             self._altColour = colour
         else:
@@ -440,7 +431,6 @@ class sortListCtrl(wx.ListCtrl):
 
     def getSelected(self):
         """Return indexes of selected items."""
-
         selected = []
 
         i = -1
@@ -455,9 +445,8 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def sort(self, col=None):
+    def sort(self, col=None) -> None:
         """Sort by last or selected column."""
-
         # get column and direction
         direction = self._currentDirection
         if col is None:
@@ -471,18 +460,16 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def deleteColumns(self):
+    def deleteColumns(self) -> None:
         """Delete all columns."""
-
         self._currentColumn = 0
         while self.GetColumnCount():
             self.DeleteColumn(0)
 
     # ----
 
-    def unselectAll(self):
+    def unselectAll(self) -> None:
         """Unselect all items."""
-
         i = -1
         while True:
             i = self.GetNextItem(i, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
@@ -492,9 +479,8 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def updateItemsBackground(self):
+    def updateItemsBackground(self) -> None:
         """Update item background colours."""
-
         # check colours
         if self._defaultColour == self._altColour:
             return
@@ -508,9 +494,8 @@ class sortListCtrl(wx.ListCtrl):
 
     # ----
 
-    def copyToClipboard(self, selected=False):
+    def copyToClipboard(self, selected=False) -> None:
         """Copy current data to clipboard."""
-
         buff = ""
 
         # get selected only
@@ -543,7 +528,7 @@ class sortListCtrl(wx.ListCtrl):
     # ----
 
 
-class scrollTextCtrl(wx.TextCtrl):
+class ScrollTextCtrl(wx.TextCtrl):
     """TextCtrl with scoll."""
 
     def __init__(
@@ -559,7 +544,7 @@ class scrollTextCtrl(wx.TextCtrl):
         size=wx.DefaultSize,
         style=0,
         validator=wx.DefaultValidator,
-    ):
+    ) -> None:
         wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator)
 
         self.Bind(wx.EVT_KEY_DOWN, self._onKey)
@@ -574,17 +559,15 @@ class scrollTextCtrl(wx.TextCtrl):
 
     # ----
 
-    def _onScroll(self, evt):
+    def _onScroll(self, evt) -> None:
         """Increase or decrease value while scrolling."""
-
         # set new value
         self._setNewValue(evt.GetWheelRotation() * SCROLL_DIRECTION, evt.AltDown())
 
     # ----
 
-    def _onKey(self, evt):
+    def _onKey(self, evt) -> None:
         """Use up and down keys."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -602,14 +585,13 @@ class scrollTextCtrl(wx.TextCtrl):
 
     # ----
 
-    def _setNewValue(self, direction, precise):
+    def _setNewValue(self, direction, precise) -> None:
         """Calculate and set new value."""
-
         # get and check current value
         old = self.GetValue()
         try:
             old = float(old)
-        except:
+        except Exception:
             wx.Bell()
             return
 
@@ -641,38 +623,38 @@ class scrollTextCtrl(wx.TextCtrl):
 
     # ----
 
-    def setScrollStep(self, value):
+    def setScrollStep(self, value) -> None:
         """Set scroll step."""
         self._scrollStep = value
 
     # ----
 
-    def setScrollMultiplier(self, value):
+    def setScrollMultiplier(self, value) -> None:
         """Set scroll multiplier."""
         self._scrollMultiplier = value
 
     # ----
 
-    def setMin(self, value):
+    def setMin(self, value) -> None:
         """Set minimum."""
         self._min = value
 
     # ----
 
-    def setMax(self, value):
+    def setMax(self, value) -> None:
         """Set maximum."""
         self._max = value
 
     # ----
 
-    def setDigits(self, value):
+    def setDigits(self, value) -> None:
         """Set number of digits."""
         self._digits = value
 
     # ----
 
 
-class formulaCtrl(wx.TextCtrl):
+class FormulaCtrl(wx.TextCtrl):
     """TextCtrl to molecular formulae."""
 
     def __init__(
@@ -684,26 +666,25 @@ class formulaCtrl(wx.TextCtrl):
         size=wx.DefaultSize,
         style=0,
         validator=wx.DefaultValidator,
-    ):
+    ) -> None:
         wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator)
         self.Bind(wx.EVT_TEXT, self._onText)
 
     # ----
 
-    def _onText(self, evt):
+    def _onText(self, evt) -> None:
         """Check current formula."""
         evt.Skip()
         wx.CallAfter(self._checkFormula)
 
     # ----
 
-    def _checkFormula(self):
+    def _checkFormula(self) -> None:
         """Check current formula."""
-
         try:
-            mspy.compound(self.GetValue())
+            mspy.Compound(self.GetValue())
             self.SetBackgroundColour(wx.NullColour)
-        except:
+        except Exception:
             self.SetBackgroundColour((250, 100, 100))
 
         self.Refresh()
@@ -711,17 +692,16 @@ class formulaCtrl(wx.TextCtrl):
     # ----
 
 
-class gauge(wx.Gauge):
+class Gauge(wx.Gauge):
     """Gauge."""
 
-    def __init__(self, parent, id=-1, size=(-1, GAUGE_HEIGHT), style=wx.GA_HORIZONTAL):
+    def __init__(self, parent, id=-1, size=(-1, GAUGE_HEIGHT), style=wx.GA_HORIZONTAL) -> None:
         wx.Gauge.__init__(self, parent, id, size=size, style=style)
 
     # ----
 
-    def pulse(self):
+    def pulse(self) -> None:
         """Pulse gauge."""
-
         self.Pulse()
         with contextlib.suppress(BaseException):
             wx.Yield()
@@ -730,10 +710,10 @@ class gauge(wx.Gauge):
     # ----
 
 
-class gaugePanel(wx.Dialog):
+class GaugePanel(wx.Dialog):
     """Processing panel."""
 
-    def __init__(self, parent, label, title="Progress..."):
+    def __init__(self, parent, label, title="Progress...") -> None:
         wx.Dialog.__init__(self, parent, -1, title, style=(wx.CAPTION | wx.STAY_ON_TOP))
 
         self.parent = parent
@@ -762,18 +742,16 @@ class gaugePanel(wx.Dialog):
 
     # ----
 
-    def setLabel(self, label):
+    def setLabel(self, label) -> None:
         """Set new label."""
-
         self.label.SetLabel(label)
         with contextlib.suppress(BaseException):
             wx.Yield()
 
     # ----
 
-    def pulse(self):
+    def pulse(self) -> None:
         """Pulse gauge."""
-
         self.gauge.Pulse()
 
         with contextlib.suppress(BaseException):
@@ -782,9 +760,8 @@ class gaugePanel(wx.Dialog):
 
     # ----
 
-    def show(self):
+    def show(self) -> None:
         """Show panel."""
-
         self.Center()
         self._disabler = wx.WindowDisabler(self)
         self.Show()
@@ -794,9 +771,8 @@ class gaugePanel(wx.Dialog):
 
     # ----
 
-    def close(self):
-        """Hide panel"""
-
+    def close(self) -> None:
+        """Hide panel."""
         if hasattr(self, '_disabler'):
             del self._disabler
         self.Destroy()
@@ -804,10 +780,10 @@ class gaugePanel(wx.Dialog):
     # ----
 
 
-class validator(wx.Validator):
+class Validator(wx.Validator):
     """Text validator."""
 
-    def __init__(self, flag):
+    def __init__(self, flag) -> None:
         wx.Validator.__init__(self)
         self.flag = flag
         self.Bind(wx.EVT_CHAR, self.OnChar)
@@ -815,21 +791,21 @@ class validator(wx.Validator):
     # ----
 
     def Clone(self):
-        return validator(self.flag)
+        return Validator(self.flag)
 
     # ----
 
-    def TransferToWindow(self):
+    def TransferToWindow(self) -> bool:
         return True
 
     # ----
 
-    def TransferFromWindow(self):
+    def TransferFromWindow(self) -> bool:
         return True
 
     # ----
 
-    def OnChar(self, evt):
+    def OnChar(self, evt) -> None:
         ctrl = self.GetWindow()
         ctrl.GetValue()
         key = evt.GetKeyCode()
@@ -882,7 +858,7 @@ class validator(wx.Validator):
     # ----
 
 
-class dlgMessage(wx.Dialog):
+class DlgMessage(wx.Dialog):
     """Base message dialog class."""
 
     def __init__(
@@ -892,7 +868,7 @@ class dlgMessage(wx.Dialog):
         message,
         buttons=None,
         style=wx.DEFAULT_DIALOG_STYLE,
-    ):
+    ) -> None:
         if buttons is None:
             buttons = [(wx.ID_CANCEL, "OK", 80, True, 0)]
         wx.Dialog.__init__(self, parent, -1, "", style=style)
@@ -916,7 +892,6 @@ class dlgMessage(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make icon
         icon = wx.StaticBitmap(self, -1, images.lib["iconDlg"])
 
@@ -961,7 +936,7 @@ class dlgMessage(wx.Dialog):
 
     # ----
 
-    def onButton(self, evt):
+    def onButton(self, evt) -> None:
         """Return pressed button ID."""
         self.EndModal(evt.GetId())
 
@@ -972,9 +947,8 @@ class dlgMessage(wx.Dialog):
 # -------
 
 
-def layout(parent, sizer):
+def layout(parent, sizer) -> None:
     """Ensure correct panel layout - hack."""
-
     parent.SetMinSize((-1, -1))
     sizer.Fit(parent)
     parent.Layout()

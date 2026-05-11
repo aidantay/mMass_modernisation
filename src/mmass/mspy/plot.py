@@ -17,5 +17,13 @@
 
 
 # load objects
-from .plot_canvas import *
-from .plot_objects import *
+from .plot_canvas import Canvas, Printout, contextlib
+from .plot_objects import (
+    Annotations,
+    Container,
+    Points,
+    Spectrum,
+    calculations,
+    copy,
+    mod_signal,
+)

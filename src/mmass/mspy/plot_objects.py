@@ -19,7 +19,7 @@
 import contextlib
 import copy
 
-import numpy
+import numpy as np
 import wx
 
 # load modules
@@ -29,10 +29,10 @@ from . import calculations, mod_signal
 # -----------------
 
 
-class container:
+class Container:
     """Container to hold plot objects."""
 
-    def __init__(self, objects):
+    def __init__(self, objects) -> None:
         self.objects = objects
 
     # ----
@@ -42,12 +42,12 @@ class container:
 
     # ----
 
-    def __delitem__(self, index):
+    def __delitem__(self, index) -> None:
         del self.objects[index]
 
     # ----
 
-    def __setitem__(self, index, obj):
+    def __setitem__(self, index, obj) -> None:
         self.objects[index] = obj
 
     # ----
@@ -57,16 +57,15 @@ class container:
 
     # ----
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.objects)
 
     # ----
 
     def getBoundingBox(self, minX=None, maxX=None, absolute=False):
         """Get bounding box coverring all visible objects."""
-
         # init values if no data in objects
-        rect = [numpy.array([0, 0]), numpy.array([1, 1])]
+        rect = [np.array([0, 0]), np.array([1, 1])]
 
         # get bouding boxes from objects
         have = False
@@ -74,11 +73,11 @@ class container:
             if obj.properties["visible"]:
                 oRect = obj.getBoundingBox(minX, maxX, absolute)
 
-                if not oRect or not numpy.all(numpy.isfinite(oRect)):
+                if not oRect or not np.all(np.isfinite(oRect)):
                     continue
                 if have and oRect:
-                    rect[0] = numpy.minimum(rect[0], oRect[0])
-                    rect[1] = numpy.maximum(rect[1], oRect[1])
+                    rect[0] = np.minimum(rect[0], oRect[0])
+                    rect[1] = np.maximum(rect[1], oRect[1])
                 elif oRect:
                     rect = oRect
                     have = True
@@ -96,7 +95,6 @@ class container:
 
     def getLegend(self):
         """Get a list of legend names."""
-
         # get names
         names = []
         for obj in self.objects:
@@ -117,7 +115,6 @@ class container:
 
     def countGels(self):
         """Get number of visible gels."""
-
         count = 0
         for obj in self.objects:
             if obj.properties["visible"] and obj.properties["showInGel"]:
@@ -127,36 +124,32 @@ class container:
 
     # ----
 
-    def cropPoints(self, minX, maxX):
+    def cropPoints(self, minX, maxX) -> None:
         """Crop points in all visible objects to selected X range."""
-
         for obj in self.objects:
             if obj.properties["visible"]:
                 obj.cropPoints(minX, maxX)
 
     # ----
 
-    def scaleAndShift(self, scale, shift):
+    def scaleAndShift(self, scale, shift) -> None:
         """Scale and shift all visible objects."""
-
         for obj in self.objects:
             if obj.properties["visible"]:
                 obj.scaleAndShift(scale, shift)
 
     # ----
 
-    def filterPoints(self, filterSize):
+    def filterPoints(self, filterSize) -> None:
         """Filter points in all visible objects."""
-
         for obj in self.objects:
             if obj.properties["visible"]:
                 obj.filterPoints(filterSize)
 
     # ----
 
-    def draw(self, dc, printerScale, overlapLabels, reverse):
+    def draw(self, dc, printerScale, overlapLabels, reverse) -> None:
         """Draw all visible objects."""
-
         # draw in reverse order
         if reverse:
             self.objects.reverse()
@@ -175,14 +168,13 @@ class container:
 
     # ----
 
-    def drawLabels(self, dc, printerScale, overlapLabels):
+    def drawLabels(self, dc, printerScale, overlapLabels) -> None:
         """Draw labels for all visible objects."""
-
         # get labels from objects
         annots = []
         labels = []
         for obj in self.objects:
-            if obj.properties["visible"] and isinstance(obj, annotations):
+            if obj.properties["visible"] and isinstance(obj, Annotations):
                 annots += obj.makeLabels(dc, printerScale)
             elif obj.properties["visible"]:
                 labels += obj.makeLabels(dc, printerScale)
@@ -257,9 +249,8 @@ class container:
 
     # ----
 
-    def drawGel(self, dc, gelCoords, gelHeight, printerScale):
+    def drawGel(self, dc, gelCoords, gelHeight, printerScale) -> None:
         """Draw gel for all allowed objects."""
-
         # draw objects
         for obj in self.objects:
             if obj.properties["visible"] and obj.properties["showInGel"]:
@@ -268,19 +259,18 @@ class container:
 
     # ----
 
-    def append(self, obj):
+    def append(self, obj) -> None:
         self.objects.append(obj)
 
     # ----
 
-    def empty(self):
+    def empty(self) -> None:
         del self.objects[:]
 
     # ----
 
-    def _checkFreeSpace(self, coords, occupied):
+    def _checkFreeSpace(self, coords, occupied) -> bool:
         """Check free space for label."""
-
         curX1, curY1, curX2, curY2 = coords
 
         # check occupied space
@@ -316,10 +306,10 @@ class container:
     # ----
 
 
-class annotations:
+class Annotations:
     """Base class for annotations drawing."""
 
-    def __init__(self, points, **attr):
+    def __init__(self, points, **attr) -> None:
         # set default params
         self.properties = {
             "visible": True,
@@ -354,13 +344,13 @@ class annotations:
             self.properties[name] = value
 
         # convert points to array
-        self.points = numpy.array([[p[0], p[1]] for p in points])
+        self.points = np.array([[p[0], p[1]] for p in points])
         self.pointsCropped = self.points
         self.pointsScaled = self.pointsCropped
         if len(self.points):
             self.pointsBox = (
-                numpy.minimum.reduce(self.points),
-                numpy.maximum.reduce(self.points),
+                np.minimum.reduce(self.points),
+                np.maximum.reduce(self.points),
             )
 
         # get labels
@@ -375,17 +365,15 @@ class annotations:
 
     # ----
 
-    def setProperties(self, **attr):
+    def setProperties(self, **attr) -> None:
         """Set object properties."""
-
         for name, value in list(attr.items()):
             self.properties[name] = value
 
     # ----
 
-    def setNormalization(self, value):
+    def setNormalization(self, value) -> None:
         """Force specified normalization to be used insted of calculated one."""
-
         value = float(value)
         if value == 0.0:
             value = 1.0
@@ -395,8 +383,7 @@ class annotations:
     # ----
 
     def getBoundingBox(self, minX=None, maxX=None, absolute=False):
-        """Get bounding box for whole data or X selection"""
-
+        """Get bounding box for whole data or X selection."""
         # use relevant data
         if minX is not None and maxX is not None:
             self.cropPoints(minX, maxX)
@@ -410,8 +397,8 @@ class annotations:
 
         # get range
         if minX is not None and maxX is not None:
-            minXY = numpy.minimum.reduce(data)
-            maxXY = numpy.maximum.reduce(data)
+            minXY = np.minimum.reduce(data)
+            maxXY = np.maximum.reduce(data)
         else:
             minXY = [self.pointsBox[0][0], self.pointsBox[0][1]]
             maxXY = [self.pointsBox[1][0], self.pointsBox[1][1]]
@@ -456,15 +443,14 @@ class annotations:
 
     # ----
 
-    def getLegend(self):
+    def getLegend(self) -> None:
         """Get legend."""
         return
 
     # ----
 
-    def cropPoints(self, minX, maxX):
+    def cropPoints(self, minX, maxX) -> None:
         """Crop points to selected X range."""
-
         # apply offset
         minX -= self.properties["xOffset"]
         maxX -= self.properties["xOffset"]
@@ -479,9 +465,8 @@ class annotations:
 
     # ----
 
-    def scaleAndShift(self, scale, shift):
+    def scaleAndShift(self, scale, shift) -> None:
         """Scale and shift points to screen coordinations."""
-
         self.pointsScaled = self.pointsCropped
 
         xScale = scale[0]
@@ -511,15 +496,14 @@ class annotations:
 
     # ----
 
-    def filterPoints(self, filterSize):
-        """Filter points for printing and exporting"""
+    def filterPoints(self, filterSize) -> None:
+        """Filter points for printing and exporting."""
         pass
 
     # ----
 
-    def draw(self, dc, printerScale):
+    def draw(self, dc, printerScale) -> None:
         """Draw object."""
-
         # check data
         if not len(self.pointsScaled):
             return
@@ -540,7 +524,7 @@ class annotations:
 
     # ----
 
-    def drawGel(self, dc, gelCoords, gelHeight, printerScale):
+    def drawGel(self, dc, gelCoords, gelHeight, printerScale) -> None:
         """Draw gel."""
         pass
 
@@ -548,7 +532,6 @@ class annotations:
 
     def makeLabels(self, dc, printerScale):
         """Get object labels."""
-
         # check labels
         if not self.properties["showLabels"] or not self.labelsCropped:
             return []
@@ -623,9 +606,8 @@ class annotations:
 
     # ----
 
-    def _normalization(self):
+    def _normalization(self) -> None:
         """Calculate normalization constants."""
-
         normalization = 1.0
 
         # calc normalization
@@ -642,10 +624,10 @@ class annotations:
     # ----
 
 
-class points:
+class Points:
     """Base class for polypoints and polylines drawing."""
 
-    def __init__(self, points, **attr):
+    def __init__(self, points, **attr) -> None:
         # set default params
         self.properties = {
             "legend": "",
@@ -677,13 +659,13 @@ class points:
             self.properties[name] = value
 
         # convert points to array
-        self.points = numpy.array(points)
+        self.points = np.array(points)
         self.cropped = self.points
         self.scaled = self.cropped
         if len(self.points):
             self.pointsBox = (
-                numpy.minimum.reduce(self.points),
-                numpy.maximum.reduce(self.points),
+                np.minimum.reduce(self.points),
+                np.maximum.reduce(self.points),
             )
 
         # calculate normalization
@@ -691,17 +673,15 @@ class points:
 
     # ----
 
-    def setProperties(self, **attr):
+    def setProperties(self, **attr) -> None:
         """Set object properties."""
-
         for name, value in list(attr.items()):
             self.properties[name] = value
 
     # ----
 
-    def setNormalization(self, value):
+    def setNormalization(self, value) -> None:
         """Force specified normalization to be used insted of calculated one."""
-
         value = float(value)
         if value == 0.0:
             value = 1.0
@@ -711,8 +691,7 @@ class points:
     # ----
 
     def getBoundingBox(self, minX=None, maxX=None, absolute=False):
-        """Get bounding box for whole data or X selection"""
-
+        """Get bounding box for whole data or X selection."""
         # use relevant data
         if minX is not None and maxX is not None:
             self.cropPoints(minX, maxX)
@@ -726,8 +705,8 @@ class points:
 
         # get range
         if minX is not None and maxX is not None:
-            minXY = numpy.minimum.reduce(data)
-            maxXY = numpy.maximum.reduce(data)
+            minXY = np.minimum.reduce(data)
+            maxXY = np.maximum.reduce(data)
         else:
             minXY = [self.pointsBox[0][0], self.pointsBox[0][1]]
             maxXY = [self.pointsBox[1][0], self.pointsBox[1][1]]
@@ -765,7 +744,6 @@ class points:
 
     def getLegend(self):
         """Get legend."""
-
         # get legend
         legend = self.properties["legend"]
         offset = ""
@@ -788,9 +766,8 @@ class points:
 
     # ----
 
-    def cropPoints(self, minX, maxX):
+    def cropPoints(self, minX, maxX) -> None:
         """Crop points to selected X range."""
-
         # apply offset
         minX -= self.properties["xOffset"]
         maxX -= self.properties["xOffset"]
@@ -807,9 +784,8 @@ class points:
 
     # ----
 
-    def scaleAndShift(self, scale, shift):
+    def scaleAndShift(self, scale, shift) -> None:
         """Scale and shift points to screen coordinations."""
-
         self.scaled = self.cropped
 
         xScale = scale[0]
@@ -838,18 +814,16 @@ class points:
 
     # ----
 
-    def filterPoints(self, filterSize):
-        """Filter points for printing and exporting"""
-
+    def filterPoints(self, filterSize) -> None:
+        """Filter points for printing and exporting."""
         # filter data
         if len(self.scaled) and self.properties["showLines"]:
             self.scaled = _filterPoints(self.scaled, filterSize)
 
     # ----
 
-    def draw(self, dc, printerScale):
+    def draw(self, dc, printerScale) -> None:
         """Draw object."""
-
         # check data
         if not len(self.scaled):
             return
@@ -897,21 +871,20 @@ class points:
 
     # ----
 
-    def drawGel(self, dc, gelCoords, gelHeight, printerScale):
+    def drawGel(self, dc, gelCoords, gelHeight, printerScale) -> None:
         """Draw gel."""
         pass
 
     # ----
 
-    def makeLabels(self, dc, printerScale):
+    def makeLabels(self, _dc, _printerScale):
         """Get object labels."""
         return []
 
     # ----
 
-    def _normalization(self):
+    def _normalization(self) -> None:
         """Calculate normalization constants."""
-
         normalization = 1.0
 
         # calc normalization
@@ -928,10 +901,10 @@ class points:
     # ----
 
 
-class spectrum:
+class Spectrum:
     """Base class for spectrum drawing."""
 
-    def __init__(self, scan, **attr):
+    def __init__(self, scan, **attr) -> None:
         # set default params
         self.properties = {
             "legend": "",
@@ -978,18 +951,18 @@ class spectrum:
             self.properties[name] = value
 
         # convert spectrum points to array
-        self.spectrumPoints = numpy.array(scan.profile)
+        self.spectrumPoints = np.array(scan.profile)
         self.spectrumCropped = self.spectrumPoints
         self.spectrumScaled = self.spectrumCropped
         if len(self.spectrumPoints):
             self.spectrumBox = (
-                numpy.minimum.reduce(self.spectrumPoints),
-                numpy.maximum.reduce(self.spectrumPoints),
+                np.minimum.reduce(self.spectrumPoints),
+                np.maximum.reduce(self.spectrumPoints),
             )
 
         # convert peaklist points to array
         self.peaklist = copy.deepcopy(scan.peaklist)
-        self.peaklistPoints = numpy.array(
+        self.peaklistPoints = np.array(
             [[peak.mz, peak.ai, peak.base] for peak in scan.peaklist]
         )
         self.peaklistCropped = self.peaklistPoints
@@ -997,8 +970,8 @@ class spectrum:
         self.peaklistCroppedPeaks = self.peaklist[:]
         if len(self.peaklistPoints):
             self.peaklistBox = (
-                numpy.minimum.reduce(self.peaklistPoints),
-                numpy.maximum.reduce(self.peaklistPoints),
+                np.minimum.reduce(self.peaklistPoints),
+                np.maximum.reduce(self.peaklistPoints),
             )
 
         # calculate normalization
@@ -1006,17 +979,15 @@ class spectrum:
 
     # ----
 
-    def setProperties(self, **attr):
+    def setProperties(self, **attr) -> None:
         """Set object properties."""
-
         for name, value in list(attr.items()):
             self.properties[name] = value
 
     # ----
 
-    def setNormalization(self, value):
+    def setNormalization(self, value) -> None:
         """Force specified normalization to be used insted of calculated one."""
-
         value = float(value)
         if value == 0.0:
             value = 1.0
@@ -1027,7 +998,6 @@ class spectrum:
 
     def getBoundingBox(self, minX=None, maxX=None, absolute=False):
         """Get bounding box for whole data or X selection."""
-
         spectrumBox = None
         peaklistBox = None
 
@@ -1043,8 +1013,8 @@ class spectrum:
         # calculate bounding box for spectrum
         if len(spectrumData) and self.properties["showSpectrum"]:
             if minX is not None and maxX is not None:
-                minXY = numpy.minimum.reduce(spectrumData)
-                maxXY = numpy.maximum.reduce(spectrumData)
+                minXY = np.minimum.reduce(spectrumData)
+                maxXY = np.maximum.reduce(spectrumData)
             else:
                 minXY = [self.spectrumBox[0][0], self.spectrumBox[0][1]]
                 maxXY = [self.spectrumBox[1][0], self.spectrumBox[1][1]]
@@ -1061,8 +1031,8 @@ class spectrum:
             or self.properties["showTicks"]
         ):
             if minX is not None and maxX is not None:
-                minXY = numpy.minimum.reduce(peaklistData)
-                maxXY = numpy.maximum.reduce(peaklistData)
+                minXY = np.minimum.reduce(peaklistData)
+                maxXY = np.maximum.reduce(peaklistData)
             else:
                 minXY = [
                     self.peaklistBox[0][0],
@@ -1099,8 +1069,8 @@ class spectrum:
         # use both
         if spectrumBox and peaklistBox:
             minXY, maxXY = [
-                numpy.minimum(spectrumBox[0], peaklistBox[0]),
-                numpy.maximum(spectrumBox[1], peaklistBox[1]),
+                np.minimum(spectrumBox[0], peaklistBox[0]),
+                np.maximum(spectrumBox[1], peaklistBox[1]),
             ]
         elif spectrumBox:
             minXY, maxXY = spectrumBox
@@ -1134,7 +1104,6 @@ class spectrum:
 
     def getLegend(self):
         """Get legend."""
-
         # get legend
         legend = self.properties["legend"]
         offset = ""
@@ -1159,7 +1128,6 @@ class spectrum:
 
     def getPoint(self, xPos, coord="screen"):
         """Get interpolated Y position for given X."""
-
         # get relevant data
         points = self.spectrumCropped if coord == "user" else self.spectrumScaled
 
@@ -1179,9 +1147,8 @@ class spectrum:
 
     # ----
 
-    def cropPoints(self, minX, maxX):
+    def cropPoints(self, minX, maxX) -> None:
         """Crop points to selected X range."""
-
         # apply offset
         minX -= self.properties["xOffset"]
         maxX -= self.properties["xOffset"]
@@ -1203,9 +1170,8 @@ class spectrum:
 
     # ----
 
-    def scaleAndShift(self, scale, shift):
+    def scaleAndShift(self, scale, shift) -> None:
         """Scale and shift points to screen coordinations."""
-
         self.spectrumScaled = self.spectrumCropped
         self.peaklistScaled = self.peaklistCropped
 
@@ -1235,27 +1201,25 @@ class spectrum:
 
         # scale and shift peaklist data
         if len(self.peaklistCropped):
-            self.peaklistScaled = numpy.array(
+            self.peaklistScaled = np.array(
                 (xScale, yScale, yScale)
-            ) * self.peaklistCropped + numpy.array((xShift, yShift, yShift))
+            ) * self.peaklistCropped + np.array((xShift, yShift, yShift))
 
         self.currentScale = scale
         self.currentShift = shift
 
     # ----
 
-    def filterPoints(self, filterSize):
+    def filterPoints(self, filterSize) -> None:
         """Filter spectrum points invisible in current resolution."""
-
         # filter spectrum data
         if len(self.spectrumScaled) and self.properties["showSpectrum"]:
             self.spectrumScaled = _filterPoints(self.spectrumScaled, filterSize)
 
     # ----
 
-    def draw(self, dc, printerScale):
+    def draw(self, dc, printerScale) -> None:
         """Draw object."""
-
         # draw line spectrum
         if len(self.spectrumScaled) > 2 and self.properties["showSpectrum"]:
             self._drawSpectrum(dc, printerScale)
@@ -1268,9 +1232,8 @@ class spectrum:
 
     # ----
 
-    def drawGel(self, dc, gelCoords, gelHeight, printerScale):
+    def drawGel(self, dc, gelCoords, gelHeight, printerScale) -> None:
         """Draw gel."""
-
         # draw line spectrum gel
         if len(self.spectrumScaled) > 2 and self.properties["showSpectrum"]:
             self._drawSpectrumGel(dc, gelCoords, gelHeight, printerScale)
@@ -1290,7 +1253,6 @@ class spectrum:
 
     def makeLabels(self, dc, printerScale):
         """Get object labels."""
-
         # check labels
         if not self.properties["showLabels"] or not len(self.peaklistScaled):
             return []
@@ -1321,7 +1283,7 @@ class spectrum:
                 self.properties["labelCharge"]
                 and self.peaklistCroppedPeaks[x].charge is not None
             ):
-                label += " (%d)" % self.peaklistCroppedPeaks[x].charge
+                label += f" ({self.peaklistCroppedPeaks[x].charge:d})"
 
             # add group to label
             if self.properties["labelGroup"] and self.peaklistCroppedPeaks[x].group:
@@ -1378,9 +1340,8 @@ class spectrum:
 
     # ----
 
-    def _drawSpectrum(self, dc, printerScale):
+    def _drawSpectrum(self, dc, printerScale) -> None:
         """Draw spectrum lines."""
-
         # set pen and brush
         pen = wx.Pen(
             self.properties["spectrumColour"],
@@ -1422,9 +1383,8 @@ class spectrum:
 
     # ----
 
-    def _drawSpectrumGel(self, dc, gelCoords, gelHeight, printerScale):
+    def _drawSpectrumGel(self, dc, gelCoords, gelHeight, printerScale) -> bool:
         """Draw spectrum gel."""
-
         # get plot coordinates
         gelY1, _plotX1, plotY1, _plotX2, plotY2, zeroY = gelCoords
 
@@ -1509,9 +1469,8 @@ class spectrum:
 
     # ----
 
-    def _drawPeaklist(self, dc, printerScale):
+    def _drawPeaklist(self, dc, printerScale) -> None:
         """Draw peaklist ticks."""
-
         # set pen params
         peakPen = wx.Pen(
             self.properties["tickColour"],
@@ -1580,9 +1539,8 @@ class spectrum:
 
     # ----
 
-    def _drawPeaklistGel(self, dc, gelCoords, gelHeight, printerScale):
+    def _drawPeaklistGel(self, dc, gelCoords, gelHeight, printerScale) -> bool | None:
         """Draw peaklist gel."""
-
         # get plot coordinates
         gelY1, _plotX1, plotY1, _plotX2, plotY2, zeroY = gelCoords
 
@@ -1679,9 +1637,8 @@ class spectrum:
 
     # ----
 
-    def _drawGelLegend(self, dc, gelCoords, gelHeight, printerScale):
-        """docstring for _drawGelLegend"""
-
+    def _drawGelLegend(self, dc, gelCoords, gelHeight, printerScale) -> None:
+        """Docstring for _drawGelLegend."""
         # get plot coordinates
         gelY1, _plotX1, _plotY1, plotX2, _plotY2, _zeroY = gelCoords
 
@@ -1712,9 +1669,8 @@ class spectrum:
 
     # ----
 
-    def _normalization(self):
+    def _normalization(self) -> None:
         """Calculate normalization constants."""
-
         normalization = 0.0
 
         # get range from points and peaklist
@@ -1725,7 +1681,7 @@ class spectrum:
 
         # get range from points only
         elif len(self.spectrumPoints):
-            minXY, maxXY = self.spectrumBox
+            _minXY, maxXY = self.spectrumBox
             normalization = maxXY[1] / 100.0
 
         # get range from peaklist only
@@ -1749,7 +1705,6 @@ class spectrum:
 
 def _scaleFont(font, scale):
     """Scale font."""
-
     # check printerScale
     if scale == 1:
         return font
@@ -1775,22 +1730,22 @@ def _scaleFont(font, scale):
 
 def _scaleAndShift(points, scaleX, scaleY, shiftX, shiftY):
     """Scale and shift signal points used by plot. New array is returned.
+
     points (numpy array) - data points
     scaleX (float) - x-axis scale
     scaleY (float) - y-axis scale
     shiftX (float) - x-axis shift
     shiftY (float) - y-axis shift
     """
-
     # check signal type
-    if not isinstance(points, numpy.ndarray):
+    if not isinstance(points, np.ndarray):
         raise TypeError("Signal points must be NumPy array!")
     if points.dtype.name != "float64":
         raise TypeError("Signal points must be float64!")
 
     # check signal data
     if len(points) == 0:
-        return numpy.array([])
+        return np.array([])
 
     # scale and shift signal
     return calculations.signal_rescale(
@@ -1803,19 +1758,19 @@ def _scaleAndShift(points, scaleX, scaleY, shiftX, shiftY):
 
 def _filterPoints(points, resolution):
     """Filter signal points according to resolution. New array is returned.
+
     points (numpy array) - data points
     resolution (float) - resolution point size
     """
-
     # check signal type
-    if not isinstance(points, numpy.ndarray):
+    if not isinstance(points, np.ndarray):
         raise TypeError("Signal points must be NumPy array!")
     if points.dtype.name != "float64":
         raise TypeError("Signal points must be float64!")
 
     # check signal data
     if len(points) == 0:
-        return numpy.array([])
+        return np.array([])
 
     # filter signal
     return calculations.signal_filter(points, float(resolution))

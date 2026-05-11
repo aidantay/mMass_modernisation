@@ -31,10 +31,10 @@ from . import config, images, mwx
 # -----------------------------------------
 
 
-class panelPeakDifferences(wx.Frame):
+class PanelPeakDifferences(wx.Frame):
     """Peak differences tool."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -62,9 +62,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -90,9 +89,8 @@ class panelPeakDifferences(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbarNoBorder"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -106,7 +104,7 @@ class panelPeakDifferences(wx.Frame):
             "",
             size=(100, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.difference_value.Bind(wx.EVT_TEXT_ENTER, self.onSearch)
 
@@ -137,7 +135,7 @@ class panelPeakDifferences(wx.Frame):
             -1,
             str(config.peakDifferences["tolerance"]),
             size=(50, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         toleranceUnits_label = wx.StaticText(panel, -1, "m/z")
@@ -186,7 +184,6 @@ class panelPeakDifferences(wx.Frame):
 
     def makeMainPanel(self):
         """Make differences panel."""
-
         panel = wx.Panel(self, -1)
 
         # make table
@@ -206,9 +203,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def makeDifferencesGrid(self, panel):
+    def makeDifferencesGrid(self, panel) -> None:
         """Make differences grid."""
-
         # make table
         self.differencesGrid = wx.grid.Grid(
             panel, -1, size=(700, 500), style=mwx.GRID_STYLE
@@ -230,9 +226,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def makeMatchesGrid(self, panel):
+    def makeMatchesGrid(self, panel) -> None:
         """Make matches grid."""
-
         # make table
         self.matchesGrid = wx.grid.Grid(
             panel, -1, size=(200, 400), style=mwx.GRID_STYLE
@@ -253,11 +248,10 @@ class panelPeakDifferences(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -282,9 +276,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -295,9 +288,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -320,9 +312,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -330,9 +321,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def onCellSelected(self, evt):
+    def onCellSelected(self, evt) -> None:
         """Grid cell selected."""
-
         evt.Skip()
 
         # get cell
@@ -356,9 +346,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def onCellActivated(self, evt):
+    def onCellActivated(self, evt) -> None:
         """Grid cell activated."""
-
         evt.Skip()
 
         # get cell
@@ -387,9 +376,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def onSearch(self, evt):
+    def onSearch(self, evt) -> None:
         """Generate differences and search for specified mass(es)."""
-
         # check processing
         if self.processing:
             return
@@ -432,9 +420,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set data."""
-
         # set new document
         self.currentDocument = document
         self.currentDifferences = None
@@ -446,9 +433,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             if self.difference_value.GetValue():
@@ -466,15 +452,14 @@ class panelPeakDifferences(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def updateDifferencesGrid(self):
+    def updateDifferencesGrid(self) -> None:
         """Update grid values."""
-
         # erase grid
         if self.differencesGrid.GetNumberRows():
             self.differencesGrid.DeleteCols(0, self.differencesGrid.GetNumberCols())
@@ -532,9 +517,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def updateMatchesGrid(self):
+    def updateMatchesGrid(self) -> None:
         """Update current matches."""
-
         # erase grid
         if self.matchesGrid.GetNumberCols():
             self.matchesGrid.DeleteCols(0, self.matchesGrid.GetNumberCols())
@@ -574,9 +558,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def searchSelected(self, diff):
+    def searchSelected(self, diff) -> None:
         """Search difference for specified value, aminoacids or dipeptides."""
-
         self.currentMatches = []
 
         # search for value
@@ -601,9 +584,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def runSearch(self):
+    def runSearch(self) -> bool | None:
         """Calculate differences for current peaklist and search for matches."""
-
         # run task
         try:
             # get peaklist
@@ -681,15 +663,14 @@ class panelPeakDifferences(wx.Frame):
                 self.consolidateTable()
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentDifferences = []
             return None
 
     # ----
 
-    def initAminoacids(self):
+    def initAminoacids(self) -> None:
         """Calculate amino acids / dipeptides masses and ranges."""
-
         self._aaLimits = [0.0, 1000.0]
         self._dipLimits = [0.0, 1000.0]
         self._aaMasses = {}
@@ -725,9 +706,8 @@ class panelPeakDifferences(wx.Frame):
 
     # ----
 
-    def consolidateTable(self):
+    def consolidateTable(self) -> None:
         """Remove unmatched peaks."""
-
         # find matches
         indexes = []
         for i, row in enumerate(self.currentDifferences):

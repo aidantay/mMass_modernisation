@@ -19,12 +19,9 @@
 import itertools
 import re
 
-# load building blocks
-# load objects
+# load modules
 from . import blocks, obj_sequence
-
-# load stopper
-from .mod_stopper import CHECK_FORCE_QUIT
+from . import mod_stopper
 
 # SEQUENCE DIGESTION
 # ------------------
@@ -32,15 +29,15 @@ from .mod_stopper import CHECK_FORCE_QUIT
 
 def digest(sequence, enzyme, miscleavage=0, allowMods=False, strict=True):
     """Digest seuence by specified enzyme.
+
     sequence: (sequence) mspy sequence object
     enzyme: (str) enzyme name - must be defined in mspy.enzymes
     miscleavage: (int) number of allowed misscleavages
     allowMods: (bool) do not care about modifications in cleavage site
     strict: (bool) do not cleave even if variable modification is in cleavage site
     """
-
     # check sequence object
-    if not isinstance(sequence, obj_sequence.sequence):
+    if not isinstance(sequence, obj_sequence.Sequence):
         raise TypeError("Cannot digest non-sequence object!")
 
     # check cyclic peptides
@@ -99,7 +96,7 @@ def digest(sequence, enzyme, miscleavage=0, allowMods=False, strict=True):
     # get peptides slices from protein
     peptides = []
     for indices in slices:
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # get peptide
         peptide = sequence[indices[0] : indices[1]]
@@ -121,11 +118,11 @@ def digest(sequence, enzyme, miscleavage=0, allowMods=False, strict=True):
 
 def coverage(ranges, length, human=True):
     """Calculate sequence coverage.
+
     ranges: (list of mspy.sequence or list of user ranges (start,stop))
     length: (int) parent sequence length
     human: (bool) ranges in human (True) or computer (False) indexes
     """
-
     # check data
     if not ranges:
         return 0.0
@@ -155,16 +152,16 @@ def coverage(ranges, length, human=True):
 
 def fragment(sequence, series, scrambling=False):
     """Generate list of neutral peptide fragments from given peptide.
+
     sequence: (sequence) mspy sequence object
     series: (list) list of fragment serie names - must be defined in mspy.fragments
     scrambling: (int) allow sequence scrambling
     """
-
     frags = []
     scramblingFilter = "M"
 
     # check sequence object
-    if not isinstance(sequence, obj_sequence.sequence):
+    if not isinstance(sequence, obj_sequence.Sequence):
         raise TypeError("Cannot fragment non-sequence object!")
 
     # generate fragments for linear peptide
@@ -217,12 +214,12 @@ def fragment(sequence, series, scrambling=False):
 
 def fragmentserie(sequence, serie, cyclicParent=False):
     """Generate list of neutral peptide fragments from given peptide.
+
     sequence: (sequence) mspy sequence object
     serie: (str) fragment serie name - must be defined in mspy.fragments
     """
-
     # check sequence object
-    if not isinstance(sequence, obj_sequence.sequence):
+    if not isinstance(sequence, obj_sequence.Sequence):
         raise TypeError("Cannot fragment non-sequence object!")
 
     # check cyclic peptides
@@ -250,7 +247,7 @@ def fragmentserie(sequence, serie, cyclicParent=False):
             frag.cTermFormula = serie.cTermFormula
             frags.append(frag)
 
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
     # C-terminal fragments
     elif serie.terminus == "C":
@@ -261,7 +258,7 @@ def fragmentserie(sequence, serie, cyclicParent=False):
             frag.nTermFormula = serie.nTermFormula
             frags.append(frag)
 
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
     # singlet fragments
     elif serie.terminus == "S":
@@ -273,7 +270,7 @@ def fragmentserie(sequence, serie, cyclicParent=False):
             frag.cTermFormula = serie.cTermFormula
             frags.append(frag)
 
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
     # internal fragments
     elif serie.terminus == "I":
@@ -285,7 +282,7 @@ def fragmentserie(sequence, serie, cyclicParent=False):
                 frag.cTermFormula = serie.cTermFormula
                 frags.append(frag)
 
-                CHECK_FORCE_QUIT()
+                mod_stopper.CHECK_FORCE_QUIT()
 
     # correct termini for cyclic peptides
     if cyclicParent:
@@ -325,6 +322,7 @@ def fragmentlosses(
     fragments, losses=None, defined=False, limit=1, filterIn=None, filterOut=None
 ):
     """Apply specified neutral losses to fragments.
+
     fragments: (list) list of sequence fragments
     losses: (list) list of neutral losses
     defined: (bool) use monomer-defined neutral losses
@@ -332,7 +330,6 @@ def fragmentlosses(
     filterIn: (dic) allowed series for specified losses
     filterOut: (dic) not allowed series for specified losses
     """
-
     # make losses combinations
     if filterOut is None:
         filterOut = {}
@@ -348,7 +345,7 @@ def fragmentlosses(
     # generate fragments
     buff = []
     for frag in fragments:
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # get monomer-defined losses to check specifity
         definedLosses = []
@@ -416,12 +413,12 @@ def fragmentgains(
     filterOut=None,
 ):
     """Apply specified neutral gains to fragments.
+
     fragments: (list) list of sequence fragments
     gains: (list) list of neutral gains
     filterIn: (dic) allowed series for specified gains
     filterOut: (dic) not allowed series for specified gains
     """
-
     # generate fragments
     if filterOut is None:
         filterOut = {}
@@ -431,7 +428,7 @@ def fragmentgains(
         gains = []
     buff = []
     for frag in fragments:
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # is parent cyclic?
         cyclicParent = False

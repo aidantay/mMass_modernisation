@@ -8594,7 +8594,7 @@ getIconDlgImage = IconDlg.GetImage
 getIconDlgBitmap = IconDlg.GetBitmap
 
 # ----------------------------------------------------------------------
-Stopper = PyEmbeddedImage(
+stopper = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAGXRFWHRTb2Z0d2FyZQBBZG9i"
     "ZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tl"
     "dCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1l"
@@ -8617,9 +8617,9 @@ Stopper = PyEmbeddedImage(
     "BZIjXoE0BgMxG7LTYJpBbCyaQOAXEwOZgAUaT3idChRjQLP1A0WBAwpaC1jEg4J+0aJFT9Cj"
     "A0kMlBBOkJ0AKE5yJCdygAADALFea70zE1mzAAAAAElFTkSuQmCC"
 )
-getStopperData = Stopper.GetData
-getStopperImage = Stopper.GetImage
-getStopperBitmap = Stopper.GetBitmap
+getStopperData = stopper.GetData
+getStopperImage = stopper.GetImage
+getStopperBitmap = stopper.GetBitmap
 
 # ----------------------------------------------------------------------
 Cursors = PyEmbeddedImage(

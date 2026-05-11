@@ -27,10 +27,10 @@ from . import libs, mwx
 # --------------
 
 
-class dlgPresetsEditor(wx.Dialog):
+class DlgPresetsEditor(wx.Dialog):
     """Edit presets library."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -59,7 +59,6 @@ class dlgPresetsEditor(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make GUI elements
         self.makeItemsList()
         editor = self.makeItemEditor()
@@ -78,11 +77,10 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def makeItemsList(self):
+    def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, wx.ID_ANY, size=(501, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -103,7 +101,6 @@ class dlgPresetsEditor(wx.Dialog):
 
     def makeItemEditor(self):
         """Make items editor."""
-
         mainSizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, ""), wx.VERTICAL)
 
         # make elements
@@ -140,9 +137,8 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Update item editor with selected item."""
-
         # get selected item
         index = evt.GetData()
         name = self.itemsMap[index][0]
@@ -155,9 +151,8 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def onRenameItem(self, _evt):
+    def onRenameItem(self, _evt) -> None:
         """Rename item."""
-
         # check selection
         if self.selectedItem is None:
             wx.Bell()
@@ -171,7 +166,7 @@ class dlgPresetsEditor(wx.Dialog):
         # check name
         if itemData[0] in libs.presets[itemData[1]]:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Presets with the same name already exists.",
                 message="Type a different name.",
@@ -192,9 +187,8 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def onDeleteItem(self, _evt):
+    def onDeleteItem(self, _evt) -> None:
         """Remove selected items."""
-
         # delete?
         title = "Do you really want to delete selected presets?"
         message = "Presets definitions will be lost."
@@ -202,7 +196,7 @@ class dlgPresetsEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -221,9 +215,8 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsMap(self):
+    def updateItemsMap(self) -> None:
         """Update items map."""
-
         self.itemsMap = []
 
         # make map
@@ -233,9 +226,8 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsList(self):
+    def updateItemsList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateItemsMap()
         self.itemsList.DeleteAllItems()
@@ -257,9 +249,8 @@ class dlgPresetsEditor(wx.Dialog):
 
     # ----
 
-    def clearEditor(self):
+    def clearEditor(self) -> None:
         """Clear item editor."""
-
         # update editor
         self.itemName_value.SetValue("")
         self.itemCategory_value.SetValue("")
@@ -268,7 +259,6 @@ class dlgPresetsEditor(wx.Dialog):
 
     def getItemData(self):
         """Get formated item data."""
-
         # get data
         name = self.itemName_value.GetValue()
         category = self.itemCategory_value.GetValue()

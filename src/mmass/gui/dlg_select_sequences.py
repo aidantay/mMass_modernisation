@@ -25,10 +25,10 @@ from . import mwx
 # -------------------------
 
 
-class dlgSelectSequences(wx.Dialog):
-    """Select sequences from multisequence files"""
+class DlgSelectSequences(wx.Dialog):
+    """Select sequences from multisequence files."""
 
-    def __init__(self, parent, sequences):
+    def __init__(self, parent, sequences) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -58,7 +58,6 @@ class dlgSelectSequences(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # make GUI elements
         self.makeSequenceList()
         buttons = self.makeButtons()
@@ -79,7 +78,6 @@ class dlgSelectSequences(wx.Dialog):
 
     def makeButtons(self):
         """Make buttons."""
-
         # make items
         cancel_butt = wx.Button(self, wx.ID_CANCEL, "Cancel")
         import_butt = wx.Button(self, wx.ID_OK, "Import")
@@ -94,11 +92,10 @@ class dlgSelectSequences(wx.Dialog):
 
     # ----
 
-    def makeSequenceList(self):
+    def makeSequenceList(self) -> None:
         """Make list for sequences."""
-
         # init list
-        self.sequenceList = mwx.sortListCtrl(
+        self.sequenceList = mwx.SortListCtrl(
             self, wx.ID_ANY, size=(626, 250), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.sequenceList.SetFont(wx.SMALL_FONT)
@@ -119,9 +116,8 @@ class dlgSelectSequences(wx.Dialog):
 
     # ----
 
-    def updateSequenceList(self):
+    def updateSequenceList(self) -> None:
         """Set data to sequence list."""
-
         # set data map
         self.sequencesMap = []
         for x, sequence in enumerate(self.sequences):
@@ -147,17 +143,15 @@ class dlgSelectSequences(wx.Dialog):
 
     # ----
 
-    def onItemActivated(self, _evt):
+    def onItemActivated(self, _evt) -> None:
         """Import selected sequence."""
-
         self.selected = self.getSelecedSequences()
         self.EndModal(wx.ID_OK)
 
     # ----
 
-    def onImport(self, _evt):
+    def onImport(self, _evt) -> None:
         """Check selected sequences."""
-
         # get selection
         self.selected = self.getSelecedSequences()
         if self.selected:
@@ -169,7 +163,6 @@ class dlgSelectSequences(wx.Dialog):
 
     def getSelecedSequences(self):
         """Get selected sequences."""
-
         # get selected sequences
         sequences = []
         for item in self.sequenceList.getSelected():

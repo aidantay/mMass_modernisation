@@ -25,12 +25,12 @@ import wx
 # -----------------------
 
 
-class canvas(wx.Window):
-    """Plot canvas"""
+class Canvas(wx.Window):
+    """Plot canvas."""
 
     def __init__(
         self, parent, id=-1, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, **attr
-    ):
+    ) -> None:
         wx.Window.__init__(self, parent, id, size=size, style=style)
 
         self.parent = parent
@@ -127,9 +127,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onPaint(self, evt):
+    def onPaint(self, _evt) -> None:
         """Repaint plot."""
-
         # clear cursor tracker
         if self.mouseTracker:
             self.drawMouseTracker()
@@ -139,9 +138,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onSize(self, evt):
+    def onSize(self, _evt) -> None:
         """Repaint plot when size changed."""
-
         # get size
         width, height = self.GetClientSize()
         width = max(1, width)
@@ -174,9 +172,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onLeave(self, evt):
+    def onLeave(self, _evt) -> None:
         """Escape mouse events when cursor leave out of the canvas."""
-
         # clear cursor tracker
         if self.mouseTracker:
             self.drawMouseTracker()
@@ -189,9 +186,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onLMD(self, evt):
+    def onLMD(self, evt) -> None:
         """Change cursor style according to position and current mouse function."""
-
         # get focus
         if self.FindFocus() != self:
             self.SetFocus()
@@ -256,9 +252,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onLMU(self, evt):
+    def onLMU(self, evt) -> None:
         """Clear cursor."""
-
         # get focus
         if self.FindFocus() != self:
             self.SetFocus()
@@ -331,9 +326,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onLMDC(self, evt):
+    def onLMDC(self, evt) -> None:
         """Show full-axis plot on left-mouse double-click."""
-
         # set axis ranges according to cursor location
         location = self.getCursorLocation()
         if location == "plot":
@@ -367,9 +361,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onRMD(self, evt):
+    def onRMD(self, evt) -> None:
         """Change cursor style according to position and current mouse function."""
-
         # get focus
         if self.FindFocus() != self:
             self.SetFocus()
@@ -405,9 +398,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onRMU(self, evt):
+    def onRMU(self, evt) -> None:
         """Set new zoom and clear cursor."""
-
         # get focus
         if self.FindFocus() != self:
             self.SetFocus()
@@ -450,9 +442,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onRMDC(self, evt):
+    def onRMDC(self, evt) -> None:
         """Show full plot on right-mouse double-click."""
-
         # set axis ranges according to cursor location
         if self.getCursorLocation() == "plot":
             minX, maxX = self.getMaxXRange()
@@ -476,9 +467,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onMMotion(self, evt):
+    def onMMotion(self, evt) -> None:
         """Draw cursor on mouse motion."""
-
         # clear cursor tracker
         if not self.mouseEvent and self.mouseTracker:
             self.drawMouseTracker()
@@ -559,9 +549,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onMScroll(self, evt):
+    def onMScroll(self, evt) -> None:
         """Process mouse scroll."""
-
         # escape if any mouse event set
         if self.mouseEvent:
             return
@@ -659,9 +648,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def onChar(self, evt):
+    def onChar(self, evt) -> None:
         """Set zoom or position according to pressed key."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -809,13 +797,12 @@ class canvas(wx.Window):
 
     def getPrintout(self, filterSize, title):
         """Get printout of current plot."""
-        return printout(self, filterSize, title)
+        return Printout(self, filterSize, title)
 
     # ----
 
     def getBitmap(self, width=None, height=None, printerScale=None):
         """Get current plot bitmap with selected size."""
-
         # get width/height if not set
         if not width or not height:
             width, height = self.GetClientSize()
@@ -878,7 +865,6 @@ class canvas(wx.Window):
 
     def getMaxXRange(self, absolute=False):
         """Get maximal X-axis range."""
-
         graphics = self.lastDraw[0]
         p1, p2 = graphics.getBoundingBox(absolute=absolute)
         return (p1[0], p2[0])
@@ -887,7 +873,6 @@ class canvas(wx.Window):
 
     def getMaxYRange(self, minX=None, maxX=None, absolute=False):
         """Get maximal Y-axis range."""
-
         # get bounding box
         graphics = self.lastDraw[0]
         p1, p2 = graphics.getBoundingBox(minX, maxX, absolute)
@@ -900,9 +885,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def getCursorLocation(self):
+    def getCursorLocation(self) -> str:
         """Locate cursor within the plot area."""
-
         # get plot width/height
         minX = self.plotCoords[0]
         minY = self.plotCoords[1]
@@ -926,7 +910,6 @@ class canvas(wx.Window):
 
     def getCursorPosition(self):
         """Get cursor position in user coordinations."""
-
         # check position
         if self.getCursorLocation() != "plot":
             return False
@@ -938,7 +921,6 @@ class canvas(wx.Window):
 
     def getDistance(self):
         """Get current cursor distance."""
-
         # check event
         if self.mouseEvent != "distance":
             return False
@@ -962,7 +944,6 @@ class canvas(wx.Window):
 
     def getIsotopes(self):
         """Get current isotopes."""
-
         # check event
         if self.mouseEvent != "isotopes":
             return False
@@ -978,7 +959,6 @@ class canvas(wx.Window):
 
     def getPoint(self, xPos=None, coord="screen"):
         """Get corresponding data point from current object and xPos."""
-
         # check current object
         if self.currentObject is None:
             return None
@@ -991,7 +971,6 @@ class canvas(wx.Window):
 
     def getSelectionBox(self):
         """Get selection rectangle coordinations."""
-
         # check position
         if self.mouseEvent not in ("rectangle", "range"):
             return False
@@ -1006,9 +985,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def setSize(self, width=None, height=None):
+    def setSize(self, width=None, height=None) -> None:
         """Set DC width and height."""
-
         # get size
         if width is None:
             (width, height) = self.GetClientSize()
@@ -1021,55 +999,52 @@ class canvas(wx.Window):
 
     # ----
 
-    def setCurrentObject(self, value):
+    def setCurrentObject(self, value) -> None:
         """Set selected data object as main."""
         self.currentObject = value
 
     # ----
 
-    def setPrinterScale(self, drawings=1, fonts=1):
+    def setPrinterScale(self, drawings=1, fonts=1) -> None:
         """Used to thicken lines and increase marker size for printouts."""
-
         self.printerScale["drawings"] = drawings
         self.printerScale["fonts"] = fonts
 
     # ----
 
-    def setProperties(self, **attr):
+    def setProperties(self, **attr) -> None:
         """Set parameters for canvas."""
-
         for name, value in list(attr.items()):
             self.properties[name] = value
 
     # ----
 
-    def setMFunction(self, fn=None):
+    def setMFunction(self, fn=None) -> None:
         """Set cursor tracker style."""
         self.mouseFn = fn
 
     # ----
 
-    def setLMBFunction(self, fn):
+    def setLMBFunction(self, fn) -> None:
         """Set function for left mouse button."""
         self.mouseFnLMB = fn
 
     # ----
 
-    def setRMBFunction(self, fn):
+    def setRMBFunction(self, fn) -> None:
         """Set function for right mouse button."""
         self.mouseFnRMB = fn
 
     # ----
 
-    def setCursorImage(self, cursor):
+    def setCursorImage(self, cursor) -> None:
         """Set cursor image for main plot area."""
         self.cursorImage = cursor
 
     # ----
 
-    def setCursorByLocation(self):
+    def setCursorByLocation(self) -> None:
         """Set cursor-type according to location."""
-
         location = self.getCursorLocation()
         if location == "xAxis":
             self.SetCursor(wx.Cursor(wx.CURSOR_SIZEWE))
@@ -1084,9 +1059,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def draw(self, graphics, xAxis=None, yAxis=None, dc=None, filterSize=1.0):
+    def draw(self, graphics, xAxis=None, yAxis=None, dc=None, filterSize=1.0) -> None:
         """Draw axis and plot graphics."""
-
         # reset tracker
         self.mouseTracker = False
 
@@ -1214,18 +1188,16 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawOutside(self, dc, filterSize):
+    def drawOutside(self, dc, filterSize) -> None:
         """Used for printing and exporting."""
-
         if self.lastDraw is not None:
             graphics, xAxis, yAxis = self.lastDraw
             self.draw(graphics, xAxis, yAxis, dc, filterSize=filterSize)
 
     # ----
 
-    def drawAxis(self, dc, xticks, yticks):
+    def drawAxis(self, dc, xticks, yticks) -> None:
         """Draw plot axis."""
-
         # set pen
         penWidth = self.printerScale["drawings"]
         dc.SetPen(wx.Pen(self.properties["axisColour"], penWidth))
@@ -1328,9 +1300,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawLegend(self, dc, graphics):
+    def drawLegend(self, dc, graphics) -> None:
         """Draw legend."""
-
         # get names
         names = graphics.getLegend()
 
@@ -1366,9 +1337,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawXPositionBar(self, dc, xAxis):
+    def drawXPositionBar(self, dc, xAxis) -> None:
         """Draw position bar."""
-
         # get plot coordinates
         x1, y1, x2, _y2 = self.plotCoords
         x1 -= self.printerScale["drawings"]
@@ -1417,9 +1387,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawYPositionBar(self, dc, yAxis):
+    def drawYPositionBar(self, dc, yAxis) -> None:
         """Draw position bar."""
-
         # get plot coordinates
         x1, y1, x2, y2 = self.plotCoords
         x1 = x2 + (5 + 2) * self.printerScale["drawings"]
@@ -1471,9 +1440,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawGelView(self, dc, graphics):
+    def drawGelView(self, dc, graphics) -> None:
         """Draw spectra gelview."""
-
         # set pen
         penWidth = self.printerScale["drawings"]
 
@@ -1521,9 +1489,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawMouseTracker(self):
+    def drawMouseTracker(self) -> None:
         """Draw selected mouse tracker."""
-
         # draw default cross tracker
         if self.mouseFn == "cross":
             self.drawCursorTracker()
@@ -1541,9 +1508,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawCursorTracker(self):
-        """Draw cursor tracker"""
-
+    def drawCursorTracker(self) -> None:
+        """Draw cursor tracker."""
         # get plot coords
         x = self.cursorPosition[2]
         y = self.cursorPosition[3]
@@ -1574,7 +1540,7 @@ class canvas(wx.Window):
             if hasattr(self, "_drawnTextKeys"):
                 self._drawnTextKeys.clear()
             return
-            
+
         dc.SetPen(wx.Pen(wx.BLACK))
         dc.SetLogicalFunction(wx.COPY)
 
@@ -1620,9 +1586,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawDistanceTracker(self):
+    def drawDistanceTracker(self) -> None:
         """Draw distance tracker."""
-
         # check cursor position
         if self.getCursorLocation() != "plot":
             return
@@ -1711,9 +1676,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawPointTracker(self):
-        """Draw point tracker - follow the main plot"""
-
+    def drawPointTracker(self) -> None:
+        """Draw point tracker - follow the main plot."""
         # check cursor position
         if self.getCursorLocation() != "plot":
             return
@@ -1779,9 +1743,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawIsotopeRuler(self):
+    def drawIsotopeRuler(self) -> None:
         """Draw charge ruler."""
-
         # check cursor position
         if self.getCursorLocation() != "plot":
             return
@@ -1817,7 +1780,7 @@ class canvas(wx.Window):
         lines += self.currentIsotopeLines
 
         diff = self.properties["isotopeDistance"] / self.currentCharge
-        for i in range(lines):
+        for _ in range(lines):
             self.currentIsotopes.append(mz)
 
             isotope = self.positionUserToScreen((mz, 0))[0]
@@ -1854,7 +1817,7 @@ class canvas(wx.Window):
         if wx.Platform != "__WXMAC__":
             dc.SetPen(wx.TRANSPARENT_PEN)
             dc.SetBrush(wx.Brush(wx.BLACK))
-        for i, isotope in enumerate(isotopes):
+        for isotope in isotopes:
             if isotope[1]:
                 dc.DrawCircle(int(isotope[0]), int(isotope[1]), 4)
 
@@ -1881,9 +1844,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawZoomBox(self):
-        """Draw zoom-box"""
-
+    def drawZoomBox(self) -> None:
+        """Draw zoom-box."""
         # get coordinations
         minX = self.draggingStart[2]
         minY = self.draggingStart[3]
@@ -1952,9 +1914,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawSelectionRect(self):
-        """Draw selection rectangle"""
-
+    def drawSelectionRect(self) -> None:
+        """Draw selection rectangle."""
         # get coordinations
         x1 = self.draggingStart[2]
         y1 = self.draggingStart[3]
@@ -1992,9 +1953,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawSelectionRange(self):
-        """Draw selection range line"""
-
+    def drawSelectionRange(self) -> None:
+        """Draw selection range line."""
         # get coordinations
         x1 = self.draggingStart[2]
         y1 = self.draggingStart[3]
@@ -2033,9 +1993,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawPointArrow(self, x, y, direction="up"):
-        """Draw point arrow"""
-
+    def drawPointArrow(self, x, y, direction="up") -> None:
+        """Draw point arrow."""
         # check stop position limits
         if x < self.plotCoords[0]:
             x = self.plotCoords[0]
@@ -2064,9 +2023,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def drawInvertedText(self, dc, text, x, y, font):
-        """Special function for drawing inverted text"""
-
+    def drawInvertedText(self, dc, text, x, y, font) -> None:
+        """Special function for drawing inverted text."""
         dc.SetFont(font)
         size = dc.GetTextExtent(text)
 
@@ -2086,7 +2044,7 @@ class canvas(wx.Window):
         else:
             if not hasattr(self, "_drawnTextKeys"):
                 self._drawnTextKeys = []
-                
+
             key = (text, x, y, size[0], size[1])
             if key in self._drawnTextKeys:
                 # We are ERASING!
@@ -2105,9 +2063,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def refresh(self, fullsize=False):
-        """Redraw plot with the same data and same scale or fullsize"""
-
+    def refresh(self, fullsize=False) -> None:
+        """Redraw plot with the same data and same scale or fullsize."""
         # get last ranges
         graphics = self.lastDraw[0]
         xAxis, yAxis = self.lastDraw[1], self.lastDraw[2]
@@ -2146,18 +2103,16 @@ class canvas(wx.Window):
 
     # ----
 
-    def clear(self):
-        """Clear plot window"""
-
+    def clear(self) -> None:
+        """Clear plot window."""
         dc = wx.BufferedDC(wx.ClientDC(self), self.plotBuffer)
         dc.Clear()
         self.lastDraw = None
 
     # ----
 
-    def zoom(self, xAxis=None, yAxis=None):
-        """Zoom plot to selected range"""
-
+    def zoom(self, xAxis=None, yAxis=None) -> None:
+        """Zoom plot to selected range."""
         # set X axis
         if xAxis is None:
             xAxis = self.getCurrentXRange()
@@ -2189,9 +2144,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def highlightXPoints(self, points, zoom=False):
-        """Move plot to see selected X position and show pointarrow"""
-
+    def highlightXPoints(self, points, zoom=False) -> None:
+        """Move plot to see selected X position and show pointarrow."""
         # check points
         if not points:
             return
@@ -2207,9 +2161,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def ensureVisible(self, points, zoom=False):
-        """Move plot to see selected X position"""
-
+    def ensureVisible(self, points, zoom=False) -> None:
+        """Move plot to see selected X position."""
         # check points
         if not points:
             return
@@ -2262,8 +2215,7 @@ class canvas(wx.Window):
     # ----
 
     def makeAxisTicks(self, lower, upper):
-        """Count axis ticks"""
-
+        """Count axis ticks."""
         # calculate major ticks
         ideal = (upper - lower) / 7.0
         log = numpy.log10(ideal)
@@ -2318,9 +2270,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def escMouseEvents(self):
+    def escMouseEvents(self) -> None:
         """Escape any mouse events function."""
-
         # clear zoombox
         if self.mouseEvent == "zoom":
             self.drawZoomBox()
@@ -2353,9 +2304,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def shiftAxis(self, axis):
-        """Shift plot while dragging"""
-
+    def shiftAxis(self, axis) -> None:
+        """Shift plot while dragging."""
         # skip y shift symmetric
         if axis == "y" and self.properties["ySymmetry"]:
             return
@@ -2392,9 +2342,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def scaleAxis(self, axis):
-        """Scale plot while dragging"""
-
+    def scaleAxis(self, axis) -> None:
+        """Scale plot while dragging."""
         # get coordination
         minX, maxX = self.getCurrentXRange()
         minY, maxY = self.getCurrentYRange()
@@ -2437,9 +2386,8 @@ class canvas(wx.Window):
 
     # ----
 
-    def rememberView(self, xAxis=None, yAxis=None):
+    def rememberView(self, xAxis=None, yAxis=None) -> None:
         """Remember current zoom."""
-
         # get axis
         if xAxis is None:
             xAxis = self.getCurrentXRange()
@@ -2460,8 +2408,7 @@ class canvas(wx.Window):
     # ----
 
     def positionUserToScreen(self, userPos):
-        """Convert user position to screen coordinates"""
-
+        """Convert user position to screen coordinates."""
         userPos = numpy.array(userPos)
         x, y = userPos * self.pointScale + self.pointShift
         return x, y
@@ -2469,8 +2416,7 @@ class canvas(wx.Window):
     # ----
 
     def positionScreenToUser(self, screenPos):
-        """Convert screen position to user coordinates"""
-
+        """Convert screen position to user coordinates."""
         screenPos = numpy.array(screenPos)
         x, y = (screenPos - self.pointShift) / self.pointScale
         return x, y
@@ -2478,8 +2424,7 @@ class canvas(wx.Window):
     # ----
 
     def pointToClientCoord(self, corner1, corner2):
-        """Convert user coords to client screen coords x,y,width,height"""
-
+        """Convert user coords to client screen coords x,y,width,height."""
         c1 = numpy.array(corner1)
         c2 = numpy.array(corner2)
 
@@ -2498,10 +2443,10 @@ class canvas(wx.Window):
     # ----
 
 
-class printout(wx.Printout):
+class Printout(wx.Printout):
     """Controls how the plot is made in printing and previewing."""
 
-    def __init__(self, graph, filterSize, title="mMass Spectrum"):
+    def __init__(self, graph, filterSize, title="mMass Spectrum") -> None:
         wx.Printout.__init__(self, title)
         self.graph = graph
         self.filterSize = filterSize
@@ -2519,9 +2464,8 @@ class printout(wx.Printout):
 
     # ----
 
-    def OnPrintPage(self, page):
+    def OnPrintPage(self, _page) -> bool:
         """Get and format data to print."""
-
         # get DC
         dc = self.GetDC()
         dcSize = dc.GetSize()
@@ -2581,8 +2525,7 @@ class printout(wx.Printout):
 
 
 def _scaleFont(font, scale):
-    """Scale font for printing"""
-
+    """Scale font for printing."""
     # check scale
     if scale == 1:
         return font

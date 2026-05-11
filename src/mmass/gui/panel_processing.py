@@ -25,19 +25,17 @@ import wx
 
 from mmass import mspy
 
-from . import config, doc, images, libs, mwx
-
 # load modules
-from .ids import *
+from . import config, doc, ids, images, libs, mwx
 
 # FLOATING PANEL WITH PROCESSING TOOLS
 # ------------------------------------
 
 
-class panelProcessing(wx.Frame):
+class PanelProcessing(wx.Frame):
     """Data processing tools."""
 
-    def __init__(self, parent, tool="peakpicking"):
+    def __init__(self, parent, tool="peakpicking") -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -69,9 +67,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -118,16 +115,15 @@ class panelProcessing(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make tools
         self.math_butt = wx.BitmapButton(
             panel,
-            ID_processingMath,
+            ids.ID_processingMath,
             images.lib["processingMathOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -137,7 +133,7 @@ class panelProcessing(wx.Frame):
 
         self.crop_butt = wx.BitmapButton(
             panel,
-            ID_processingCrop,
+            ids.ID_processingCrop,
             images.lib["processingCropOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -147,7 +143,7 @@ class panelProcessing(wx.Frame):
 
         self.baseline_butt = wx.BitmapButton(
             panel,
-            ID_processingBaseline,
+            ids.ID_processingBaseline,
             images.lib["processingBaselineOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -157,7 +153,7 @@ class panelProcessing(wx.Frame):
 
         self.smoothing_butt = wx.BitmapButton(
             panel,
-            ID_processingSmoothing,
+            ids.ID_processingSmoothing,
             images.lib["processingSmoothingOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -167,7 +163,7 @@ class panelProcessing(wx.Frame):
 
         self.peakpicking_butt = wx.BitmapButton(
             panel,
-            ID_processingPeakpicking,
+            ids.ID_processingPeakpicking,
             images.lib["processingPeakpickingOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -177,7 +173,7 @@ class panelProcessing(wx.Frame):
 
         self.deisotoping_butt = wx.BitmapButton(
             panel,
-            ID_processingDeisotoping,
+            ids.ID_processingDeisotoping,
             images.lib["processingDeisotopingOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -187,7 +183,7 @@ class panelProcessing(wx.Frame):
 
         self.deconvolution_butt = wx.BitmapButton(
             panel,
-            ID_processingDeconvolution,
+            ids.ID_processingDeconvolution,
             images.lib["processingDeconvolutionOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -197,7 +193,7 @@ class panelProcessing(wx.Frame):
 
         self.batch_butt = wx.BitmapButton(
             panel,
-            ID_processingBatch,
+            ids.ID_processingBatch,
             images.lib["processingBatchOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -289,7 +285,6 @@ class panelProcessing(wx.Frame):
 
     def makeMathPanel(self):
         """Make controls for math operations."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -314,7 +309,7 @@ class panelProcessing(wx.Frame):
         self.mathOperationMultiply_radio = wx.RadioButton(panel, -1, "Multiply A * ")
 
         self.mathMultiply_value = wx.TextCtrl(
-            panel, -1, "1", size=(80, -1), validator=mwx.validator("floatPos")
+            panel, -1, "1", size=(80, -1), validator=mwx.Validator("floatPos")
         )
         self.mathMultiply_value.Disable()
 
@@ -390,7 +385,6 @@ class panelProcessing(wx.Frame):
 
     def makeCropPanel(self):
         """Make controls for crop."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -400,7 +394,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["crop"]["lowMass"]),
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         cropLowMassUnits_label = wx.StaticText(panel, -1, "m/z")
 
@@ -410,7 +404,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["crop"]["highMass"]),
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         cropHighMassUnits_label = wx.StaticText(panel, -1, "m/z")
 
@@ -440,7 +434,6 @@ class panelProcessing(wx.Frame):
 
     def makeBaselinePanel(self):
         """Make controls for baseline subtraction."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -496,7 +489,6 @@ class panelProcessing(wx.Frame):
 
     def makeSmoothingPanel(self):
         """Make controls for smoothing."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -520,7 +512,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["smoothing"]["windowSize"]),
             size=(90, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         smoothingWindowUnits_label = wx.StaticText(panel, -1, "m/z")
         self.smoothingWindow_value.Bind(wx.EVT_TEXT, self.onSmoothingChanged)
@@ -573,12 +565,11 @@ class panelProcessing(wx.Frame):
 
     def makePeakpickingPanel(self):
         """Make controls for peak picking."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
         peakpickingSNThreshold_label = wx.StaticText(panel, -1, "S/N threshold:")
-        self.peakpickingSNThreshold_value = mwx.scrollTextCtrl(
+        self.peakpickingSNThreshold_value = mwx.ScrollTextCtrl(
             panel,
             -1,
             str(config.processing["peakpicking"]["snThreshold"]),
@@ -586,7 +577,7 @@ class panelProcessing(wx.Frame):
             limits=(1, 100),
             digits=1,
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.peakpickingSNThreshold_value.Bind(wx.EVT_TEXT, self.onPeakpickingChanged)
 
@@ -598,7 +589,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["peakpicking"]["absIntThreshold"]),
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.peakpickingAbsIntThreshold_value.Bind(
             wx.EVT_TEXT, self.onPeakpickingChanged
@@ -607,7 +598,7 @@ class panelProcessing(wx.Frame):
         peakpickingRelIntThreshold_label = wx.StaticText(
             panel, -1, "Rel. intensity threshold:"
         )
-        self.peakpickingRelIntThreshold_value = mwx.scrollTextCtrl(
+        self.peakpickingRelIntThreshold_value = mwx.ScrollTextCtrl(
             panel,
             -1,
             str(config.processing["peakpicking"]["relIntThreshold"] * 100),
@@ -615,7 +606,7 @@ class panelProcessing(wx.Frame):
             limits=(0.01, 100),
             digits=3,
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.peakpickingRelIntThreshold_value.Bind(
             wx.EVT_TEXT, self.onPeakpickingChanged
@@ -739,7 +730,6 @@ class panelProcessing(wx.Frame):
 
     def makeDeisotopingPanel(self):
         """Make controls for charge calculations and deisotoping."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -749,7 +739,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["deisotoping"]["maxCharge"]),
             size=(70, -1),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
 
         deisotopingMassTolerance_label = wx.StaticText(
@@ -760,7 +750,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["deisotoping"]["massTolerance"]),
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         deisotopingMassToleranceUnits_label = wx.StaticText(panel, -1, "m/z")
 
@@ -772,7 +762,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["deisotoping"]["intTolerance"] * 100),
             size=(70, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         deisotopingIntToleranceUnits_label = wx.StaticText(panel, -1, "%")
 
@@ -782,7 +772,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["deisotoping"]["isotopeShift"]),
             size=(70, -1),
-            validator=mwx.validator("float"),
+            validator=mwx.Validator("float"),
         )
         self.deisotopingIsotopeShift_value.Bind(wx.EVT_TEXT, self.getParams)
 
@@ -930,7 +920,6 @@ class panelProcessing(wx.Frame):
 
     def makeDeconvolutionPanel(self):
         """Make controls for deconvolution."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -951,7 +940,7 @@ class panelProcessing(wx.Frame):
             -1,
             str(config.processing["deconvolution"]["groupWindow"]),
             size=(90, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         deconvolutionGroupWindowUnits_label = wx.StaticText(panel, -1, "m/z")
 
@@ -1010,7 +999,6 @@ class panelProcessing(wx.Frame):
 
     def makeBatchPanel(self):
         """Make controls for batch processing."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -1054,11 +1042,10 @@ class panelProcessing(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -1083,11 +1070,10 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def makeDocumentsList(self, panel):
+    def makeDocumentsList(self, panel) -> None:
         """Make list for documents batch."""
-
         # init list
-        self.batchDocumentsList = mwx.sortListCtrl(
+        self.batchDocumentsList = mwx.SortListCtrl(
             panel, -1, size=(251, 100), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.batchDocumentsList.SetFont(wx.SMALL_FONT)
@@ -1099,9 +1085,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Close panel."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -1112,9 +1097,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -1122,21 +1106,21 @@ class panelProcessing(wx.Frame):
 
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_processingMath:
+            if evt.GetId() == ids.ID_processingMath:
                 tool = "math"
-            elif evt.GetId() == ID_processingCrop:
+            elif evt.GetId() == ids.ID_processingCrop:
                 tool = "crop"
-            elif evt.GetId() == ID_processingBaseline:
+            elif evt.GetId() == ids.ID_processingBaseline:
                 tool = "baseline"
-            elif evt.GetId() == ID_processingSmoothing:
+            elif evt.GetId() == ids.ID_processingSmoothing:
                 tool = "smoothing"
-            elif evt.GetId() == ID_processingPeakpicking:
+            elif evt.GetId() == ids.ID_processingPeakpicking:
                 tool = "peakpicking"
-            elif evt.GetId() == ID_processingDeisotoping:
+            elif evt.GetId() == ids.ID_processingDeisotoping:
                 tool = "deisotoping"
-            elif evt.GetId() == ID_processingDeconvolution:
+            elif evt.GetId() == ids.ID_processingDeconvolution:
                 tool = "deconvolution"
-            elif evt.GetId() == ID_processingBatch:
+            elif evt.GetId() == ids.ID_processingBatch:
                 tool = "batch"
 
         # set current tool
@@ -1235,9 +1219,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -1258,9 +1241,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -1268,9 +1250,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onPresets(self, evt):
+    def onPresets(self, evt) -> None:
         """Show presets."""
-
         # get presets
         presets = list(libs.presets["processing"].keys())
         presets.sort()
@@ -1291,9 +1272,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onPresetsSelected(self, evt):
+    def onPresetsSelected(self, evt) -> None:
         """Load selected presets."""
-
         # get presets
         item = self.presets_popup.FindItemById(evt.GetId())
         presets = libs.presets["processing"][item.GetText()]
@@ -1414,16 +1394,15 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onPresetsSave(self, evt):
+    def onPresetsSave(self, evt) -> None:
         """Save current params as presets."""
-
         # check params
         if not self.getParams():
             wx.Bell()
             return
 
         # get presets name
-        dlg = dlgPresetsName(self)
+        dlg = DlgPresetsName(self)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -1437,9 +1416,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onMathChanged(self, evt=None):
+    def onMathChanged(self, evt=None) -> None:
         """Disable / enable related items in math panel."""
-
         # disable / enable items
         if (
             self.mathOperationAverageAll_radio.GetValue()
@@ -1468,9 +1446,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onBaselineChanged(self, evt=None):
+    def onBaselineChanged(self, evt=None) -> None:
         """Show baseline while params are changing."""
-
         # check tool
         if self.currentTool != "baseline":
             return
@@ -1500,9 +1477,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onSmoothingChanged(self, evt=None):
+    def onSmoothingChanged(self, evt=None) -> None:
         """Clear smoothing preview while params changed."""
-
         # check tool
         if self.currentTool != "smoothing":
             return
@@ -1512,9 +1488,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onPeakpickingChanged(self, evt=None):
+    def onPeakpickingChanged(self, evt=None) -> None:
         """Show intensity threshold while params are changing."""
-
         # update batch processing options
         self.onBatchChanged()
 
@@ -1539,9 +1514,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onBatchChanged(self, evt=None):
+    def onBatchChanged(self, evt=None) -> None:
         """Check math operation, double baseline correction, smoothing and deisotoping."""
-
         # enable tools
         self.batchMath_check.Enable(True)
         self.batchBaseline_check.Enable(True)
@@ -1573,9 +1547,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onPreview(self, evt=None):
+    def onPreview(self, evt=None) -> None:
         """Recalculate data and show preview."""
-
         # check processing
         if self.processing:
             return
@@ -1617,9 +1590,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def onApply(self, evt=None):
+    def onApply(self, evt=None) -> None:
         """Apply processing to the data."""
-
         # check processing
         if self.processing:
             return
@@ -1719,9 +1691,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set document
         self.currentDocument = document
         self.updateCurrentDocument()
@@ -1735,9 +1706,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def getParams(self, evt=None):
+    def getParams(self, evt=None) -> bool:
         """Get all params from dialog."""
-
         # try to get values
         try:
             # math operations
@@ -1908,7 +1878,7 @@ class panelProcessing(wx.Frame):
             )
 
         # ring error bell if error
-        except:
+        except Exception:
             wx.Bell()
             return False
 
@@ -1922,9 +1892,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def updateCurrentDocument(self):
+    def updateCurrentDocument(self) -> None:
         """Show selected document title as Spectrum A."""
-
         # clear choice
         self.mathSpectrumA_choice.Clear()
 
@@ -1937,16 +1906,15 @@ class panelProcessing(wx.Frame):
         # show selected document
         for x, document in enumerate(self.parent.documents):
             if document is self.currentDocument:
-                title = "#%d: %s" % (x + 1, document.title)
+                title = f"#{x + 1}: {document.title}"
                 self.mathSpectrumA_choice.Append(title)
                 self.mathSpectrumA_choice.Select(0)
                 return
 
     # ----
 
-    def updateAvailableDocuments(self):
+    def updateAvailableDocuments(self) -> None:
         """Update list of documents in math and batch panels."""
-
         # check processing
         if self.processing:
             return
@@ -1956,32 +1924,29 @@ class panelProcessing(wx.Frame):
         self.mathSpectrumB_choice.Append("None")
 
         for x, document in enumerate(self.parent.documents):
-            title = "#%d: %s" % (x + 1, document.title)
+            title = f"#{x + 1}: {document.title}"
             self.mathSpectrumB_choice.Append(title)
 
         self.mathSpectrumB_choice.Select(0)
 
         # update available documents in batch panel
         documentsMap = []
-        for x, document in enumerate(self.parent.documents):
+        for document in self.parent.documents:
             documentsMap.append([document.title, document.colour])
 
         self.batchDocumentsList.DeleteAllItems()
         self.batchDocumentsList.setDataMap(documentsMap)
 
-        row = 0
-        for title, colour in documentsMap:
+        for row, (title, colour) in enumerate(documentsMap):
             self.batchDocumentsList.InsertItem(row, title)
             self.batchDocumentsList.SetItemData(row, row)
             self.batchDocumentsList.SetItemTextColour(row, colour)
-            row += 1
         self.batchDocumentsList.updateItemsBackground()
 
     # ----
 
-    def runPreviewMath(self):
+    def runPreviewMath(self) -> None:
         """Preview operations results."""
-
         # run task
         try:
             # get spectrum A
@@ -2055,14 +2020,13 @@ class panelProcessing(wx.Frame):
                         )
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def runPreviewBaseline(self):
+    def runPreviewBaseline(self) -> None:
         """Preview smoothing results."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.hasprofile():
             wx.Bell()
@@ -2082,14 +2046,13 @@ class panelProcessing(wx.Frame):
             )
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def runPreviewSmoothing(self):
+    def runPreviewSmoothing(self) -> None:
         """Preview smoothing results."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.hasprofile():
             wx.Bell()
@@ -2106,14 +2069,13 @@ class panelProcessing(wx.Frame):
             )
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def runApplySwap(self, batch=False):
+    def runApplySwap(self, batch=False) -> None:
         """Crop data."""
-
         # check current spectrum
         if not self.currentDocument:
             wx.Bell()
@@ -2134,16 +2096,15 @@ class panelProcessing(wx.Frame):
                 del sequence.matches[:]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyMath(self, batch=False):
+    def runApplyMath(self, batch=False) -> None:
         """Math operations."""
-
         # run task
         try:
             # apply math to multiple documents
@@ -2153,7 +2114,7 @@ class panelProcessing(wx.Frame):
                 "overlayall",
             ):
                 # make document
-                docData = doc.document()
+                docData = doc.Document()
                 docData.format = "mSD"
                 docData.path = ""
                 docData.dirty = True
@@ -2247,16 +2208,15 @@ class panelProcessing(wx.Frame):
                     del sequence.matches[:]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyCrop(self, batch=False):
+    def runApplyCrop(self, batch=False) -> None:
         """Crop data."""
-
         # check current spectrum
         if not self.currentDocument:
             wx.Bell()
@@ -2300,16 +2260,15 @@ class panelProcessing(wx.Frame):
                     del sequence.matches[x]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyBaseline(self, batch=False):
+    def runApplyBaseline(self, batch=False) -> None:
         """Subtract baseline."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.hasprofile():
             wx.Bell()
@@ -2333,16 +2292,15 @@ class panelProcessing(wx.Frame):
                 del sequence.matches[:]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplySmoothing(self, batch=False):
+    def runApplySmoothing(self, batch=False) -> None:
         """Smooth data."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.hasprofile():
             wx.Bell()
@@ -2367,16 +2325,15 @@ class panelProcessing(wx.Frame):
                 del sequence.matches[:]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyPeakpicking(self, batch=False):
+    def runApplyPeakpicking(self, batch=False) -> None:
         """Find peaks."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.hasprofile():
             wx.Bell()
@@ -2440,16 +2397,15 @@ class panelProcessing(wx.Frame):
                 del sequence.matches[:]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyDeisotoping(self, batch=False):
+    def runApplyDeisotoping(self, batch=False) -> None:
         """Calculate charges for peaks."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.haspeaks():
             wx.Bell()
@@ -2483,16 +2439,15 @@ class panelProcessing(wx.Frame):
                 del sequence.matches[:]
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyDeconvolution(self, batch=False):
+    def runApplyDeconvolution(self, batch=False) -> None:
         """Recalculate peak list to singly-charged and make new document."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.haspeaks():
             wx.Bell()
@@ -2529,16 +2484,15 @@ class panelProcessing(wx.Frame):
             self.parent.onDocumentNew(document=docData, select=False)
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             if batch:
                 mspy.stop()
             return
 
     # ----
 
-    def runApplyBatch(self):
+    def runApplyBatch(self) -> None:
         """Batch process selected documents."""
-
         self.batchChanged = []
         current = self.currentDocument
 
@@ -2595,15 +2549,14 @@ class panelProcessing(wx.Frame):
             self.currentDocument = current
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentDocument = current
             return
 
     # ----
 
-    def checkIsotopeMassTolerance(self):
+    def checkIsotopeMassTolerance(self) -> bool:
         """Check isotope mass tolerance for cuurent max charge."""
-
         # get max tolerance
         z = float(abs(config.processing["deisotoping"]["maxCharge"]))
         if z == 1:
@@ -2616,7 +2569,7 @@ class panelProcessing(wx.Frame):
         if config.processing["deisotoping"]["massTolerance"] >= maxTol:
             wx.Bell()
             message = f"For the specified charge your isotope mass tolerance must be\nlower than {maxTol:.4f}. Please correct the parameter in deisotoping panel."
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self, title="Isotope mass tolerance is too high.", message=message
             )
             dlg.ShowModal()
@@ -2627,9 +2580,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def checkChargedPeaks(self):
+    def checkChargedPeaks(self) -> bool:
         """Check if at least one peak in current peaklist has charge."""
-
         # check charge
         for peak in self.currentDocument.spectrum.peaklist:
             if peak.charge:
@@ -2638,7 +2590,7 @@ class panelProcessing(wx.Frame):
         # show message
         wx.Bell()
         message = "Only the peaks with specified charge can be deconvoluted.\nPlease use deisotoping tool or peak editor to set peak charges\nprior to deconvolution."
-        dlg = mwx.dlgMessage(
+        dlg = mwx.DlgMessage(
             self, title="There are no charged peaks in your peak list.", message=message
         )
         dlg.ShowModal()
@@ -2650,7 +2602,6 @@ class panelProcessing(wx.Frame):
 
     def makeThresholdLine(self):
         """Make peakpicking threshold line."""
-
         # check current spectrum
         if not self.currentDocument or not self.currentDocument.spectrum.hasprofile():
             return []
@@ -2688,9 +2639,8 @@ class panelProcessing(wx.Frame):
 
     # ----
 
-    def clearPreview(self):
+    def clearPreview(self) -> None:
         """Clear tmp preview spectrum."""
-
         if self.previewData is not None:
             self.previewData = None
             self.parent.updateTmpSpectrum(None)
@@ -2698,10 +2648,10 @@ class panelProcessing(wx.Frame):
     # ----
 
 
-class dlgPresetsName(wx.Dialog):
+class DlgPresetsName(wx.Dialog):
     """Set presets name."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, -1, "Method Name", style=wx.DEFAULT_DIALOG_STYLE
@@ -2723,7 +2673,6 @@ class dlgPresetsName(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
 
         # make elements
@@ -2756,9 +2705,8 @@ class dlgPresetsName(wx.Dialog):
 
     # ----
 
-    def onOK(self, evt):
+    def onOK(self, evt) -> None:
         """Get name."""
-
         self.name = self.name_value.GetValue()
         if self.name:
             self.EndModal(wx.ID_OK)

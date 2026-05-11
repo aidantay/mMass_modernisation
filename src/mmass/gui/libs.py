@@ -19,9 +19,9 @@
 import contextlib
 import copy
 import importlib.resources
-import os.path
 import shutil
 import xml.dom.minidom
+from pathlib import Path
 
 from mmass import mspy
 
@@ -39,12 +39,12 @@ for item in (
     "compounds.xml",
     "mascot.xml",
 ):
-    if not os.path.exists(os.path.join(config.confdir, item)):
+    if not (config.confdir / item).exists():
         try:
             source = importlib.resources.files("mmass").joinpath("configs", item)
             with importlib.resources.as_file(source) as source_path:
-                shutil.copyfile(source_path, os.path.join(config.confdir, item))
-        except:
+                shutil.copyfile(source_path, config.confdir / item)
+        except Exception:
             pass
 
 
@@ -52,21 +52,19 @@ for item in (
 # --------------------------
 
 try:
-    mspy.loadMonomers(os.path.join(config.confdir, "monomers.xml"), clear=False)
-except:
-    mspy.saveMonomers(os.path.join(config.confdir, "monomers.xml"))
+    mspy.loadMonomers(config.confdir / "monomers.xml", clear=False)
+except Exception:
+    mspy.saveMonomers(config.confdir / "monomers.xml")
 
 try:
-    mspy.loadModifications(
-        os.path.join(config.confdir, "modifications.xml"), clear=False
-    )
-except:
-    mspy.saveModifications(os.path.join(config.confdir, "modifications.xml"))
+    mspy.loadModifications(config.confdir / "modifications.xml", clear=False)
+except Exception:
+    mspy.saveModifications(config.confdir / "modifications.xml")
 
 try:
-    mspy.loadEnzymes(os.path.join(config.confdir, "enzymes.xml"), clear=False)
-except:
-    mspy.saveEnzymes(os.path.join(config.confdir, "enzymes.xml"))
+    mspy.loadEnzymes(config.confdir / "enzymes.xml", clear=False)
+except Exception:
+    mspy.saveEnzymes(config.confdir / "enzymes.xml")
 
 
 # INIT DEFAULT VALUES
@@ -583,10 +581,11 @@ mascot = {
 
 
 def loadPresets(
-    path=os.path.join(config.confdir, "presets.xml"), clear=True, replace=True
-):
+    path: Path | str = config.confdir / "presets.xml",
+    clear: bool = True,
+    replace: bool = True,
+) -> None:
     """Parse processing presets XML and get data."""
-
     container = {}
 
     # parse XML
@@ -707,9 +706,10 @@ def loadPresets(
 # ----
 
 
-def loadReferences(path=os.path.join(config.confdir, "references.xml"), clear=True):
+def loadReferences(
+    path: Path | str = config.confdir / "references.xml", clear: bool = True
+) -> None:
     """Parse calibration references XML and get data."""
-
     container = {}
 
     # parse XML
@@ -739,9 +739,10 @@ def loadReferences(path=os.path.join(config.confdir, "references.xml"), clear=Tr
 # ----
 
 
-def loadCompounds(path=os.path.join(config.confdir, "compounds.xml"), clear=True):
+def loadCompounds(
+    path: Path | str = config.confdir / "compounds.xml", clear: bool = True
+) -> None:
     """Parse compounds XML and get data."""
-
     container = {}
 
     # parse XML
@@ -759,10 +760,10 @@ def loadCompounds(path=os.path.join(config.confdir, "compounds.xml"), clear=True
                 for compoundTag in compoundTags:
                     try:
                         name = compoundTag.getAttribute("name")
-                        compound = mspy.compound(compoundTag.getAttribute("formula"))
+                        compound = mspy.Compound(compoundTag.getAttribute("formula"))
                         compound.description = _getNodeText(compoundTag)
                         container[groupName][name] = compound
-                    except:
+                    except Exception:
                         pass
 
     # update current lib
@@ -776,10 +777,10 @@ def loadCompounds(path=os.path.join(config.confdir, "compounds.xml"), clear=True
 
 
 def loadMascot(
-    path=os.path.join(config.confdir, "mascot.xml"), clear=True, replace=True
-):
+    path: Path | str = config.confdir / "mascot.xml",
+    clear: bool = True,
+) -> None:
     """Parse mascot servers XML and get data."""
-
     container = {}
 
     # parse XML
@@ -811,9 +812,8 @@ def loadMascot(
 # ----
 
 
-def _getParams(sectionTag, section):
+def _getParams(sectionTag, section) -> None:
     """Get params from nodes."""
-
     if sectionTag:
         paramTags = sectionTag.getElementsByTagName("param")
         if paramTags and paramTags:
@@ -824,9 +824,15 @@ def _getParams(sectionTag, section):
                 if name in section:
                     if valueType == "unicode":
                         valueType = "str"
-                    if valueType in ("str", "float", "int"):
+                    if valueType == "str":
                         with contextlib.suppress(BaseException):
-                            section[name] = eval(valueType + "(value)")
+                            section[name] = str(value)
+                    elif valueType == "float":
+                        with contextlib.suppress(BaseException):
+                            section[name] = float(value)
+                    elif valueType == "int":
+                        with contextlib.suppress(BaseException):
+                            section[name] = int(value)
 
 
 # ----
@@ -834,7 +840,6 @@ def _getParams(sectionTag, section):
 
 def _getNodeText(node):
     """Get text from node list."""
-
     buff = ""
     for node in node.childNodes:
         if node.nodeType == node.TEXT_NODE:
@@ -850,9 +855,8 @@ def _getNodeText(node):
 # --------------
 
 
-def savePresets(path=os.path.join(config.confdir, "presets.xml")):
+def savePresets(path: Path | str = config.confdir / "presets.xml") -> bool:
     """Make and save presets XML."""
-
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mMassPresets version="1.0">\n\n'
 
@@ -874,20 +878,11 @@ def savePresets(path=os.path.join(config.confdir, "presets.xml")):
         item = presets["processing"][name]
         buff += f'    <presets name="{_escape(name)}">\n'
         buff += "      <crop>\n"
-        buff += (
-            '        <param name="lowMass" value="%d" type="int" />\n'
-            % (item["crop"]["lowMass"])
-        )
-        buff += (
-            '        <param name="highMass" value="%d" type="int" />\n'
-            % (item["crop"]["highMass"])
-        )
+        buff += f'        <param name="lowMass" value="{item["crop"]["lowMass"]}" type="int" />\n'
+        buff += f'        <param name="highMass" value="{item["crop"]["highMass"]}" type="int" />\n'
         buff += "      </crop>\n"
         buff += "      <baseline>\n"
-        buff += (
-            '        <param name="precision" value="%d" type="int" />\n'
-            % (item["baseline"]["precision"])
-        )
+        buff += f'        <param name="precision" value="{item["baseline"]["precision"]}" type="int" />\n'
         buff += '        <param name="offset" value="{:f}" type="float" />\n'.format(
             item["baseline"]["offset"]
         )
@@ -901,10 +896,7 @@ def savePresets(path=os.path.join(config.confdir, "presets.xml")):
                 item["smoothing"]["windowSize"]
             )
         )
-        buff += (
-            '        <param name="cycles" value="%d" type="int" />\n'
-            % (item["smoothing"]["cycles"])
-        )
+        buff += f'        <param name="cycles" value="{item["smoothing"]["cycles"]}" type="int" />\n'
         buff += "      </smoothing>\n"
         buff += "      <peakpicking>\n"
         buff += (
@@ -923,24 +915,13 @@ def savePresets(path=os.path.join(config.confdir, "presets.xml")):
                 item["peakpicking"]["pickingHeight"]
             )
         )
-        buff += '        <param name="baseline" value="%d" type="int" />\n' % (
-            bool(item["peakpicking"]["baseline"])
-        )
-        buff += '        <param name="smoothing" value="%d" type="int" />\n' % (
-            bool(item["peakpicking"]["smoothing"])
-        )
-        buff += '        <param name="deisotoping" value="%d" type="int" />\n' % (
-            bool(item["peakpicking"]["deisotoping"])
-        )
-        buff += '        <param name="removeShoulders" value="%d" type="int" />\n' % (
-            bool(item["peakpicking"]["removeShoulders"])
-        )
+        buff += f'        <param name="baseline" value="{bool(item["peakpicking"]["baseline"]):d}" type="int" />\n'
+        buff += f'        <param name="smoothing" value="{bool(item["peakpicking"]["smoothing"]):d}" type="int" />\n'
+        buff += f'        <param name="deisotoping" value="{bool(item["peakpicking"]["deisotoping"]):d}" type="int" />\n'
+        buff += f'        <param name="removeShoulders" value="{bool(item["peakpicking"]["removeShoulders"]):d}" type="int" />\n'
         buff += "      </peakpicking>\n"
         buff += "      <deisotoping>\n"
-        buff += (
-            '        <param name="maxCharge" value="%d" type="int" />\n'
-            % (item["deisotoping"]["maxCharge"])
-        )
+        buff += f'        <param name="maxCharge" value="{item["deisotoping"]["maxCharge"]}" type="int" />\n'
         buff += (
             '        <param name="massTolerance" value="{:f}" type="float" />\n'.format(
                 item["deisotoping"]["massTolerance"]
@@ -956,12 +937,8 @@ def savePresets(path=os.path.join(config.confdir, "presets.xml")):
                 item["deisotoping"]["isotopeShift"]
             )
         )
-        buff += '        <param name="removeIsotopes" value="%d" type="int" />\n' % (
-            bool(item["deisotoping"]["removeIsotopes"])
-        )
-        buff += '        <param name="removeUnknown" value="%d" type="int" />\n' % (
-            bool(item["deisotoping"]["removeUnknown"])
-        )
+        buff += f'        <param name="removeIsotopes" value="{bool(item["deisotoping"]["removeIsotopes"]):d}" type="int" />\n'
+        buff += f'        <param name="removeUnknown" value="{bool(item["deisotoping"]["removeUnknown"]):d}" type="int" />\n'
         buff += '        <param name="labelEnvelope" value="{}" type="str" />\n'.format(
             item["deisotoping"]["labelEnvelope"]
         )
@@ -970,52 +947,27 @@ def savePresets(path=os.path.join(config.confdir, "presets.xml")):
                 item["deisotoping"]["envelopeIntensity"]
             )
         )
-        buff += '        <param name="setAsMonoisotopic" value="%d" type="int" />\n' % (
-            bool(item["deisotoping"]["setAsMonoisotopic"])
-        )
+        buff += f'        <param name="setAsMonoisotopic" value="{bool(item["deisotoping"]["setAsMonoisotopic"]):d}" type="int" />\n'
         buff += "      </deisotoping>\n"
         buff += "      <deconvolution>\n"
-        buff += (
-            '        <param name="massType" value="%d" type="int" />\n'
-            % (item["deconvolution"]["massType"])
-        )
+        buff += f'        <param name="massType" value="{item["deconvolution"]["massType"]}" type="int" />\n'
         buff += (
             '        <param name="groupWindow" value="{:f}" type="float" />\n'.format(
                 item["deconvolution"]["groupWindow"]
             )
         )
-        buff += '        <param name="groupPeaks" value="%d" type="int" />\n' % (
-            bool(item["deconvolution"]["groupPeaks"])
-        )
-        buff += '        <param name="forceGroupWindow" value="%d" type="int" />\n' % (
-            bool(item["deconvolution"]["forceGroupWindow"])
-        )
+        buff += f'        <param name="groupPeaks" value="{bool(item["deconvolution"]["groupPeaks"]):d}" type="int" />\n'
+        buff += f'        <param name="forceGroupWindow" value="{bool(item["deconvolution"]["forceGroupWindow"]):d}" type="int" />\n'
         buff += "      </deconvolution>\n"
         buff += "      <batch>\n"
-        buff += '        <param name="swap" value="%d" type="int" />\n' % (
-            bool(item["batch"]["swap"])
-        )
-        buff += '        <param name="math" value="%d" type="int" />\n' % (
-            bool(item["batch"]["math"])
-        )
-        buff += '        <param name="crop" value="%d" type="int" />\n' % (
-            bool(item["batch"]["crop"])
-        )
-        buff += '        <param name="baseline" value="%d" type="int" />\n' % (
-            bool(item["batch"]["baseline"])
-        )
-        buff += '        <param name="smoothing" value="%d" type="int" />\n' % (
-            bool(item["batch"]["smoothing"])
-        )
-        buff += '        <param name="peakpicking" value="%d" type="int" />\n' % (
-            bool(item["batch"]["peakpicking"])
-        )
-        buff += '        <param name="deisotoping" value="%d" type="int" />\n' % (
-            bool(item["batch"]["deisotoping"])
-        )
-        buff += '        <param name="deconvolution" value="%d" type="int" />\n' % (
-            bool(item["batch"]["deconvolution"])
-        )
+        buff += f'        <param name="swap" value="{bool(item["batch"]["swap"]):d}" type="int" />\n'
+        buff += f'        <param name="math" value="{bool(item["batch"]["math"]):d}" type="int" />\n'
+        buff += f'        <param name="crop" value="{bool(item["batch"]["crop"]):d}" type="int" />\n'
+        buff += f'        <param name="baseline" value="{bool(item["batch"]["baseline"]):d}" type="int" />\n'
+        buff += f'        <param name="smoothing" value="{bool(item["batch"]["smoothing"]):d}" type="int" />\n'
+        buff += f'        <param name="peakpicking" value="{bool(item["batch"]["peakpicking"]):d}" type="int" />\n'
+        buff += f'        <param name="deisotoping" value="{bool(item["batch"]["deisotoping"]):d}" type="int" />\n'
+        buff += f'        <param name="deconvolution" value="{bool(item["batch"]["deconvolution"]):d}" type="int" />\n'
         buff += "      </batch>\n"
         buff += "    </presets>\n\n"
     buff += "  </processing>\n\n"
@@ -1042,20 +994,17 @@ def savePresets(path=os.path.join(config.confdir, "presets.xml")):
 
     # save config file
     try:
-        save = open(path, "w", encoding="utf-8")
-        save.write(buff)
-        save.close()
+        Path(path).write_text(buff, encoding="utf-8")
         return True
-    except:
+    except Exception:
         return False
 
 
 # ----
 
 
-def saveReferences(path=os.path.join(config.confdir, "references.xml")):
+def saveReferences(path: Path | str = config.confdir / "references.xml") -> bool:
     """Make and save calibration references XML."""
-
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mMassReferenceMasses version="1.0">\n\n'
 
@@ -1069,20 +1018,17 @@ def saveReferences(path=os.path.join(config.confdir, "references.xml")):
 
     # save config file
     try:
-        save = open(path, "w", encoding="utf-8")
-        save.write(buff)
-        save.close()
+        Path(path).write_text(buff, encoding="utf-8")
         return True
-    except:
+    except Exception:
         return False
 
 
 # ----
 
 
-def saveCompounds(path=os.path.join(config.confdir, "compounds.xml")):
+def saveCompounds(path: Path | str = config.confdir / "compounds.xml") -> bool:
     """Make and save compounds XML."""
-
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mMassCompounds version="1.0">\n\n'
 
@@ -1096,20 +1042,17 @@ def saveCompounds(path=os.path.join(config.confdir, "compounds.xml")):
 
     # save config file
     try:
-        save = open(path, "w", encoding="utf-8")
-        save.write(buff)
-        save.close()
+        Path(path).write_text(buff, encoding="utf-8")
         return True
-    except:
+    except Exception:
         return False
 
 
 # ----
 
 
-def saveMascot(path=os.path.join(config.confdir, "mascot.xml")):
+def saveMascot(path: Path | str = config.confdir / "mascot.xml") -> bool:
     """Make and save mascot servers XML."""
-
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mMassMascot version="1.0">\n\n'
 
@@ -1128,11 +1071,9 @@ def saveMascot(path=os.path.join(config.confdir, "mascot.xml")):
 
     # save config file
     try:
-        save = open(path, "w", encoding="utf-8")
-        save.write(buff)
-        save.close()
+        Path(path).write_text(buff, encoding="utf-8")
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -1141,7 +1082,6 @@ def saveMascot(path=os.path.join(config.confdir, "mascot.xml")):
 
 def _escape(text):
     """Clear special characters such as <> etc."""
-
     text = text.strip()
     search = ("&", '"', "'", "<", ">")
     replace = ("&amp;", "&quot;", "&apos;", "&lt;", "&gt;")
@@ -1159,20 +1099,20 @@ def _escape(text):
 
 try:
     loadPresets()
-except:
+except Exception:
     savePresets()
 
 try:
     loadReferences()
-except:
+except Exception:
     saveReferences()
 
 try:
     loadCompounds()
-except:
+except Exception:
     saveCompounds()
 
 try:
     loadMascot()
-except:
+except Exception:
     saveMascot()

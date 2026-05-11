@@ -18,20 +18,18 @@
 # load libs
 import wx
 
-from . import config, images, libs, mwx
-
 # load modules
-from .ids import *
-from .panel_match import panelMatch
+from . import config, ids, images, libs, mwx
+from .panel_match import PanelMatch
 
 # FLOATING PANEL WITH MASS FILTER TOOL
 # -------------------------------------
 
 
-class panelMassFilter(wx.Frame):
+class PanelMassFilter(wx.Frame):
     """Mass filter tool."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -55,9 +53,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -80,9 +77,8 @@ class panelMassFilter(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbarNoBorder"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -136,11 +132,10 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def makeReferencesList(self):
+    def makeReferencesList(self) -> None:
         """Make references list."""
-
         # init list
-        self.referencesList = mwx.sortListCtrl(
+        self.referencesList = mwx.SortListCtrl(
             self, -1, size=(581, 250), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.referencesList.SetFont(wx.SMALL_FONT)
@@ -166,9 +161,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
-
         # close match panel
         if self.matchPanel:
             self.matchPanel.Close()
@@ -178,9 +172,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Show selected mass in spectrum canvas."""
-
         # get mass
         mz = self.currentReferences[evt.GetData()][1]
 
@@ -189,9 +182,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onItemActivated(self, evt):
+    def onItemActivated(self, evt) -> None:
         """Discard selected item."""
-
         # get item
         index = evt.GetData()
         row = evt.GetIndex()
@@ -207,27 +199,26 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onListRMU(self, evt):
+    def onListRMU(self, evt) -> None:
         """Show filter pop-up menu on lists."""
-
         # popup menu
         menu = wx.Menu()
-        menu.Append(ID_listViewAll, "Show All", "", wx.ITEM_RADIO)
-        menu.Append(ID_listViewMatched, "Show Matched Only", "", wx.ITEM_RADIO)
-        menu.Append(ID_listViewUnmatched, "Show Unmatched Only", "", wx.ITEM_RADIO)
+        menu.Append(ids.ID_listViewAll, "Show All", "", wx.ITEM_RADIO)
+        menu.Append(ids.ID_listViewMatched, "Show Matched Only", "", wx.ITEM_RADIO)
+        menu.Append(ids.ID_listViewUnmatched, "Show Unmatched Only", "", wx.ITEM_RADIO)
 
         # check item
         if self._referencesFilter == 1:
-            menu.Check(ID_listViewMatched, True)
+            menu.Check(ids.ID_listViewMatched, True)
         elif self._referencesFilter == -1:
-            menu.Check(ID_listViewUnmatched, True)
+            menu.Check(ids.ID_listViewUnmatched, True)
         else:
-            menu.Check(ID_listViewAll, True)
+            menu.Check(ids.ID_listViewAll, True)
 
         # bind events
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewAll)
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewMatched)
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewUnmatched)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewAll)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewMatched)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewUnmatched)
 
         # show menu
         self.PopupMenu(menu)
@@ -236,13 +227,12 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onListFilter(self, evt):
+    def onListFilter(self, evt) -> None:
         """Apply selected view filter on current list."""
-
         # set filter
-        if evt.GetId() == ID_listViewMatched:
+        if evt.GetId() == ids.ID_listViewMatched:
             self._referencesFilter = 1
-        elif evt.GetId() == ID_listViewUnmatched:
+        elif evt.GetId() == ids.ID_listViewUnmatched:
             self._referencesFilter = -1
         else:
             self._referencesFilter = 0
@@ -252,9 +242,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onReferencesSelected(self, evt):
+    def onReferencesSelected(self, evt) -> None:
         """Update references list."""
-
         # clear previous data
         self.currentReferences = None
 
@@ -280,14 +269,13 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onMatch(self, evt=None):
+    def onMatch(self, evt=None) -> None:
         """Match data to current peaklist."""
-
         # init match panel
         match = True
         if not self.matchPanel:
             match = False
-            self.matchPanel = panelMatch(self, self.parent, "massfilter")
+            self.matchPanel = PanelMatch(self, self.parent, "massfilter")
             self.matchPanel.Centre()
             self.matchPanel.Show(True)
 
@@ -304,9 +292,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onAnnotate(self, evt):
+    def onAnnotate(self, evt) -> None:
         """Annotate matched peaks."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -334,9 +321,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def onRemove(self, evt=None):
+    def onRemove(self, evt=None) -> None:
         """Remove matched masses from current peaklist."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -363,9 +349,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set new document
         self.currentDocument = document
 
@@ -374,9 +359,8 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def updateReferencesList(self, scroll=False):
+    def updateReferencesList(self, scroll=False) -> None:
         """Update references list."""
-
         # clear previous data and set new
         self.referencesList.DeleteAllItems()
         self.referencesList.setDataMap(self.currentReferences)
@@ -442,17 +426,15 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def updateMatches(self, resultList=None):
+    def updateMatches(self, resultList=None) -> None:
         """Update references list."""
-
         # update references list
         self.updateReferencesList()
 
     # ----
 
-    def clearMatches(self):
+    def clearMatches(self) -> None:
         """Clear matched data."""
-
         # update references list
         if self.currentReferences is not None:
             for item in self.currentReferences:
@@ -466,7 +448,7 @@ class panelMassFilter(wx.Frame):
 
     # ----
 
-    def calibrateByMatches(self, references):
+    def calibrateByMatches(self, references) -> None:
         """Use matches for calibration."""
         self.parent.onToolsCalibration(references=references)
 

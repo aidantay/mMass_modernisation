@@ -16,10 +16,8 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os.path
 import xml.dom.minidom
-
-# load objects
+from pathlib import Path
 
 # set default blocks path
 blocksdir = "."
@@ -29,8 +27,9 @@ blocksdir = "."
 # ------------------
 
 
-class element:
+class Element:
     """Element object definition.
+
     name: (str) name
     symbol: (str) symbol
     atomicNumber: (int) atomic number
@@ -38,7 +37,7 @@ class element:
     valence: (int)
     """
 
-    def __init__(self, name, symbol, atomicNumber, isotopes=None, valence=None):
+    def __init__(self, name, symbol, atomicNumber, isotopes=None, valence=None) -> None:
         if isotopes is None:
             isotopes = {}
         self.name = name
@@ -65,8 +64,9 @@ class element:
     # ----
 
 
-class monomer:
+class Monomer:
     """Monomer object definition.
+
     abbr: (str) unique monomer abbreviation
     formula: (str) molecular formula
     losses: (list) list of applicable neutral losses
@@ -74,7 +74,7 @@ class monomer:
     category: (str) category name
     """
 
-    def __init__(self, abbr, formula, losses=None, name="", category=""):
+    def __init__(self, abbr, formula, losses=None, name="", category="") -> None:
         from . import obj_compound
 
         if losses is None:
@@ -86,19 +86,20 @@ class monomer:
         self.category = category
 
         # init masses and composition
-        cmpd = obj_compound.compound(self.formula)
+        cmpd = obj_compound.Compound(self.formula)
         self.composition = cmpd.composition()
         self.mass = cmpd.mass()
 
         # check formulae
         for loss in losses:
-            cmpd = obj_compound.compound(loss)
+            cmpd = obj_compound.Compound(loss)
 
     # ----
 
 
-class enzyme:
+class Enzyme:
     """Enzyme object definition.
+
     name: (str) name
     expression: (str) regular expression of cleavage site
     nTermFormula: (str) molecular formula for new N-terminus
@@ -115,7 +116,7 @@ class enzyme:
         cTermFormula="",
         modsBefore=True,
         modsAfter=True,
-    ):
+    ) -> None:
         self.name = name
         self.expression = expression
         self.nTermFormula = nTermFormula
@@ -126,14 +127,15 @@ class enzyme:
         # check formulae
         from . import obj_compound
 
-        obj_compound.compound(nTermFormula)
-        obj_compound.compound(cTermFormula)
+        obj_compound.Compound(nTermFormula)
+        obj_compound.Compound(cTermFormula)
 
     # ----
 
 
-class fragment:
+class Fragment:
     """Peptide ion fragment object definition.
+
     name: (str) name
     teminus: (M or N or C on S or I) fragment type (M-molecular ion, N-terminal, C-terminal, I-internal, S-single amino)
     nTermFormula: (str) molecular formula of N-terminal gain or loss
@@ -150,7 +152,7 @@ class fragment:
         cTermFormula="",
         nTermFilter=False,
         cTermFilter=False,
-    ):
+    ) -> None:
         self.name = name
         self.terminus = terminus
         self.nTermFormula = nTermFormula
@@ -161,14 +163,15 @@ class fragment:
         # check formulae
         from . import obj_compound
 
-        obj_compound.compound(nTermFormula)
-        obj_compound.compound(cTermFormula)
+        obj_compound.Compound(nTermFormula)
+        obj_compound.Compound(cTermFormula)
 
     # ----
 
 
-class modification:
+class Modification:
     """Modification object definition.
+
     name: (str) name
     gainFormula: (str) gain molecular formula
     lossFormula: (str) loss molecular formula
@@ -185,7 +188,7 @@ class modification:
         aminoSpecifity="",
         termSpecifity="",
         description="",
-    ):
+    ) -> None:
         self.name = name
         self.gainFormula = gainFormula
         self.lossFormula = lossFormula
@@ -196,14 +199,14 @@ class modification:
         # init masses and composition
         from . import obj_compound
 
-        lossCmpd = obj_compound.compound(self.lossFormula)
+        lossCmpd = obj_compound.Compound(self.lossFormula)
         lossComposition = lossCmpd.composition()
 
         formula = self.gainFormula
         for el, count in list(lossComposition.items()):
-            formula += "%s%d" % (el, -1 * count)
+            formula += f"{el}{-1 * count}"
 
-        cmpd = obj_compound.compound(formula)
+        cmpd = obj_compound.Compound(formula)
         self.composition = cmpd.composition()
         self.mass = cmpd.mass()
 
@@ -214,14 +217,14 @@ class modification:
 # --------------
 
 elements = {
-    "Ac": element(
+    "Ac": Element(
         name="Actinium",
         symbol="Ac",
         atomicNumber=89,
         isotopes={227: (227.02774700000001, 1.0)},
         valence=3,
     ),
-    "Ag": element(
+    "Ag": Element(
         name="Silver",
         symbol="Ag",
         atomicNumber=47,
@@ -231,21 +234,24 @@ elements = {
         },
         valence=1,
     ),
-    "Al": element(
+    "Al": Element(
         name="Aluminium",
         symbol="Al",
         atomicNumber=13,
         isotopes={27: (26.981538440000001, 1.0)},
         valence=3,
     ),
-    "Am": element(
+    "Am": Element(
         name="Americium",
         symbol="Am",
         atomicNumber=95,
-        isotopes={241: (241.05682289999999, 0.0), 243: (243.06137269999999, 1.0)},
+        isotopes={
+            241: (241.05682289999999, 0.0),
+            243: (243.06137269999999, 1.0)
+        },
         valence=3,
     ),
-    "Ar": element(
+    "Ar": Element(
         name="Argon",
         symbol="Ar",
         atomicNumber=18,
@@ -256,28 +262,31 @@ elements = {
         },
         valence=0,
     ),
-    "As": element(
+    "As": Element(
         name="Arsenic",
         symbol="As",
         atomicNumber=33,
         isotopes={75: (74.921596399999999, 1.0)},
         valence=3,
     ),
-    "At": element(
+    "At": Element(
         name="Astatine",
         symbol="At",
         atomicNumber=85,
-        isotopes={210: (209.98713100000001, 0.0), 211: (210.987481, 1.0)},
+        isotopes={
+            210: (209.98713100000001, 0.0),
+            211: (210.987481, 1.0)
+        },
         valence=1,
     ),
-    "Au": element(
+    "Au": Element(
         name="Gold",
         symbol="Au",
         atomicNumber=79,
         isotopes={197: (196.96655200000001, 1.0)},
         valence=1,
     ),
-    "B": element(
+    "B": Element(
         name="Boron",
         symbol="B",
         atomicNumber=5,
@@ -287,7 +296,7 @@ elements = {
         },
         valence=3,
     ),
-    "Ba": element(
+    "Ba": Element(
         name="Barium",
         symbol="Ba",
         atomicNumber=56,
@@ -302,35 +311,38 @@ elements = {
         },
         valence=2,
     ),
-    "Be": element(
+    "Be": Element(
         name="Beryllium",
         symbol="Be",
         atomicNumber=4,
         isotopes={9: (9.0121821000000004, 1.0)},
         valence=2,
     ),
-    "Bh": element(
+    "Bh": Element(
         name="Bohrium",
         symbol="Bh",
         atomicNumber=107,
         isotopes={264: (264.12473, 1.0)},
         valence=0,
     ),
-    "Bi": element(
+    "Bi": Element(
         name="Bismuth",
         symbol="Bi",
         atomicNumber=83,
         isotopes={209: (208.98038299999999, 1.0)},
         valence=5,
     ),
-    "Bk": element(
+    "Bk": Element(
         name="Berkelium",
         symbol="Bk",
         atomicNumber=97,
-        isotopes={249: (249.07498000000001, 0.0), 247: (247.07029900000001, 1.0)},
+        isotopes={
+            249: (249.07498000000001, 0.0),
+            247: (247.07029900000001, 1.0)
+        },
         valence=3,
     ),
-    "Br": element(
+    "Br": Element(
         name="Bromine",
         symbol="Br",
         atomicNumber=35,
@@ -340,7 +352,7 @@ elements = {
         },
         valence=1,
     ),
-    "C": element(
+    "C": Element(
         name="Carbon",
         symbol="C",
         atomicNumber=6,
@@ -351,7 +363,7 @@ elements = {
         },
         valence=4,
     ),
-    "Ca": element(
+    "Ca": Element(
         name="Calcium",
         symbol="Ca",
         atomicNumber=20,
@@ -365,7 +377,7 @@ elements = {
         },
         valence=2,
     ),
-    "Cd": element(
+    "Cd": Element(
         name="Cadmium",
         symbol="Cd",
         atomicNumber=48,
@@ -381,7 +393,7 @@ elements = {
         },
         valence=2,
     ),
-    "Ce": element(
+    "Ce": Element(
         name="Cerium",
         symbol="Ce",
         atomicNumber=58,
@@ -393,7 +405,7 @@ elements = {
         },
         valence=4,
     ),
-    "Cf": element(
+    "Cf": Element(
         name="Californium",
         symbol="Cf",
         atomicNumber=98,
@@ -405,14 +417,17 @@ elements = {
         },
         valence=3,
     ),
-    "Cl": element(
+    "Cl": Element(
         name="Chlorine",
         symbol="Cl",
         atomicNumber=17,
-        isotopes={35: (34.96885271, 0.75780000000000003), 37: (36.9659026, 0.2422)},
+        isotopes={
+            35: (34.96885271, 0.75780000000000003),
+            37: (36.9659026, 0.2422)
+        },
         valence=1,
     ),
-    "Cm": element(
+    "Cm": Element(
         name="Curium",
         symbol="Cm",
         atomicNumber=96,
@@ -426,14 +441,14 @@ elements = {
         },
         valence=3,
     ),
-    "Co": element(
+    "Co": Element(
         name="Cobalt",
         symbol="Co",
         atomicNumber=27,
         isotopes={59: (58.933200200000002, 1.0)},
         valence=2,
     ),
-    "Cr": element(
+    "Cr": Element(
         name="Chromium",
         symbol="Cr",
         atomicNumber=24,
@@ -445,14 +460,14 @@ elements = {
         },
         valence=3,
     ),
-    "Cs": element(
+    "Cs": Element(
         name="Caesium",
         symbol="Cs",
         atomicNumber=55,
         isotopes={133: (132.90544700000001, 1.0)},
         valence=1,
     ),
-    "Cu": element(
+    "Cu": Element(
         name="Copper",
         symbol="Cu",
         atomicNumber=29,
@@ -462,14 +477,14 @@ elements = {
         },
         valence=1,
     ),
-    "Db": element(
+    "Db": Element(
         name="Dubnium",
         symbol="Db",
         atomicNumber=105,
         isotopes={262: (262.11415, 1.0)},
         valence=0,
     ),
-    "Dy": element(
+    "Dy": Element(
         name="Dysprosium",
         symbol="Dy",
         atomicNumber=66,
@@ -484,7 +499,7 @@ elements = {
         },
         valence=3,
     ),
-    "Er": element(
+    "Er": Element(
         name="Erbium",
         symbol="Er",
         atomicNumber=68,
@@ -498,14 +513,14 @@ elements = {
         },
         valence=3,
     ),
-    "Es": element(
+    "Es": Element(
         name="Einsteinium",
         symbol="Es",
         atomicNumber=99,
         isotopes={252: (252.08296999999999, 1.0)},
         valence=3,
     ),
-    "Eu": element(
+    "Eu": Element(
         name="Europium",
         symbol="Eu",
         atomicNumber=63,
@@ -515,14 +530,14 @@ elements = {
         },
         valence=2,
     ),
-    "F": element(
+    "F": Element(
         name="Fluorine",
         symbol="F",
         atomicNumber=9,
         isotopes={19: (18.998403199999998, 1.0)},
         valence=1,
     ),
-    "Fe": element(
+    "Fe": Element(
         name="Iron",
         symbol="Fe",
         atomicNumber=26,
@@ -534,21 +549,21 @@ elements = {
         },
         valence=2,
     ),
-    "Fm": element(
+    "Fm": Element(
         name="Fermium",
         symbol="Fm",
         atomicNumber=100,
         isotopes={257: (257.095099, 1.0)},
         valence=3,
     ),
-    "Fr": element(
+    "Fr": Element(
         name="Francium",
         symbol="Fr",
         atomicNumber=87,
         isotopes={223: (223.0197307, 1.0)},
         valence=1,
     ),
-    "Ga": element(
+    "Ga": Element(
         name="Gallium",
         symbol="Ga",
         atomicNumber=31,
@@ -558,7 +573,7 @@ elements = {
         },
         valence=3,
     ),
-    "Gd": element(
+    "Gd": Element(
         name="Gadolinium",
         symbol="Gd",
         atomicNumber=64,
@@ -573,7 +588,7 @@ elements = {
         },
         valence=3,
     ),
-    "Ge": element(
+    "Ge": Element(
         name="Germanium",
         symbol="Ge",
         atomicNumber=32,
@@ -586,7 +601,7 @@ elements = {
         },
         valence=4,
     ),
-    "H": element(
+    "H": Element(
         name="Hydrogen",
         symbol="H",
         atomicNumber=1,
@@ -597,7 +612,7 @@ elements = {
         },
         valence=1,
     ),
-    "He": element(
+    "He": Element(
         name="Helium",
         symbol="He",
         atomicNumber=2,
@@ -607,7 +622,7 @@ elements = {
         },
         valence=0,
     ),
-    "Hf": element(
+    "Hf": Element(
         name="Hafnium",
         symbol="Hf",
         atomicNumber=72,
@@ -621,7 +636,7 @@ elements = {
         },
         valence=4,
     ),
-    "Hg": element(
+    "Hg": Element(
         name="Mercury",
         symbol="Hg",
         atomicNumber=80,
@@ -636,21 +651,21 @@ elements = {
         },
         valence=2,
     ),
-    "Ho": element(
+    "Ho": Element(
         name="Holmium",
         symbol="Ho",
         atomicNumber=67,
         isotopes={165: (164.930319, 1.0)},
         valence=3,
     ),
-    "I": element(
+    "I": Element(
         name="Iodine",
         symbol="I",
         atomicNumber=53,
         isotopes={127: (126.90446799999999, 1.0)},
         valence=1,
     ),
-    "In": element(
+    "In": Element(
         name="Indium",
         symbol="In",
         atomicNumber=49,
@@ -660,14 +675,17 @@ elements = {
         },
         valence=3,
     ),
-    "Ir": element(
+    "Ir": Element(
         name="Iridium",
         symbol="Ir",
         atomicNumber=77,
-        isotopes={193: (192.96292399999999, 0.627), 191: (190.96059099999999, 0.373)},
+        isotopes={
+            193: (192.96292399999999, 0.627),
+            191: (190.96059099999999, 0.373)
+        },
         valence=3,
     ),
-    "K": element(
+    "K": Element(
         name="Potassium",
         symbol="K",
         atomicNumber=19,
@@ -678,7 +696,7 @@ elements = {
         },
         valence=1,
     ),
-    "Kr": element(
+    "Kr": Element(
         name="Krypton",
         symbol="Kr",
         atomicNumber=36,
@@ -692,7 +710,7 @@ elements = {
         },
         valence=0,
     ),
-    "La": element(
+    "La": Element(
         name="Lanthanum",
         symbol="La",
         atomicNumber=57,
@@ -702,7 +720,7 @@ elements = {
         },
         valence=3,
     ),
-    "Li": element(
+    "Li": Element(
         name="Lithium",
         symbol="Li",
         atomicNumber=3,
@@ -712,14 +730,14 @@ elements = {
         },
         valence=1,
     ),
-    "Lr": element(
+    "Lr": Element(
         name="Lawrencium",
         symbol="Lr",
         atomicNumber=103,
         isotopes={262: (262.10969, 1.0)},
         valence=3,
     ),
-    "Lu": element(
+    "Lu": Element(
         name="Lutetium",
         symbol="Lu",
         atomicNumber=71,
@@ -729,14 +747,17 @@ elements = {
         },
         valence=3,
     ),
-    "Md": element(
+    "Md": Element(
         name="Mendelevium",
         symbol="Md",
         atomicNumber=101,
-        isotopes={256: (256.09404999999998, 0.0), 258: (258.09842500000002, 1.0)},
+        isotopes={
+            256: (256.09404999999998, 0.0),
+            258: (258.09842500000002, 1.0)
+        },
         valence=3,
     ),
-    "Mg": element(
+    "Mg": Element(
         name="Magnesium",
         symbol="Mg",
         atomicNumber=12,
@@ -747,14 +768,14 @@ elements = {
         },
         valence=2,
     ),
-    "Mn": element(
+    "Mn": Element(
         name="Manganese",
         symbol="Mn",
         atomicNumber=25,
         isotopes={55: (54.938049599999999, 1.0)},
         valence=2,
     ),
-    "Mo": element(
+    "Mo": Element(
         name="Molybdenum",
         symbol="Mo",
         atomicNumber=42,
@@ -769,14 +790,14 @@ elements = {
         },
         valence=6,
     ),
-    "Mt": element(
+    "Mt": Element(
         name="Meitnerium",
         symbol="Mt",
         atomicNumber=109,
         isotopes={268: (268.13882000000001, 1.0)},
         valence=0,
     ),
-    "N": element(
+    "N": Element(
         name="Nitrogen",
         symbol="N",
         atomicNumber=7,
@@ -786,21 +807,21 @@ elements = {
         },
         valence=3,
     ),
-    "Na": element(
+    "Na": Element(
         name="Sodium",
         symbol="Na",
         atomicNumber=11,
         isotopes={23: (22.989769670000001, 1.0)},
         valence=1,
     ),
-    "Nb": element(
+    "Nb": Element(
         name="Niobium",
         symbol="Nb",
         atomicNumber=41,
         isotopes={93: (92.906377500000005, 1.0)},
         valence=5,
     ),
-    "Nd": element(
+    "Nd": Element(
         name="Neodymium",
         symbol="Nd",
         atomicNumber=60,
@@ -815,7 +836,7 @@ elements = {
         },
         valence=3,
     ),
-    "Ne": element(
+    "Ne": Element(
         name="Neon",
         symbol="Ne",
         atomicNumber=10,
@@ -826,7 +847,7 @@ elements = {
         },
         valence=0,
     ),
-    "Ni": element(
+    "Ni": Element(
         name="Nickel",
         symbol="Ni",
         atomicNumber=28,
@@ -839,21 +860,24 @@ elements = {
         },
         valence=2,
     ),
-    "No": element(
+    "No": Element(
         name="Nobelium",
         symbol="No",
         atomicNumber=102,
         isotopes={259: (259.10102000000001, 1.0)},
         valence=2,
     ),
-    "Np": element(
+    "Np": Element(
         name="Neptunium",
         symbol="Np",
         atomicNumber=93,
-        isotopes={237: (237.04816729999999, 1.0), 239: (239.05293140000001, 0.0)},
+        isotopes={
+            237: (237.04816729999999, 1.0),
+            239: (239.05293140000001, 0.0)
+        },
         valence=3,
     ),
-    "O": element(
+    "O": Element(
         name="Oxygen",
         symbol="O",
         atomicNumber=8,
@@ -864,7 +888,7 @@ elements = {
         },
         valence=2,
     ),
-    "Os": element(
+    "Os": Element(
         name="Osmium",
         symbol="Os",
         atomicNumber=76,
@@ -879,21 +903,21 @@ elements = {
         },
         valence=3,
     ),
-    "P": element(
+    "P": Element(
         name="Phosphorus",
         symbol="P",
         atomicNumber=15,
         isotopes={31: (30.973761509999999, 1.0)},
         valence=3,
     ),
-    "Pa": element(
+    "Pa": Element(
         name="Protactinium",
         symbol="Pa",
         atomicNumber=91,
         isotopes={231: (231.0358789, 1.0)},
         valence=4,
     ),
-    "Pb": element(
+    "Pb": Element(
         name="Lead",
         symbol="Pb",
         atomicNumber=82,
@@ -905,7 +929,7 @@ elements = {
         },
         valence=4,
     ),
-    "Pd": element(
+    "Pd": Element(
         name="Palladium",
         symbol="Pd",
         atomicNumber=46,
@@ -919,28 +943,34 @@ elements = {
         },
         valence=2,
     ),
-    "Pm": element(
+    "Pm": Element(
         name="Promethium",
         symbol="Pm",
         atomicNumber=61,
-        isotopes={145: (144.912744, 1.0), 147: (146.91513399999999, 0.0)},
+        isotopes={
+            145: (144.912744, 1.0),
+            147: (146.91513399999999, 0.0)
+        },
         valence=3,
     ),
-    "Po": element(
+    "Po": Element(
         name="Polonium",
         symbol="Po",
         atomicNumber=84,
-        isotopes={209: (208.982416, 1.0), 210: (209.982857, 0.0)},
+        isotopes={
+            209: (208.982416, 1.0),
+            210: (209.982857, 0.0)
+        },
         valence=2,
     ),
-    "Pr": element(
+    "Pr": Element(
         name="Praseodymium",
         symbol="Pr",
         atomicNumber=59,
         isotopes={141: (140.90764799999999, 1.0)},
         valence=3,
     ),
-    "Pt": element(
+    "Pt": Element(
         name="Platinum",
         symbol="Pt",
         atomicNumber=78,
@@ -954,7 +984,7 @@ elements = {
         },
         valence=2,
     ),
-    "Pu": element(
+    "Pu": Element(
         name="Plutonium",
         symbol="Pu",
         atomicNumber=94,
@@ -968,7 +998,7 @@ elements = {
         },
         valence=3,
     ),
-    "Ra": element(
+    "Ra": Element(
         name="Radium",
         symbol="Ra",
         atomicNumber=88,
@@ -980,7 +1010,7 @@ elements = {
         },
         valence=2,
     ),
-    "Rb": element(
+    "Rb": Element(
         name="Rubidium",
         symbol="Rb",
         atomicNumber=37,
@@ -990,28 +1020,31 @@ elements = {
         },
         valence=1,
     ),
-    "Re": element(
+    "Re": Element(
         name="Rhenium",
         symbol="Re",
         atomicNumber=75,
-        isotopes={185: (184.95295569999999, 0.374), 187: (186.9557508, 0.626)},
+        isotopes={
+            185: (184.95295569999999, 0.374),
+            187: (186.9557508, 0.626)
+        },
         valence=4,
     ),
-    "Rf": element(
+    "Rf": Element(
         name="Rutherfordium",
         symbol="Rf",
         atomicNumber=104,
         isotopes={261: (261.10874999999999, 1.0)},
         valence=0,
     ),
-    "Rh": element(
+    "Rh": Element(
         name="Rhodium",
         symbol="Rh",
         atomicNumber=45,
         isotopes={103: (102.90550399999999, 1.0)},
         valence=3,
     ),
-    "Rn": element(
+    "Rn": Element(
         name="Radon",
         symbol="Rn",
         atomicNumber=86,
@@ -1022,7 +1055,7 @@ elements = {
         },
         valence=0,
     ),
-    "Ru": element(
+    "Ru": Element(
         name="Ruthenium",
         symbol="Ru",
         atomicNumber=44,
@@ -1037,7 +1070,7 @@ elements = {
         },
         valence=3,
     ),
-    "S": element(
+    "S": Element(
         name="Sulfur",
         symbol="S",
         atomicNumber=16,
@@ -1049,7 +1082,7 @@ elements = {
         },
         valence=2,
     ),
-    "Sb": element(
+    "Sb": Element(
         name="Antimony",
         symbol="Sb",
         atomicNumber=51,
@@ -1059,14 +1092,14 @@ elements = {
         },
         valence=5,
     ),
-    "Sc": element(
+    "Sc": Element(
         name="Scandium",
         symbol="Sc",
         atomicNumber=21,
         isotopes={45: (44.955910199999998, 1.0)},
         valence=3,
     ),
-    "Se": element(
+    "Se": Element(
         name="Selenium",
         symbol="Se",
         atomicNumber=34,
@@ -1080,14 +1113,14 @@ elements = {
         },
         valence=2,
     ),
-    "Sg": element(
+    "Sg": Element(
         name="Seaborgium",
         symbol="Sg",
         atomicNumber=106,
         isotopes={266: (266.12193000000002, 1.0)},
         valence=0,
     ),
-    "Si": element(
+    "Si": Element(
         name="Silicon",
         symbol="Si",
         atomicNumber=14,
@@ -1098,7 +1131,7 @@ elements = {
         },
         valence=4,
     ),
-    "Sm": element(
+    "Sm": Element(
         name="Samarium",
         symbol="Sm",
         atomicNumber=62,
@@ -1113,7 +1146,7 @@ elements = {
         },
         valence=2,
     ),
-    "Sn": element(
+    "Sn": Element(
         name="Tin",
         symbol="Sn",
         atomicNumber=50,
@@ -1131,7 +1164,7 @@ elements = {
         },
         valence=4,
     ),
-    "Sr": element(
+    "Sr": Element(
         name="Strontium",
         symbol="Sr",
         atomicNumber=38,
@@ -1143,7 +1176,7 @@ elements = {
         },
         valence=2,
     ),
-    "Ta": element(
+    "Ta": Element(
         name="Tantalum",
         symbol="Ta",
         atomicNumber=73,
@@ -1153,14 +1186,14 @@ elements = {
         },
         valence=5,
     ),
-    "Tb": element(
+    "Tb": Element(
         name="Terbium",
         symbol="Tb",
         atomicNumber=65,
         isotopes={159: (158.925343, 1.0)},
         valence=3,
     ),
-    "Tc": element(
+    "Tc": Element(
         name="Technetium",
         symbol="Tc",
         atomicNumber=43,
@@ -1171,7 +1204,7 @@ elements = {
         },
         valence=4,
     ),
-    "Te": element(
+    "Te": Element(
         name="Tellurium",
         symbol="Te",
         atomicNumber=52,
@@ -1187,14 +1220,17 @@ elements = {
         },
         valence=2,
     ),
-    "Th": element(
+    "Th": Element(
         name="Thorium",
         symbol="Th",
         atomicNumber=90,
-        isotopes={232: (232.0380504, 1.0), 230: (230.0331266, 2.3203809999999998)},
+        isotopes={
+            232: (232.0380504, 1.0),
+            230: (230.0331266, 2.3203809999999998)
+        },
         valence=4,
     ),
-    "Ti": element(
+    "Ti": Element(
         name="Titanium",
         symbol="Ti",
         atomicNumber=22,
@@ -1207,21 +1243,24 @@ elements = {
         },
         valence=4,
     ),
-    "Tl": element(
+    "Tl": Element(
         name="Thallium",
         symbol="Tl",
         atomicNumber=81,
-        isotopes={203: (202.972329, 0.29524), 205: (204.974412, 0.70476000000000005)},
+        isotopes={
+            203: (202.972329, 0.29524),
+            205: (204.974412, 0.70476000000000005)
+        },
         valence=3,
     ),
-    "Tm": element(
+    "Tm": Element(
         name="Thulium",
         symbol="Tm",
         atomicNumber=69,
         isotopes={169: (168.934211, 1.0)},
         valence=3,
     ),
-    "U": element(
+    "U": Element(
         name="Uranium",
         symbol="U",
         atomicNumber=92,
@@ -1234,7 +1273,7 @@ elements = {
         },
         valence=3,
     ),
-    "V": element(
+    "V": Element(
         name="Vanadium",
         symbol="V",
         atomicNumber=23,
@@ -1244,7 +1283,7 @@ elements = {
         },
         valence=5,
     ),
-    "W": element(
+    "W": Element(
         name="Tungsten",
         symbol="W",
         atomicNumber=74,
@@ -1257,7 +1296,7 @@ elements = {
         },
         valence=6,
     ),
-    "Xe": element(
+    "Xe": Element(
         name="Xenon",
         symbol="Xe",
         atomicNumber=54,
@@ -1274,14 +1313,14 @@ elements = {
         },
         valence=0,
     ),
-    "Y": element(
+    "Y": Element(
         name="Yttrium",
         symbol="Y",
         atomicNumber=39,
         isotopes={89: (88.905847899999998, 1.0)},
         valence=3,
     ),
-    "Yb": element(
+    "Yb": Element(
         name="Ytterbium",
         symbol="Yb",
         atomicNumber=70,
@@ -1296,7 +1335,7 @@ elements = {
         },
         valence=2,
     ),
-    "Zn": element(
+    "Zn": Element(
         name="Zinc",
         symbol="Zn",
         atomicNumber=30,
@@ -1309,7 +1348,7 @@ elements = {
         },
         valence=2,
     ),
-    "Zr": element(
+    "Zr": Element(
         name="Zirconium",
         symbol="Zr",
         atomicNumber=40,
@@ -1324,800 +1363,133 @@ elements = {
     ),
 }
 
+# ruff: disable[E501]
 monomers = {
     # regular amino acids for protein and peptide sequences
-    "A": monomer(abbr="A", name="Alanine", formula="C3H5NO", category="_InternalAA"),
-    "C": monomer(abbr="C", name="Cysteine", formula="C3H5NOS", category="_InternalAA"),
-    "D": monomer(
-        abbr="D",
-        name="Aspartic Acid",
-        formula="C4H5NO3",
-        losses=["H2O"],
-        category="_InternalAA",
-    ),
-    "E": monomer(
-        abbr="E",
-        name="Glutamic Acid",
-        formula="C5H7NO3",
-        losses=["H2O"],
-        category="_InternalAA",
-    ),
-    "F": monomer(
-        abbr="F", name="Phenylalanine", formula="C9H9NO", category="_InternalAA"
-    ),
-    "G": monomer(abbr="G", name="Glycine", formula="C2H3NO", category="_InternalAA"),
-    "H": monomer(abbr="H", name="Histidine", formula="C6H7N3O", category="_InternalAA"),
-    "I": monomer(
-        abbr="I", name="Isoleucine", formula="C6H11NO", category="_InternalAA"
-    ),
-    "K": monomer(
-        abbr="K",
-        name="Lysine",
-        formula="C6H12N2O",
-        losses=["NH3"],
-        category="_InternalAA",
-    ),
-    "L": monomer(abbr="L", name="Leucine", formula="C6H11NO", category="_InternalAA"),
-    "M": monomer(
-        abbr="M", name="Methionine", formula="C5H9NSO", category="_InternalAA"
-    ),
-    "N": monomer(
-        abbr="N",
-        name="Asparagine",
-        formula="C4H6O2N2",
-        losses=["NH3"],
-        category="_InternalAA",
-    ),
-    "O": monomer(
-        abbr="O", name="Ornithine", formula="C5H10N2O", category="_InternalAA"
-    ),
-    "P": monomer(abbr="P", name="Proline", formula="C5H7NO", category="_InternalAA"),
-    "Q": monomer(
-        abbr="Q",
-        name="Glutamine",
-        formula="C5H8N2O2",
-        losses=["NH3"],
-        category="_InternalAA",
-    ),
-    "R": monomer(
-        abbr="R",
-        name="Arginine",
-        formula="C6H12N4O",
-        losses=["NH3"],
-        category="_InternalAA",
-    ),
-    "S": monomer(
-        abbr="S",
-        name="Serine",
-        formula="C3H5NO2",
-        losses=["H2O", "H3PO4"],
-        category="_InternalAA",
-    ),
-    "T": monomer(
-        abbr="T",
-        name="Threonine",
-        formula="C4H7NO2",
-        losses=["H2O", "H3PO4"],
-        category="_InternalAA",
-    ),
-    "V": monomer(abbr="V", name="Valine", formula="C5H9NO", category="_InternalAA"),
-    "W": monomer(
-        abbr="W", name="Tryptophan", formula="C11H10N2O", category="_InternalAA"
-    ),
-    "Y": monomer(
-        abbr="Y",
-        name="Tyrosine",
-        formula="C9H9NO2",
-        losses=["H3PO4"],
-        category="_InternalAA",
-    ),
+    "A": Monomer(abbr="A", name="Alanine",       formula="C3H5NO",                            category="_InternalAA"),
+    "C": Monomer(abbr="C", name="Cysteine",      formula="C3H5NOS",                           category="_InternalAA"),
+    "D": Monomer(abbr="D", name="Aspartic Acid", formula="C4H5NO3",  losses=["H2O"],          category="_InternalAA"),
+    "E": Monomer(abbr="E", name="Glutamic Acid", formula="C5H7NO3",  losses=["H2O"],          category="_InternalAA"),
+    "F": Monomer(abbr="F", name="Phenylalanine", formula="C9H9NO",                            category="_InternalAA"),
+    "G": Monomer(abbr="G", name="Glycine",       formula="C2H3NO",                            category="_InternalAA"),
+    "H": Monomer(abbr="H", name="Histidine",     formula="C6H7N3O",                           category="_InternalAA"),
+    "I": Monomer(abbr="I", name="Isoleucine",    formula="C6H11NO",                           category="_InternalAA"),
+    "K": Monomer(abbr="K", name="Lysine",        formula="C6H12N2O", losses=["NH3"],          category="_InternalAA"),
+    "L": Monomer(abbr="L", name="Leucine",       formula="C6H11NO",                           category="_InternalAA"),
+    "M": Monomer(abbr="M", name="Methionine",    formula="C5H9NSO",                           category="_InternalAA"),
+    "N": Monomer(abbr="N", name="Asparagine",    formula="C4H6O2N2", losses=["NH3"],          category="_InternalAA"),
+    "O": Monomer(abbr="O", name="Ornithine",     formula="C5H10N2O",                          category="_InternalAA"),
+    "P": Monomer(abbr="P", name="Proline",       formula="C5H7NO",                            category="_InternalAA"),
+    "Q": Monomer(abbr="Q", name="Glutamine",     formula="C5H8N2O2", losses=["NH3"],          category="_InternalAA"),
+    "R": Monomer(abbr="R", name="Arginine",      formula="C6H12N4O", losses=["NH3"],          category="_InternalAA"),
+    "S": Monomer(abbr="S", name="Serine",        formula="C3H5NO2",  losses=["H2O", "H3PO4"], category="_InternalAA"),
+    "T": Monomer(abbr="T", name="Threonine",     formula="C4H7NO2",  losses=["H2O", "H3PO4"], category="_InternalAA"),
+    "V": Monomer(abbr="V", name="Valine",        formula="C5H9NO",                            category="_InternalAA"),
+    "W": Monomer(abbr="W", name="Tryptophan",    formula="C11H10N2O",                         category="_InternalAA"),
+    "Y": Monomer(abbr="Y", name="Tyrosine",      formula="C9H9NO2",  losses=["H3PO4"],        category="_InternalAA"),
 }
 
 enzymes = {
-    "Arg-C": enzyme(
-        name="Arg-C",
-        expression="[R][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Asp-N": enzyme(
-        name="Asp-N",
-        expression="[A-Z][D]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=True,
-        modsAfter=False,
-    ),
-    "Bromelain": enzyme(
-        name="Bromelain",
-        expression="[KAY][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "CNBr-HSerLac": enzyme(
-        name="CNBr-HSerLac",
-        expression="[M][A-Z]",
-        nTermFormula="H",
-        cTermFormula="O-1C-1H-3",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Cathepsin B": enzyme(
-        name="Cathepsin B",
-        expression="[R][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Cathepsin D": enzyme(
-        name="Cathepsin D",
-        expression="[LF][^VAG]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Cathepsin G": enzyme(
-        name="Cathepsin G",
-        expression="[YWF][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Chymotrypsin": enzyme(
-        name="Chymotrypsin",
-        expression="[YWFL][^P]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Clostripain": enzyme(
-        name="Clostripain",
-        expression="[R][^P]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Elastase": enzyme(
-        name="Elastase",
-        expression="[AVLIGS][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Glu-C Bic": enzyme(
-        name="Glu-C Bic",
-        expression="[E][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Glu-C Phos": enzyme(
-        name="Glu-C Phos",
-        expression="[ED][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Hydroxylamine": enzyme(
-        name="Hydroxylamine",
-        expression="[N][G]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=False,
-    ),
-    "Lys-C": enzyme(
-        name="Lys-C",
-        expression="[K][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Lys-N": enzyme(
-        name="Lys-N",
-        expression="[A-Z][K]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=True,
-        modsAfter=False,
-    ),
-    "Non-Specific": enzyme(
-        name="Non-Specific",
-        expression="[A-Z][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=True,
-        modsAfter=True,
-    ),
-    "Papain": enzyme(
-        name="Papain",
-        expression="[RK][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Pepsin": enzyme(
-        name="Pepsin",
-        expression="[LF][^VAG]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Proteinase K": enzyme(
-        name="Proteinase K",
-        expression="[YWF][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Subtilisin": enzyme(
-        name="Subtilisin",
-        expression="[^RHK][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Thermolysin": enzyme(
-        name="Thermolysin",
-        expression="[A-Z][LFIVMA]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=True,
-        modsAfter=False,
-    ),
-    "TrypAspN": enzyme(
-        name="TrypAspN",
-        expression="(([KR][^P])|([A-Z][D]))",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=False,
-    ),
-    "TrypChymo": enzyme(
-        name="TrypChymo",
-        expression="[FYWLKR][^P]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Trypsin": enzyme(
-        name="Trypsin",
-        expression="[KR][^P]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
-    "Trypsin/P": enzyme(
-        name="Trypsin/P",
-        expression="[KR][A-Z]",
-        nTermFormula="H",
-        cTermFormula="OH",
-        modsBefore=False,
-        modsAfter=True,
-    ),
+    "Arg-C":         Enzyme(name="Arg-C",         expression="[R][A-Z]",                nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Asp-N":         Enzyme(name="Asp-N",         expression="[A-Z][D]",                nTermFormula="H", cTermFormula="OH",        modsBefore=True,  modsAfter=False),
+    "Bromelain":     Enzyme(name="Bromelain",     expression="[KAY][A-Z]",              nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "CNBr-HSerLac":  Enzyme(name="CNBr-HSerLac",  expression="[M][A-Z]",                nTermFormula="H", cTermFormula="O-1C-1H-3", modsBefore=False, modsAfter=True ),
+    "Cathepsin B":   Enzyme(name="Cathepsin B",   expression="[R][A-Z]",                nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Cathepsin D":   Enzyme(name="Cathepsin D",   expression="[LF][^VAG]",              nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Cathepsin G":   Enzyme(name="Cathepsin G",   expression="[YWF][A-Z]",              nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Chymotrypsin":  Enzyme(name="Chymotrypsin",  expression="[YWFL][^P]",              nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Clostripain":   Enzyme(name="Clostripain",   expression="[R][^P]",                 nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Elastase":      Enzyme(name="Elastase",      expression="[AVLIGS][A-Z]",           nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Glu-C Bic":     Enzyme(name="Glu-C Bic",     expression="[E][A-Z]",                nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Glu-C Phos":    Enzyme(name="Glu-C Phos",    expression="[ED][A-Z]",               nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Hydroxylamine": Enzyme(name="Hydroxylamine", expression="[N][G]",                  nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=False),
+    "Lys-C":         Enzyme(name="Lys-C"        , expression="[K][A-Z]",                nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Lys-N":         Enzyme(name="Lys-N"        , expression="[A-Z][K]",                nTermFormula="H", cTermFormula="OH",        modsBefore=True,  modsAfter=False),
+    "Non-Specific":  Enzyme(name="Non-Specific",  expression="[A-Z][A-Z]",              nTermFormula="H", cTermFormula="OH",        modsBefore=True,  modsAfter=True ),
+    "Papain":        Enzyme(name="Papain",        expression="[RK][A-Z]",               nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Pepsin":        Enzyme(name="Pepsin",        expression="[LF][^VAG]",              nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Proteinase K":  Enzyme(name="Proteinase K",  expression="[YWF][A-Z]",              nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Subtilisin":    Enzyme(name="Subtilisin",    expression="[^RHK][A-Z]",             nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Thermolysin":   Enzyme(name="Thermolysin",   expression="[A-Z][LFIVMA]",           nTermFormula="H", cTermFormula="OH",        modsBefore=True,  modsAfter=False),
+    "TrypAspN":      Enzyme(name="TrypAspN",      expression="(([KR][^P])|([A-Z][D]))", nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=False),
+    "TrypChymo":     Enzyme(name="TrypChymo",     expression="[FYWLKR][^P]",            nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Trypsin":       Enzyme(name="Trypsin",       expression="[KR][^P]",                nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
+    "Trypsin/P":     Enzyme(name="Trypsin/P",     expression="[KR][A-Z]",               nTermFormula="H", cTermFormula="OH",        modsBefore=False, modsAfter=True ),
 }
 
 fragments = {
-    "M": fragment(name="M", terminus="M", nTermFilter=False, cTermFilter=False),
-    "im": fragment(
-        name="im",
-        terminus="S",
-        nTermFormula="H",
-        cTermFormula="C-1O-1H-1",
-        nTermFilter=False,
-        cTermFilter=False,
-    ),
-    "a": fragment(
-        name="a",
-        terminus="N",
-        cTermFormula="C-1O-1H-1",
-        nTermFilter=True,
-        cTermFilter=True,
-    ),
-    "b": fragment(
-        name="b", terminus="N", cTermFormula="H-1", nTermFilter=True, cTermFilter=True
-    ),
-    "c": fragment(
-        name="c", terminus="N", cTermFormula="NH2", nTermFilter=False, cTermFilter=True
-    ),
-    "x": fragment(
-        name="x",
-        terminus="C",
-        nTermFormula="COH-1",
-        nTermFilter=True,
-        cTermFilter=False,
-    ),
-    "y": fragment(
-        name="y", terminus="C", nTermFormula="H", nTermFilter=True, cTermFilter=False
-    ),
-    "z": fragment(
-        name="z",
-        terminus="C",
-        nTermFormula="N-1H-2",
-        nTermFilter=True,
-        cTermFilter=False,
-    ),
-    "c-ladder": fragment(
-        name="c-ladder",
-        terminus="N",
-        cTermFormula="OH",
-        nTermFilter=True,
-        cTermFilter=True,
-    ),
-    "n-ladder": fragment(
-        name="n-ladder",
-        terminus="C",
-        nTermFormula="H",
-        nTermFilter=True,
-        cTermFilter=False,
-    ),
-    "int-b": fragment(name="int-b", terminus="I", nTermFormula="H", cTermFormula="H-1"),
-    "int-a": fragment(
-        name="int-a", terminus="I", nTermFormula="H", cTermFormula="C-1O-1H-1"
-    ),
+    "M":        Fragment(name="M",        terminus="M",                                             nTermFilter=False, cTermFilter=False),
+    "im":       Fragment(name="im",       terminus="S", nTermFormula="H", cTermFormula="C-1O-1H-1", nTermFilter=False, cTermFilter=False),
+    "a":        Fragment(name="a",        terminus="N",                   cTermFormula="C-1O-1H-1", nTermFilter=True,  cTermFilter=True ),
+    "b":        Fragment(name="b",        terminus="N",                   cTermFormula="H-1",       nTermFilter=True,  cTermFilter=True ),
+    "c":        Fragment(name="c",        terminus="N",                   cTermFormula="NH2",       nTermFilter=False, cTermFilter=True ),
+    "x":        Fragment(name="x",        terminus="C", nTermFormula="COH-1",                       nTermFilter=True,  cTermFilter=False),
+    "y":        Fragment(name="y",        terminus="C", nTermFormula="H",                           nTermFilter=True,  cTermFilter=False),
+    "z":        Fragment(name="z",        terminus="C", nTermFormula="N-1H-2",                      nTermFilter=True,  cTermFilter=False),
+    "c-ladder": Fragment(name="c-ladder", terminus="N",                   cTermFormula="OH",        nTermFilter=True,  cTermFilter=True ),
+    "n-ladder": Fragment(name="n-ladder", terminus="C", nTermFormula="H",                           nTermFilter=True,  cTermFilter=False),
+    "int-b":    Fragment(name="int-b",    terminus="I", nTermFormula="H", cTermFormula="H-1"                                            ),
+    "int-a":    Fragment(name="int-a",    terminus="I", nTermFormula="H", cTermFormula="C-1O-1H-1"                                      ),
 }
 
 modifications = {
-    "Acetyl": modification(
-        name="Acetyl",
-        gainFormula="C2H3O",
-        lossFormula="H",
-        aminoSpecifity="KCST",
-        termSpecifity="N",
-        description="Acetylation",
-    ),
-    "Amide": modification(
-        name="Amide",
-        gainFormula="NH2",
-        lossFormula="OH",
-        aminoSpecifity="",
-        termSpecifity="C",
-        description="Amidation",
-    ),
-    "Aminotyrosine": modification(
-        name="Aminotyrosine",
-        gainFormula="HN",
-        lossFormula="",
-        aminoSpecifity="Y",
-        termSpecifity="",
-        description="Tyrosine oxidation to 2-aminotyrosine",
-    ),
-    "Biotin": modification(
-        name="Biotin",
-        gainFormula="H14C10N2O2S",
-        lossFormula="",
-        aminoSpecifity="K",
-        termSpecifity="N",
-        description="Biotinylation",
-    ),
-    "Boc": modification(
-        name="Boc",
-        gainFormula="C5H9O2",
-        lossFormula="H",
-        aminoSpecifity="K",
-        termSpecifity="N",
-        description="Boc protecting group",
-    ),
-    "Carbamidomethyl": modification(
-        name="Carbamidomethyl",
-        gainFormula="CH2CONH2",
-        lossFormula="H",
-        aminoSpecifity="CKHDE",
-        termSpecifity="N",
-        description="Iodoacetamide derivative",
-    ),
-    "Carbamyl": modification(
-        name="Carbamyl",
-        gainFormula="HCNO",
-        lossFormula="",
-        aminoSpecifity="KRCM",
-        termSpecifity="N",
-        description="Carbamylation",
-    ),
-    "Carboxyethyl": modification(
-        name="Carboxyethyl",
-        gainFormula="H4C3O2",
-        lossFormula="",
-        aminoSpecifity="K",
-        termSpecifity="",
-        description="Carboxyethyl",
-    ),
-    "Carboxyl": modification(
-        name="Carboxyl",
-        gainFormula="CO2",
-        lossFormula="",
-        aminoSpecifity="WKDEM",
-        termSpecifity="",
-        description="Carboxylation",
-    ),
-    "Carboxymethyl": modification(
-        name="Carboxymethyl",
-        gainFormula="CH2COOH",
-        lossFormula="H",
-        aminoSpecifity="CKW",
-        termSpecifity="N",
-        description="Iodoacetic acid derivative",
-    ),
-    "Cation:K": modification(
-        name="Cation:K",
-        gainFormula="K",
-        lossFormula="H",
-        aminoSpecifity="DE",
-        termSpecifity="C",
-        description="Replacement of proton by potassium",
-    ),
-    "Cation:Na": modification(
-        name="Cation:Na",
-        gainFormula="Na",
-        lossFormula="H",
-        aminoSpecifity="DE",
-        termSpecifity="C",
-        description="Replacement of proton by sodium",
-    ),
-    "Cyano": modification(
-        name="Cyano",
-        gainFormula="CN",
-        lossFormula="H",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Cyano",
-    ),
-    "Cys->Dha": modification(
-        name="Cys->Dha",
-        gainFormula="",
-        lossFormula="H2S",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Dehydroalanine (from Cysteine)",
-    ),
-    "Cystine": modification(
-        name="Cystine",
-        gainFormula="",
-        lossFormula="H",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Half of a disulfide bridge",
-    ),
-    "Deamidation": modification(
-        name="Deamidation",
-        gainFormula="O",
-        lossFormula="HN",
-        aminoSpecifity="NQRF",
-        termSpecifity="",
-        description="Deamidation",
-    ),
-    "Dehydrated": modification(
-        name="Dehydrated",
-        gainFormula="",
-        lossFormula="H2O",
-        aminoSpecifity="NQSTYDC",
-        termSpecifity="",
-        description="Dehydration",
-    ),
-    "Diacylglycerol": modification(
-        name="Diacylglycerol",
-        gainFormula="H68C37O4",
-        lossFormula="",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Diacylglycerol",
-    ),
-    "Dimethyl": modification(
-        name="Dimethyl",
-        gainFormula="C2H6",
-        lossFormula="H2",
-        aminoSpecifity="KRNP",
-        termSpecifity="N",
-        description="Di-Methylation",
-    ),
-    "Dioxidation": modification(
-        name="Dioxidation",
-        gainFormula="O2H2",
-        lossFormula="H2",
-        aminoSpecifity="PRKMFWYC",
-        termSpecifity="",
-        description="Dihydroxy",
-    ),
-    "Ethanolyl": modification(
-        name="Ethanolyl",
-        gainFormula="H4C2O",
-        lossFormula="",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Ethanolation of Cys",
-    ),
-    "Ethyl": modification(
-        name="Ethyl",
-        gainFormula="H4C2",
-        lossFormula="",
-        aminoSpecifity="KED",
-        termSpecifity="N",
-        description="Ethylation",
-    ),
-    "FAD": modification(
-        name="FAD",
-        gainFormula="H31C27N9O15P2",
-        lossFormula="",
-        aminoSpecifity="CHY",
-        termSpecifity="",
-        description="Flavin adenine dinucleotide",
-    ),
-    "FMNH": modification(
-        name="FMNH",
-        gainFormula="H19C17N4O9P",
-        lossFormula="",
-        aminoSpecifity="CH",
-        termSpecifity="",
-        description="Flavin mononucleotide",
-    ),
-    "Fluorescein": modification(
-        name="Fluorescein",
-        gainFormula="H14C22NO6",
-        lossFormula="",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="5-iodoacetamidofluorescein",
-    ),
-    "Fmoc": modification(
-        name="Fmoc",
-        gainFormula="C15H11O2",
-        lossFormula="H",
-        aminoSpecifity="K",
-        termSpecifity="N",
-        description="Fmoc protecting group",
-    ),
-    "Formyl": modification(
-        name="Formyl",
-        gainFormula="CHO",
-        lossFormula="H",
-        aminoSpecifity="KST",
-        termSpecifity="N",
-        description="Formylation",
-    ),
-    "FormylMet": modification(
-        name="FormylMet",
-        gainFormula="H10C6NO2S",
-        lossFormula="",
-        aminoSpecifity="",
-        termSpecifity="N",
-        description="Addition of N-formyl Methionine",
-    ),
-    "Guanidination": modification(
-        name="Guanidination",
-        gainFormula="CH3N2",
-        lossFormula="H",
-        aminoSpecifity="K",
-        termSpecifity="",
-        description="Homoarginine from Lysine",
-    ),
-    "Guanidinyl": modification(
-        name="Guanidinyl",
-        gainFormula="H2CN2",
-        lossFormula="",
-        aminoSpecifity="K",
-        termSpecifity="",
-        description="Guanidination",
-    ),
-    "Heme": modification(
-        name="Heme",
-        gainFormula="H32C34N4O4Fe",
-        lossFormula="",
-        aminoSpecifity="CH",
-        termSpecifity="",
-        description="Heme",
-    ),
-    "Hep": modification(
-        name="Hep",
-        gainFormula="C7H14O7",
-        lossFormula="H2O",
-        aminoSpecifity="KNQRST",
-        termSpecifity="",
-        description="Heptose",
-    ),
-    "Hex": modification(
-        name="Hex",
-        gainFormula="C6H12O6",
-        lossFormula="H2O",
-        aminoSpecifity="KNTWCRY",
-        termSpecifity="N",
-        description="Hexose",
-    ),
-    "HexN": modification(
-        name="HexN",
-        gainFormula="C6H13N1O5",
-        lossFormula="H2O",
-        aminoSpecifity="KNTW",
-        termSpecifity="",
-        description="Hexosamine",
-    ),
-    "HexNAc": modification(
-        name="HexNAc",
-        gainFormula="C8H15N1O6",
-        lossFormula="H2O",
-        aminoSpecifity="NST",
-        termSpecifity="",
-        description="N-Acetylhexosamine",
-    ),
-    "Hydroxymethyl": modification(
-        name="Hydroxymethyl",
-        gainFormula="H2CO",
-        lossFormula="",
-        aminoSpecifity="N",
-        termSpecifity="",
-        description="Hydroxymethyl",
-    ),
-    "Iodo": modification(
-        name="Iodo",
-        gainFormula="I",
-        lossFormula="H",
-        aminoSpecifity="YH",
-        termSpecifity="",
-        description="Iodination",
-    ),
-    "Label:13C(6)": modification(
-        name="Label:13C(6)",
-        gainFormula="C{13}6",
-        lossFormula="C6",
-        aminoSpecifity="KR",
-        termSpecifity="",
-        description="13C(6) Silac label",
-    ),
-    "Lipoyl": modification(
-        name="Lipoyl",
-        gainFormula="H12C8OS2",
-        lossFormula="",
-        aminoSpecifity="K",
-        termSpecifity="",
-        description="Lipoyl",
-    ),
-    "Methyl": modification(
-        name="Methyl",
-        gainFormula="CH3",
-        lossFormula="H",
-        aminoSpecifity="CHKNQRIL",
-        termSpecifity="N",
-        description="Methylation",
-    ),
-    "Myristoyl": modification(
-        name="Myristoyl",
-        gainFormula="C14H27O",
-        lossFormula="H",
-        aminoSpecifity="GKC",
-        termSpecifity="N",
-        description="Myristoylation",
-    ),
-    "Nitro": modification(
-        name="Nitro",
-        gainFormula="NO2",
-        lossFormula="H",
-        aminoSpecifity="WY",
-        termSpecifity="",
-        description="Oxidation to nitro",
-    ),
-    "Oxidation": modification(
-        name="Oxidation",
-        gainFormula="O",
-        lossFormula="",
-        aminoSpecifity="ODKNPFYRMCHWG",
-        termSpecifity="",
-        description="Oxidation or Hydroxylation",
-    ),
-    "Palmitoyl": modification(
-        name="Palmitoyl",
-        gainFormula="C16H31O",
-        lossFormula="H",
-        aminoSpecifity="CKST",
-        termSpecifity="N",
-        description="Palmitoylation",
-    ),
-    "Pentose": modification(
-        name="Pentose",
-        gainFormula="C5H10O5",
-        lossFormula="H2O",
-        aminoSpecifity="STD",
-        termSpecifity="",
-        description="Pentose",
-    ),
-    "Phenylisocyanate": modification(
-        name="Phenylisocyanate",
-        gainFormula="H5C7NO",
-        lossFormula="",
-        aminoSpecifity="",
-        termSpecifity="N",
-        description="Phenyl isocyanate",
-    ),
-    "Phospho": modification(
-        name="Phospho",
-        gainFormula="H2PO3",
-        lossFormula="H",
-        aminoSpecifity="STYDHCR",
-        termSpecifity="",
-        description="Phosphorylation",
-    ),
-    "Propionamide": modification(
-        name="Propionamide",
-        gainFormula="C3H6ON",
-        lossFormula="H",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Acrylamide adduct",
-    ),
-    "SeCys": modification(
-        name="SeCys",
-        gainFormula="Se",
-        lossFormula="S",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="Selenium replaces sulphur in Cysteine",
-    ),
-    "SeMet": modification(
-        name="SeMet",
-        gainFormula="Se",
-        lossFormula="S",
-        aminoSpecifity="M",
-        termSpecifity="",
-        description="Selenium replaces sulphur in Methionine",
-    ),
-    "Sulfo": modification(
-        name="Sulfo",
-        gainFormula="HSO3",
-        lossFormula="H",
-        aminoSpecifity="STYC",
-        termSpecifity="",
-        description="O-Sulfonation",
-    ),
-    "Tyr->Dha": modification(
-        name="Tyr->Dha",
-        gainFormula="",
-        lossFormula="H6C6O",
-        aminoSpecifity="Y",
-        termSpecifity="",
-        description="Dehydroalanine (from Tyrosine)",
-    ),
-    "dHex": modification(
-        name="dHex",
-        gainFormula="C6H12O5",
-        lossFormula="H2O",
-        aminoSpecifity="ST",
-        termSpecifity="",
-        description="Deoxyhexose, fucose",
-    ),
-    "pCMB": modification(
-        name="pCMB",
-        gainFormula="C7H5HgO2",
-        lossFormula="H",
-        aminoSpecifity="C",
-        termSpecifity="",
-        description="p-Chloromercurybenzoate",
-    ),
-    "tButyl": modification(
-        name="tButyl",
-        gainFormula="C4H9",
-        lossFormula="H",
-        aminoSpecifity="CDEHSTY",
-        termSpecifity="",
-        description="tButyl protecting group",
-    ),
+    "Acetyl":           Modification(name="Acetyl",           gainFormula="C2H3O",         lossFormula="H",     aminoSpecifity="KCST",          termSpecifity="N", description="Acetylation"                            ),
+    "Amide":            Modification(name="Amide",            gainFormula="NH2",           lossFormula="OH",    aminoSpecifity="",              termSpecifity="C", description="Amidation"                              ),
+    "Aminotyrosine":    Modification(name="Aminotyrosine",    gainFormula="HN",            lossFormula="",      aminoSpecifity="Y",             termSpecifity="",  description="Tyrosine oxidation to 2-aminotyrosine"  ),
+    "Biotin":           Modification(name="Biotin",           gainFormula="H14C10N2O2S",   lossFormula="",      aminoSpecifity="K",             termSpecifity="N", description="Biotinylation"                          ),
+    "Boc":              Modification(name="Boc",              gainFormula="C5H9O2",        lossFormula="H",     aminoSpecifity="K",             termSpecifity="N", description="Boc protecting group"                   ),
+    "Carbamidomethyl":  Modification(name="Carbamidomethyl",  gainFormula="CH2CONH2",      lossFormula="H",     aminoSpecifity="CKHDE",         termSpecifity="N", description="Iodoacetamide derivative"               ),
+    "Carbamyl":         Modification(name="Carbamyl",         gainFormula="HCNO",          lossFormula="",      aminoSpecifity="KRCM",          termSpecifity="N", description="Carbamylation"                          ),
+    "Carboxyethyl":     Modification(name="Carboxyethyl",     gainFormula="H4C3O2",        lossFormula="",      aminoSpecifity="K",             termSpecifity="",  description="Carboxyethyl"                           ),
+    "Carboxyl":         Modification(name="Carboxyl",         gainFormula="CO2",           lossFormula="",      aminoSpecifity="WKDEM",         termSpecifity="",  description="Carboxylation"                          ),
+    "Carboxymethyl":    Modification(name="Carboxymethyl",    gainFormula="CH2COOH",       lossFormula="H",     aminoSpecifity="CKW",           termSpecifity="N", description="Iodoacetic acid derivative"             ),
+    "Cation:K":         Modification(name="Cation:K",         gainFormula="K",             lossFormula="H",     aminoSpecifity="DE",            termSpecifity="C", description="Replacement of proton by potassium"     ),
+    "Cation:Na":        Modification(name="Cation:Na",        gainFormula="Na",            lossFormula="H",     aminoSpecifity="DE",            termSpecifity="C", description="Replacement of proton by sodium"        ),
+    "Cyano":            Modification(name="Cyano",            gainFormula="CN",            lossFormula="H",     aminoSpecifity="C",             termSpecifity="",  description="Cyano"                                  ),
+    "Cys->Dha":         Modification(name="Cys->Dha",         gainFormula="",              lossFormula="H2S",   aminoSpecifity="C",             termSpecifity="",  description="Dehydroalanine (from Cysteine)"         ),
+    "Cystine":          Modification(name="Cystine",          gainFormula="",              lossFormula="H",     aminoSpecifity="C",             termSpecifity="",  description="Half of a disulfide bridge"             ),
+    "Deamidation":      Modification(name="Deamidation",      gainFormula="O",             lossFormula="HN",    aminoSpecifity="NQRF",          termSpecifity="",  description="Deamidation"                            ),
+    "Dehydrated":       Modification(name="Dehydrated",       gainFormula="",              lossFormula="H2O",   aminoSpecifity="NQSTYDC",       termSpecifity="",  description="Dehydration"                            ),
+    "Diacylglycerol":   Modification(name="Diacylglycerol",   gainFormula="H68C37O4",      lossFormula="",      aminoSpecifity="C",             termSpecifity="",  description="Diacylglycerol"                         ),
+    "Dimethyl":         Modification(name="Dimethyl",         gainFormula="C2H6",          lossFormula="H2",    aminoSpecifity="KRNP",          termSpecifity="N", description="Di-Methylation"                         ),
+    "Dioxidation":      Modification(name="Dioxidation",      gainFormula="O2H2",          lossFormula="H2",    aminoSpecifity="PRKMFWYC",      termSpecifity="",  description="Dihydroxy"                              ),
+    "Ethanolyl":        Modification(name="Ethanolyl",        gainFormula="H4C2O",         lossFormula="",      aminoSpecifity="C",             termSpecifity="",  description="Ethanolation of Cys"                    ),
+    "Ethyl":            Modification(name="Ethyl",            gainFormula="H4C2",          lossFormula="",      aminoSpecifity="KED",           termSpecifity="N", description="Ethylation"                             ),
+    "FAD":              Modification(name="FAD",              gainFormula="H31C27N9O15P2", lossFormula="",      aminoSpecifity="CHY",           termSpecifity="",  description="Flavin adenine dinucleotide"            ),
+    "FMNH":             Modification(name="FMNH",             gainFormula="H19C17N4O9P",   lossFormula="",      aminoSpecifity="CH",            termSpecifity="",  description="Flavin mononucleotide"                  ),
+    "Fluorescein":      Modification(name="Fluorescein",      gainFormula="H14C22NO6",     lossFormula="",      aminoSpecifity="C",             termSpecifity="",  description="5-iodoacetamidofluorescein"             ),
+    "Fmoc":             Modification(name="Fmoc",             gainFormula="C15H11O2",      lossFormula="H",     aminoSpecifity="K",             termSpecifity="N", description="Fmoc protecting group"                  ),
+    "Formyl":           Modification(name="Formyl",           gainFormula="CHO",           lossFormula="H",     aminoSpecifity="KST",           termSpecifity="N", description="Formylation"                            ),
+    "FormylMet":        Modification(name="FormylMet",        gainFormula="H10C6NO2S",     lossFormula="",      aminoSpecifity="",              termSpecifity="N", description="Addition of N-formyl Methionine"        ),
+    "Guanidination":    Modification(name="Guanidination",    gainFormula="CH3N2",         lossFormula="H",     aminoSpecifity="K",             termSpecifity="",  description="Homoarginine from Lysine"               ),
+    "Guanidinyl":       Modification(name="Guanidinyl",       gainFormula="H2CN2",         lossFormula="",      aminoSpecifity="K",             termSpecifity="",  description="Guanidination"                          ),
+    "Heme":             Modification(name="Heme",             gainFormula="H32C34N4O4Fe",  lossFormula="",      aminoSpecifity="CH",            termSpecifity="",  description="Heme"                                   ),
+    "Hep":              Modification(name="Hep",              gainFormula="C7H14O7",       lossFormula="H2O",   aminoSpecifity="KNQRST",        termSpecifity="",  description="Heptose"                                ),
+    "Hex":              Modification(name="Hex",              gainFormula="C6H12O6",       lossFormula="H2O",   aminoSpecifity="KNTWCRY",       termSpecifity="N", description="Hexose"                                 ),
+    "HexN":             Modification(name="HexN",             gainFormula="C6H13N1O5",     lossFormula="H2O",   aminoSpecifity="KNTW",          termSpecifity="",  description="Hexosamine"                             ),
+    "HexNAc":           Modification(name="HexNAc",           gainFormula="C8H15N1O6",     lossFormula="H2O",   aminoSpecifity="NST",           termSpecifity="",  description="N-Acetylhexosamine"                     ),
+    "Hydroxymethyl":    Modification(name="Hydroxymethyl",    gainFormula="H2CO",          lossFormula="",      aminoSpecifity="N",             termSpecifity="",  description="Hydroxymethyl"                          ),
+    "Iodo":             Modification(name="Iodo",             gainFormula="I",             lossFormula="H",     aminoSpecifity="YH",            termSpecifity="",  description="Iodination"                             ),
+    "Label:13C(6)":     Modification(name="Label:13C(6)",     gainFormula="C{13}6",        lossFormula="C6",    aminoSpecifity="KR",            termSpecifity="",  description="13C(6) Silac label"                     ),
+    "Lipoyl":           Modification(name="Lipoyl",           gainFormula="H12C8OS2",      lossFormula="",      aminoSpecifity="K",             termSpecifity="",  description="Lipoyl"                                 ),
+    "Methyl":           Modification(name="Methyl",           gainFormula="CH3",           lossFormula="H",     aminoSpecifity="CHKNQRIL",      termSpecifity="N", description="Methylation"                            ),
+    "Myristoyl":        Modification(name="Myristoyl",        gainFormula="C14H27O",       lossFormula="H",     aminoSpecifity="GKC",           termSpecifity="N", description="Myristoylation"                         ),
+    "Nitro":            Modification(name="Nitro",            gainFormula="NO2",           lossFormula="H",     aminoSpecifity="WY",            termSpecifity="",  description="Oxidation to nitro"                     ),
+    "Oxidation":        Modification(name="Oxidation",        gainFormula="O",             lossFormula="",      aminoSpecifity="ODKNPFYRMCHWG", termSpecifity="",  description="Oxidation or Hydroxylation"             ),
+    "Palmitoyl":        Modification(name="Palmitoyl",        gainFormula="C16H31O",       lossFormula="H",     aminoSpecifity="CKST",          termSpecifity="N", description="Palmitoylation"                         ),
+    "Pentose":          Modification(name="Pentose",          gainFormula="C5H10O5",       lossFormula="H2O",   aminoSpecifity="STD",           termSpecifity="",  description="Pentose"                                ),
+    "Phenylisocyanate": Modification(name="Phenylisocyanate", gainFormula="H5C7NO",        lossFormula="",      aminoSpecifity="",              termSpecifity="N", description="Phenyl isocyanate"                      ),
+    "Phospho":          Modification(name="Phospho",          gainFormula="H2PO3",         lossFormula="H",     aminoSpecifity="STYDHCR",       termSpecifity="",  description="Phosphorylation"                        ),
+    "Propionamide":     Modification(name="Propionamide",     gainFormula="C3H6ON",        lossFormula="H",     aminoSpecifity="C",             termSpecifity="",  description="Acrylamide adduct"                      ),
+    "SeCys":            Modification(name="SeCys",            gainFormula="Se",            lossFormula="S",     aminoSpecifity="C",             termSpecifity="",  description="Selenium replaces sulphur in Cysteine"  ),
+    "SeMet":            Modification(name="SeMet",            gainFormula="Se",            lossFormula="S",     aminoSpecifity="M",             termSpecifity="",  description="Selenium replaces sulphur in Methionine"),
+    "Sulfo":            Modification(name="Sulfo",            gainFormula="HSO3",          lossFormula="H",     aminoSpecifity="STYC",          termSpecifity="",  description="O-Sulfonation"                          ),
+    "Tyr->Dha":         Modification(name="Tyr->Dha",         gainFormula="",              lossFormula="H6C6O", aminoSpecifity="Y",             termSpecifity="",  description="Dehydroalanine (from Tyrosine)"         ),
+    "dHex":             Modification(name="dHex",             gainFormula="C6H12O5",       lossFormula="H2O",   aminoSpecifity="ST",            termSpecifity="",  description="Deoxyhexose, fucose"                    ),
+    "pCMB":             Modification(name="pCMB",             gainFormula="C7H5HgO2",      lossFormula="H",     aminoSpecifity="C",             termSpecifity="",  description="p-Chloromercurybenzoate"                ),
+    "tButyl":           Modification(name="tButyl",           gainFormula="C4H9",          lossFormula="H",     aminoSpecifity="CDEHSTY",       termSpecifity="",  description="tButyl protecting group"                ),
 }
+# ruff: enable[E501]
 
 
 # LOAD FUNCTIONS
@@ -2125,14 +1497,13 @@ modifications = {
 
 
 def loadMonomers(
-    path=os.path.join(blocksdir, "monomers.xml"), clear=False, replace=False
-):
+    path: str | Path = Path(blocksdir) / "monomers.xml", clear=False, replace=False
+) -> None:
     """Parse monomers XML and get data."""
-
     container = {}
 
     # parse XML
-    document = xml.dom.minidom.parse(path)
+    document = xml.dom.minidom.parse(str(path))
 
     # get monomers
     monomerTags = document.getElementsByTagName("monomer")
@@ -2150,7 +1521,7 @@ def loadMonomers(
             losses = attr.split(";")
 
         # add object
-        container[abbr] = monomer(
+        container[abbr] = Monomer(
             abbr=abbr, formula=formula, losses=losses, name=name, category=category
         )
 
@@ -2165,13 +1536,14 @@ def loadMonomers(
 # ----
 
 
-def loadEnzymes(path=os.path.join(blocksdir, "enzymes.xml"), clear=False, replace=True):
+def loadEnzymes(
+    path: str | Path = Path(blocksdir) / "enzymes.xml", clear=False, replace=True
+) -> None:
     """Parse enzymes XML and get data."""
-
     container = {}
 
     # parse XML
-    document = xml.dom.minidom.parse(path)
+    document = xml.dom.minidom.parse(str(path))
 
     # get enzymes
     enzymeTags = document.getElementsByTagName("enzyme")
@@ -2194,7 +1566,7 @@ def loadEnzymes(path=os.path.join(blocksdir, "enzymes.xml"), clear=False, replac
         modsAfter = bool(int(allowModsTags[0].getAttribute("after")))
 
         # add objects
-        container[name] = enzyme(
+        container[name] = Enzyme(
             name=name,
             expression=expression,
             nTermFormula=nTermFormula,
@@ -2212,17 +1584,17 @@ def loadEnzymes(path=os.path.join(blocksdir, "enzymes.xml"), clear=False, replac
 
 
 # ----
-
-
 def loadModifications(
-    path=os.path.join(blocksdir, "modifications.xml"), clear=False, replace=True
-):
+    path: str | Path = Path(blocksdir) / "modifications.xml",
+    clear=False,
+    replace=True,
+) -> None:
     """Parse modifications XML and get data."""
-
     container = {}
 
     # parse XML
-    document = xml.dom.minidom.parse(path)
+    document = xml.dom.minidom.parse(str(path))
+
 
     # get modifications
     modificationTags = document.getElementsByTagName("modification")
@@ -2245,7 +1617,7 @@ def loadModifications(
         description = _getNodeText(descriptionTags[0])
 
         # add object
-        container[name] = modification(
+        container[name] = Modification(
             name=name,
             gainFormula=gainFormula,
             lossFormula=lossFormula,
@@ -2267,7 +1639,6 @@ def loadModifications(
 
 def _getNodeText(node):
     """Get text from node list."""
-
     buff = ""
     for node in node.childNodes:
         if node.nodeType == node.TEXT_NODE:
@@ -2283,9 +1654,8 @@ def _getNodeText(node):
 # --------------
 
 
-def saveMonomers(path=os.path.join(blocksdir, "monomers.xml")):
+def saveMonomers(path: str | Path = Path(blocksdir) / "monomers.xml") -> bool | None:
     """Make and save monomers XML."""
-
     # make monomers xml
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mspyMonomers version="1.0">\n'
@@ -2293,21 +1663,16 @@ def saveMonomers(path=os.path.join(blocksdir, "monomers.xml")):
     abbrs = list(monomers.keys())
     abbrs.sort()
     for abbr in abbrs:
-        if monomers[abbr].category != "_InternalAA":
-            buff += '  <monomer abbr="{}" name="{}" formula="{}" category="{}" losses="{}" />\n'.format(
-                monomers[abbr].abbr,
-                monomers[abbr].name,
-                monomers[abbr].formula,
-                monomers[abbr].category,
-                ";".join(monomers[abbr].losses),
-            )
+        monomer = monomers[abbr]
+        if monomer.category != "_InternalAA":
+            losses = ";".join(monomer.losses)
+            buff += f'  <monomer abbr="{monomer.abbr}" name="{monomer.name}" formula="{monomer.formula}" category="{monomer.category}" losses="{losses}" />\n'
 
     buff += "</mspyMonomers>"
 
     # save monomers file
     try:
-        with open(path, "wb") as f:
-            f.write(buff.encode("utf-8"))
+        Path(path).write_bytes(buff.encode("utf-8"))
         return True
     except Exception:
         return False
@@ -2316,9 +1681,8 @@ def saveMonomers(path=os.path.join(blocksdir, "monomers.xml")):
 # ----
 
 
-def saveEnzymes(path=os.path.join(blocksdir, "enzymes.xml")):
+def saveEnzymes(path: str | Path = Path(blocksdir) / "enzymes.xml") -> bool | None:
     """Make and save enzymes XML."""
-
     # make enzymes xml
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mspyEnzymes version="1.0">\n'
@@ -2336,8 +1700,7 @@ def saveEnzymes(path=os.path.join(blocksdir, "enzymes.xml")):
 
     # save enzymes file
     try:
-        with open(path, "wb") as f:
-            f.write(buff.encode("utf-8"))
+        Path(path).write_bytes(buff.encode("utf-8"))
         return True
     except Exception:
         return False
@@ -2346,9 +1709,8 @@ def saveEnzymes(path=os.path.join(blocksdir, "enzymes.xml")):
 # ----
 
 
-def saveModifications(path=os.path.join(blocksdir, "modifications.xml")):
+def saveModifications(path: str | Path = Path(blocksdir) / "modifications.xml") -> bool | None:
     """Make and save modifications XML."""
-
     # make modifications xml
     buff = '<?xml version="1.0" encoding="utf-8" ?>\n'
     buff += '<mspyModifications version="1.0">\n'
@@ -2366,8 +1728,7 @@ def saveModifications(path=os.path.join(blocksdir, "modifications.xml")):
 
     # save modifications file
     try:
-        with open(path, "wb") as f:
-            f.write(buff.encode("utf-8"))
+        Path(path).write_bytes(buff.encode("utf-8"))
         return True
     except Exception:
         return False
@@ -2378,7 +1739,6 @@ def saveModifications(path=os.path.join(blocksdir, "modifications.xml")):
 
 def _escape(text):
     """Clear special characters such as <> etc."""
-
     text = text.strip()
     search = ("&", '"', "'", "<", ">")
     replace = ("&amp;", "&quot;", "&apos;", "&lt;", "&gt;")

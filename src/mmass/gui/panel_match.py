@@ -24,19 +24,17 @@ import wx
 from mmass import mspy
 from mmass.mspy import plot
 
-from . import config, doc, images, mwx
-
 # load modules
-from .ids import *
+from . import config, doc, ids, images, mwx
 
 # FLOATING PANEL WITH MATCH TOOLS
 # -------------------------------
 
 
-class panelMatch(wx.Frame):
+class PanelMatch(wx.Frame):
     """Data match tool."""
 
-    def __init__(self, parentTool, mainFrame, module):
+    def __init__(self, parentTool, MainFrame, module) -> None:
         wx.Frame.__init__(
             self,
             parentTool,
@@ -47,7 +45,7 @@ class panelMatch(wx.Frame):
         )
 
         self.parentTool = parentTool
-        self.mainFrame = mainFrame
+        self.MainFrame = MainFrame
 
         self.processing = None
 
@@ -68,9 +66,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # set frame title
         if self.currentModule == "massfilter":
             self.SetTitle("Match References")
@@ -115,16 +112,15 @@ class panelMatch(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make buttons
         self.errors_butt = wx.BitmapButton(
             panel,
-            ID_matchErrors,
+            ids.ID_matchErrors,
             images.lib["matchErrorsOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -134,7 +130,7 @@ class panelMatch(wx.Frame):
 
         self.summary_butt = wx.BitmapButton(
             panel,
-            ID_matchSummary,
+            ids.ID_matchSummary,
             images.lib["matchSummaryOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -151,7 +147,7 @@ class panelMatch(wx.Frame):
             -1,
             str(config.match["tolerance"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         self.unitsDa_radio = wx.RadioButton(panel, -1, "Da", style=wx.RB_GROUP)
@@ -215,9 +211,8 @@ class panelMatch(wx.Frame):
 
     def makeControlbar(self):
         """Make controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -274,14 +269,13 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def makeErrorCanvas(self):
+    def makeErrorCanvas(self) -> None:
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.errorCanvas = plot.canvas(
+        self.errorCanvas = plot.Canvas(
             self, size=(621, 220), style=mwx.PLOTCANVAS_STYLE_PANEL
         )
-        self.errorCanvas.draw(plot.container([]))
+        self.errorCanvas.draw(plot.Container([]))
 
         # set default params
         self.errorCanvas.setProperties(xLabel="m/z")
@@ -313,15 +307,14 @@ class panelMatch(wx.Frame):
         )
         self.errorCanvas.setProperties(axisFont=axisFont)
 
-        self.errorCanvas.draw(plot.container([]))
+        self.errorCanvas.draw(plot.Container([]))
 
     # ----
 
-    def makeSummaryList(self):
+    def makeSummaryList(self) -> None:
         """Make match summary list."""
-
         # init list
-        self.summaryList = mwx.sortListCtrl(
+        self.summaryList = mwx.SortListCtrl(
             self, -1, size=(631, 200), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.summaryList.SetFont(wx.SMALL_FONT)
@@ -339,11 +332,10 @@ class panelMatch(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -368,9 +360,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Destroy this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -381,14 +372,13 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_matchErrors:
+            if evt.GetId() == ids.ID_matchErrors:
                 tool = "errors"
-            elif evt.GetId() == ID_matchSummary:
+            elif evt.GetId() == ids.ID_matchSummary:
                 tool = "summary"
 
         # set current tool
@@ -417,9 +407,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -440,9 +429,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -450,9 +438,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onFilter(self, evt):
+    def onFilter(self, evt) -> None:
         """Apply peaklist filter."""
-
         # get current filters
         config.match["filterAnnotations"] = 0
         if self.filterAnnotations_check.GetValue():
@@ -489,9 +476,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onMatch(self, evt=None):
+    def onMatch(self, evt=None) -> None:
         """Match data to peaklist."""
-
         # check processing
         if self.processing:
             return
@@ -544,9 +530,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onCalibrate(self, evt):
+    def onCalibrate(self, evt) -> None:
         """Use matches for calibration."""
-
         # check references
         if not self.currentCalibrationPoints:
             wx.Bell()
@@ -557,9 +542,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def onUnitsChanged(self, evt=None):
+    def onUnitsChanged(self, evt=None) -> None:
         """Change units in error plot."""
-
         # get units
         if self.unitsDa_radio.GetValue():
             config.match["units"] = "Da"
@@ -583,9 +567,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def setData(self, matchData, summaryData=None):
+    def setData(self, matchData, summaryData=None) -> None:
         """Set data."""
-
         # update values
         self.currentData = matchData
         self.currentSummaryData = summaryData
@@ -603,9 +586,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             config.match["tolerance"] = float(self.tolerance_value.GetValue())
@@ -640,15 +622,14 @@ class panelMatch(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def getPeaklist(self):
+    def getPeaklist(self) -> None:
         """Get current peaklist according to specified filter."""
-
         # get filters
         filters = ""
         if config.match["filterAnnotations"]:
@@ -663,13 +644,12 @@ class panelMatch(wx.Frame):
             filters += "X"
 
         # get peaklist
-        self.currentPeaklist = self.mainFrame.getCurrentPeaklist(filters)
+        self.currentPeaklist = self.MainFrame.getCurrentPeaklist(filters)
 
     # ----
 
-    def runMatch(self):
+    def runMatch(self) -> None:
         """Match data to peaklist."""
-
         # run task
         try:
             # set columns
@@ -677,17 +657,17 @@ class panelMatch(wx.Frame):
                 massCol = 1
                 chargeCol = None
                 errorCol = 2
-                matchObject = doc.annotation
+                matchObject = doc.Annotation
             elif self.currentModule == "digest" or self.currentModule == "fragment":
                 massCol = 2
                 chargeCol = 3
                 errorCol = 5
-                matchObject = doc.match
+                matchObject = doc.Match
             elif self.currentModule == "compounds":
                 massCol = 1
                 chargeCol = 2
                 errorCol = 5
-                matchObject = doc.annotation
+                matchObject = doc.Annotation
 
             # clear previous match
             for item in self.currentData:
@@ -744,7 +724,7 @@ class panelMatch(wx.Frame):
             self.makeMatchSummary()
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentErrors = []
             self.currentCalibrationPoints = []
             self.currentSummary = []
@@ -755,9 +735,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all."""
-
         self.currentData = None
         self.currentSummaryData = None
         self.currentPeaklist = None
@@ -769,15 +748,14 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def updateErrorCanvas(self):
+    def updateErrorCanvas(self) -> None:
         """Update error canvas."""
-
         # make container
-        container = plot.container([])
+        container = plot.Container([])
 
         # make points object
         self.currentErrors.sort()
-        points = plot.points(
+        points = plot.Points(
             self.currentErrors,
             pointColour=(0, 255, 0),
             showPoints=True,
@@ -788,8 +766,8 @@ class panelMatch(wx.Frame):
         # make peaklist object
         if self.currentPeaklist:
             peaks = self.makeCurrentPeaklist()
-            peaklist = plot.spectrum(
-                mspy.scan(peaklist=peaks), tickColour=(170, 170, 170), showLabels=False
+            peaklist = plot.Spectrum(
+                mspy.Scan(peaklist=peaks), tickColour=(170, 170, 170), showLabels=False
             )
             container.append(peaklist)
 
@@ -803,9 +781,8 @@ class panelMatch(wx.Frame):
 
     # ----
 
-    def updateMatchSummary(self):
+    def updateMatchSummary(self) -> None:
         """Update match summary list."""
-
         # clear previous data and set new
         self.summaryList.DeleteAllItems()
         self.summaryList.setDataMap(self.currentSummary)
@@ -830,7 +807,6 @@ class panelMatch(wx.Frame):
 
     def makeCurrentPeaklist(self):
         """Convert peaklist for current error range."""
-
         # get error range
         minY = 0
         maxY = 1
@@ -849,16 +825,15 @@ class panelMatch(wx.Frame):
         f = abs(maxY - minY) / basePeak.intensity
         for peak in self.currentPeaklist:
             intensity = (peak.intensity * f) + minY
-            peaklist.append(mspy.peak(mz=peak.mz, ai=intensity, base=minY))
+            peaklist.append(mspy.Peak(mz=peak.mz, ai=intensity, base=minY))
 
         # convert to mspy.peaklist
-        return mspy.peaklist(peaklist)
+        return mspy.Peaklist(peaklist)
 
     # ----
 
-    def makeMatchSummary(self):
+    def makeMatchSummary(self) -> None:
         """Make summary info for current match."""
-
         self.currentSummary = []
 
         # get items name
@@ -877,7 +852,7 @@ class panelMatch(wx.Frame):
         )
 
         # get searched items
-        value = "%d" % len(self.currentData)
+        value = f"{len(self.currentData)}"
         label = f"Number of {itemName} searched"
         self.currentSummary.append((label, value))
 

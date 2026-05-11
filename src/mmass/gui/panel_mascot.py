@@ -27,19 +27,17 @@ from pathlib import Path
 
 import wx
 
-from . import config, images, libs, mwx
-
 # load modules
-from .ids import ID_mascotMIS, ID_mascotPMF, ID_mascotQuery, ID_mascotSQ
+from . import config, ids, images, libs, mwx
 
 # FLOATING PANEL WITH MASCOT SEARCH
 # ---------------------------------
 
 
-class panelMascot(wx.Frame):
+class PanelMascot(wx.Frame):
     """Mascot search tool."""
 
-    def __init__(self, parent, tool=config.mascot["common"]["searchType"]):
+    def __init__(self, parent, tool=config.mascot["common"]["searchType"]) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -66,9 +64,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -103,16 +100,15 @@ class panelMascot(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make tools
         self.pmf_butt = wx.BitmapButton(
             panel,
-            ID_mascotPMF,
+            ids.ID_mascotPMF,
             images.lib["mascotPMFOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -122,7 +118,7 @@ class panelMascot(wx.Frame):
 
         self.mis_butt = wx.BitmapButton(
             panel,
-            ID_mascotMIS,
+            ids.ID_mascotMIS,
             images.lib["mascotMISOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -132,7 +128,7 @@ class panelMascot(wx.Frame):
 
         self.sq_butt = wx.BitmapButton(
             panel,
-            ID_mascotSQ,
+            ids.ID_mascotSQ,
             images.lib["mascotSQOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -142,7 +138,7 @@ class panelMascot(wx.Frame):
 
         self.query_butt = wx.BitmapButton(
             panel,
-            ID_mascotQuery,
+            ids.ID_mascotQuery,
             images.lib["mascotQueryOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -210,7 +206,6 @@ class panelMascot(wx.Frame):
 
     def makePMFPanel(self):
         """Make controls for search form panel."""
-
         panel = wx.Panel(self, -1)
 
         # make info elements
@@ -282,7 +277,7 @@ class panelMascot(wx.Frame):
         # make masses elements
         paramPMFProteinMass_label = wx.StaticText(panel, -1, "Protein mass:")
         self.paramPMFProteinMass_value = wx.TextCtrl(
-            panel, -1, "", size=(60, -1), validator=mwx.validator("floatPos")
+            panel, -1, "", size=(60, -1), validator=mwx.Validator("floatPos")
         )
         paramPMFProteinMassUnits_label = wx.StaticText(panel, -1, "kDa")
 
@@ -292,7 +287,7 @@ class panelMascot(wx.Frame):
             -1,
             str(config.mascot["pmf"]["peptideTol"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramPMFPeptideTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "mmu", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -354,31 +349,31 @@ class panelMascot(wx.Frame):
         infoGrid.AddGrowableCol(1)
         infoGrid.AddGrowableCol(3)
 
-        sequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
-        sequenceGrid.Add(
+        SequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
+        SequenceGrid.Add(
             paramPMFTaxonomy_label,
             (0, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramPMFTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramPMFTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramPMFDatabase_label,
             (1, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramPMFDatabase_choice, (1, 1), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramPMFDatabase_choice, (1, 1), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramPMFEnzyme_label, (1, 2), flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL
         )
-        sequenceGrid.Add(self.paramPMFEnzyme_choice, (1, 3), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramPMFEnzyme_choice, (1, 3), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramPMFMiscleavages_label,
             (1, 4),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramPMFMiscleavages_choice, (1, 5))
-        sequenceGrid.AddGrowableCol(1)
-        sequenceGrid.AddGrowableCol(3)
+        SequenceGrid.Add(self.paramPMFMiscleavages_choice, (1, 5))
+        SequenceGrid.AddGrowableCol(1)
+        SequenceGrid.AddGrowableCol(3)
 
         modsGrid = wx.GridBagSizer(5, 20)
         modsGrid.Add(
@@ -454,7 +449,7 @@ class panelMascot(wx.Frame):
             wx.EXPAND | wx.LEFT | wx.RIGHT,
             mwx.PANEL_SPACE_MAIN,
         )
-        mainSizer.Add(sequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
+        mainSizer.Add(SequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
         mainSizer.Add(
             wx.StaticLine(panel),
             0,
@@ -487,7 +482,6 @@ class panelMascot(wx.Frame):
 
     def makeMISPanel(self):
         """Make controls for search form panel."""
-
         panel = wx.Panel(self, -1)
 
         # make info elements
@@ -559,7 +553,7 @@ class panelMascot(wx.Frame):
         # make masses elements
         paramMISPrecursorMass_label = wx.StaticText(panel, -1, "Precursor m/z:")
         self.paramMISPeptideMass_value = wx.TextCtrl(
-            panel, -1, "", size=(145, -1), validator=mwx.validator("floatPos")
+            panel, -1, "", size=(145, -1), validator=mwx.Validator("floatPos")
         )
 
         paramMISPeptideTol_label = wx.StaticText(panel, -1, "Precursor tolerance:")
@@ -568,7 +562,7 @@ class panelMascot(wx.Frame):
             -1,
             str(config.mascot["mis"]["peptideTol"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramMISPeptideTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "mmu", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -583,7 +577,7 @@ class panelMascot(wx.Frame):
             -1,
             str(config.mascot["mis"]["msmsTol"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramMISMSMSTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -685,31 +679,31 @@ class panelMascot(wx.Frame):
         infoGrid.AddGrowableCol(1)
         infoGrid.AddGrowableCol(3)
 
-        sequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
-        sequenceGrid.Add(
+        SequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
+        SequenceGrid.Add(
             paramMISTaxonomy_label,
             (0, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMISTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMISTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMISDatabase_label,
             (1, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMISDatabase_choice, (1, 1), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMISDatabase_choice, (1, 1), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMISEnzyme_label, (1, 2), flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL
         )
-        sequenceGrid.Add(self.paramMISEnzyme_choice, (1, 3), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMISEnzyme_choice, (1, 3), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMISMiscleavages_label,
             (1, 4),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMISMiscleavages_choice, (1, 5))
-        sequenceGrid.AddGrowableCol(1)
-        sequenceGrid.AddGrowableCol(3)
+        SequenceGrid.Add(self.paramMISMiscleavages_choice, (1, 5))
+        SequenceGrid.AddGrowableCol(1)
+        SequenceGrid.AddGrowableCol(3)
 
         modsGrid = wx.GridBagSizer(5, 20)
         modsGrid.Add(
@@ -817,7 +811,7 @@ class panelMascot(wx.Frame):
             wx.EXPAND | wx.LEFT | wx.RIGHT,
             mwx.PANEL_SPACE_MAIN,
         )
-        mainSizer.Add(sequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
+        mainSizer.Add(SequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
         mainSizer.Add(
             wx.StaticLine(panel),
             0,
@@ -850,7 +844,6 @@ class panelMascot(wx.Frame):
 
     def makeSQPanel(self):
         """Make controls for search form panel."""
-
         panel = wx.Panel(self, -1)
 
         # make info elements
@@ -926,7 +919,7 @@ class panelMascot(wx.Frame):
             -1,
             str(config.mascot["sq"]["peptideTol"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramSQPeptideTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "mmu", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -941,7 +934,7 @@ class panelMascot(wx.Frame):
             -1,
             str(config.mascot["sq"]["msmsTol"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramSQMSMSTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -1036,31 +1029,31 @@ class panelMascot(wx.Frame):
         infoGrid.AddGrowableCol(1)
         infoGrid.AddGrowableCol(3)
 
-        sequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
-        sequenceGrid.Add(
+        SequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
+        SequenceGrid.Add(
             paramSQTaxonomy_label,
             (0, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramSQTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramSQTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramSQDatabase_label,
             (1, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramSQDatabase_choice, (1, 1), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramSQDatabase_choice, (1, 1), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramSQEnzyme_label, (1, 2), flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL
         )
-        sequenceGrid.Add(self.paramSQEnzyme_choice, (1, 3), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramSQEnzyme_choice, (1, 3), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramSQMiscleavages_label,
             (1, 4),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramSQMiscleavages_choice, (1, 5))
-        sequenceGrid.AddGrowableCol(1)
-        sequenceGrid.AddGrowableCol(3)
+        SequenceGrid.Add(self.paramSQMiscleavages_choice, (1, 5))
+        SequenceGrid.AddGrowableCol(1)
+        SequenceGrid.AddGrowableCol(3)
 
         modsGrid = wx.GridBagSizer(5, 20)
         modsGrid.Add(self.paramSQFixedMods_label, (0, 0), flag=wx.ALIGN_CENTER_VERTICAL)
@@ -1142,7 +1135,7 @@ class panelMascot(wx.Frame):
             wx.EXPAND | wx.LEFT | wx.RIGHT,
             mwx.PANEL_SPACE_MAIN,
         )
-        mainSizer.Add(sequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
+        mainSizer.Add(SequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
         mainSizer.Add(
             wx.StaticLine(panel),
             0,
@@ -1175,9 +1168,8 @@ class panelMascot(wx.Frame):
 
     def makeQueryPanel(self):
         """Make controls for query."""
-
         # init panels
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
         pklPanel = wx.Panel(self, -1)
@@ -1263,11 +1255,10 @@ class panelMascot(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         # pack elements
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -1283,9 +1274,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onClose(self, _evt):
+    def onClose(self, _evt) -> None:
         """Hide this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -1302,9 +1292,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -1324,9 +1313,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -1334,13 +1322,13 @@ class panelMascot(wx.Frame):
 
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_mascotPMF:
+            if evt.GetId() == ids.ID_mascotPMF:
                 tool = "pmf"
-            elif evt.GetId() == ID_mascotMIS:
+            elif evt.GetId() == ids.ID_mascotMIS:
                 tool = "mis"
-            elif evt.GetId() == ID_mascotSQ:
+            elif evt.GetId() == ids.ID_mascotSQ:
                 tool = "sq"
-            elif evt.GetId() == ID_mascotQuery:
+            elif evt.GetId() == ids.ID_mascotQuery:
                 tool = "query"
 
         # set current tool
@@ -1398,15 +1386,14 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onServerSelected(self, _evt=None):
+    def onServerSelected(self, _evt=None) -> None:
         """Get parameters from the server and update form."""
         self.updateServerParams()
 
     # ----
 
-    def onModificationSelected(self, _evt=None):
+    def onModificationSelected(self, _evt=None) -> None:
         """Count and show number of selected modifications."""
-
         if self.paramPMFFixedMods_label and self.paramPMFVariableMods_label:
             label = f"Fixed modifications: ({len(self.paramPMFFixedMods_listbox.GetSelections())})"
             self.paramPMFFixedMods_label.SetLabel(label)
@@ -1427,9 +1414,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onHiddenModifications(self, _evt=None):
+    def onHiddenModifications(self, _evt=None) -> None:
         """Enable / disable hidden modifications."""
-
         # get value
         config.mascot["pmf"]["hiddenMods"] = int(
             self.paramPMFHiddenMods_check.GetValue()
@@ -1445,9 +1431,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onGetPeaklist(self, evt=None):
+    def onGetPeaklist(self, evt=None) -> None:
         """Get current peaklist according to specified filter."""
-
         # get filters
         filters = ""
         if self.filterAnnotations_check.GetValue():
@@ -1481,9 +1466,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def onSearch(self, _evt):
-        """Make query and send data to Mascot."""
-
+    def onSearch(self, _evt) -> None:
+        """Make query and send data to mascot."""
         # get params
         if not self.getParams():
             return
@@ -1501,7 +1485,7 @@ class panelMascot(wx.Frame):
             webbrowser.open("file://" + str(path), autoraise=1)
         except Exception:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Unable to send data to Mascot server.",
                 message="Unknown error occured while creating the search page.",
@@ -1511,9 +1495,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set current document
         self.currentDocument = document
 
@@ -1541,9 +1524,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def getServerParams(self):
+    def getServerParams(self) -> bool | None:
         """Get form params from the selected server."""
-
         # server
         name = config.mascot["common"]["server"]
         server = libs.mascot[name]
@@ -1593,9 +1575,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get dialog params."""
-
         try:
             # PMF params
             if config.mascot["common"]["searchType"] == "pmf":
@@ -1810,9 +1791,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def checkParams(self):
+    def checkParams(self) -> bool:
         """Check search parameters."""
-
         errors = ""
         form = config.mascot["common"]["searchType"]
 
@@ -1931,7 +1911,7 @@ class panelMascot(wx.Frame):
         # show warning if errors
         if errors:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="You have the following errors in the search form.",
                 message=errors,
@@ -1944,9 +1924,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def updateServerParams(self):
+    def updateServerParams(self) -> None:
         """Get parameters from the server and update form."""
-
         # check processing
         if self.processing:
             return
@@ -1993,7 +1972,7 @@ class panelMascot(wx.Frame):
                 (wx.ID_CANCEL, "Close", -1, False, 15),
                 (wx.ID_OK, "Retry", -1, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() == wx.ID_OK:
                 dlg.Destroy()
                 self.updateServerParams()
@@ -2002,9 +1981,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def updateForm(self):
+    def updateForm(self) -> None:
         """Get params from selected server and update items."""
-
         # update databases
         self.paramPMFDatabase_choice.Clear()
         self.paramMISDatabase_choice.Clear()
@@ -2121,9 +2099,8 @@ class panelMascot(wx.Frame):
 
     # ----
 
-    def updateModification(self, tool=None):
+    def updateModification(self, tool=None) -> None:
         """Update modifications items."""
-
         # update PMF
         if not tool or tool == "pmf":
             self.paramPMFFixedMods_listbox.Clear()
@@ -2194,7 +2171,6 @@ class panelMascot(wx.Frame):
 
     def makeMGFQuery(self):
         """Make Mascot query."""
-
         form = config.mascot["common"]["searchType"]
 
         # common params
@@ -2279,8 +2255,8 @@ class panelMascot(wx.Frame):
     # ----
 
     def makeSearchHTML(self):
+        # ruff: disable[E501]
         """Format data to mascot html."""
-
         # make query
         query = self.makeMGFQuery()
 
@@ -2343,7 +2319,7 @@ class panelMascot(wx.Frame):
         buff += "  </form>\n"
         buff += "</body>\n"
         buff += "</html>\n"
-
+        # ruff: enable[E501]
         return buff
 
     # ----

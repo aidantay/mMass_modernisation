@@ -16,33 +16,33 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os.path
+from __future__ import annotations
+
 import re
+from pathlib import Path
 
 # load objects
 from . import obj_peak, obj_peaklist, obj_scan
 
-# load stopper
 
 # PARSE SIMPLE ASCII XY
 # ---------------------
 
 
-class parseXY:
+class ParseXY:
     """Parse data from ASCII XY."""
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
 
         # check path
-        if not os.path.exists(path):
-            raise OSError("File not found! --> " + self.path)
+        if not self.path.exists():
+            raise OSError(f"File not found! --> {self.path}")
 
     # ----
 
     def info(self):
         """Get document info."""
-
         return {
             "title": "",
             "operator": "",
@@ -57,7 +57,6 @@ class parseXY:
 
     def scan(self, dataType="continuous"):
         """Get spectrum from document."""
-
         # parse file
         data = self._parseData()
 
@@ -72,10 +71,9 @@ class parseXY:
 
     def _parseData(self):
         """Parse data."""
-
         # open document
         try:
-            with open(self.path, encoding="utf-8") as document:
+            with self.path.open(encoding="utf-8") as document:
                 rawData = document.readlines()
         except OSError:
             return False
@@ -109,17 +107,16 @@ class parseXY:
 
     def _makeScan(self, scanData, dataType):
         """Make scan object from raw data."""
-
-        # parse data as peaklist (discrete points)
+        # parse data as Peaklist (discrete points)
         if dataType == "discrete":
             buff = []
             for point in scanData:
-                buff.append(obj_peak.peak(point[0], point[1]))
-            scan = obj_scan.scan(peaklist=obj_peaklist.peaklist(buff))
+                buff.append(obj_peak.Peak(point[0], point[1]))
+            scan = obj_scan.Scan(peaklist=obj_peaklist.Peaklist(buff))
 
         # parse data as spectrum (continuous line)
         else:
-            scan = obj_scan.scan(profile=scanData)
+            scan = obj_scan.Scan(profile=scanData)
 
         return scan
 

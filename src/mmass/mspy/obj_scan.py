@@ -20,20 +20,17 @@ import copy
 
 import numpy
 
-# load objects
 # load modules
 from . import mod_peakpicking, mod_signal, obj_peak, obj_peaklist
-
-# load stopper
 
 # SCAN OBJECT DEFINITION
 # ----------------------
 
 
-class scan:
+class Scan:
     """Scan object definition."""
 
-    def __init__(self, profile=None, peaklist=None, **attr):
+    def __init__(self, profile=None, peaklist=None, **attr) -> None:
         if peaklist is None:
             peaklist = []
         if profile is None:
@@ -61,8 +58,8 @@ class scan:
         self.profile = profile
 
         # convert peaks to peaklist
-        if not isinstance(peaklist, obj_peaklist.peaklist):
-            peaklist = obj_peaklist.peaklist(peaklist)
+        if not isinstance(peaklist, obj_peaklist.Peaklist):
+            peaklist = obj_peaklist.Peaklist(peaklist)
         self.peaklist = peaklist
 
         # get additional attributes
@@ -72,14 +69,13 @@ class scan:
 
     # ----
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.profile)
 
     # ----
 
     def __add__(self, other):
         """Return A+B."""
-
         new = self.duplicate()
         new.combine(other)
         return new
@@ -88,7 +84,6 @@ class scan:
 
     def __sub__(self, other):
         """Return A-B."""
-
         new = self.duplicate()
         new.subtract(other)
         return new
@@ -97,16 +92,14 @@ class scan:
 
     def __mul__(self, y):
         """Return A*y."""
-
         new = self.duplicate()
         new.multiply(y)
         return new
 
     # ----
 
-    def reset(self):
+    def reset(self) -> None:
         """Clear scan buffers."""
-
         self._baseline = None
         self._baselineParams = {"window": None, "offset": None}
 
@@ -122,12 +115,12 @@ class scan:
 
     def noise(self, minX=None, maxX=None, mz=None, window=0.1):
         """Return noise level and width for specified m/z range or m/z value.
+
         minX (float) - lower m/z limit
         maxX (float) - upper m/z limit
         mz (float) - m/z value
         window (float) - percentage around specified m/z value to use for noise calculation
         """
-
         # calculate noise
         return mod_signal.noise(
             signal=self.profile, minX=minX, maxX=maxX, x=mz, window=window
@@ -137,10 +130,10 @@ class scan:
 
     def baseline(self, window=0.1, offset=0.0):
         """Return spectrum baseline data.
+
         window (float or None) - noise calculation window (%/100)
         offset (float) - baseline offset, relative to noise width (in %/100)
         """
-
         # calculate baseline
         if (
             self._baseline is None
@@ -160,7 +153,6 @@ class scan:
 
     def normalization(self):
         """Return normalization params."""
-
         # calculate range for spectrum and peaklist
         if len(self.profile) > 0 and len(self.peaklist) > 0:
             spectrumMax = numpy.maximum.reduce(self.profile)[1]
@@ -191,9 +183,9 @@ class scan:
 
     def intensity(self, mz):
         """Return interpolated intensity for given m/z.
+
         mz (float) - m/z value
         """
-
         # calculate peak intensity
         return mod_signal.intensity(self.profile, mz)
 
@@ -201,10 +193,10 @@ class scan:
 
     def width(self, mz, intensity):
         """Return peak width for given m/z and height.
+
         mz (float) - peak m/z value
         intensity (float) - intensity of width measurement
         """
-
         # calculate peak width
         return mod_signal.width(self.profile, mz, intensity)
 
@@ -212,12 +204,12 @@ class scan:
 
     def area(self, minX=None, maxX=None, baselineWindow=0.1, baselineOffset=0.0):
         """Return labeled peak in given m/z range.
+
         minX (float) - starting m/z value
         maxX (float) - ending m/z value
         baselineWindow (float or None) - noise calculation window (%/100)
         baselineOffset (float) - baseline offset, relative to noise width (in %/100)
         """
-
         # check data
         if len(self.profile) == 0:
             return 0.0
@@ -246,37 +238,34 @@ class scan:
 
     # SETTERS
 
-    def setprofile(self, profile):
+    def setprofile(self, profile) -> None:
         """Set new profile data."""
-
         self.profile = profile
         self.reset()
 
     # ----
 
-    def setpeaklist(self, peaks):
+    def setpeaklist(self, peaks) -> None:
         """Set new peaklist."""
-
         # convert peaks to peaklist
-        if isinstance(peaks, obj_peaklist.peaklist):
+        if isinstance(peaks, obj_peaklist.Peaklist):
             self.peaklist = peaks
         else:
-            self.peaklist = obj_peaklist.peaklist(peaks)
+            self.peaklist = obj_peaklist.Peaklist(peaks)
 
     # ----
 
     # MODIFIERS
 
-    def swap(self):
+    def swap(self) -> None:
         """Swap data between profile and peaklist."""
-
         # make new profile
         profile = [[i.mz, i.ai] for i in self.peaklist]
         profile = numpy.array(profile)
 
         # make new peaklist
-        peaks = [obj_peak.peak(i[0], i[1]) for i in self.profile]
-        peaks = obj_peaklist.peaklist(peaks)
+        peaks = [obj_peak.Peak(i[0], i[1]) for i in self.profile]
+        peaks = obj_peaklist.Peaklist(peaks)
 
         # update scan
         self.profile = profile
@@ -287,12 +276,12 @@ class scan:
 
     # ----
 
-    def crop(self, minX, maxX):
+    def crop(self, minX, maxX) -> None:
         """Crop profile and peaklist.
+
         minX (float) - lower m/z limit
         maxX (float) - upper m/z limit
         """
-
         # crop spectrum data
         self.profile = mod_signal.crop(self.profile, minX, maxX)
 
@@ -304,11 +293,11 @@ class scan:
 
     # ----
 
-    def multiply(self, y):
+    def multiply(self, y) -> None:
         """Multiply profile and peaklist by Y.
+
         y (int or float) - multiplier factor
         """
-
         # multiply spectrum
         if len(self.profile):
             self.profile = mod_signal.multiply(self.profile, y=y)
@@ -321,9 +310,8 @@ class scan:
 
     # ----
 
-    def normalize(self):
+    def normalize(self) -> None:
         """Normalize profile and peaklist."""
-
         # get normalization params
         f = self.normalization()
 
@@ -343,13 +331,13 @@ class scan:
 
     # ----
 
-    def combine(self, other):
+    def combine(self, other) -> None:
         """Add data from given scan.
+
         other (mspy.scan) - scan to combine with
         """
-
         # check scan
-        if not isinstance(other, scan):
+        if not isinstance(other, Scan):
             raise TypeError("Cannot combine with non-scan object!")
 
         # use profiles only
@@ -369,13 +357,13 @@ class scan:
 
     # ----
 
-    def overlay(self, other):
+    def overlay(self, other) -> None:
         """Overlay with data from given scan.
+
         other (mspy.scan) - scan to overlay with
         """
-
         # check scan
-        if not isinstance(other, scan):
+        if not isinstance(other, Scan):
             raise TypeError("Cannot overlay with non-scan object!")
 
         # use profiles only
@@ -391,13 +379,13 @@ class scan:
 
     # ----
 
-    def subtract(self, other):
+    def subtract(self, other) -> None:
         """Subtract given data from current scan.
+
         other (mspy.scan) - scan to subtract
         """
-
         # check scan
-        if not isinstance(other, scan):
+        if not isinstance(other, Scan):
             raise TypeError("Cannot subtract non-scan object!")
 
         # use profiles only
@@ -413,13 +401,13 @@ class scan:
 
     # ----
 
-    def smooth(self, method, window, cycles=1):
+    def smooth(self, method, window, cycles=1) -> None:
         """Smooth profile.
+
         method (MA GA SG) - smoothing method
         window (float) - m/z window size for smoothing
         cycles (int) - number of repeating cycles
         """
-
         # smooth data
         profile = mod_signal.smooth(
             signal=self.profile, method=method, window=window, cycles=cycles
@@ -434,12 +422,12 @@ class scan:
 
     # ----
 
-    def recalibrate(self, fn, params):
+    def recalibrate(self, fn, params) -> None:
         """Apply calibration to profile and peaklist.
+
         fn (function) - calibration model
         params (list or tuple) - params for calibration model
         """
-
         # calibrate profile
         for x, point in enumerate(self.profile):
             self.profile[x][0] = fn(params, point[0])
@@ -452,12 +440,12 @@ class scan:
 
     # ----
 
-    def subbase(self, window=0.1, offset=0.0):
+    def subbase(self, window=0.1, offset=0.0) -> None:
         """Subtract baseline from profile.
+
         window (float or None) - noise calculation window (%/100)
         offset (float) - baseline offset, relative to noise width (in %/100)
         """
-
         # get baseline
         baseline = self.baseline(window=window, offset=offset)
 
@@ -486,8 +474,9 @@ class scan:
         smoothMethod=None,
         smoothWindow=0.2,
         smoothCycles=1,
-    ):
+    ) -> bool:
         """Label centroides in current scan.
+
         pickingHeight (float) - peak picking height for centroiding
         absThreshold (float) - absolute intensity threshold
         relThreshold (float) - relative intensity threshold
@@ -498,7 +487,6 @@ class scan:
         smoothWindow (float) - m/z window size for smoothing
         smoothCycles (int) - number of smoothing cycles
         """
-
         # get baseline
         baseline = self.baseline(window=baselineWindow, offset=baselineOffset)
 
@@ -541,8 +529,9 @@ class scan:
         pickingHeight=0.75,
         baselineWindow=0.1,
         baselineOffset=0.0,
-    ):
+    ) -> bool:
         """Return labeled peak in given m/z range.
+
         mz (float) - m/z value to label
         minX (float) - m/z range start
         maxX (float) - m/z range end
@@ -550,7 +539,6 @@ class scan:
         baselineWindow (float) - noise calculation window (in %/100)
         baselineOffset (float) - baseline offset, relative to noise width (in %/100)
         """
-
         # get baseline
         baseline = self.baseline(window=baselineWindow, offset=baselineOffset)
 
@@ -575,13 +563,13 @@ class scan:
 
     # ----
 
-    def labelpoint(self, mz, baselineWindow=0.1, baselineOffset=0.0):
+    def labelpoint(self, mz, baselineWindow=0.1, baselineOffset=0.0) -> bool:
         """Label peak at given m/z value.
+
         mz (float) - m/z value to label
         baselineWindow (float) - noise calculation window (in %/100)
         baselineOffset (float) - baseline offset, relative to noise width (in %/100)
         """
-
         # get baseline
         baseline = self.baseline(window=baselineWindow, offset=baselineOffset)
 
@@ -601,14 +589,14 @@ class scan:
 
     def deisotope(
         self, maxCharge=1, mzTolerance=0.15, intTolerance=0.5, isotopeShift=0.0
-    ):
+    ) -> None:
         """Calculate peak charges and find isotopes.
+
         maxCharge (float) - max charge to be searched
         zTolerance (float) - absolute m/z tolerance for isotopes distance
         intTolerance (float) - relative intensity tolerance for isotopes and model (in %/100)
         isotopeShift (float) - isotope distance correction (neutral mass) (for HDX etc.)
         """
-
         # find istopes
         self.peaklist.deisotope(
             maxCharge=maxCharge,
@@ -619,11 +607,11 @@ class scan:
 
     # ----
 
-    def deconvolute(self, massType=0):
+    def deconvolute(self, massType=0) -> None:
         """Recalculate peaklist to singly charged.
+
         massType (0 or 1) - mass type used for m/z re-calculation, 0 = monoisotopic, 1 = average
         """
-
         # delete profile data
         self.profile = numpy.array([])
 
@@ -635,23 +623,23 @@ class scan:
 
     # ----
 
-    def consolidate(self, window, forceWindow=False):
+    def consolidate(self, window, forceWindow=False) -> None:
         """Group peaks within specified window.
+
         window (float) - default grouping window if no peak fwhm
         forceWindow (bool) - use default window for all peaks instead of fwhm
         """
-
         self.peaklist.consolidate(window=window, forceWindow=forceWindow)
 
     # ----
 
-    def remthreshold(self, absThreshold=0.0, relThreshold=0.0, snThreshold=0.0):
+    def remthreshold(self, absThreshold=0.0, relThreshold=0.0, snThreshold=0.0) -> None:
         """Remove peaks below threshold.
+
         absThreshold (float) - absolute intensity threshold
         relThreshold (float) - relative intensity threshold
         snThreshold (float) - signal to noise threshold
         """
-
         self.peaklist.remthreshold(
             absThreshold=absThreshold,
             relThreshold=relThreshold,
@@ -660,24 +648,24 @@ class scan:
 
     # ----
 
-    def remshoulders(self, window=2.5, relThreshold=0.05, fwhm=0.01):
+    def remshoulders(self, window=2.5, relThreshold=0.05, fwhm=0.01) -> None:
         """Remove shoulder peaks from current peaklist.
+
         window (float) - peak width multiplier to make search window
-        relThreshold (float) - max relative intensity of shoulder/parent peak (in %/100)
+        relThreshold (float) - max relative intensity of shoulder/parent Peak (in %/100)
         fwhm (float) - default peak width if not set in peak
         """
-
         self.peaklist.remshoulders(window=window, relThreshold=relThreshold, fwhm=fwhm)
 
     # ----
 
-    def remisotopes(self):
+    def remisotopes(self) -> None:
         """Remove isotopes from current peaklist."""
         self.peaklist.remisotopes()
 
     # ----
 
-    def remuncharged(self):
+    def remuncharged(self) -> None:
         """Remove uncharged peaks from current peaklist."""
         self.peaklist.remuncharged()
 

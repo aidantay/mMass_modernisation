@@ -25,16 +25,14 @@ import wx
 from mmass import mspy
 from mmass.mspy import plot
 
-from . import config, images, libs, mwx
-
 # load modules
-from .ids import *
+from . import config, ids, images, libs, mwx
 
 # FLOATING PANEL WITH CALIBRATION TOOL
 # ------------------------------------
 
 
-class panelCalibration(wx.Frame):
+class PanelCalibration(wx.Frame):
     """Calibration tool."""
 
     def __init__(self, parent: wx.Window, tool: str = "references") -> None:
@@ -66,7 +64,6 @@ class panelCalibration(wx.Frame):
 
     def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -95,16 +92,15 @@ class panelCalibration(wx.Frame):
 
     def makeToolbar(self) -> wx.Panel:
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make buttons
         self.references_butt = wx.BitmapButton(
             panel,
-            ID_calibrationReferences,
+            ids.ID_calibrationReferences,
             images.lib["calibrationReferencesOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -114,7 +110,7 @@ class panelCalibration(wx.Frame):
 
         self.errors_butt = wx.BitmapButton(
             panel,
-            ID_calibrationErrors,
+            ids.ID_calibrationErrors,
             images.lib["calibrationErrorsOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -195,9 +191,8 @@ class panelCalibration(wx.Frame):
 
     def makeReferencesPanel(self) -> wx.Sizer:
         """Make references selection panel."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -219,7 +214,7 @@ class panelCalibration(wx.Frame):
             -1,
             str(config.calibration["tolerance"]),
             size=(50, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.tolerance_value.SetFont(wx.SMALL_FONT)
         self.toleranceUnits_label = wx.StaticText(
@@ -262,9 +257,8 @@ class panelCalibration(wx.Frame):
 
     def makeReferencesList(self) -> None:
         """Make references list."""
-
         # init list
-        self.referencesList = mwx.sortListCtrl(
+        self.referencesList = mwx.SortListCtrl(
             self, -1, size=(651, 250), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.referencesList.SetFont(wx.SMALL_FONT)
@@ -291,9 +285,8 @@ class panelCalibration(wx.Frame):
 
     def makeErrorsPanel(self) -> wx.Window:
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.errorCanvas = plot.canvas(
+        self.errorCanvas = plot.Canvas(
             self, size=(-1, 250), style=mwx.PLOTCANVAS_STYLE_PANEL
         )
 
@@ -325,7 +318,7 @@ class panelCalibration(wx.Frame):
         )
         self.errorCanvas.setProperties(axisFont=axisFont)
 
-        self.errorCanvas.draw(plot.container([]))
+        self.errorCanvas.draw(plot.Container([]))
 
         return self.errorCanvas
 
@@ -333,11 +326,10 @@ class panelCalibration(wx.Frame):
 
     def makeGaugePanel(self) -> wx.Panel:
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         # pack elements
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -355,7 +347,6 @@ class panelCalibration(wx.Frame):
 
     def onClose(self, evt: wx.Event) -> None:
         """Hide this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -367,7 +358,6 @@ class panelCalibration(wx.Frame):
     # ----
     def onProcessing(self, status: bool = True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -389,12 +379,11 @@ class panelCalibration(wx.Frame):
 
     def onToolSelected(self, evt: wx.Event = None, tool: str | None = None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_calibrationReferences:
+            if evt.GetId() == ids.ID_calibrationReferences:
                 tool = "references"
-            elif evt.GetId() == ID_calibrationErrors:
+            elif evt.GetId() == ids.ID_calibrationErrors:
                 tool = "errors"
 
         # set current tool
@@ -427,7 +416,6 @@ class panelCalibration(wx.Frame):
 
     def onModelChanged(self, evt: wx.Event) -> None:
         """Fitting model has been changed."""
-
         # get model
         config.calibration["fitting"] = "linear"
         if self.quadraticFit_radio.GetValue():
@@ -448,7 +436,6 @@ class panelCalibration(wx.Frame):
 
     def onUnitsChanged(self, evt: wx.Event) -> None:
         """Set current units and update data."""
-
         # get units
         config.calibration["units"] = "Da"
         if self.unitsPpm_radio.GetValue():
@@ -476,7 +463,6 @@ class panelCalibration(wx.Frame):
 
     def onReferencesSelected(self, evt: wx.Event = None) -> None:
         """Update reference list."""
-
         # clear last calibration
         self.currentCalibration = None
         self.currentReferences = None
@@ -503,7 +489,6 @@ class panelCalibration(wx.Frame):
 
     def onStatCalibration(self, evt: wx.Event) -> None:
         """Use statistical calibration."""
-
         # enable statistical calibration
         if self.statCalibration_check.GetValue():
             self.references_choice.Enable(False)
@@ -520,7 +505,6 @@ class panelCalibration(wx.Frame):
 
     def onItemSelected(self, evt: wx.Event) -> None:
         """Show selected mass in spectrum canvas."""
-
         # get points
         points = []
         theoretical = self.currentReferences[evt.GetData()][1]
@@ -536,7 +520,6 @@ class panelCalibration(wx.Frame):
 
     def onItemActivated(self, evt: wx.Event) -> None:
         """Discard selected item from calibration."""
-
         # get item
         index = evt.GetData()
         row = evt.GetIndex()
@@ -558,7 +541,6 @@ class panelCalibration(wx.Frame):
 
     def onAssign(self, evt: wx.Event = None) -> None:
         """Assign reference masses to peaks."""
-
         # clear last calibration
         self.currentCalibration = None
 
@@ -587,7 +569,6 @@ class panelCalibration(wx.Frame):
 
     def onApply(self, evt: wx.Event) -> None:
         """Apply current calibration to document."""
-
         # check processing
         if self.processing:
             return
@@ -643,7 +624,6 @@ class panelCalibration(wx.Frame):
 
     def updateReferencesList(self, scroll: bool = False) -> None:
         """Update reference mass list."""
-
         # clear previous data and set new
         self.referencesList.DeleteAllItems()
         self.referencesList.setDataMap(self.currentReferences)
@@ -707,9 +687,8 @@ class panelCalibration(wx.Frame):
 
     def updateErrorPlot(self) -> None:
         """Update error plot."""
-
         # make container
-        container = plot.container([])
+        container = plot.Container([])
         minY = 0
         maxY = 1
 
@@ -725,7 +704,7 @@ class panelCalibration(wx.Frame):
                     intensities.append(item[5])
             if pointsAfter:
                 pointsAfter.sort()
-                obj = plot.points(
+                obj = plot.Points(
                     pointsAfter,
                     pointColour=(0, 255, 0),
                     legend="after",
@@ -742,7 +721,7 @@ class panelCalibration(wx.Frame):
                     intensities.append(item[4])
             if pointsBefore:
                 pointsBefore.sort()
-                obj = plot.points(
+                obj = plot.Points(
                     pointsBefore,
                     pointColour=(255, 100, 100),
                     legend="before",
@@ -768,7 +747,7 @@ class panelCalibration(wx.Frame):
                 curvePoints = self.makeCalibrationCurve()
                 curvePoints = numpy.array(curvePoints)
                 if config.calibration["units"] == "ppm":
-                    obj = plot.points(
+                    obj = plot.Points(
                         curvePoints,
                         lineColour=(255, 100, 100),
                         showLines=True,
@@ -776,7 +755,7 @@ class panelCalibration(wx.Frame):
                         lineStyle=mwx.DASHED_LINE,
                     )
                 else:
-                    obj = plot.points(
+                    obj = plot.Points(
                         curvePoints,
                         lineColour=(255, 100, 100),
                         showLines=True,
@@ -795,8 +774,8 @@ class panelCalibration(wx.Frame):
         # make peaklist
         if self.currentDocument and self.currentDocument.spectrum.peaklist:
             peaks = self.makeCurrentPeaklist(minY, maxY)
-            obj = plot.spectrum(
-                mspy.scan(peaklist=peaks), tickColour=(170, 170, 170), showLabels=False
+            obj = plot.Spectrum(
+                mspy.Scan(peaklist=peaks), tickColour=(170, 170, 170), showLabels=False
             )
             container.append(obj)
 
@@ -814,7 +793,6 @@ class panelCalibration(wx.Frame):
         self, document: "mspy.obj_document.Document", references: list | None = None
     ) -> None:
         """Set current document."""
-
         # set new document
         self.currentDocument = document
 
@@ -862,7 +840,6 @@ class panelCalibration(wx.Frame):
 
     def calcCalibration(self) -> None:
         """Get calibration based on currently assigned masses."""
-
         # clear last calibration
         self.currentCalibration = None
 
@@ -903,7 +880,6 @@ class panelCalibration(wx.Frame):
 
     def internalCalibration(self) -> None:
         """Assign reference masses to peaks."""
-
         # check references
         if not self.currentReferences:
             wx.Bell()
@@ -928,12 +904,12 @@ class panelCalibration(wx.Frame):
         for x, item in enumerate(self.currentReferences):
             for peak in peaklist:
                 delta = mspy.delta(peak.mz, item[1], config.calibration["units"])
-                if abs(delta) <= config.calibration["tolerance"]:
-                    if self.currentReferences[x][2] is None or abs(delta) < abs(
-                        self.currentReferences[x][4]
-                    ):
-                        self.currentReferences[x][2] = peak.mz
-                        self.currentReferences[x][4] = delta
+                if abs(delta) <= config.calibration["tolerance"] and (
+                    self.currentReferences[x][2] is None
+                    or abs(delta) < abs(self.currentReferences[x][4])
+                ):
+                    self.currentReferences[x][2] = peak.mz
+                    self.currentReferences[x][4] = delta
                 if delta > config.calibration["tolerance"]:
                     break
 
@@ -944,7 +920,6 @@ class panelCalibration(wx.Frame):
 
     def statisticalCalibration(self) -> None:
         """Do statistical calibration."""
-
         # get peaklist
         peaklist = self.currentDocument.spectrum.peaklist
         if not peaklist:
@@ -978,7 +953,6 @@ class panelCalibration(wx.Frame):
 
     def applyCalibration(self, fn: callable, params: list[float]) -> None:
         """Calibrate document."""
-
         # backup data
         self.currentDocument.backup(("spectrum", "notations"))
 
@@ -998,7 +972,6 @@ class panelCalibration(wx.Frame):
 
     def makeCalibrationCurve(self) -> list[tuple[float, float]]:
         """Make calibration curve to show in plot."""
-
         # get range
         minX = self.currentDocument.spectrum.peaklist[0].mz
         maxX = self.currentDocument.spectrum.peaklist[-1].mz
@@ -1023,7 +996,6 @@ class panelCalibration(wx.Frame):
         self, minY: float, maxY: float
     ) -> "mspy.obj_peaklist.Peaklist":
         """Convert peaklist for current error range."""
-
         # shift peaklist
         if (minY, maxY) != (0, 1):
             minY -= 0.05 * abs(maxY - minY)
@@ -1034,9 +1006,9 @@ class panelCalibration(wx.Frame):
         f = abs(maxY - minY) / basePeak.intensity
         for peak in self.currentDocument.spectrum.peaklist:
             intensity = (peak.intensity * f) + minY
-            peaklist.append(mspy.peak(mz=peak.mz, ai=intensity, base=minY))
+            peaklist.append(mspy.Peak(mz=peak.mz, ai=intensity, base=minY))
 
         # convert to mspy.peaklist
-        return mspy.peaklist(peaklist)
+        return mspy.Peaklist(peaklist)
 
     # ----

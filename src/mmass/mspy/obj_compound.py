@@ -15,19 +15,15 @@
 #     main directory of the program.
 # -------------------------------------------------------------------------
 
-# load stopper
-
-# load objects
-# load modules
 
 # COMPOUND OBJECT DEFINITION
 # --------------------------
 
 
-class compound:
+class Compound:
     """Compound object definition."""
 
-    def __init__(self, expression, **attr):
+    def __init__(self, expression, **attr) -> None:
         # check formula
         self._checkFormula(expression)
         self.expression = expression
@@ -47,9 +43,8 @@ class compound:
 
     def __iadd__(self, other):
         """Append formula."""
-
         # check and append value
-        if isinstance(other, compound):
+        if isinstance(other, Compound):
             self.expression += other.expression
         else:
             self._checkFormula(other)
@@ -62,9 +57,8 @@ class compound:
 
     # ----
 
-    def reset(self):
+    def reset(self) -> None:
         """Clear formula buffers."""
-
         self._composition = None
         self._formula = None
         self._mass = None
@@ -76,7 +70,6 @@ class compound:
 
     def count(self, item, groupIsotopes=False):
         """Count atom in formula."""
-
         # get composition
         comp = self.composition()
 
@@ -86,7 +79,7 @@ class compound:
 
         if groupIsotopes and item in blocks.elements:
             for massNo in blocks.elements[item].isotopes:
-                atom = "%s{%d}" % (item, massNo)
+                atom = f"{item}{{{massNo:d}}}"
                 atoms.append(atom)
 
         # count atom
@@ -101,7 +94,6 @@ class compound:
 
     def formula(self):
         """Get formula."""
-
         # check formula buffer
         if self._formula is not None:
             return self._formula
@@ -118,7 +110,7 @@ class compound:
                 if comp[el] == 1:
                     self._formula += el
                 else:
-                    self._formula += "%s%d" % (el, comp[el])
+                    self._formula += f"{el}{comp[el]:d}"
                 del elements[elements.index(el)]
 
         # add remaining atoms
@@ -126,7 +118,7 @@ class compound:
             if comp[el] == 1:
                 self._formula += el
             else:
-                self._formula += "%s%d" % (el, comp[el])
+                self._formula += f"{el}{comp[el]:d}"
 
         return self._formula
 
@@ -134,7 +126,6 @@ class compound:
 
     def composition(self):
         """Get elemental composition."""
-
         # check composition buffer
         if self._composition is not None:
             return self._composition
@@ -172,7 +163,6 @@ class compound:
 
     def mass(self, massType=None):
         """Get mass."""
-
         # get mass
         if self._mass is None:
             massMo = 0
@@ -214,7 +204,6 @@ class compound:
 
     def nominalmass(self):
         """Get nominal mass."""
-
         # get mass
         if self._nominalmass is None:
             nominalmass = 0
@@ -249,7 +238,6 @@ class compound:
 
     def mz(self, charge, agentFormula="H", agentCharge=1):
         """Get ion m/z."""
-
         from . import mod_basics
 
         return mod_basics.mz(
@@ -271,7 +259,6 @@ class compound:
         real=True,
     ):
         """Get isotopic pattern."""
-
         from . import mod_pattern
 
         return mod_pattern.pattern(
@@ -288,7 +275,6 @@ class compound:
 
     def rdbe(self):
         """Get RDBE (Range or Double Bonds Equivalents)."""
-
         from . import mod_basics
 
         return mod_basics.rdbe(self)
@@ -297,19 +283,18 @@ class compound:
 
     def isvalid(self, charge=0, agentFormula="H", agentCharge=1):
         """Check ion composition."""
-
         # check agent formula
-        if agentFormula != "e" and not isinstance(agentFormula, compound):
-            agentFormula = compound(agentFormula)
+        if agentFormula != "e" and not isinstance(agentFormula, Compound):
+            agentFormula = Compound(agentFormula)
 
         # make ion compound
         if charge and agentFormula != "e":
             ionFormula = self.expression
             for atom, count in list(agentFormula.composition().items()):
-                ionFormula += "%s%d" % (atom, count * (charge / agentCharge))
-            ion = compound(ionFormula)
+                ionFormula += f"{atom}{int(count * (charge / agentCharge)):d}"
+            ion = Compound(ionFormula)
         else:
-            ion = compound(self.expression)
+            ion = Compound(self.expression)
 
         # get composition
         return all(count >= 0 for atom, count in list(ion.composition().items()))
@@ -324,7 +309,6 @@ class compound:
         RDBE=(-1, 40),
     ):
         """Check formula rules."""
-
         if rules is None:
             rules = ["HC", "NOPSC", "NOPS", "RDBE"]
         from . import mod_basics
@@ -337,16 +321,15 @@ class compound:
 
     # MODIFIERS
 
-    def negate(self):
+    def negate(self) -> None:
         """Make all atom counts negative."""
-
         # get composition
         comp = self.composition()
 
         # negate composition
         formula = ""
         for el in sorted(comp.keys()):
-            formula += "%s%d" % (el, -1 * comp[el])
+            formula += f"{el}{-1 * comp[el]:d}"
         self.expression = formula
 
         # clear buffers
@@ -356,9 +339,8 @@ class compound:
 
     # HELPERS
 
-    def _checkFormula(self, formula):
+    def _checkFormula(self, formula) -> None:
         """Check given formula."""
-
         # check formula
         from . import blocks, mod_basics
 
@@ -388,7 +370,6 @@ class compound:
 
     def _unfoldBrackets(self, string):
         """Unfold formula and count each atom."""
-
         unfoldedFormula = ""
         brackets = [0, 0]
         enclosedFormula = ""

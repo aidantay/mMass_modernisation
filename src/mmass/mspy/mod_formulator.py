@@ -15,11 +15,8 @@
 #     main directory of the program.
 # -------------------------------------------------------------------------
 
-# load stopper
-# load objects
 # load modules
-from . import calculations, mod_basics, obj_compound
-from .mod_stopper import CHECK_FORCE_QUIT
+from . import calculations, mod_basics, mod_stopper, obj_compound
 
 # MASS TO FORMULA FUNCTIONS
 # -------------------------
@@ -36,6 +33,7 @@ def formulator(
     limit=1000,
 ):
     """Generate formulae for given mass, tolerance and composition limits.
+
     mz (float) - searched m/z value
     charge (int) - current charge
     tolerance (float) - mass tolerance
@@ -45,7 +43,6 @@ def formulator(
     agentCharge (int) - charging agent unit charge
     limit (int) - maximum formulae allowed to be calculated
     """
-
     # get neutral mass
     if composition is None:
         composition = {}
@@ -78,7 +75,7 @@ def formulator(
     # sort elements by masses to speed up processing
     buff = []
     for el in composition:
-        elMass = obj_compound.compound(el).mass(0)
+        elMass = obj_compound.Compound(el).mass(0)
         buff.append([elMass, el])
     buff.sort(reverse=True)
 
@@ -103,11 +100,11 @@ def formulator(
         minComposition, maxComposition, elementMasses, loMass, hiMass, limit
     )
     for comp in comps:
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         formula = ""
         for i in range(len(comp)):
-            formula += "%s%d" % (elements[i], comp[i])
+            formula += f"{elements[i]}{comp[i]}"
 
         formulae.append(formula)
 
@@ -119,6 +116,7 @@ def formulator(
 
 def _compositions(minimum, maximum, masses, loMass, hiMass, limit):
     """Generates composition variants within given atom count limits and mass range.
+
     minimum (list or tuple of int) - miminum atom counts
     maximum (list or tuple of int) - maximum atom counts
     masses (list or tuple of float) - element masses reverse ordered
@@ -126,7 +124,6 @@ def _compositions(minimum, maximum, masses, loMass, hiMass, limit):
     hiMass (float) - high mass limit
     limit (int) - max number of items to be counted
     """
-
     # check data
     if len(minimum) != len(maximum) or len(minimum) != len(masses):
         raise ValueError("Sizes of minimum, maximum and masses are not equal!")

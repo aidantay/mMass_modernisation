@@ -19,31 +19,28 @@
 import numpy
 from numpy.linalg import solve as solveLinEq
 
-# load objects
 # load modules
 from . import (
     mod_calibration,
     mod_pattern,
     mod_peakpicking,
     mod_signal,
+    mod_stopper,
     obj_compound,
     obj_peaklist,
 )
-
-# load stopper
-from .mod_stopper import CHECK_FORCE_QUIT
 
 # ENVELOPE FIT
 # ------------
 
 
-class envfit:
+class EnvFit:
     """Fit modeled profiles with exchanged atoms to acquired data."""
 
     def __init__(
         self, formula, charge, scales, loss="H", gain="H{2}", peakShape="gaussian"
-    ):
-        loss = obj_compound.compound(loss)
+    ) -> None:
+        loss = obj_compound.Compound(loss)
         loss.negate()
         self._lossFormula = loss.formula()
         self._gainFormula = gain
@@ -80,6 +77,7 @@ class envfit:
         baseline=None,
     ):
         """Fit modeled profiles to spectrum using tmp peaklist.
+
         signal (numpy array) - m/z / intensity pairs
         fwhm (float) - defaut fwhm
         forceFwhm (bool) - use default fwhm
@@ -89,7 +87,6 @@ class envfit:
         relThreshold (float) - relative intensity threshold
         baseline (numpy array) - signal baseline
         """
-
         # crop signal to relevant m/z range
         i1 = mod_signal.locate(signal, self.mzrange[0])
         i2 = mod_signal.locate(signal, self.mzrange[1])
@@ -132,16 +129,16 @@ class envfit:
         relThreshold=0.0,
     ):
         """Fit modeled profiles to peaklist.
-        peaklist (mspy.peaklist) - peak list
+
+        Peaklist (mspy.peaklist) - peak list
         fwhm (float) - defaut fwhm
         forceFwhm (bool) - use default fwhm
         autoAlign (bool) - automatic m/z shift
         iterLimit (int) - maximum number of iterations
         """
-
         # check peaklist object
-        if not isinstance(peaklist, obj_peaklist.peaklist):
-            peaklist = obj_peaklist.peaklist(peaklist)
+        if not isinstance(peaklist, obj_peaklist.Peaklist):
+            peaklist = obj_peaklist.Peaklist(peaklist)
 
         # crop peaklist to relevant m/z range
         peaklist = peaklist.duplicate()
@@ -167,14 +164,14 @@ class envfit:
 
     # ----
 
-    def topoints(self, points, fwhm=0.1, autoAlign=True, iterLimit=None):
+    def topoints(self, points, fwhm=0.1, autoAlign=True, iterLimit=None) -> bool:
         """Fit modeled profiles to given points.
+
         points (numpy array or list) - m/z / intensity pairs
         fwhm (float) - defaut fwhm
         autoAlign (bool) - automatic m/z shift
         iterLimit (int) - maximum number of iterations
         """
-
         self.fwhm = fwhm
 
         # reset previous results
@@ -242,7 +239,6 @@ class envfit:
 
     def envelope(self, points=10):
         """Make envelope for current composition."""
-
         # get isotopes
         isotopes = []
         for x in self.models:
@@ -258,24 +254,17 @@ class envfit:
 
     # HELPERS
 
-    def _initModels(self, scales):
+    def _initModels(self, scales) -> None:
         """Init theoretical envelope models."""
-
         self.models = {}
 
         # generate possible models to fit
         for x in scales:
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
             # make compound
-            item = "%s(%s)%d(%s)%d" % (
-                self.formula,
-                self._lossFormula,
-                x,
-                self._gainFormula,
-                x,
-            )
-            compound = obj_compound.compound(item)
+            item = f"{self.formula}({self._lossFormula}){x}({self._gainFormula}){x}"
+            compound = obj_compound.Compound(item)
 
             # check compound
             if not compound.isvalid(charge=self.charge):
@@ -286,9 +275,8 @@ class envfit:
 
     # ----
 
-    def _initRange(self):
+    def _initRange(self) -> None:
         """Get relevant mz range from models."""
-
         scales = list(self.models.keys())
 
         compound = self.models[min(scales)][0]
@@ -309,7 +297,6 @@ class envfit:
 
     def _makeModels(self, raster, reset=True):
         """Calculate pattern for every model."""
-
         models = []
         exchanged = []
 
@@ -318,7 +305,7 @@ class envfit:
         rasterMax = raster[-1] + self.fwhm
 
         for x in sorted(self.models.keys()):
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
             # get compound
             compound = self.models[x][0]
@@ -354,9 +341,8 @@ class envfit:
 
     # ----
 
-    def _alignData(self):
+    def _alignData(self) -> None:
         """Re-calibrate data using theoretical envelope."""
-
         # split data to raster and intensities
         xAxis, yAxis = numpy.hsplit(self.data, 2)
         raster = xAxis.flatten()
@@ -408,7 +394,7 @@ class envfit:
 
         # calc calibration
         if len(calibrants) > 3:
-            model, params, chi = mod_calibration.calibration(
+            model, params, _chi = mod_calibration.calibration(
                 calibrants, model="quadratic"
             )
         elif len(calibrants) > 1:
@@ -428,7 +414,6 @@ class envfit:
 
     def _leastSquare(self, data, models, iterLimit=None, chiLimit=1e-3):
         """Least-square fitting. Adapted from the original code by Konrad Hinsen."""
-
         normf = 100.0 / numpy.max(data)
         data *= normf
 
@@ -439,7 +424,7 @@ class envfit:
 
         niter = 0
         while True:
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
             niter += 1
             delta = solveLinEq(
@@ -473,7 +458,6 @@ class envfit:
 
     def _chiSquare(self, data, models, params):
         """Calculate fitting chi-square for current parameter set."""
-
         # calculate differences and chi-square value between calculated and real data
         differences = numpy.sum(models * [[x] for x in params], axis=0) - data
         chisq_value = numpy.sum(differences**2)

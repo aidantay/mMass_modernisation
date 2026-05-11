@@ -63,11 +63,11 @@ else:
     else:
         confdir = Path("~/.mmass").expanduser()
 
-if not Path(confdir).exists():
+if not confdir.exists():
     try:
-        Path(confdir).mkdir(parents=True, exist_ok=True)
+        confdir.mkdir(parents=True, exist_ok=True)
     except Exception:
-        raise OSError("Configuration folder cannot be created!")
+        raise OSError("Configuration folder cannot be created!") from None
 
 
 # INIT DEFAULT VALUES
@@ -637,9 +637,8 @@ replacements = {
 # -------------------------
 
 
-def loadConfig(path=None):
+def loadConfig(path=None) -> None:
     """Parse config XML and get data."""
-
     # set default path
     if path is None:
         path = confdir / "config.xml"
@@ -894,9 +893,9 @@ def loadConfig(path=None):
 # ----
 
 
-def saveConfig(path=None):
+def saveConfig(path=None) -> bool | None:
+    # ruff: disable[E501]
     """Make and save config XML."""
-
     # set default path
     if path is None:
         path = confdir / "config.xml"
@@ -954,48 +953,28 @@ def saveConfig(path=None):
     # colours
     buff += "  <colours>\n"
     for item in colours:
-        buff += '    <colour value="{:02x}{:02x}{:02x}" />\n'.format(*tuple(item))
+        buff += f'    <colour value="{item[0]:02x}{item[1]:02x}{item[2]:02x}" />\n'
     buff += "  </colours>\n\n"
 
     # export
     buff += "  <export>\n"
-    buff += '    <param name="imageWidth" value="{:.1f}" type="float" />\n'.format(
-        export["imageWidth"]
-    )
-    buff += '    <param name="imageHeight" value="{:.1f}" type="float" />\n'.format(
-        export["imageHeight"]
-    )
-    buff += '    <param name="imageUnits" value="{}" type="str" />\n'.format(
-        export["imageUnits"]
-    )
+    buff += f'    <param name="imageWidth" value="{export["imageWidth"]:.1f}" type="float" />\n'
+    buff += f'    <param name="imageHeight" value="{export["imageHeight"]:.1f}" type="float" />\n'
+    buff += f'    <param name="imageUnits" value="{export["imageUnits"]}" type="str" />\n'
     buff += f'    <param name="imageResolution" value="{export["imageResolution"]}" type="int" />\n'
     buff += f'    <param name="imageFontsScale" value="{export["imageFontsScale"]}" type="int" />\n'
     buff += f'    <param name="imageDrawingsScale" value="{export["imageDrawingsScale"]}" type="int" />\n'
-    buff += '    <param name="imageFormat" value="{}" type="str" />\n'.format(
-        export["imageFormat"]
-    )
-    buff += '    <param name="peaklistColumns" value="{}" type="str" />\n'.format(
-        ";".join(export["peaklistColumns"])
-    )
-    buff += '    <param name="peaklistFormat" value="{}" type="str" />\n'.format(
-        export["peaklistFormat"]
-    )
-    buff += '    <param name="peaklistSeparator" value="{}" type="str" />\n'.format(
-        export["peaklistSeparator"]
-    )
-    buff += '    <param name="spectrumSeparator" value="{}" type="str" />\n'.format(
-        export["spectrumSeparator"]
-    )
+    buff += f'    <param name="imageFormat" value="{export["imageFormat"]}" type="str" />\n'
+    buff += f'    <param name="peaklistColumns" value="{";".join(export["peaklistColumns"])}" type="str" />\n'
+    buff += f'    <param name="peaklistFormat" value="{export["peaklistFormat"]}" type="str" />\n'
+    buff += f'    <param name="peaklistSeparator" value="{export["peaklistSeparator"]}" type="str" />\n'
+    buff += f'    <param name="spectrumSeparator" value="{export["spectrumSeparator"]}" type="str" />\n'
     buff += "  </export>\n\n"
 
     # spectrum
     buff += "  <spectrum>\n"
-    buff += '    <param name="xLabel" value="{}" type="unicode" />\n'.format(
-        _escape(spectrum["xLabel"])
-    )
-    buff += '    <param name="yLabel" value="{}" type="unicode" />\n'.format(
-        _escape(spectrum["yLabel"])
-    )
+    buff += f'    <param name="xLabel" value="{_escape(spectrum["xLabel"])}" type="unicode" />\n'
+    buff += f'    <param name="yLabel" value="{_escape(spectrum["yLabel"])}" type="unicode" />\n'
     buff += f'    <param name="showGrid" value="{int(bool(spectrum["showGrid"]))}" type="int" />\n'
     buff += f'    <param name="showMinorTicks" value="{int(bool(spectrum["showMinorTicks"]))}" type="int" />\n'
     buff += f'    <param name="showLegend" value="{int(bool(spectrum["showLegend"]))}" type="int" />\n'
@@ -1009,32 +988,20 @@ def saveConfig(path=None):
     buff += f'    <param name="showAllLabels" value="{int(bool(spectrum["showAllLabels"]))}" type="int" />\n'
     buff += f'    <param name="showTicks" value="{int(bool(spectrum["showTicks"]))}" type="int" />\n'
     buff += f'    <param name="showCursorImage" value="{int(bool(spectrum["showCursorImage"]))}" type="int" />\n'
-    buff += (
-        f'    <param name="posBarSize" value="{spectrum["posBarSize"]}" type="int" />\n'
-    )
-    buff += (
-        f'    <param name="gelHeight" value="{spectrum["gelHeight"]}" type="int" />\n'
-    )
+    buff += f'    <param name="posBarSize" value="{spectrum["posBarSize"]}" type="int" />\n'
+    buff += f'    <param name="gelHeight" value="{spectrum["gelHeight"]}" type="int" />\n'
     buff += f'    <param name="autoscale" value="{int(bool(spectrum["autoscale"]))}" type="int" />\n'
     buff += f'    <param name="overlapLabels" value="{int(bool(spectrum["overlapLabels"]))}" type="int" />\n'
     buff += f'    <param name="checkLimits" value="{int(bool(spectrum["checkLimits"]))}" type="int" />\n'
-    buff += (
-        f'    <param name="labelAngle" value="{spectrum["labelAngle"]}" type="int" />\n'
-    )
+    buff += f'    <param name="labelAngle" value="{spectrum["labelAngle"]}" type="int" />\n'
     buff += f'    <param name="labelCharge" value="{int(bool(spectrum["labelCharge"]))}" type="int" />\n'
     buff += f'    <param name="labelGroup" value="{int(bool(spectrum["labelGroup"]))}" type="int" />\n'
     buff += f'    <param name="labelBgr" value="{int(bool(spectrum["labelBgr"]))}" type="int" />\n'
     buff += f'    <param name="labelFontSize" value="{spectrum["labelFontSize"]}" type="int" />\n'
     buff += f'    <param name="axisFontSize" value="{spectrum["axisFontSize"]}" type="int" />\n'
-    buff += '    <param name="tickColour" value="{:02x}{:02x}{:02x}" type="str" />\n'.format(
-        *tuple(spectrum["tickColour"])
-    )
-    buff += '    <param name="tmpSpectrumColour" value="{:02x}{:02x}{:02x}" type="str" />\n'.format(
-        *tuple(spectrum["tmpSpectrumColour"])
-    )
-    buff += '    <param name="notationMarksColour" value="{:02x}{:02x}{:02x}" type="str" />\n'.format(
-        *tuple(spectrum["notationMarksColour"])
-    )
+    buff += f'    <param name="tickColour" value="{spectrum["tickColour"][0]:02x}{spectrum["tickColour"][1]:02x}{spectrum["tickColour"][2]:02x}" type="str" />\n'
+    buff += f'    <param name="tmpSpectrumColour" value="{spectrum["tmpSpectrumColour"][0]:02x}{spectrum["tmpSpectrumColour"][1]:02x}{spectrum["tmpSpectrumColour"][2]:02x}" type="str" />\n'
+    buff += f'    <param name="notationMarksColour" value="{spectrum["notationMarksColour"][0]:02x}{spectrum["notationMarksColour"][1]:02x}{spectrum["notationMarksColour"][2]:02x}" type="str" />\n'
     buff += f'    <param name="notationMaxLength" value="{spectrum["notationMaxLength"]}" type="int" />\n'
     buff += f'    <param name="notationMarks" value="{int(bool(spectrum["notationMarks"]))}" type="int" />\n'
     buff += f'    <param name="notationLabels" value="{int(bool(spectrum["notationLabels"]))}" type="int" />\n'
@@ -1043,10 +1010,8 @@ def saveConfig(path=None):
 
     # match
     buff += "  <match>\n"
-    buff += '    <param name="tolerance" value="{:f}" type="float" />\n'.format(
-        match["tolerance"]
-    )
-    buff += '    <param name="units" value="{}" type="str" />\n'.format(match["units"])
+    buff += f'    <param name="tolerance" value="{match["tolerance"]:f}" type="float" />\n'
+    buff += f'    <param name="units" value="{match["units"]}" type="str" />\n'
     buff += f'    <param name="ignoreCharge" value="{int(bool(match["ignoreCharge"]))}" type="int" />\n'
     buff += f'    <param name="filterAnnotations" value="{int(bool(match["filterAnnotations"]))}" type="int" />\n'
     buff += f'    <param name="filterMatches" value="{int(bool(match["filterMatches"]))}" type="int" />\n'
@@ -1063,32 +1028,18 @@ def saveConfig(path=None):
     buff += "    </crop>\n"
     buff += "    <baseline>\n"
     buff += f'      <param name="precision" value="{processing["baseline"]["precision"]}" type="int" />\n'
-    buff += '      <param name="offset" value="{:f}" type="float" />\n'.format(
-        processing["baseline"]["offset"]
-    )
+    buff += f'      <param name="offset" value="{processing["baseline"]["offset"]:f}" type="float" />\n'
     buff += "    </baseline>\n"
     buff += "    <smoothing>\n"
-    buff += '      <param name="method" value="{}" type="str" />\n'.format(
-        processing["smoothing"]["method"]
-    )
-    buff += '      <param name="windowSize" value="{:f}" type="float" />\n'.format(
-        processing["smoothing"]["windowSize"]
-    )
+    buff += f'      <param name="method" value="{processing["smoothing"]["method"]}" type="str" />\n'
+    buff += f'      <param name="windowSize" value="{processing["smoothing"]["windowSize"]:f}" type="float" />\n'
     buff += f'      <param name="cycles" value="{processing["smoothing"]["cycles"]}" type="int" />\n'
     buff += "    </smoothing>\n"
     buff += "    <peakpicking>\n"
-    buff += '      <param name="snThreshold" value="{:f}" type="float" />\n'.format(
-        processing["peakpicking"]["snThreshold"]
-    )
-    buff += '      <param name="absIntThreshold" value="{:f}" type="float" />\n'.format(
-        processing["peakpicking"]["absIntThreshold"]
-    )
-    buff += '      <param name="relIntThreshold" value="{:f}" type="float" />\n'.format(
-        processing["peakpicking"]["relIntThreshold"]
-    )
-    buff += '      <param name="pickingHeight" value="{:f}" type="float" />\n'.format(
-        processing["peakpicking"]["pickingHeight"]
-    )
+    buff += f'      <param name="snThreshold" value="{processing["peakpicking"]["snThreshold"]:f}" type="float" />\n'
+    buff += f'      <param name="absIntThreshold" value="{processing["peakpicking"]["absIntThreshold"]:f}" type="float" />\n'
+    buff += f'      <param name="relIntThreshold" value="{processing["peakpicking"]["relIntThreshold"]:f}" type="float" />\n'
+    buff += f'      <param name="pickingHeight" value="{processing["peakpicking"]["pickingHeight"]:f}" type="float" />\n'
     buff += f'      <param name="baseline" value="{int(bool(processing["peakpicking"]["baseline"]))}" type="int" />\n'
     buff += f'      <param name="smoothing" value="{int(bool(processing["peakpicking"]["smoothing"]))}" type="int" />\n'
     buff += f'      <param name="deisotoping" value="{int(bool(processing["peakpicking"]["deisotoping"]))}" type="int" />\n'
@@ -1096,27 +1047,17 @@ def saveConfig(path=None):
     buff += "    </peakpicking>\n"
     buff += "    <deisotoping>\n"
     buff += f'      <param name="maxCharge" value="{processing["deisotoping"]["maxCharge"]}" type="int" />\n'
-    buff += '      <param name="massTolerance" value="{:f}" type="float" />\n'.format(
-        processing["deisotoping"]["massTolerance"]
-    )
-    buff += '      <param name="intTolerance" value="{:f}" type="float" />\n'.format(
-        processing["deisotoping"]["intTolerance"]
-    )
+    buff += f'      <param name="massTolerance" value="{processing["deisotoping"]["massTolerance"]:f}" type="float" />\n'
+    buff += f'      <param name="intTolerance" value="{processing["deisotoping"]["intTolerance"]:f}" type="float" />\n'
     buff += f'      <param name="removeIsotopes" value="{int(bool(processing["deisotoping"]["removeIsotopes"]))}" type="int" />\n'
     buff += f'      <param name="removeUnknown" value="{int(bool(processing["deisotoping"]["removeUnknown"]))}" type="int" />\n'
-    buff += '      <param name="labelEnvelope" value="{}" type="str" />\n'.format(
-        processing["deisotoping"]["labelEnvelope"]
-    )
-    buff += '      <param name="envelopeIntensity" value="{}" type="str" />\n'.format(
-        processing["deisotoping"]["envelopeIntensity"]
-    )
+    buff += f'      <param name="labelEnvelope" value="{processing["deisotoping"]["labelEnvelope"]}" type="str" />\n'
+    buff += f'      <param name="envelopeIntensity" value="{processing["deisotoping"]["envelopeIntensity"]}" type="str" />\n'
     buff += f'      <param name="setAsMonoisotopic" value="{int(bool(processing["deisotoping"]["setAsMonoisotopic"]))}" type="int" />\n'
     buff += "    </deisotoping>\n"
     buff += "    <deconvolution>\n"
     buff += f'      <param name="massType" value="{processing["deconvolution"]["massType"]}" type="int" />\n'
-    buff += '      <param name="groupWindow" value="{:f}" type="float" />\n'.format(
-        processing["deconvolution"]["groupWindow"]
-    )
+    buff += f'      <param name="groupWindow" value="{processing["deconvolution"]["groupWindow"]:f}" type="float" />\n'
     buff += f'      <param name="groupPeaks" value="{int(bool(processing["deconvolution"]["groupPeaks"]))}" type="int" />\n'
     buff += f'      <param name="forceGroupWindow" value="{int(bool(processing["deconvolution"]["forceGroupWindow"]))}" type="int" />\n'
     buff += "    </deconvolution>\n"
@@ -1133,15 +1074,9 @@ def saveConfig(path=None):
 
     # calibration
     buff += "  <calibration>\n"
-    buff += '    <param name="fitting" value="{}" type="str" />\n'.format(
-        calibration["fitting"]
-    )
-    buff += '    <param name="tolerance" value="{:f}" type="float" />\n'.format(
-        calibration["tolerance"]
-    )
-    buff += '    <param name="units" value="{}" type="str" />\n'.format(
-        calibration["units"]
-    )
+    buff += f'    <param name="fitting" value="{calibration["fitting"]}" type="str" />\n'
+    buff += f'    <param name="tolerance" value="{calibration["tolerance"]:f}" type="float" />\n'
+    buff += f'    <param name="units" value="{calibration["units"]}" type="str" />\n'
     buff += f'    <param name="statCutOff" value="{calibration["statCutOff"]}" type="int" />\n'
     buff += "  </calibration>\n\n"
 
@@ -1154,9 +1089,7 @@ def saveConfig(path=None):
     buff += f'      <param name="maxMods" value="{sequence["digest"]["maxMods"]}" type="int" />\n'
     buff += f'      <param name="maxCharge" value="{sequence["digest"]["maxCharge"]}" type="int" />\n'
     buff += f'      <param name="massType" value="{sequence["digest"]["massType"]}" type="int" />\n'
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        _escape(sequence["digest"]["enzyme"])
-    )
+    buff += f'      <param name="enzyme" value="{_escape(sequence["digest"]["enzyme"])}" type="unicode" />\n'
     buff += f'      <param name="miscl" value="{sequence["digest"]["miscl"]}" type="int" />\n'
     buff += f'      <param name="lowMass" value="{sequence["digest"]["lowMass"]}" type="int" />\n'
     buff += f'      <param name="highMass" value="{sequence["digest"]["highMass"]}" type="int" />\n'
@@ -1167,9 +1100,7 @@ def saveConfig(path=None):
     buff += f'      <param name="maxMods" value="{sequence["fragment"]["maxMods"]}" type="int" />\n'
     buff += f'      <param name="maxCharge" value="{sequence["fragment"]["maxCharge"]}" type="int" />\n'
     buff += f'      <param name="massType" value="{sequence["fragment"]["massType"]}" type="int" />\n'
-    buff += '      <param name="fragments" value="{}" type="str" />\n'.format(
-        ";".join(sequence["fragment"]["fragments"])
-    )
+    buff += f'      <param name="fragments" value="{";".join(sequence["fragment"]["fragments"])}" type="str" />\n'
     buff += f'      <param name="maxLosses" value="{sequence["fragment"]["maxLosses"]}" type="int" />\n'
     buff += f'      <param name="filterFragments" value="{int(bool(sequence["fragment"]["filterFragments"]))}" type="int" />\n'
     buff += "    </fragment>\n"
@@ -1177,37 +1108,23 @@ def saveConfig(path=None):
     buff += f'      <param name="maxMods" value="{sequence["search"]["maxMods"]}" type="int" />\n'
     buff += f'      <param name="charge" value="{sequence["search"]["charge"]}" type="int" />\n'
     buff += f'      <param name="massType" value="{sequence["search"]["massType"]}" type="int" />\n'
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        _escape(sequence["search"]["enzyme"])
-    )
+    buff += f'      <param name="enzyme" value="{_escape(sequence["search"]["enzyme"])}" type="unicode" />\n'
     buff += f'      <param name="semiSpecific" value="{int(bool(sequence["search"]["semiSpecific"]))}" type="int" />\n'
-    buff += '    <param name="tolerance" value="{:f}" type="float" />\n'.format(
-        sequence["search"]["tolerance"]
-    )
-    buff += '    <param name="units" value="{}" type="str" />\n'.format(
-        sequence["search"]["units"]
-    )
+    buff += f'    <param name="tolerance" value="{sequence["search"]["tolerance"]:f}" type="float" />\n'
+    buff += f'    <param name="units" value="{sequence["search"]["units"]}" type="str" />\n'
     buff += f'      <param name="retainPos" value="{int(bool(sequence["search"]["retainPos"]))}" type="int" />\n'
     buff += "    </search>\n"
     buff += "  </sequence>\n\n"
 
     # mass calculator
     buff += "  <massCalculator>\n"
-    buff += '    <param name="ionseriesAgent" value="{}" type="str" />\n'.format(
-        massCalculator["ionseriesAgent"]
-    )
+    buff += f'    <param name="ionseriesAgent" value="{massCalculator["ionseriesAgent"]}" type="str" />\n'
     buff += f'    <param name="ionseriesAgentCharge" value="{massCalculator["ionseriesAgentCharge"]}" type="int" />\n'
     buff += f'    <param name="ionseriesPolarity" value="{massCalculator["ionseriesPolarity"]}" type="int" />\n'
-    buff += '    <param name="patternFwhm" value="{:f}" type="float" />\n'.format(
-        massCalculator["patternFwhm"]
-    )
-    buff += '    <param name="patternThreshold" value="{:f}" type="float" />\n'.format(
-        massCalculator["patternThreshold"]
-    )
+    buff += f'    <param name="patternFwhm" value="{massCalculator["patternFwhm"]:f}" type="float" />\n'
+    buff += f'    <param name="patternThreshold" value="{massCalculator["patternThreshold"]:f}" type="float" />\n'
     buff += f'    <param name="patternShowPeaks" value="{int(bool(massCalculator["patternShowPeaks"]))}" type="int" />\n'
-    buff += '    <param name="patternPeakShape" value="{}" type="unicode" />\n'.format(
-        _escape(massCalculator["patternPeakShape"])
-    )
+    buff += f'    <param name="patternPeakShape" value="{_escape(massCalculator["patternPeakShape"])}" type="unicode" />\n'
     buff += "  </massCalculator>\n\n"
 
     # mass to formula
@@ -1217,66 +1134,30 @@ def saveConfig(path=None):
     buff += (
         f'    <param name="charge" value="{massToFormula["charge"]}" type="int" />\n'
     )
-    buff += '    <param name="ionization" value="{}" type="str" />\n'.format(
-        massToFormula["ionization"]
-    )
-    buff += '    <param name="tolerance" value="{:f}" type="float" />\n'.format(
-        massToFormula["tolerance"]
-    )
-    buff += '    <param name="units" value="{}" type="str" />\n'.format(
-        massToFormula["units"]
-    )
-    buff += '    <param name="formulaMin" value="{}" type="str" />\n'.format(
-        massToFormula["formulaMin"]
-    )
-    buff += '    <param name="formulaMax" value="{}" type="str" />\n'.format(
-        massToFormula["formulaMax"]
-    )
+    buff += f'    <param name="ionization" value="{massToFormula["ionization"]}" type="str" />\n'
+    buff += f'    <param name="tolerance" value="{massToFormula["tolerance"]:f}" type="float" />\n'
+    buff += f'    <param name="units" value="{massToFormula["units"]}" type="str" />\n'
+    buff += f'    <param name="formulaMin" value="{massToFormula["formulaMin"]}" type="str" />\n'
+    buff += f'    <param name="formulaMax" value="{massToFormula["formulaMax"]}" type="str" />\n'
     buff += f'    <param name="autoCHNO" value="{int(bool(massToFormula["autoCHNO"]))}" type="int" />\n'
     buff += f'    <param name="checkPattern" value="{int(bool(massToFormula["checkPattern"]))}" type="int" />\n'
-    buff += '    <param name="rules" value="{}" type="str" />\n'.format(
-        ";".join(massToFormula["rules"])
-    )
-    buff += '    <param name="HCMin" value="{:f}" type="float" />\n'.format(
-        massToFormula["HCMin"]
-    )
-    buff += '    <param name="HCMax" value="{:f}" type="float" />\n'.format(
-        massToFormula["HCMax"]
-    )
-    buff += '    <param name="NCMax" value="{:f}" type="float" />\n'.format(
-        massToFormula["NCMax"]
-    )
-    buff += '    <param name="OCMax" value="{:f}" type="float" />\n'.format(
-        massToFormula["OCMax"]
-    )
-    buff += '    <param name="PCMax" value="{:f}" type="float" />\n'.format(
-        massToFormula["PCMax"]
-    )
-    buff += '    <param name="SCMax" value="{:f}" type="float" />\n'.format(
-        massToFormula["SCMax"]
-    )
-    buff += '    <param name="RDBEMin" value="{:f}" type="float" />\n'.format(
-        massToFormula["RDBEMin"]
-    )
-    buff += '    <param name="RDBEMax" value="{:f}" type="float" />\n'.format(
-        massToFormula["RDBEMax"]
-    )
+    buff += f'    <param name="rules" value="{";".join(massToFormula["rules"])}" type="str" />\n'
+    buff += f'    <param name="HCMin" value="{massToFormula["HCMin"]:f}" type="float" />\n'
+    buff += f'    <param name="HCMax" value="{massToFormula["HCMax"]:f}" type="float" />\n'
+    buff += f'    <param name="NCMax" value="{massToFormula["NCMax"]:f}" type="float" />\n'
+    buff += f'    <param name="OCMax" value="{massToFormula["OCMax"]:f}" type="float" />\n'
+    buff += f'    <param name="PCMax" value="{massToFormula["PCMax"]:f}" type="float" />\n'
+    buff += f'    <param name="SCMax" value="{massToFormula["SCMax"]:f}" type="float" />\n'
+    buff += f'    <param name="RDBEMin" value="{massToFormula["RDBEMin"]:f}" type="float" />\n'
+    buff += f'    <param name="RDBEMax" value="{massToFormula["RDBEMax"]:f}" type="float" />\n'
     buff += "  </massToFormula>\n\n"
 
     # mass defect plot
     buff += "  <massDefectPlot>\n"
-    buff += '    <param name="yAxis" value="{}" type="str" />\n'.format(
-        massDefectPlot["yAxis"]
-    )
-    buff += '    <param name="nominalMass" value="{}" type="str" />\n'.format(
-        massDefectPlot["nominalMass"]
-    )
-    buff += '    <param name="kendrickFormula" value="{}" type="str" />\n'.format(
-        massDefectPlot["kendrickFormula"]
-    )
-    buff += '    <param name="relIntCutoff" value="{:f}" type="float" />\n'.format(
-        massDefectPlot["relIntCutoff"]
-    )
+    buff += f'    <param name="yAxis" value="{massDefectPlot["yAxis"]}" type="str" />\n'
+    buff += f'    <param name="nominalMass" value="{massDefectPlot["nominalMass"]}" type="str" />\n'
+    buff += f'    <param name="kendrickFormula" value="{massDefectPlot["kendrickFormula"]}" type="str" />\n'
+    buff += f'    <param name="relIntCutoff" value="{massDefectPlot["relIntCutoff"]:f}" type="float" />\n'
     buff += f'    <param name="removeIsotopes" value="{int(bool(massDefectPlot["removeIsotopes"]))}" type="int" />\n'
     buff += f'    <param name="ignoreCharge" value="{int(bool(massDefectPlot["ignoreCharge"]))}" type="int" />\n'
     buff += f'    <param name="showNotations" value="{int(bool(massDefectPlot["showNotations"]))}" type="int" />\n'
@@ -1287,88 +1168,56 @@ def saveConfig(path=None):
     buff += f'    <param name="massType" value="{compoundsSearch["massType"]}" type="int" />\n'
     buff += f'    <param name="maxCharge" value="{compoundsSearch["maxCharge"]}" type="int" />\n'
     buff += f'    <param name="radicals" value="{int(bool(compoundsSearch["radicals"]))}" type="int" />\n'
-    buff += '    <param name="adducts" value="{}" type="str" />\n'.format(
-        ";".join(compoundsSearch["adducts"])
-    )
+    buff += f'    <param name="adducts" value="{";".join(compoundsSearch["adducts"])}" type="str" />\n'
     buff += "  </compoundsSearch>\n\n"
 
     # peak differences
     buff += "  <peakDifferences>\n"
     buff += f'    <param name="aminoacids" value="{int(bool(peakDifferences["aminoacids"]))}" type="int" />\n'
     buff += f'    <param name="dipeptides" value="{int(bool(peakDifferences["dipeptides"]))}" type="int" />\n'
-    buff += '    <param name="tolerance" value="{:f}" type="float" />\n'.format(
-        peakDifferences["tolerance"]
-    )
+    buff += f'    <param name="tolerance" value="{peakDifferences["tolerance"]:f}" type="float" />\n'
     buff += f'    <param name="massType" value="{peakDifferences["massType"]}" type="int" />\n'
     buff += f'    <param name="consolidate" value="{int(bool(peakDifferences["consolidate"]))}" type="int" />\n'
     buff += "  </peakDifferences>\n\n"
 
     # compare peaklists
     buff += "  <comparePeaklists>\n"
-    buff += '    <param name="tolerance" value="{:f}" type="float" />\n'.format(
-        comparePeaklists["tolerance"]
-    )
-    buff += '    <param name="units" value="{}" type="str" />\n'.format(
-        comparePeaklists["units"]
-    )
+    buff += f'    <param name="tolerance" value="{comparePeaklists["tolerance"]:f}" type="float" />\n'
+    buff += f'    <param name="units" value="{comparePeaklists["units"]}" type="str" />\n'
     buff += f'    <param name="ignoreCharge" value="{int(bool(comparePeaklists["ignoreCharge"]))}" type="int" />\n'
     buff += f'    <param name="ratioCheck" value="{int(bool(comparePeaklists["ratioCheck"]))}" type="int" />\n'
     buff += f'    <param name="ratioDirection" value="{comparePeaklists["ratioDirection"]}" type="int" />\n'
-    buff += '    <param name="ratioThreshold" value="{:f}" type="float" />\n'.format(
-        comparePeaklists["ratioThreshold"]
-    )
+    buff += f'    <param name="ratioThreshold" value="{comparePeaklists["ratioThreshold"]:f}" type="float" />\n'
     buff += "  </comparePeaklists>\n\n"
 
     # spectrum generator
     buff += "  <spectrumGenerator>\n"
-    buff += '    <param name="fwhm" value="{:f}" type="float" />\n'.format(
-        spectrumGenerator["fwhm"]
-    )
+    buff += f'    <param name="fwhm" value="{spectrumGenerator["fwhm"]:f}" type="float" />\n'
     buff += f'    <param name="points" value="{spectrumGenerator["points"]}" type="int" />\n'
-    buff += '    <param name="noise" value="{:f}" type="float" />\n'.format(
-        spectrumGenerator["noise"]
-    )
+    buff += f'    <param name="noise" value="{spectrumGenerator["noise"]:f}" type="float" />\n'
     buff += f'    <param name="forceFwhm" value="{int(bool(spectrumGenerator["forceFwhm"]))}" type="int" />\n'
-    buff += '    <param name="peakShape" value="{}" type="unicode" />\n'.format(
-        _escape(spectrumGenerator["peakShape"])
-    )
+    buff += f'    <param name="peakShape" value="{_escape(spectrumGenerator["peakShape"])}" type="unicode" />\n'
     buff += f'    <param name="showPeaks" value="{int(bool(spectrumGenerator["showPeaks"]))}" type="int" />\n'
     buff += f'    <param name="showOverlay" value="{int(bool(spectrumGenerator["showOverlay"]))}" type="int" />\n'
     buff += "  </spectrumGenerator>\n\n"
 
     # envelope fit
     buff += "  <envelopeFit>\n"
-    buff += '    <param name="fit" value="{}" type="str" />\n'.format(
-        envelopeFit["fit"]
-    )
-    buff += '    <param name="fwhm" value="{:f}" type="float" />\n'.format(
-        envelopeFit["fwhm"]
-    )
+    buff += f'    <param name="fit" value="{envelopeFit["fit"]}" type="str" />\n'
+    buff += f'    <param name="fwhm" value="{envelopeFit["fwhm"]:f}" type="float" />\n'
     buff += f'    <param name="forceFwhm" value="{int(bool(envelopeFit["forceFwhm"]))}" type="int" />\n'
-    buff += '    <param name="peakShape" value="{}" type="unicode" />\n'.format(
-        _escape(envelopeFit["peakShape"])
-    )
+    buff += f'    <param name="peakShape" value="{_escape(envelopeFit["peakShape"])}" type="unicode" />\n'
     buff += f'    <param name="autoAlign" value="{int(bool(envelopeFit["autoAlign"]))}" type="int" />\n'
-    buff += '    <param name="relThreshold" value="{:f}" type="float" />\n'.format(
-        envelopeFit["relThreshold"]
-    )
+    buff += f'    <param name="relThreshold" value="{envelopeFit["relThreshold"]:f}" type="float" />\n'
     buff += "  </envelopeFit>\n\n"
 
     # mascot
     buff += "  <mascot>\n"
     buff += "    <common>\n"
-    buff += '      <param name="server" value="{}" type="unicode" />\n'.format(
-        _escape(mascot["common"]["server"])
-    )
-    buff += '      <param name="searchType" value="{}" type="str" />\n'.format(
-        mascot["common"]["searchType"]
-    )
-    buff += '      <param name="userName" value="{}" type="unicode" />\n'.format(
-        _escape(mascot["common"]["userName"])
-    )
-    buff += '      <param name="userEmail" value="{}" type="unicode" />\n'.format(
-        _escape(mascot["common"]["userEmail"])
-    )
+    buff += f'      <param name="server" value="{_escape(mascot["common"]["server"])}" type="unicode" />\n'
+    buff += f'      <param name="searchType" value="{mascot["common"]["searchType"]}" type="str" />\n'
+    buff += f'      <param name="userName" value="{_escape(mascot["common"]["userName"])}" type="unicode" />\n'
+    buff += f'      <param name="userEmail" value="{_escape(mascot["common"]["userEmail"])}" type="unicode" />\n'
     buff += f'      <param name="filterAnnotations" value="{int(bool(mascot["common"]["filterAnnotations"]))}" type="int" />\n'
     buff += f'      <param name="filterMatches" value="{int(bool(mascot["common"]["filterMatches"]))}" type="int" />\n'
     buff += f'      <param name="filterUnselected" value="{int(bool(mascot["common"]["filterUnselected"]))}" type="int" />\n'
@@ -1376,196 +1225,82 @@ def saveConfig(path=None):
     buff += f'      <param name="filterUnknown" value="{int(bool(mascot["common"]["filterUnknown"]))}" type="int" />\n'
     buff += "    </common>\n"
     buff += "    <pmf>\n"
-    buff += '      <param name="database" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["database"]
-    )
-    buff += '      <param name="taxonomy" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["taxonomy"]
-    )
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["enzyme"]
-    )
-    buff += '      <param name="miscleavages" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["miscleavages"]
-    )
-    buff += '      <param name="fixedMods" value="{}" type="unicode" />\n'.format(
-        ";".join(mascot["pmf"]["fixedMods"])
-    )
-    buff += '      <param name="variableMods" value="{}" type="unicode" />\n'.format(
-        ";".join(mascot["pmf"]["variableMods"])
-    )
+    buff += f'      <param name="database" value="{mascot["pmf"]["database"]}" type="unicode" />\n'
+    buff += f'      <param name="taxonomy" value="{mascot["pmf"]["taxonomy"]}" type="unicode" />\n'
+    buff += f'      <param name="enzyme" value="{mascot["pmf"]["enzyme"]}" type="unicode" />\n'
+    buff += f'      <param name="miscleavages" value="{mascot["pmf"]["miscleavages"]}" type="unicode" />\n'
+    buff += f'      <param name="fixedMods" value="{";".join(mascot["pmf"]["fixedMods"])}" type="unicode" />\n'
+    buff += f'      <param name="variableMods" value="{";".join(mascot["pmf"]["variableMods"])}" type="unicode" />\n'
     buff += f'      <param name="hiddenMods" value="{int(bool(mascot["pmf"]["hiddenMods"]))}" type="int" />\n'
-    buff += '      <param name="proteinMass" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["proteinMass"]
-    )
-    buff += '      <param name="peptideTol" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["peptideTol"]
-    )
-    buff += '      <param name="peptideTolUnits" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["peptideTolUnits"]
-    )
-    buff += '      <param name="massType" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["massType"]
-    )
-    buff += '      <param name="charge" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["charge"]
-    )
+    buff += f'      <param name="proteinMass" value="{mascot["pmf"]["proteinMass"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTol" value="{mascot["pmf"]["peptideTol"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTolUnits" value="{mascot["pmf"]["peptideTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="massType" value="{mascot["pmf"]["massType"]}" type="unicode" />\n'
+    buff += f'      <param name="charge" value="{mascot["pmf"]["charge"]}" type="unicode" />\n'
     buff += f'      <param name="decoy" value="{int(bool(mascot["pmf"]["decoy"]))}" type="int" />\n'
-    buff += '      <param name="report" value="{}" type="unicode" />\n'.format(
-        mascot["pmf"]["report"]
-    )
+    buff += f'      <param name="report" value="{mascot["pmf"]["report"]}" type="unicode" />\n'
     buff += "    </pmf>\n"
     # mascot
     buff += "    <sq>\n"
-    buff += '      <param name="database" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["database"]
-    )
-    buff += '      <param name="taxonomy" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["taxonomy"]
-    )
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["enzyme"]
-    )
-    buff += '      <param name="miscleavages" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["miscleavages"]
-    )
-    buff += '      <param name="fixedMods" value="{}" type="unicode" />\n'.format(
-        ";".join(mascot["sq"]["fixedMods"])
-    )
-    buff += '      <param name="variableMods" value="{}" type="unicode" />\n'.format(
-        ";".join(mascot["sq"]["variableMods"])
-    )
+    buff += f'      <param name="database" value="{mascot["sq"]["database"]}" type="unicode" />\n'
+    buff += f'      <param name="taxonomy" value="{mascot["sq"]["taxonomy"]}" type="unicode" />\n'
+    buff += f'      <param name="enzyme" value="{mascot["sq"]["enzyme"]}" type="unicode" />\n'
+    buff += f'      <param name="miscleavages" value="{mascot["sq"]["miscleavages"]}" type="unicode" />\n'
+    buff += f'      <param name="fixedMods" value="{";".join(mascot["sq"]["fixedMods"])}" type="unicode" />\n'
+    buff += f'      <param name="variableMods" value="{";".join(mascot["sq"]["variableMods"])}" type="unicode" />\n'
     buff += f'      <param name="hiddenMods" value="{int(bool(mascot["sq"]["hiddenMods"]))}" type="int" />\n'
-    buff += '      <param name="peptideTol" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["peptideTol"]
-    )
-    buff += '      <param name="peptideTolUnits" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["peptideTolUnits"]
-    )
-    buff += '      <param name="msmsTol" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["msmsTol"]
-    )
-    buff += '      <param name="msmsTolUnits" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["msmsTolUnits"]
-    )
-    buff += '      <param name="massType" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["massType"]
-    )
-    buff += '      <param name="charge" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["charge"]
-    )
-    buff += '      <param name="instrument" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["instrument"]
-    )
-    buff += '      <param name="quantitation" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["quantitation"]
-    )
+    buff += f'      <param name="peptideTol" value="{mascot["sq"]["peptideTol"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTolUnits" value="{mascot["sq"]["peptideTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="msmsTol" value="{mascot["sq"]["msmsTol"]}" type="unicode" />\n'
+    buff += f'      <param name="msmsTolUnits" value="{mascot["sq"]["msmsTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="massType" value="{mascot["sq"]["massType"]}" type="unicode" />\n'
+    buff += f'      <param name="charge" value="{mascot["sq"]["charge"]}" type="unicode" />\n'
+    buff += f'      <param name="instrument" value="{mascot["sq"]["instrument"]}" type="unicode" />\n'
+    buff += f'      <param name="quantitation" value="{mascot["sq"]["quantitation"]}" type="unicode" />\n'
     buff += f'      <param name="decoy" value="{int(bool(mascot["sq"]["decoy"]))}" type="int" />\n'
-    buff += '      <param name="report" value="{}" type="unicode" />\n'.format(
-        mascot["sq"]["report"]
-    )
+    buff += f'      <param name="report" value="{mascot["sq"]["report"]}" type="unicode" />\n'
     buff += "    </sq>\n"
     buff += "    <mis>\n"
-    buff += '      <param name="database" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["database"]
-    )
-    buff += '      <param name="taxonomy" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["taxonomy"]
-    )
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["enzyme"]
-    )
-    buff += '      <param name="miscleavages" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["miscleavages"]
-    )
-    buff += '      <param name="fixedMods" value="{}" type="unicode" />\n'.format(
-        ";".join(mascot["mis"]["fixedMods"])
-    )
-    buff += '      <param name="variableMods" value="{}" type="unicode" />\n'.format(
-        ";".join(mascot["mis"]["variableMods"])
-    )
+    buff += f'      <param name="database" value="{mascot["mis"]["database"]}" type="unicode" />\n'
+    buff += f'      <param name="taxonomy" value="{mascot["mis"]["taxonomy"]}" type="unicode" />\n'
+    buff += f'      <param name="enzyme" value="{mascot["mis"]["enzyme"]}" type="unicode" />\n'
+    buff += f'      <param name="miscleavages" value="{mascot["mis"]["miscleavages"]}" type="unicode" />\n'
+    buff += f'      <param name="fixedMods" value="{";".join(mascot["mis"]["fixedMods"])}" type="unicode" />\n'
+    buff += f'      <param name="variableMods" value="{";".join(mascot["mis"]["variableMods"])}" type="unicode" />\n'
     buff += f'      <param name="hiddenMods" value="{int(bool(mascot["mis"]["hiddenMods"]))}" type="int" />\n'
-    buff += '      <param name="peptideTol" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["peptideTol"]
-    )
-    buff += '      <param name="peptideTolUnits" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["peptideTolUnits"]
-    )
-    buff += '      <param name="msmsTol" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["msmsTol"]
-    )
-    buff += '      <param name="msmsTolUnits" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["msmsTolUnits"]
-    )
-    buff += '      <param name="massType" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["massType"]
-    )
-    buff += '      <param name="charge" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["charge"]
-    )
-    buff += '      <param name="instrument" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["instrument"]
-    )
-    buff += '      <param name="quantitation" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["quantitation"]
-    )
+    buff += f'      <param name="peptideTol" value="{mascot["mis"]["peptideTol"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTolUnits" value="{mascot["mis"]["peptideTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="msmsTol" value="{mascot["mis"]["msmsTol"]}" type="unicode" />\n'
+    buff += f'      <param name="msmsTolUnits" value="{mascot["mis"]["msmsTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="massType" value="{mascot["mis"]["massType"]}" type="unicode" />\n'
+    buff += f'      <param name="charge" value="{mascot["mis"]["charge"]}" type="unicode" />\n'
+    buff += f'      <param name="instrument" value="{mascot["mis"]["instrument"]}" type="unicode" />\n'
+    buff += f'      <param name="quantitation" value="{mascot["mis"]["quantitation"]}" type="unicode" />\n'
     buff += f'      <param name="errorTolerant" value="{int(bool(mascot["mis"]["errorTolerant"]))}" type="int" />\n'
     buff += f'      <param name="decoy" value="{int(bool(mascot["mis"]["decoy"]))}" type="int" />\n'
-    buff += '      <param name="report" value="{}" type="unicode" />\n'.format(
-        mascot["mis"]["report"]
-    )
+    buff += f'      <param name="report" value="{mascot["mis"]["report"]}" type="unicode" />\n'
     buff += "    </mis>\n"
     buff += "  </mascot>\n\n"
 
     # profound
     buff += "  <profound>\n"
-    buff += '    <param name="script" value="{}" type="unicode" />\n'.format(
-        _escape(profound["script"])
-    )
-    buff += '    <param name="database" value="{}" type="unicode" />\n'.format(
-        profound["database"]
-    )
-    buff += '    <param name="taxonomy" value="{}" type="unicode" />\n'.format(
-        profound["taxonomy"]
-    )
-    buff += '    <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        profound["enzyme"]
-    )
-    buff += '    <param name="miscleavages" value="{}" type="unicode" />\n'.format(
-        profound["miscleavages"]
-    )
-    buff += '    <param name="fixedMods" value="{}" type="unicode" />\n'.format(
-        ";".join(profound["fixedMods"])
-    )
-    buff += '    <param name="variableMods" value="{}" type="unicode" />\n'.format(
-        ";".join(profound["variableMods"])
-    )
-    buff += '    <param name="proteinMassLow" value="{:f}" type="float" />\n'.format(
-        profound["proteinMassLow"]
-    )
-    buff += '    <param name="proteinMassHigh" value="{:f}" type="float" />\n'.format(
-        profound["proteinMassHigh"]
-    )
+    buff += f'    <param name="script" value="{_escape(profound["script"])}" type="unicode" />\n'
+    buff += f'    <param name="database" value="{profound["database"]}" type="unicode" />\n'
+    buff += f'    <param name="taxonomy" value="{profound["taxonomy"]}" type="unicode" />\n'
+    buff += f'    <param name="enzyme" value="{profound["enzyme"]}" type="unicode" />\n'
+    buff += f'    <param name="miscleavages" value="{profound["miscleavages"]}" type="unicode" />\n'
+    buff += f'    <param name="fixedMods" value="{";".join(profound["fixedMods"])}" type="unicode" />\n'
+    buff += f'    <param name="variableMods" value="{";".join(profound["variableMods"])}" type="unicode" />\n'
+    buff += f'    <param name="proteinMassLow" value="{profound["proteinMassLow"]:f}" type="float" />\n'
+    buff += f'    <param name="proteinMassHigh" value="{profound["proteinMassHigh"]:f}" type="float" />\n'
     buff += f'    <param name="proteinPILow" value="{profound["proteinPILow"]}" type="int" />\n'
     buff += f'    <param name="proteinPIHigh" value="{profound["proteinPIHigh"]}" type="int" />\n'
-    buff += '    <param name="peptideTol" value="{:f}" type="float" />\n'.format(
-        profound["peptideTol"]
-    )
-    buff += '    <param name="peptideTolUnits" value="{}" type="unicode" />\n'.format(
-        profound["peptideTolUnits"]
-    )
-    buff += '    <param name="massType" value="{}" type="unicode" />\n'.format(
-        profound["massType"]
-    )
-    buff += '    <param name="charge" value="{}" type="unicode" />\n'.format(
-        profound["charge"]
-    )
-    buff += '    <param name="ranking" value="{}" type="unicode" />\n'.format(
-        profound["ranking"]
-    )
-    buff += '    <param name="expectation" value="{:f}" type="float" />\n'.format(
-        profound["expectation"]
-    )
+    buff += f'    <param name="peptideTol" value="{profound["peptideTol"]:f}" type="float" />\n'
+    buff += f'    <param name="peptideTolUnits" value="{profound["peptideTolUnits"]}" type="unicode" />\n'
+    buff += f'    <param name="massType" value="{profound["massType"]}" type="unicode" />\n'
+    buff += f'    <param name="charge" value="{profound["charge"]}" type="unicode" />\n'
+    buff += f'    <param name="ranking" value="{profound["ranking"]}" type="unicode" />\n'
+    buff += f'    <param name="expectation" value="{profound["expectation"]:f}" type="float" />\n'
     buff += (
         f'    <param name="candidates" value="{profound["candidates"]}" type="int" />\n'
     )
@@ -1579,12 +1314,8 @@ def saveConfig(path=None):
     # protein prospector
     buff += "  <prospector>\n"
     buff += "    <common>\n"
-    buff += '      <param name="script" value="{}" type="unicode" />\n'.format(
-        _escape(prospector["common"]["script"])
-    )
-    buff += '      <param name="searchType" value="{}" type="str" />\n'.format(
-        prospector["common"]["searchType"]
-    )
+    buff += f'      <param name="script" value="{_escape(prospector["common"]["script"])}" type="unicode" />\n'
+    buff += f'      <param name="searchType" value="{prospector["common"]["searchType"]}" type="str" />\n'
     buff += f'      <param name="filterAnnotations" value="{int(bool(prospector["common"]["filterAnnotations"]))}" type="int" />\n'
     buff += f'      <param name="filterMatches" value="{int(bool(prospector["common"]["filterMatches"]))}" type="int" />\n'
     buff += f'      <param name="filterUnselected" value="{int(bool(prospector["common"]["filterUnselected"]))}" type="int" />\n'
@@ -1592,107 +1323,41 @@ def saveConfig(path=None):
     buff += f'      <param name="filterUnknown" value="{int(bool(prospector["common"]["filterUnknown"]))}" type="int" />\n'
     buff += "    </common>\n"
     buff += "    <msfit>\n"
-    buff += '      <param name="database" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["database"]
-    )
-    buff += '      <param name="taxonomy" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["taxonomy"]
-    )
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["enzyme"]
-    )
-    buff += '      <param name="miscleavages" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["miscleavages"]
-    )
-    buff += '      <param name="fixedMods" value="{}" type="unicode" />\n'.format(
-        ";".join(prospector["msfit"]["fixedMods"])
-    )
-    buff += '      <param name="variableMods" value="{}" type="unicode" />\n'.format(
-        ";".join(prospector["msfit"]["variableMods"])
-    )
-    buff += '      <param name="proteinMassLow" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["proteinMassLow"]
-    )
-    buff += '      <param name="proteinMassHigh" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["proteinMassHigh"]
-    )
-    buff += '      <param name="proteinPILow" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["proteinPILow"]
-    )
-    buff += '      <param name="proteinPIHigh" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["proteinPIHigh"]
-    )
-    buff += '      <param name="peptideTol" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["peptideTol"]
-    )
-    buff += '      <param name="peptideTolUnits" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["peptideTolUnits"]
-    )
-    buff += '      <param name="massType" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["massType"]
-    )
-    buff += '      <param name="instrument" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["instrument"]
-    )
-    buff += '      <param name="minMatches" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["minMatches"]
-    )
-    buff += '      <param name="maxMods" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["maxMods"]
-    )
-    buff += '      <param name="report" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["report"]
-    )
-    buff += '      <param name="pfactor" value="{}" type="unicode" />\n'.format(
-        prospector["msfit"]["pfactor"]
-    )
+    buff += f'      <param name="database" value="{prospector["msfit"]["database"]}" type="unicode" />\n'
+    buff += f'      <param name="taxonomy" value="{prospector["msfit"]["taxonomy"]}" type="unicode" />\n'
+    buff += f'      <param name="enzyme" value="{prospector["msfit"]["enzyme"]}" type="unicode" />\n'
+    buff += f'      <param name="miscleavages" value="{prospector["msfit"]["miscleavages"]}" type="unicode" />\n'
+    buff += f'      <param name="fixedMods" value="{";".join(prospector["msfit"]["fixedMods"])}" type="unicode" />\n'
+    buff += f'      <param name="variableMods" value="{";".join(prospector["msfit"]["variableMods"])}" type="unicode" />\n'
+    buff += f'      <param name="proteinMassLow" value="{prospector["msfit"]["proteinMassLow"]}" type="unicode" />\n'
+    buff += f'      <param name="proteinMassHigh" value="{prospector["msfit"]["proteinMassHigh"]}" type="unicode" />\n'
+    buff += f'      <param name="proteinPILow" value="{prospector["msfit"]["proteinPILow"]}" type="unicode" />\n'
+    buff += f'      <param name="proteinPIHigh" value="{prospector["msfit"]["proteinPIHigh"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTol" value="{prospector["msfit"]["peptideTol"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTolUnits" value="{prospector["msfit"]["peptideTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="massType" value="{prospector["msfit"]["massType"]}" type="unicode" />\n'
+    buff += f'      <param name="instrument" value="{prospector["msfit"]["instrument"]}" type="unicode" />\n'
+    buff += f'      <param name="minMatches" value="{prospector["msfit"]["minMatches"]}" type="unicode" />\n'
+    buff += f'      <param name="maxMods" value="{prospector["msfit"]["maxMods"]}" type="unicode" />\n'
+    buff += f'      <param name="report" value="{prospector["msfit"]["report"]}" type="unicode" />\n'
+    buff += f'      <param name="pfactor" value="{prospector["msfit"]["pfactor"]}" type="unicode" />\n'
     buff += "    </msfit>\n"
     buff += "    <mstag>\n"
-    buff += '      <param name="database" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["database"]
-    )
-    buff += '      <param name="taxonomy" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["taxonomy"]
-    )
-    buff += '      <param name="enzyme" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["enzyme"]
-    )
-    buff += '      <param name="miscleavages" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["miscleavages"]
-    )
-    buff += '      <param name="fixedMods" value="{}" type="unicode" />\n'.format(
-        ";".join(prospector["mstag"]["fixedMods"])
-    )
-    buff += '      <param name="variableMods" value="{}" type="unicode" />\n'.format(
-        ";".join(prospector["mstag"]["variableMods"])
-    )
-    buff += '      <param name="peptideTol" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["peptideTol"]
-    )
-    buff += '      <param name="peptideTolUnits" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["peptideTolUnits"]
-    )
-    buff += '      <param name="peptideCharge" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["peptideCharge"]
-    )
-    buff += '      <param name="msmsTol" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["msmsTol"]
-    )
-    buff += '      <param name="msmsTolUnits" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["msmsTolUnits"]
-    )
-    buff += '      <param name="massType" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["massType"]
-    )
-    buff += '      <param name="instrument" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["instrument"]
-    )
-    buff += '      <param name="maxMods" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["maxMods"]
-    )
-    buff += '      <param name="report" value="{}" type="unicode" />\n'.format(
-        prospector["mstag"]["report"]
-    )
+    buff += f'      <param name="database" value="{prospector["mstag"]["database"]}" type="unicode" />\n'
+    buff += f'      <param name="taxonomy" value="{prospector["mstag"]["taxonomy"]}" type="unicode" />\n'
+    buff += f'      <param name="enzyme" value="{prospector["mstag"]["enzyme"]}" type="unicode" />\n'
+    buff += f'      <param name="miscleavages" value="{prospector["mstag"]["miscleavages"]}" type="unicode" />\n'
+    buff += f'      <param name="fixedMods" value="{";".join(prospector["mstag"]["fixedMods"])}" type="unicode" />\n'
+    buff += f'      <param name="variableMods" value="{";".join(prospector["mstag"]["variableMods"])}" type="unicode" />\n'
+    buff += f'      <param name="peptideTol" value="{prospector["mstag"]["peptideTol"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideTolUnits" value="{prospector["mstag"]["peptideTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="peptideCharge" value="{prospector["mstag"]["peptideCharge"]}" type="unicode" />\n'
+    buff += f'      <param name="msmsTol" value="{prospector["mstag"]["msmsTol"]}" type="unicode" />\n'
+    buff += f'      <param name="msmsTolUnits" value="{prospector["mstag"]["msmsTolUnits"]}" type="unicode" />\n'
+    buff += f'      <param name="massType" value="{prospector["mstag"]["massType"]}" type="unicode" />\n'
+    buff += f'      <param name="instrument" value="{prospector["mstag"]["instrument"]}" type="unicode" />\n'
+    buff += f'      <param name="maxMods" value="{prospector["mstag"]["maxMods"]}" type="unicode" />\n'
+    buff += f'      <param name="report" value="{prospector["mstag"]["report"]}" type="unicode" />\n'
     buff += "    </mstag>\n"
     buff += "  </prospector>\n\n"
 
@@ -1721,14 +1386,14 @@ def saveConfig(path=None):
         return True
     except Exception:
         return False
+    # ruff: enable[E501]
 
 
 # ----
 
 
-def _getParams(sectionTag, section):
+def _getParams(sectionTag, section) -> None:
     """Get params from nodes."""
-
     if sectionTag:
         paramTags = sectionTag.getElementsByTagName("param")
         if paramTags and paramTags:
@@ -1739,9 +1404,15 @@ def _getParams(sectionTag, section):
                 if name in section:
                     if valueType == "unicode":
                         valueType = "str"
-                    if valueType in ("str", "float", "int"):
+                    if valueType == "str":
                         with contextlib.suppress(BaseException):
-                            section[name] = eval(valueType + "(value)")
+                            section[name] = str(value)
+                    elif valueType == "float":
+                        with contextlib.suppress(BaseException):
+                            section[name] = float(value)
+                    elif valueType == "int":
+                        with contextlib.suppress(BaseException):
+                            section[name] = int(value)
 
 
 # ----
@@ -1749,7 +1420,6 @@ def _getParams(sectionTag, section):
 
 def _escape(text):
     """Clear special characters such as <> etc."""
-
     text = text.strip()
     search = ("&", '"', "'", "<", ">")
     replace = ("&amp;", "&quot;", "&apos;", "&lt;", "&gt;")

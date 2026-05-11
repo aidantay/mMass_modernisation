@@ -16,51 +16,50 @@
 # -------------------------------------------------------------------------
 
 # load libs
+from __future__ import annotations
+
 import base64
 import contextlib
-import os.path
 import struct
 import xml.dom.minidom
 import xml.sax
 from copy import deepcopy
+from pathlib import Path
 
 import numpy
 
 # load objects
 from . import obj_peak, obj_peaklist, obj_scan
 
-# load stopper
-
 # PARSE mzData DATA
 # -----------------
 
 
-class parseMZDATA:
+class ParseMZData:
     """Parse data from mzData."""
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
         self._scans = None
         self._scanlist = None
         self._info = None
 
         # check path
-        if not os.path.exists(path):
-            raise OSError("File not found! --> " + self.path)
+        if not self.path.exists():
+            raise OSError(f"File not found! --> {self.path}")
 
     # ----
 
-    def load(self):
+    def load(self) -> None:
         """Load all scans into memory."""
-
         # init parser
-        handler = runHandler()
+        handler = RunHandler()
         parser = xml.sax.make_parser()
         parser.setContentHandler(handler)
 
         # parse document
         try:
-            with open(self.path, "rb") as document:
+            with self.path.open("rb") as document:
                 parser.parse(document)
             self._scans = handler.data
         except xml.sax.SAXException:
@@ -81,21 +80,20 @@ class parseMZDATA:
 
     def info(self):
         """Get document info."""
-
         # get preloaded data if available
         if self._info:
             return self._info
 
         # init parser
-        handler = infoHandler()
+        handler = InfoHandler()
         parser = xml.sax.make_parser()
         parser.setContentHandler(handler)
 
         # parse document
         try:
-            with open(self.path, "rb") as document:
+            with self.path.open("rb") as document:
                 parser.parse(document)
-        except stopParsing:
+        except StopParsingError:
             self._info = handler.data
         except xml.sax.SAXException:
             self._info = False
@@ -106,19 +104,18 @@ class parseMZDATA:
 
     def scanlist(self):
         """Get list of all scans in the document."""
-
         # use preloaded data if available
         if self._scanlist:
             return self._scanlist
 
         # init parser
-        handler = scanlistHandler()
+        handler = ScanlistHandler()
         parser = xml.sax.make_parser()
         parser.setContentHandler(handler)
 
         # parse document
         try:
-            with open(self.path, "rb") as document:
+            with self.path.open("rb") as document:
                 parser.parse(document)
             self._scanlist = handler.data
         except xml.sax.SAXException:
@@ -130,21 +127,20 @@ class parseMZDATA:
 
     def scan(self, scanID=None):
         """Get spectrum from document."""
-
         # use preloaded data if available
         if self._scans and scanID in self._scans:
             data = self._scans[scanID]
 
         # parse file
         else:
-            handler = scanHandler(scanID)
+            handler = ScanHandler(scanID)
             parser = xml.sax.make_parser()
             parser.setContentHandler(handler)
             try:
-                with open(self.path, "rb") as document:
+                with self.path.open("rb") as document:
                     parser.parse(document)
                 data = handler.data
-            except stopParsing:
+            except StopParsingError:
                 data = handler.data
             except xml.sax.SAXException:
                 return False
@@ -160,15 +156,14 @@ class parseMZDATA:
 
     def _makeScan(self, scanData):
         """Make scan object from raw data."""
-
         # parse peaks
         points = self._parsePoints(scanData)
         if scanData["spectrumType"] == "discrete":
             for x, p in enumerate(points):
-                points[x] = obj_peak.peak(p[0], p[1])
-            scan = obj_scan.scan(peaklist=obj_peaklist.peaklist(points))
+                points[x] = obj_peak.Peak(p[0], p[1])
+            scan = obj_scan.Scan(peaklist=obj_peaklist.Peaklist(points))
         else:
-            scan = obj_scan.scan(profile=points)
+            scan = obj_scan.Scan(profile=points)
 
         # set metadata
         scan.title = scanData["title"]
@@ -190,7 +185,6 @@ class parseMZDATA:
 
     def _parsePoints(self, scanData):
         """Parse spectrum data."""
-
         # check data
         if not scanData["mzData"] or not scanData["intData"]:
             return []
@@ -243,10 +237,10 @@ class parseMZDATA:
     # ----
 
 
-class infoHandler(xml.sax.handler.ContentHandler):
+class InfoHandler(xml.sax.handler.ContentHandler):
     """Get info data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.data = {
             "title": "",
             "operator": "",
@@ -266,9 +260,8 @@ class infoHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def startElement(self, name, attrs):
+    def startElement(self, name, _attrs) -> None:
         """Element started."""
-
         # get instrument
         if name == "sampleName":
             self._isSampleName = True
@@ -285,12 +278,11 @@ class infoHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def endElement(self, name):
+    def endElement(self, name) -> None:
         """Element ended."""
-
         # stop parsing
         if name == "description":
-            raise stopParsing()
+            raise StopParsingError()
 
         # stop elements
         if name == "sampleName":
@@ -309,9 +301,8 @@ class infoHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def characters(self, ch):
+    def characters(self, ch) -> None:
         """Grab characters."""
-
         # get data
         if self._isSampleName:
             self.data["title"] += ch
@@ -327,18 +318,17 @@ class infoHandler(xml.sax.handler.ContentHandler):
     # ----
 
 
-class scanlistHandler(xml.sax.handler.ContentHandler):
+class ScanlistHandler(xml.sax.handler.ContentHandler):
     """Get list of all scans in the document."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.data = {}
         self.currentID = None
 
     # ----
 
-    def startElement(self, name, attrs):
+    def startElement(self, name, attrs) -> None:
         """Element started."""
-
         # get scan metadata
         if name == "spectrum":
             # get scan ID
@@ -437,23 +427,23 @@ class scanlistHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def endElement(self, name):
+    def endElement(self, name) -> None:
         """Element ended."""
         pass
 
     # ----
 
-    def characters(self, ch):
+    def characters(self, ch) -> None:
         """Grab characters."""
         pass
 
     # ----
 
 
-class scanHandler(xml.sax.handler.ContentHandler):
+class ScanHandler(xml.sax.handler.ContentHandler):
     """Get scan data."""
 
-    def __init__(self, scanID):
+    def __init__(self, scanID) -> None:
         self.data = False
         self.scanID = scanID
 
@@ -463,9 +453,8 @@ class scanHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def startElement(self, name, attrs):
+    def startElement(self, name, attrs) -> None:
         """Element started."""
-
         # get scan metadata
         if name == "spectrum":
             self._isMatch = False
@@ -598,12 +587,11 @@ class scanHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def endElement(self, name):
+    def endElement(self, name) -> None:
         """Element ended."""
-
         # stop parsing
         if name == "spectrum" and self._isMatch:
-            raise stopParsing()
+            raise StopParsingError()
 
         # stop reading mz data
         if name == "mzArrayBinary" and self._isMatch:
@@ -623,9 +611,8 @@ class scanHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def characters(self, ch):
+    def characters(self, ch) -> None:
         """Grab characters."""
-
         # get m/z array
         if self._isMzArray:
             self.data["mzData"].append(ch)
@@ -637,10 +624,10 @@ class scanHandler(xml.sax.handler.ContentHandler):
     # ----
 
 
-class runHandler(xml.sax.handler.ContentHandler):
+class RunHandler(xml.sax.handler.ContentHandler):
     """Get whole run."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.data = {}
         self.currentID = None
 
@@ -649,9 +636,8 @@ class runHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def startElement(self, name, attrs):
+    def startElement(self, name, attrs) -> None:
         """Element started."""
-
         # get scan metadata
         if name == "spectrum":
             # get scan ID
@@ -781,9 +767,8 @@ class runHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def endElement(self, name):
+    def endElement(self, name) -> None:
         """Element ended."""
-
         # stop reading mz data
         if name == "mzArrayBinary":
             self._isMzArray = False
@@ -806,9 +791,8 @@ class runHandler(xml.sax.handler.ContentHandler):
 
     # ----
 
-    def characters(self, ch):
+    def characters(self, ch) -> None:
         """Grab characters."""
-
         # get m/z array
         if self._isMzArray:
             self.data[self.currentID]["mzData"].append(ch)
@@ -820,7 +804,7 @@ class runHandler(xml.sax.handler.ContentHandler):
     # ----
 
 
-class stopParsing(Exception):
+class StopParsingError(Exception):
     """Exeption to stop parsing XML data."""
 
     pass

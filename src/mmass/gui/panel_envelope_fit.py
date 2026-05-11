@@ -25,16 +25,15 @@ from mmass import mspy
 from mmass.mspy import plot
 
 from . import config, images, mwx
-from .ids import *
 
 # FLOATING PANEL WITH ENVELOPE FIT TOOL
 # -------------------------------------
 
 
-class panelEnvelopeFit(wx.Frame):
+class PanelEnvelopeFit(wx.Frame):
     """Envelope fit tool."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -53,7 +52,7 @@ class panelEnvelopeFit(wx.Frame):
         self.currentFit = None
 
         # init container
-        self.spectrumContainer = plot.container([])
+        self.spectrumContainer = plot.Container([])
 
         # make gui items
         self.makeGUI()
@@ -61,9 +60,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
         controlbar = self.makeControlbar()
@@ -92,16 +90,15 @@ class panelEnvelopeFit(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make elements
         formula_label = wx.StaticText(panel, -1, "Formula:")
         formula_label.SetFont(wx.SMALL_FONT)
-        self.formula_value = mwx.formulaCtrl(panel, -1, "", size=(220, -1))
+        self.formula_value = mwx.FormulaCtrl(panel, -1, "", size=(220, -1))
 
         charge_label = wx.StaticText(panel, -1, "Charge:")
         charge_label.SetFont(wx.SMALL_FONT)
@@ -110,17 +107,17 @@ class panelEnvelopeFit(wx.Frame):
             -1,
             str(config.envelopeFit["charge"]),
             size=(35, -1),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
 
         exchange_label = wx.StaticText(panel, -1, "Exchange:")
         exchange_label.SetFont(wx.SMALL_FONT)
-        self.exchangeLoss_value = mwx.formulaCtrl(
+        self.exchangeLoss_value = mwx.FormulaCtrl(
             panel, -1, str(config.envelopeFit["loss"]), size=(60, -1)
         )
         exchangeVs_label = wx.StaticText(panel, -1, " vs.")
         exchangeVs_label.SetFont(wx.SMALL_FONT)
-        self.exchangeGain_value = mwx.formulaCtrl(
+        self.exchangeGain_value = mwx.FormulaCtrl(
             panel, -1, str(config.envelopeFit["gain"]), size=(60, -1)
         )
 
@@ -133,14 +130,14 @@ class panelEnvelopeFit(wx.Frame):
             -1,
             str(config.envelopeFit["scaleMin"]),
             size=(35, -1),
-            validator=mwx.validator("intPos"),
+            validator=mwx.Validator("intPos"),
         )
         self.scaleMax_value = wx.TextCtrl(
             panel,
             -1,
             str(config.envelopeFit["scaleMax"]),
             size=(35, -1),
-            validator=mwx.validator("intPos"),
+            validator=mwx.Validator("intPos"),
         )
 
         self.calculate_butt = wx.Button(
@@ -182,9 +179,8 @@ class panelEnvelopeFit(wx.Frame):
 
     def makeControlbar(self):
         """Make controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -220,7 +216,7 @@ class panelEnvelopeFit(wx.Frame):
             -1,
             str(config.envelopeFit["fwhm"]),
             size=(50, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.fwhm_value.SetFont(wx.SMALL_FONT)
 
@@ -237,7 +233,7 @@ class panelEnvelopeFit(wx.Frame):
             -1,
             str(config.envelopeFit["relThreshold"] * 100),
             size=(50, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.relThreshold_value.SetFont(wx.SMALL_FONT)
 
@@ -282,7 +278,6 @@ class panelEnvelopeFit(wx.Frame):
 
     def makeResultsPanel(self):
         """Make results panel."""
-
         panel = wx.Panel(self, -1)
 
         # make table
@@ -304,9 +299,8 @@ class panelEnvelopeFit(wx.Frame):
 
     def makeSpectrumCanvas(self, panel):
         """Make spectrum canvas and set defalt parameters."""
-
         # init canvas
-        self.spectrumCanvas = plot.canvas(
+        self.spectrumCanvas = plot.Canvas(
             panel, size=(600, 350), style=mwx.PLOTCANVAS_STYLE_PANEL
         )
 
@@ -333,11 +327,10 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def makeResultsList(self, panel):
+    def makeResultsList(self, panel) -> None:
         """Make results list."""
-
         # init results list
-        self.resultsList = mwx.sortListCtrl(
+        self.resultsList = mwx.SortListCtrl(
             panel, -1, size=(171, 350), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.resultsList.SetFont(wx.SMALL_FONT)
@@ -356,11 +349,10 @@ class panelEnvelopeFit(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -385,9 +377,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Close panel."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -401,9 +392,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -426,9 +416,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -436,9 +425,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def onListKey(self, evt):
+    def onListKey(self, evt) -> None:
         """Export list if Ctrl+C."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -459,9 +447,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def onCalculate(self, evt):
+    def onCalculate(self, evt) -> None:
         """Generate compounds ions."""
-
         # check processing
         if self.processing:
             return
@@ -515,7 +502,7 @@ class panelEnvelopeFit(wx.Frame):
         # check errors
         if error:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="No data to fit.",
                 message="There are no data in relevant mass range. Please check\nspecified formula, charge and default FWHM.",
@@ -525,9 +512,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def onCollapse(self, evt):
+    def onCollapse(self, evt) -> None:
         """Collapse spectrum panel."""
-
         # Show / hide panel
         if self.mainSizer.IsShown(2):
             self.mainSizer.Hide(2)
@@ -544,9 +530,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def setData(self, document=None, formula=None, charge=None, fwhm=None, scale=None):
+    def setData(self, document=None, formula=None, charge=None, fwhm=None, scale=None) -> None:
         """Set current data."""
-
         self.currentCompound = None
         self.currentFit = None
 
@@ -580,9 +565,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             formula = self.formula_value.GetValue()
@@ -592,9 +576,9 @@ class panelEnvelopeFit(wx.Frame):
             if not formula or not loss or not gain:
                 raise ValueError
 
-            self.currentCompound = mspy.compound(formula)
-            mspy.compound(loss)
-            mspy.compound(gain)
+            self.currentCompound = mspy.Compound(formula)
+            mspy.Compound(loss)
+            mspy.Compound(gain)
 
             config.envelopeFit["loss"] = str(loss)
             config.envelopeFit["gain"] = str(gain)
@@ -615,15 +599,14 @@ class panelEnvelopeFit(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def updateAverageLabel(self):
+    def updateAverageLabel(self) -> None:
         """Update average label value."""
-
         # get label
         label = "Average X: "
         if self.currentFit is not None:
@@ -634,9 +617,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def updateCanvasProperties(self, refresh=True):
+    def updateCanvasProperties(self, refresh=True) -> None:
         """Set current canvas properties."""
-
         # set common properties
         self.spectrumCanvas.setProperties(xLabel=config.spectrum["xLabel"])
         self.spectrumCanvas.setProperties(yLabel=config.spectrum["yLabel"])
@@ -672,9 +654,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def updateSpectrumCanvas(self):
+    def updateSpectrumCanvas(self) -> None:
         """Update spectrum canvas."""
-
         # clear container
         self.spectrumContainer.empty()
 
@@ -692,7 +673,7 @@ class panelEnvelopeFit(wx.Frame):
 
         # show results
         self.spectrumContainer.append(
-            plot.points(
+            plot.Points(
                 spectrum,
                 legend="measured",
                 showPoints=False,
@@ -701,7 +682,7 @@ class panelEnvelopeFit(wx.Frame):
             )
         )
         self.spectrumContainer.append(
-            plot.points(
+            plot.Points(
                 envelope,
                 legend="model",
                 showPoints=False,
@@ -710,10 +691,10 @@ class panelEnvelopeFit(wx.Frame):
             )
         )
         self.spectrumContainer.append(
-            plot.points(data, legend="", showLines=False, pointColour=(16, 71, 185))
+            plot.Points(data, legend="", showLines=False, pointColour=(16, 71, 185))
         )
         self.spectrumContainer.append(
-            plot.points(model, legend="", showLines=False, pointColour=(241, 144, 0))
+            plot.Points(model, legend="", showLines=False, pointColour=(241, 144, 0))
         )
 
         # draw container
@@ -724,9 +705,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def updateResultsList(self):
+    def updateResultsList(self) -> None:
         """Update results list."""
-
         # make data map
         if self.currentFit is None:
             data = []
@@ -757,9 +737,8 @@ class panelEnvelopeFit(wx.Frame):
 
     # ----
 
-    def runEnvelopeFit(self):
+    def runEnvelopeFit(self) -> None:
         """Run envelope fitting."""
-
         # run task
         try:
             # get scales
@@ -772,7 +751,7 @@ class panelEnvelopeFit(wx.Frame):
             scales = list(range(scaleMin, scaleMax + 1))
 
             # init module
-            self.currentFit = mspy.envfit(
+            self.currentFit = mspy.EnvFit(
                 formula=self.currentCompound.formula(),
                 charge=config.envelopeFit["charge"],
                 scales=scales,
@@ -822,7 +801,7 @@ class panelEnvelopeFit(wx.Frame):
                 self.currentFit = False
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentFit = None
             return
 

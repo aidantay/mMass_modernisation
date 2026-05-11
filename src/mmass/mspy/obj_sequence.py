@@ -19,19 +19,14 @@
 import copy
 import re
 
-# load blocks
-# load objects
 # load modules
-from . import blocks, mod_basics, mod_pattern, obj_compound
-
-# load stopper
-from .mod_stopper import CHECK_FORCE_QUIT
+from . import blocks, mod_basics, mod_pattern, mod_stopper, obj_compound
 
 # SEQUENCE OBJECT DEFINITION
 # --------------------------
 
 
-class sequence:
+class Sequence:
     """Sequence object definition."""
 
     def __init__(
@@ -42,13 +37,13 @@ class sequence:
         chainType="aminoacids",
         cyclic=False,
         **attr,
-    ):
+    ) -> None:
         self.chain = []
         self.chainType = chainType
         self.cyclic = cyclic
 
         # get sequence chain
-        if type(chain) == list:
+        if isinstance(chain, list):
             self.chain = chain
 
         elif self.chainType == "aminoacids":
@@ -109,13 +104,13 @@ class sequence:
 
     # ----
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """Check sequence length."""
         return bool(len(self.chain))
 
     # ----
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Get sequence length."""
         return len(self.chain)
 
@@ -134,7 +129,7 @@ class sequence:
 
     # ----
 
-    def __setitem__(self, i, value):
+    def __setitem__(self, i, value) -> None:
         if isinstance(i, slice):
             start = i.start if i.start is not None else 0
             stop = i.stop if i.stop is not None else len(self)
@@ -147,7 +142,7 @@ class sequence:
 
     # ----
 
-    def __delitem__(self, i):
+    def __delitem__(self, i) -> None:
         if isinstance(i, slice):
             start = i.start if i.start is not None else 0
             stop = i.stop if i.stop is not None else len(self)
@@ -162,7 +157,6 @@ class sequence:
 
     def _get_slice(self, start, stop):
         """Get slice of the sequence."""
-
         # check slice
         if stop <= start and not self.cyclic:
             raise ValueError("Invalid slice!")
@@ -177,10 +171,10 @@ class sequence:
         # make new sequence object
         if start < stop:
             seq = parent.chain[start:stop]
-            peptide = sequence(seq, chainType=parent.chainType, cyclic=False)
+            peptide = Sequence(seq, chainType=parent.chainType, cyclic=False)
         elif self.cyclic:
             seq = parent.chain[start:] + parent.chain[:stop]
-            peptide = sequence(seq, chainType=parent.chainType, cyclic=False)
+            peptide = Sequence(seq, chainType=parent.chainType, cyclic=False)
 
         # add previous history
         peptide.history = parent.history
@@ -193,7 +187,7 @@ class sequence:
                 or (type(mod[1]) in (str, str) and mod[1] in peptide.chain)
             ):
                 peptide.modifications.append(mod)
-            elif type(mod[1]) == int:
+            elif isinstance(mod[1], int):
                 if start <= mod[1] < stop or (start >= stop and mod[1] >= start):
                     mod[1] -= start
                     peptide.modifications.append(mod)
@@ -205,7 +199,7 @@ class sequence:
         for mod in parent.labels:
             if type(mod[1]) in (str, str) and mod[1] in peptide.chain:
                 peptide.labels.append(mod)
-            elif type(mod[1]) == int:
+            elif isinstance(mod[1], int):
                 if start <= mod[1] < stop or (start >= stop and mod[1] >= start):
                     mod[1] -= start
                     peptide.labels.append(mod)
@@ -241,22 +235,12 @@ class sequence:
     # ----
 
     def __iter__(self):
-        self._index = 0
-        return self
+        return iter(self.chain)
 
     # ----
 
-    def __next__(self):
-        if self._index < len(self.chain):
-            self._index += 1
-            return self.chain[self._index - 1]
-        raise StopIteration
-
-    # ----
-
-    def reset(self):
+    def reset(self) -> None:
         """Clear sequence buffers."""
-
         self._formula = None
         self._mass = None
         self._composition = None
@@ -265,15 +249,14 @@ class sequence:
 
     # SEQUENCE EDITOR ESSENTIALS
 
-    def _set_slice(self, start, stop, value):
+    def _set_slice(self, start, stop, value) -> None:
         """Insert sequence object (essential for sequence editor)."""
-
         # check slice
         if stop < start:
             raise ValueError("Invalid slice!")
 
         # check value
-        if not isinstance(value, sequence):
+        if not isinstance(value, Sequence):
             raise TypeError("Invalid object to instert!")
 
         # check chain type
@@ -292,12 +275,12 @@ class sequence:
 
         # shift modifications
         for x, mod in enumerate(self.modifications):
-            if type(mod[1]) == int and mod[1] >= start:
+            if isinstance(mod[1], int) and mod[1] >= start:
                 self.modifications[x][1] += len(value)
 
         # shift labels
         for x, mod in enumerate(self.labels):
-            if type(mod[1]) == int and mod[1] >= start:
+            if isinstance(mod[1], int) and mod[1] >= start:
                 self.labels[x][1] += len(value)
 
         # adding modifications not implemented
@@ -317,9 +300,8 @@ class sequence:
 
     # ----
 
-    def _del_slice(self, start, stop):
-        """Delete slice of sequence (essential for sequence editor)."""
-
+    def _del_slice(self, start, stop) -> None:
+        """Delete slice of Sequence (essential for sequence editor)."""
         # check slice
         if stop < start:
             raise ValueError("Invalid slice!")
@@ -330,7 +312,7 @@ class sequence:
         # remove modifications
         keep = []
         for mod in self.modifications:
-            if type(mod[1]) == int and (mod[1] < start or mod[1] >= stop):
+            if isinstance(mod[1], int) and (mod[1] < start or mod[1] >= stop):
                 if mod[1] >= stop:
                     mod[1] -= stop - start
                 keep.append(mod)
@@ -343,7 +325,7 @@ class sequence:
         # remove labels
         keep = []
         for mod in self.labels:
-            if type(mod[1]) == int and (mod[1] < start or mod[1] >= stop):
+            if isinstance(mod[1], int) and (mod[1] < start or mod[1] >= stop):
                 if mod[1] >= stop:
                     mod[1] -= stop - start
                 keep.append(mod)
@@ -366,7 +348,6 @@ class sequence:
 
     def duplicate(self):
         """Return copy of current sequence."""
-
         dupl = copy.deepcopy(self)
         dupl.reset()
 
@@ -382,7 +363,6 @@ class sequence:
 
     def formula(self):
         """Get formula."""
-
         # check formula buffer
         if self._formula is not None:
             return self._formula
@@ -396,7 +376,7 @@ class sequence:
             if comp[el] == 1:
                 self._formula += el
             else:
-                self._formula += "%s%d" % (el, comp[el])
+                self._formula += f"{el}{comp[el]}"
 
         return self._formula
 
@@ -404,7 +384,6 @@ class sequence:
 
     def composition(self):
         """Get elemental composition."""
-
         # check composition buffer
         if self._composition is not None:
             return self._composition
@@ -437,7 +416,7 @@ class sequence:
 
         # add terminal formulae
         if not self.cyclic:
-            termCmpd = obj_compound.compound(self.nTermFormula + self.cTermFormula)
+            termCmpd = obj_compound.Compound(self.nTermFormula + self.cTermFormula)
             for el, count in list(termCmpd.composition().items()):
                 if el in self._composition:
                     self._composition[el] += count
@@ -446,7 +425,7 @@ class sequence:
 
         # subtract neutral losses for fragments
         for loss in self.fragmentLosses:
-            lossCmpd = obj_compound.compound(loss)
+            lossCmpd = obj_compound.Compound(loss)
             for el, count in list(lossCmpd.composition().items()):
                 if el in self._composition:
                     self._composition[el] -= count
@@ -455,7 +434,7 @@ class sequence:
 
         # add neutral gains for fragments
         for gain in self.fragmentGains:
-            gainCmpd = obj_compound.compound(gain)
+            gainCmpd = obj_compound.Compound(gain)
             for el, count in list(gainCmpd.composition().items()):
                 if el in self._composition:
                     self._composition[el] += count
@@ -473,10 +452,9 @@ class sequence:
 
     def mass(self, massType=None):
         """Get mass."""
-
         # get mass
         if self._mass is None:
-            self._mass = obj_compound.compound(self.formula()).mass()
+            self._mass = obj_compound.Compound(self.formula()).mass()
 
         # return mass
         if massType == 0:
@@ -488,8 +466,7 @@ class sequence:
     # ----
 
     def mz(self, charge, agentFormula="H", agentCharge=1):
-        """Get ion m/z"""
-
+        """Get ion m/z."""
         return mod_basics.mz(
             mass=self.mass(),
             charge=charge,
@@ -509,7 +486,6 @@ class sequence:
         real=True,
     ):
         """Get isotopic pattern."""
-
         return mod_pattern.pattern(
             compound=self,
             fwhm=fwhm,
@@ -524,7 +500,6 @@ class sequence:
 
     def format(self, template="S [m]"):
         """Get formated sequence."""
-
         keys = {}
 
         # make sequence keys
@@ -601,6 +576,7 @@ class sequence:
         position=False,
     ):
         """Search sequence for specified ion.
+
         mass: (float) m/z value to search for
         charge: (int) charge of the m/z value
         tolerance: (float) mass tolerance
@@ -611,7 +587,6 @@ class sequence:
         maxMods: (int) maximum number of modifications at one residue
         position: (bool) retain position for variable modifications (much slower)
         """
-
         # check cyclic peptides
         if self.cyclic:
             raise TypeError("Search function is not supported for cyclic peptides!")
@@ -641,7 +616,7 @@ class sequence:
         length = len(self)
         for i in range(length):
             for j in range(i + 1, length + 1):
-                CHECK_FORCE_QUIT()
+                mod_stopper.CHECK_FORCE_QUIT()
 
                 # get peptide
                 peptide = self[i:j]
@@ -651,11 +626,14 @@ class sequence:
                     peptide.cTerminalFormula = cTerm
 
                 # check enzyme specifity
-                if semiSpecific and peptide.itemBefore and peptide.itemAfter:
-                    if not expression.search(
-                        peptide.itemBefore + peptide.chain[0]
-                    ) and not expression.search(peptide.chain[-1] + peptide.itemAfter):
-                        continue
+                if (
+                    semiSpecific
+                    and peptide.itemBefore
+                    and peptide.itemAfter
+                    and not expression.search(peptide.itemBefore + peptide.chain[0])
+                    and not expression.search(peptide.chain[-1] + peptide.itemAfter)
+                ):
+                    continue
 
                 # variate modifications
                 variants = peptide.variations(maxMods=maxMods, position=position)
@@ -683,11 +661,11 @@ class sequence:
 
     def variations(self, maxMods=1, position=True, enzyme=None):
         """Calculate all possible combinations of variable modifications.
+
         maxMods: (int) maximum modifications allowed per one residue
         position: (bool) retain modifications positions (much slower)
         enzyme: (str) enzyme name to ensure that modifications are not presented in cleavage site
         """
-
         variablePeptides = []
 
         # get modifications
@@ -699,7 +677,7 @@ class sequence:
                 fixedMods.append(mod)
 
             # positioned modifications
-            elif type(mod[1]) == int or mod[1] in ("nTerm", "cTerm"):
+            elif isinstance(mod[1], int) or mod[1] in ("nTerm", "cTerm"):
                 variableMods.append(mod)
 
             # retain position of global modifications
@@ -730,7 +708,7 @@ class sequence:
             if not enz.modsAfter and self.itemBefore:
                 occupied += [0] * maxMods
 
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # filter modifications
         buff = []
@@ -742,7 +720,7 @@ class sequence:
                 buff.append(combination)
         combinations = buff
 
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # format modifications and filter same
         buff = []
@@ -762,7 +740,7 @@ class sequence:
 
         # make new peptides
         for combination in combinations:
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
             variablePeptide = self.duplicate()
             variablePeptide.modifications[:] = fixedMods + combination
@@ -777,7 +755,6 @@ class sequence:
 
     def linearized(self, breakPoint=None):
         """Return list of all linearized sequences resulted from cyclic parent."""
-
         # ensure sequence is cyclic
         cyclic = self.cyclic
         self.cyclic = True
@@ -822,7 +799,6 @@ class sequence:
 
     def indexes(self):
         """Calculate parent indexes from sequence history."""
-
         ranges = list(range(self.history[0][1], self.history[0][2]))
         for item in self.history[1:]:
             if item[0] == "slice":
@@ -834,12 +810,12 @@ class sequence:
 
     # ----
 
-    def ismodified(self, position=None, strict=False):
+    def ismodified(self, position=None, strict=False) -> bool:
         """Check if selected amino acid or whole sequence has any modification.
+
         position: (int) amino acid index
         strict: (bool) check variable modifications
         """
-
         # check specified position only
         if position is not None:
             for mod in self.modifications:
@@ -865,9 +841,8 @@ class sequence:
 
     def isvalid(self, charge=0, agentFormula="H", agentCharge=1):
         """Utility to check ion composition."""
-
         # make compound
-        formula = obj_compound.compound(self.formula())
+        formula = obj_compound.Compound(self.formula())
 
         # check ion composition
         return formula.isvalid(
@@ -878,9 +853,8 @@ class sequence:
 
     # MODIFIERS
 
-    def modify(self, name, position, state="f"):
+    def modify(self, name, position, state="f") -> bool:
         """Apply modification to sequence."""
-
         # check modification
         if name not in blocks.modifications:
             raise KeyError("Unknown modification! --> " + name)
@@ -888,16 +862,16 @@ class sequence:
         # check position
         try:
             position = int(position)
-        except:
+        except Exception:
             position = str(position)
 
         if self.cyclic and position in ("nTerm", "cTerm"):
             return False
-        if type(position) == str and (
+        if isinstance(position, str) and (
             position not in ("nTerm", "cTerm") and position not in self.chain
         ):
             return False
-        if type(position) == int and (position < 0 or position >= len(self)):
+        if isinstance(position, int) and (position < 0 or position >= len(self)):
             return False
 
         # add modification
@@ -910,9 +884,8 @@ class sequence:
 
     # ----
 
-    def unmodify(self, name=None, position=None, state="f"):
+    def unmodify(self, name=None, position=None, state="f") -> None:
         """Remove modification from sequence."""
-
         # remove all modifications
         if name is None:
             del self.modifications[:]
@@ -921,7 +894,7 @@ class sequence:
         else:
             try:
                 mod = [name, int(position), str(state)]
-            except:
+            except Exception:
                 mod = [name, str(position), str(state)]
             while mod in self.modifications:
                 del self.modifications[self.modifications.index(mod)]
@@ -931,9 +904,8 @@ class sequence:
 
     # ----
 
-    def label(self, name, position, state="f"):
+    def label(self, name, position, state="f") -> bool:
         """Apply label modification to sequence."""
-
         # check modification
         if name not in blocks.modifications:
             raise KeyError("Unknown modification! --> " + name)
@@ -941,10 +913,10 @@ class sequence:
         # check position
         try:
             position = int(position)
-        except:
+        except Exception:
             position = str(position)
-        if (type(position) == str and position not in self.chain) or (
-            type(position) == int and (position < 0 or position >= len(self))
+        if (isinstance(position, str) and position not in self.chain) or (
+            isinstance(position, int) and (position < 0 or position >= len(self))
         ):
             return False
 
@@ -958,9 +930,8 @@ class sequence:
 
     # ----
 
-    def cyclize(self, cyclic=True):
+    def cyclize(self, cyclic=True) -> None:
         """Make current sequence cyclic/linear."""
-
         # make sequence cyclic
         if cyclic:
             self.cyclic = True
@@ -987,14 +958,13 @@ class sequence:
 
     # HELPERS
 
-    def _formatModifications(self, modifications):
+    def _formatModifications(self, modifications) -> str:
         """Format modifications."""
-
         # get modifications
         modifs = {}
         for mod in modifications:
             # count modification
-            if mod[1] == "" or type(mod[1]) == int or mod[1] in ("nTerm", "cTerm"):
+            if mod[1] == "" or isinstance(mod[1], int) or mod[1] in ("nTerm", "cTerm"):
                 count = 1
             else:
                 count = self.chain.count(mod[1])
@@ -1017,7 +987,6 @@ class sequence:
 
     def _uniqueCombinations(self, items):
         """Generate unique combinations of items."""
-
         for i in range(len(items)):
             for cc in self._uniqueCombinations(items[i + 1 :]):
                 for j in range(items[i][1]):
@@ -1028,7 +997,6 @@ class sequence:
 
     def _countUniqueModifications(self, modifications):
         """Get list of unique modifications with counter."""
-
         uniqueMods = []
         modsCount = []
         for mod in modifications:
@@ -1046,18 +1014,17 @@ class sequence:
 
     # ----
 
-    def _checkModifications(self, positions, chain, maxMods):
+    def _checkModifications(self, positions, chain, maxMods) -> bool:
         """Check if current modification set is applicable."""
-
         for x in positions:
             count = positions.count(x)
-            if type(x) == int or x in ("nTerm", "cTerm"):
+            if isinstance(x, int) or x in ("nTerm", "cTerm"):
                 if count > maxMods:
                     return False
             elif type(x) in (str, str):
                 available = chain.count(x)
                 for y in positions:
-                    if type(y) == int and chain[y] == x:
+                    if isinstance(y, int) and chain[y] == x:
                         available -= 1
                 if count > (available * maxMods):
                     return False

@@ -26,7 +26,7 @@ from . import libs, mwx
 # ---------------------
 
 
-class dlgMascotEditor(wx.Dialog):
+class DlgMascotEditor(wx.Dialog):
     """Edit mascot servers library."""
 
     def __init__(self, parent: wx.Window) -> None:
@@ -55,7 +55,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def makeGUI(self) -> wx.BoxSizer:
         """Make GUI elements."""
-
         # make GUI elements
         self.makeItemsList()
         editor = self.makeItemEditor()
@@ -76,9 +75,8 @@ class dlgMascotEditor(wx.Dialog):
 
     def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, id=wx.ID_ANY, size=(711, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -100,7 +98,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def makeItemEditor(self) -> wx.StaticBoxSizer:
         """Make items editor."""
-
         mainSizer = wx.StaticBoxSizer(
             wx.StaticBox(self, id=wx.ID_ANY, label=""), wx.VERTICAL
         )
@@ -180,7 +177,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def onItemSelected(self, evt: wx.ListEvent) -> None:
         """Update item editor with selected item."""
-
         # get selected item
         name = evt.GetText()
         server = libs.mascot[name]
@@ -198,7 +194,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def onAddItem(self, _evt: wx.CommandEvent) -> None:
         """Add/replace item."""
-
         # get item data
         itemData = self.getItemData()
         if not itemData:
@@ -216,7 +211,7 @@ class dlgMascotEditor(wx.Dialog):
                 (wx.ID_CANCEL, "Cancel", 80, False, 15),
                 (wx.ID_OK, "Replace", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() != wx.ID_OK:
                 dlg.Destroy()
                 return
@@ -233,7 +228,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def onDeleteItem(self, _evt: wx.CommandEvent) -> None:
         """Remove selected items."""
-
         # delete?
         title = "Do you really want to delete selected servers?"
         message = "Server definitions will be lost."
@@ -241,7 +235,7 @@ class dlgMascotEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -261,7 +255,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def updateItemsMap(self) -> None:
         """Update items map."""
-
         self.itemsMap = []
 
         # make map
@@ -278,7 +271,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def updateItemsList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateItemsMap()
         self.itemsList.DeleteAllItems()
@@ -302,7 +294,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def clearEditor(self) -> None:
         """Clear item editor."""
-
         # update editor
         self.itemName_value.SetValue("")
         self.itemHost_value.SetValue("")
@@ -316,7 +307,6 @@ class dlgMascotEditor(wx.Dialog):
 
     def getItemData(self) -> dict[str, str] | bool:
         """Get formated item data."""
-
         # get data
         name = self.itemName_value.GetValue()
         host = self.itemHost_value.GetValue()

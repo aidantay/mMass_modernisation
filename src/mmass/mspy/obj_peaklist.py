@@ -27,10 +27,10 @@ from . import mod_peakpicking, obj_peak
 # --------------------------
 
 
-class peaklist:
+class Peaklist:
     """Peaklist object definition."""
 
-    def __init__(self, peaks=None):
+    def __init__(self, peaks=None) -> None:
         # check data
         if peaks is None:
             peaks = []
@@ -51,12 +51,17 @@ class peaklist:
 
     # ----
 
-    def __len__(self):
+    def __str__(self) -> str:
+        return " ".join(str(peak) for peak in self.peaks)
+
+    # ----
+
+    def __len__(self) -> int:
         return len(self.peaks)
 
     # ----
 
-    def __setitem__(self, i, item):
+    def __setitem__(self, i, item) -> None:
         if isinstance(i, slice):
             self.peaks[i] = [self._checkPeak(p) for p in item]
             self.reset()
@@ -95,12 +100,12 @@ class peaklist:
 
     def __getitem__(self, i):
         if isinstance(i, slice):
-            return peaklist(self.peaks[i])
+            return Peaklist(self.peaks[i])
         return self.peaks[i]
 
     # ----
 
-    def __delitem__(self, i):
+    def __delitem__(self, i) -> None:
         if isinstance(i, slice):
             # check if basepeak is in the slice
             basepeak_deleted = False
@@ -128,14 +133,12 @@ class peaklist:
     # ----
 
     def __iter__(self):
-        self._index = 0
-        return self
+        return iter(self.peaks)
 
     # ----
 
     def __add__(self, other):
         """Return A+B."""
-
         new = self.duplicate()
         new.combine(other)
         return new
@@ -144,26 +147,17 @@ class peaklist:
 
     def __mul__(self, y):
         """Return A*y."""
-
         new = self.duplicate()
         new.multiply(y)
         return new
 
     # ----
 
-    def __next__(self):
-        if self._index < len(self.peaks):
-            self._index += 1
-            return self.peaks[self._index - 1]
-        raise StopIteration
-
-    # ----
-
-    def append(self, item):
+    def append(self, item) -> None:
         """Append new peak.
+
         item (peak or [#, #] or (#,#)) - peak to be added
         """
-
         # check peak
         item = self._checkPeak(item)
 
@@ -190,9 +184,8 @@ class peaklist:
 
     # ----
 
-    def reset(self):
+    def reset(self) -> None:
         """Sort peaklist and recalculate basepeak and relative intensities."""
-
         self.sort()
         self._setbasepeak()
         self._setRelativeIntensities()
@@ -209,7 +202,6 @@ class peaklist:
 
     def groupname(self):
         """Get available group name."""
-
         # get used names
         used = []
         for peak in self.peaks:
@@ -228,17 +220,17 @@ class peaklist:
 
     # MODIFIERS
 
-    def sort(self):
+    def sort(self) -> None:
         """Sort peaks according to m/z."""
         self.peaks.sort(key=lambda x: x.mz)
 
     # ----
 
-    def delete(self, indexes=None):
+    def delete(self, indexes=None) -> None:
         """Delete selected peaks.
+
         indexes (list or tuple) - indexes of peaks to be deleted
         """
-
         # check peaklist
         if indexes is None:
             indexes = []
@@ -259,20 +251,19 @@ class peaklist:
 
     # ----
 
-    def empty(self):
+    def empty(self) -> None:
         """Remove all peaks."""
-
         del self.peaks[:]
         self.basepeak = None
 
     # ----
 
-    def crop(self, minX, maxX):
+    def crop(self, minX, maxX) -> None:
         """Delete peaks outside given range.
+
         minX (float) - lower m/z limit
         maxX (float) - upper m/z limit
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -288,11 +279,11 @@ class peaklist:
 
     # ----
 
-    def multiply(self, y):
+    def multiply(self, y) -> None:
         """Multiply each peak intensity by Y.
+
         y (int or float) - multiplier factor
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -308,9 +299,8 @@ class peaklist:
 
     # ----
 
-    def combine(self, other):
+    def combine(self, other) -> None:
         """Add data from given peaklist."""
-
         # check peaks
         buff = []
         for peak in copy.deepcopy(other):
@@ -327,12 +317,12 @@ class peaklist:
 
     # ----
 
-    def recalibrate(self, fn, params):
+    def recalibrate(self, fn, params) -> None:
         """Apply calibration to peaks.
+
         fn (function) - calibration model
         params (list or tuple) - params for calibration model
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -345,14 +335,14 @@ class peaklist:
 
     def deisotope(
         self, maxCharge=1, mzTolerance=0.15, intTolerance=0.5, isotopeShift=0.0
-    ):
+    ) -> None:
         """Calculate peak charges and find isotopes.
+
         maxCharge (float) - max charge to be searched
         mzTolerance (float) - absolute m/z tolerance for isotopes distance
         intTolerance (float) - relative intensity tolerance for isotopes and model (in %/100)
         isotopeShift (float) - isotope distance correction (neutral mass) (for HDX etc.)
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -368,11 +358,11 @@ class peaklist:
 
     # ----
 
-    def deconvolute(self, massType=0):
+    def deconvolute(self, massType=0) -> None:
         """Recalculate peaklist to singly charged.
+
         massType (0 or 1) - mass type used for m/z re-calculation, 0 = monoisotopic, 1 = average
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -390,12 +380,12 @@ class peaklist:
 
     # ----
 
-    def consolidate(self, window, forceWindow=False):
+    def consolidate(self, window, forceWindow=False) -> None:
         """Group peaks within specified window.
+
         window (float) - default grouping window if peak fwhm not set
         forceWindow (bool) - use default window for all peaks instead of fwhm
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -453,13 +443,13 @@ class peaklist:
 
     # ----
 
-    def remthreshold(self, absThreshold=0.0, relThreshold=0.0, snThreshold=0.0):
+    def remthreshold(self, absThreshold=0.0, relThreshold=0.0, snThreshold=0.0) -> None:
         """Remove peaks below threshold.
+
         absThreshold (float) - absolute intensity threshold
         relThreshold (float) - relative intensity threshold
         snThreshold (float) - signal to noise threshold
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -481,13 +471,13 @@ class peaklist:
 
     # ----
 
-    def remshoulders(self, window=2.5, relThreshold=0.05, fwhm=0.01):
+    def remshoulders(self, window=2.5, relThreshold=0.05, fwhm=0.01) -> None:
         """Remove FT shoulder peaks.
+
         window (float) - peak width multiplier to make search window
-        relThreshold (float) - max relative intensity of shoulder/parent peak (in %/100)
+        relThreshold (float) - max relative intensity of shoulder/parent Peak (in %/100)
         fwhm (float) - default peak width if not set in peak
         """
-
         # check peaklist
         if not self.peaks:
             return
@@ -530,9 +520,8 @@ class peaklist:
 
     # ----
 
-    def remisotopes(self):
+    def remisotopes(self) -> None:
         """Remove isotopes."""
-
         # check peaklist
         if not self.peaks:
             return
@@ -548,9 +537,8 @@ class peaklist:
 
     # ----
 
-    def remuncharged(self):
+    def remuncharged(self) -> None:
         """Remove uncharged peaks."""
-
         # check peaklist
         if not self.peaks:
             return
@@ -570,23 +558,21 @@ class peaklist:
 
     def _checkPeak(self, item):
         """Check item to be a valid peak."""
-
         # peak instance
-        if isinstance(item, obj_peak.peak):
+        if isinstance(item, obj_peak.Peak):
             return item
 
         # make peak from list or tuple
         if type(item) in (list, tuple) and len(item) == 2:
-            return obj_peak.peak(item[0], item[1])
+            return obj_peak.Peak(item[0], item[1])
 
         # not valid peak data
         raise TypeError("Item must be a peak object or list/tuple of two floats!")
 
     # ----
 
-    def _setbasepeak(self):
+    def _setbasepeak(self) -> None:
         """Get most intens peak."""
-
         # check peaklist
         if not self.peaks:
             self.basepeak = None
@@ -602,9 +588,8 @@ class peaklist:
 
     # ----
 
-    def _setRelativeIntensities(self):
+    def _setRelativeIntensities(self) -> None:
         """Set relative intensities for all peaks."""
-
         # check peaklist
         if not self.peaks:
             return
@@ -622,7 +607,6 @@ class peaklist:
 
     def _generateGroupNames(self, size):
         """Generates serie of group names like A B.. AA AB... AAA AAB.."""
-
         pools = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ"] * size
         result = [[]]
         for pool in pools:

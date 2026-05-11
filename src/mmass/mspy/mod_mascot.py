@@ -20,17 +20,16 @@ import http.client
 import re
 import webbrowser
 import xml.dom.minidom
-
-# load stopper
+from pathlib import Path
 
 # MASCOT SEARCH FUNCTIONS
 # -----------------------
 
 
-class mascot:
+class Mascot:
     """Mascot search module."""
 
-    def __init__(self, host, path="/mascot/"):
+    def __init__(self, host, path="/mascot/") -> None:
         # server settings
         self.server = {
             "host": host,
@@ -117,9 +116,8 @@ class mascot:
 
     # ----
 
-    def search(self, query):
+    def search(self, query) -> bool:
         """Send MGF query to Mascot server."""
-
         # clear results
         self.resultsPath = None
         self.resultsXML = None
@@ -145,7 +143,7 @@ class mascot:
             response = conn.getresponse()
             data = response.read().decode("utf-8")
             conn.close()
-        except:
+        except Exception:
             return False
 
         # error
@@ -161,44 +159,34 @@ class mascot:
 
     # ----
 
-    def report(self, path=None):
+    def report(self, path=None) -> None:
         """View search results in a browser."""
+        server_url = self.server["host"] + self.server["path"] + self.server["result"]
 
         # show user defined path
         if path:
-            path = 'http://{}?file="{}"'.format(
-                self.server["host"] + self.server["path"] + self.server["result"],
-                path,
-            )
-            webbrowser.open(path)
+            url = f'http://{server_url}?file="{path}"'
+            webbrowser.open(url)
 
         # show current results
         elif self.resultsPath:
-            path = 'http://{}?file="{}"'.format(
-                self.server["host"] + self.server["path"] + self.server["result"],
-                self.resultsPath,
-            )
-            webbrowser.open(path)
+            url = f'http://{server_url}?file="{self.resultsPath}"'
+            webbrowser.open(url)
 
     # ----
 
     def fetchall(self, path=None):
         """Get search results in XML format."""
-
         # clear results
         self.resultsXML = None
         self.hits = {}
 
         # set path
+        server_export = self.server["path"] + self.server["export"]
         if path:
-            path = '{}?file="{}"'.format(
-                self.server["path"] + self.server["export"], path
-            )
+            path = f'{server_export}?file="{path}"'
         elif self.resultsPath:
-            path = '{}?file="{}"'.format(
-                self.server["path"] + self.server["export"],
-                self.resultsPath,
-            )
+            path = f'{server_export}?file="{self.resultsPath}"'
         else:
             return False
 
@@ -213,7 +201,7 @@ class mascot:
             response = conn.getresponse()
             data = response.read()
             conn.close()
-        except:
+        except Exception:
             return False
 
         # error
@@ -226,9 +214,8 @@ class mascot:
 
     # ----
 
-    def parse(self, data=None, path=None):
+    def parse(self, data=None, path=None) -> bool:
         """Get hits from results."""
-
         self.hits = {}
 
         # parse results XML
@@ -245,7 +232,7 @@ class mascot:
                 data = xml.dom.minidom.parseString(self.resultsXML)
             else:
                 return False
-        except:
+        except Exception:
             return False
 
         # get all hits
@@ -295,29 +282,27 @@ class mascot:
 
     # ----
 
-    def save(self, path):
+    def save(self, path) -> bool | None:
         """Save Mascot results XML."""
-
         # check results
         if not self.resultsXML:
             return False
 
         # save file
         try:
-            with open(path, "wb") as save:
+            with Path(path).open("wb") as save:
                 if isinstance(self.resultsXML, str):
                     save.write(self.resultsXML.encode("utf-8"))
                 else:
                     save.write(self.resultsXML)
             return True
-        except:
+        except Exception:
             return False
 
     # ----
 
     def parameters(self):
         """Get form params from the server."""
-
         # get data from the server
         try:
             conn = http.client.HTTPConnection(self.server["host"])
@@ -326,7 +311,7 @@ class mascot:
             response = conn.getresponse()
             data = response.read().decode("utf-8")
             conn.close()
-        except:
+        except Exception:
             return False
 
         # parse parameter file

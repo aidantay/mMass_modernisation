@@ -16,25 +16,23 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os.path
+import pathlib
 import tempfile
 import webbrowser
 
 import wx
 
-from mmass.gui import config, images, mwx
-
 # load modules
-from mmass.gui.ids import *
+from mmass.gui import config, ids, images, mwx
 
 # FLOATING PANEL WITH PROFOUND SEARCH
 # -----------------------------------
 
 
-class panelProfound(wx.Frame):
+class PanelProfound(wx.Frame):
     """Profound search tool."""
 
-    def __init__(self, parent, tool="pmf"):
+    def __init__(self, parent, tool="pmf") -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -63,9 +61,8 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -91,16 +88,15 @@ class panelProfound(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make tools
         self.pmf_butt = wx.BitmapButton(
             panel,
-            ID_profoundPMF,
+            ids.ID_profoundPMF,
             images.lib["profoundPMFOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -110,7 +106,7 @@ class panelProfound(wx.Frame):
 
         self.query_butt = wx.BitmapButton(
             panel,
-            ID_profoundQuery,
+            ids.ID_profoundQuery,
             images.lib["profoundQueryOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -150,7 +146,6 @@ class panelProfound(wx.Frame):
 
     def makePMFPanel(self):
         """Make controls for search form panel."""
-
         panel = wx.Panel(self, -1)
 
         # make info elements
@@ -201,20 +196,20 @@ class panelProfound(wx.Frame):
         # make masses elements
         paramProteinMass_label = wx.StaticText(panel, -1, "Protein mass:")
         self.paramProteinMassLow_value = wx.TextCtrl(
-            panel, -1, "0", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "0", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         self.paramProteinMassHigh_value = wx.TextCtrl(
-            panel, -1, "300", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "300", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         paramProteinMass_dash = wx.StaticText(panel, -1, "-")
         paramProteinMassUnits_label = wx.StaticText(panel, -1, "kDa")
 
         paramProteinPI_label = wx.StaticText(panel, -1, "Protein pI:")
         self.paramProteinPILow_value = wx.TextCtrl(
-            panel, -1, "0", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "0", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         self.paramProteinPIHigh_value = wx.TextCtrl(
-            panel, -1, "14", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "14", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         paramProteinPI_dash = wx.StaticText(panel, -1, "-")
 
@@ -224,7 +219,7 @@ class panelProfound(wx.Frame):
             -1,
             str(config.profound["peptideTol"]),
             size=(50, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramPeptideTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -257,7 +252,7 @@ class panelProfound(wx.Frame):
             -1,
             str(config.profound["expectation"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         if config.profound["ranking"] == "expect":
             self.paramExpectation_radio.SetValue(True)
@@ -268,7 +263,7 @@ class panelProfound(wx.Frame):
             -1,
             str(config.profound["candidates"]),
             size=(60, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         if config.profound["ranking"] == "zscore":
             self.paramZscore_radio.SetValue(True)
@@ -283,27 +278,27 @@ class panelProfound(wx.Frame):
         infoGrid.Add(self.paramTitle_value, (0, 1), flag=wx.EXPAND)
         infoGrid.AddGrowableCol(1)
 
-        sequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
-        sequenceGrid.Add(
+        SequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
+        SequenceGrid.Add(
             paramTaxonomy_label, (0, 0), flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL
         )
-        sequenceGrid.Add(self.paramTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramDatabase_label, (1, 0), flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL
         )
-        sequenceGrid.Add(self.paramDatabase_choice, (1, 1), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramDatabase_choice, (1, 1), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramEnzyme_label, (1, 2), flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL
         )
-        sequenceGrid.Add(self.paramEnzyme_choice, (1, 3), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramEnzyme_choice, (1, 3), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMiscleavages_label,
             (1, 4),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMiscleavages_choice, (1, 5))
-        sequenceGrid.AddGrowableCol(1)
-        sequenceGrid.AddGrowableCol(3)
+        SequenceGrid.Add(self.paramMiscleavages_choice, (1, 5))
+        SequenceGrid.AddGrowableCol(1)
+        SequenceGrid.AddGrowableCol(3)
 
         modsGrid = wx.GridBagSizer(5, 20)
         modsGrid.Add(self.paramFixedMods_label, (0, 0), flag=wx.ALIGN_CENTER_VERTICAL)
@@ -396,7 +391,7 @@ class panelProfound(wx.Frame):
             wx.EXPAND | wx.LEFT | wx.RIGHT,
             mwx.PANEL_SPACE_MAIN,
         )
-        mainSizer.Add(sequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
+        mainSizer.Add(SequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
         mainSizer.Add(
             wx.StaticLine(panel),
             0,
@@ -429,9 +424,8 @@ class panelProfound(wx.Frame):
 
     def makeQueryPanel(self):
         """Make controls for query."""
-
         # init panels
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
         pklPanel = wx.Panel(self, -1)
@@ -511,28 +505,23 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
-
         # delete temporary file
-        try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_profound_search.html")
-            os.unlink(path)
-        except:
-            pass
+        path = pathlib.Path(tempfile.gettempdir()) / "mmass_profound_search.html"
+        path.unlink(missing_ok=True)
 
         self.Destroy()
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_profoundPMF:
+            if evt.GetId() == ids.ID_profoundPMF:
                 tool = "pmf"
-            elif evt.GetId() == ID_profoundQuery:
+            elif evt.GetId() == ids.ID_profoundQuery:
                 tool = "query"
 
         # set current tool
@@ -563,26 +552,20 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def onModificationSelected(self, evt=None):
+    def onModificationSelected(self, evt=None) -> None:
         """Count and show number of selected modifications."""
-
         if (self.paramFixedMods_label and self.paramVariableMods_label) and (
             not evt or self.currentTool == "pmf"
         ):
-            label = "Fixed modifications: (%d)" % len(
-                self.paramFixedMods_listbox.GetSelections()
-            )
+            label = f"Fixed modifications: ({len(self.paramFixedMods_listbox.GetSelections())})"
             self.paramFixedMods_label.SetLabel(label)
-            label = "Variable modifications: (%d)" % len(
-                self.paramVariableMods_listbox.GetSelections()
-            )
+            label = f"Variable modifications: ({len(self.paramVariableMods_listbox.GetSelections())})"
             self.paramVariableMods_label.SetLabel(label)
 
     # ----
 
-    def onGetPeaklist(self, evt=None):
+    def onGetPeaklist(self, evt=None) -> None:
         """Get current peaklist according to specified filter."""
-
         # get filters
         filters = ""
         if self.filterAnnotations_check.GetValue():
@@ -616,9 +599,8 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def onSearch(self, evt):
+    def onSearch(self, evt) -> None:
         """Make query and send data to ProFound."""
-
         # get params
         if not self.getParams():
             return
@@ -630,14 +612,12 @@ class panelProfound(wx.Frame):
         # make temporary search file
         htmlData = self.makeSearchHTML()
         try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_profound_search.html")
-            htmlFile = open(path, "w")
-            htmlFile.write(htmlData.encode("utf-8"))
-            htmlFile.close()
-            webbrowser.open("file://" + path, autoraise=1)
-        except:
+            path = pathlib.Path(tempfile.gettempdir()) / "mmass_profound_search.html"
+            path.write_text(htmlData, encoding="utf-8")
+            webbrowser.open(path.as_uri(), autoraise=1)
+        except Exception:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Unable to send data to ProFound server.",
                 message="Unknown error occured while creating the search page.",
@@ -647,9 +627,8 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set current document
         self.currentDocument = document
 
@@ -667,9 +646,8 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get dialog params."""
-
         try:
             config.profound["title"] = self.paramTitle_value.GetValue()
             config.profound["database"] = self.paramDatabase_choice.GetStringSelection()
@@ -738,15 +716,14 @@ class panelProfound(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def checkParams(self):
+    def checkParams(self) -> bool:
         """Check search parameters."""
-
         errors = ""
 
         # check taxonomy and database
@@ -764,7 +741,7 @@ class panelProfound(wx.Frame):
         # show warning if errors
         if errors:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="You have the following errors in the search form.",
                 message=errors,
@@ -777,9 +754,9 @@ class panelProfound(wx.Frame):
 
     # ----
 
-    def updateForm(self):
+    def updateForm(self) -> None:
+        # ruff: disable[E501]
         """Update items."""
-
         # default server params
         self.currentParams = {
             "DBSE": {
@@ -960,12 +937,13 @@ class panelProfound(wx.Frame):
 
         # update modifications count
         self.onModificationSelected()
+        # ruff: enable[E501]
 
     # ----
 
     def makeSearchHTML(self):
+        # ruff: disable[E501]
         """Format data to profound html."""
-
         # make html page
         buff = '<?xml version="1.0" encoding="utf-8"?>\n'
         buff += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n'
@@ -996,81 +974,39 @@ class panelProfound(wx.Frame):
         buff += "</head>\n\n"
 
         buff += '<body onload="runsearch()">\n'
-        buff += '  <form action="{}" id="mainSearch" method="post">\n'.format(
-            config.profound["script"]
-        )
+        buff += f'  <form action="{config.profound["script"]}" id="mainSearch" method="post">\n'
         buff += '    <div style="display:none;">\n\n'
-
         buff += '      <input type="text" name="PASS" value="0" />\n'
         buff += '      <input type="text" name="ERRP" value="0.5" />\n'
         buff += '      <input type="text" name="SEARCHP" value="Identify Protein" />\n'
         buff += '      <input type="text" name="FORM" value="1" />\n'
         buff += '      <input type="text" name="ENZY" value="USER" />\n'
-
-        buff += '      <input type="text" name="LABL" value="{}" />\n'.format(
-            self._escape(config.profound["title"])
-        )
-        buff += '      <input type="text" name="DBSE" value="{}" />\n'.format(
-            self._escape(self.currentParams["DBSE"][config.profound["database"]])
-        )
-        buff += '      <input type="text" name="MCLV" value="{}" />\n'.format(
-            config.profound["miscleavages"]
-        )
-        buff += '      <input type="text" name="MINM" value="{}" />\n'.format(
-            config.profound["proteinMassLow"]
-        )
-        buff += '      <input type="text" name="MAXM" value="{}" />\n'.format(
-            config.profound["proteinMassHigh"]
-        )
-        buff += '      <input type="text" name="MINP" value="{}" />\n'.format(
-            config.profound["proteinPILow"]
-        )
-        buff += '      <input type="text" name="MAXP" value="{}" />\n'.format(
-            config.profound["proteinPIHigh"]
-        )
-        buff += '      <input type="text" name="ERRA" value="{}" />\n'.format(
-            config.profound["peptideTol"]
-        )
-        buff += '      <input type="text" name="ERRM" value="{}" />\n'.format(
-            config.profound["peptideTol"]
-        )
-        buff += '      <input type="text" name="ERRT" value="{}" />\n'.format(
-            config.profound["peptideTolUnits"]
-        )
-        buff += '      <input type="text" name="CHRG" value="{}" />\n'.format(
-            config.profound["charge"]
-        )
-        buff += '      <input type="text" name="EXPT" value="{}" />\n'.format(
-            config.profound["expectation"]
-        )
-        buff += '      <input type="text" name="NRET" value="{}" />\n'.format(
-            config.profound["candidates"]
-        )
-        buff += '      <input type="text" name="CLST" value="{}" />\n'.format(
-            self.currentParams["ENZ"][config.profound["enzyme"]]["CLST"]
-        )
-        buff += '      <input type="text" name="CNST" value="{}" />\n'.format(
-            self.currentParams["ENZ"][config.profound["enzyme"]]["CNST"]
-        )
-        buff += '      <input type="text" name="CLMD" value="{}" />\n'.format(
-            self.currentParams["ENZ"][config.profound["enzyme"]]["CLMD"]
-        )
-        buff += '      <input type="text" name="TERM" value="{}" />\n'.format(
-            self.currentParams["ENZ"][config.profound["enzyme"]]["TERM"]
-        )
+        buff += f'      <input type="text" name="LABL" value="{self._escape(config.profound["title"])}" />\n'
+        buff += f'      <input type="text" name="DBSE" value="{self._escape(self.currentParams["DBSE"][config.profound["database"]])}" />\n'
+        buff += f'      <input type="text" name="MCLV" value="{config.profound["miscleavages"]}" />\n'
+        buff += f'      <input type="text" name="MINM" value="{config.profound["proteinMassLow"]}" />\n'
+        buff += f'      <input type="text" name="MAXM" value="{config.profound["proteinMassHigh"]}" />\n'
+        buff += f'      <input type="text" name="MINP" value="{config.profound["proteinPILow"]}" />\n'
+        buff += f'      <input type="text" name="MAXP" value="{config.profound["proteinPIHigh"]}" />\n'
+        buff += f'      <input type="text" name="ERRA" value="{config.profound["peptideTol"]}" />\n'
+        buff += f'      <input type="text" name="ERRM" value="{config.profound["peptideTol"]}" />\n'
+        buff += f'      <input type="text" name="ERRT" value="{config.profound["peptideTolUnits"]}" />\n'
+        buff += f'      <input type="text" name="CHRG" value="{config.profound["charge"]}" />\n'
+        buff += f'      <input type="text" name="EXPT" value="{config.profound["expectation"]}" />\n'
+        buff += f'      <input type="text" name="NRET" value="{config.profound["candidates"]}" />\n'
+        buff += f'      <input type="text" name="CLST" value="{self.currentParams["ENZ"][config.profound["enzyme"]]["CLST"]}" />\n'
+        buff += f'      <input type="text" name="CNST" value="{self.currentParams["ENZ"][config.profound["enzyme"]]["CNST"]}" />\n'
+        buff += f'      <input type="text" name="CLMD" value="{self.currentParams["ENZ"][config.profound["enzyme"]]["CLMD"]}" />\n'
+        buff += f'      <input type="text" name="TERM" value="{self.currentParams["ENZ"][config.profound["enzyme"]]["TERM"]}" />\n'
 
         taxonomy = config.profound["taxonomy"].replace(". ", "")
         taxonomy = taxonomy.replace(" ", "-")
         buff += f'      <input type="text" name="SPEC" value="{self._escape(taxonomy)}" />\n'
 
         for mod in config.profound["fixedMods"]:
-            buff += '      <input type="text" name="CMOD" value="{}" />\n'.format(
-                self.currentParams["CMOD"][mod]
-            )
+            buff += f'      <input type="text" name="CMOD" value="{self.currentParams["CMOD"][mod]}" />\n'
         for mod in config.profound["variableMods"]:
-            buff += '      <input type="text" name="PMOD" value="{}" />\n'.format(
-                self.currentParams["PMOD"][mod]
-            )
+            buff += f'      <input type="text" name="PMOD" value="{self.currentParams["PMOD"][mod]}" />\n'
 
         if config.profound["massType"] == "Average":
             buff += f'      <textarea name="APKS">{self.paramQuery_value.GetValue()}</textarea>\n'
@@ -1085,7 +1021,6 @@ class panelProfound(wx.Frame):
             buff += '      <input type="text" name="EXPECT" value="1" />\n'
 
         buff += "    </div>\n\n"
-
         buff += '    <div id="info">\n'
         buff += "      <h1>mMass - ProFound Search</h1>\n"
         buff += '      <p id="sending">Sending data to ProFound &hellip;</p>\n'
@@ -1093,18 +1028,16 @@ class panelProfound(wx.Frame):
         buff += '      <p id="note">Press the <strong>Search</strong> button if data was not sent automatically.</p>\n'
         buff += '      <p id="button"><input type="submit" value="Search" /></p>\n'
         buff += "    </div>\n\n"
-
         buff += "  </form>\n"
         buff += "</body>\n"
         buff += "</html>\n"
-
+        # ruff: enable[E501]
         return buff
 
     # ----
 
     def _escape(self, text):
         """Clear special characters such as <> etc."""
-
         text = text.strip()
         search = ("&", '"', "'", "<", ">")
         replace = ("&amp;", "&quot;", "&#39;", "&lt;", "&gt;")

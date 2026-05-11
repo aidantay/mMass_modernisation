@@ -16,25 +16,23 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os.path
+import pathlib
 import tempfile
 import webbrowser
 
 import wx
 
-from mmass.gui import config, images, mwx
-
 # load modules
-from mmass.gui.ids import *
+from mmass.gui import config, ids, images, mwx
 
 # FLOATING PANEL WITH PROSPECTOR SEARCH TOOLS
 # -------------------------------------------
 
 
-class panelProspector(wx.Frame):
+class PanelProspector(wx.Frame):
     """ProteinProspector search tools."""
 
-    def __init__(self, parent, tool=config.prospector["common"]["searchType"]):
+    def __init__(self, parent, tool=config.prospector["common"]["searchType"]) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -63,9 +61,8 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -94,16 +91,15 @@ class panelProspector(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make tools
         self.msFit_butt = wx.BitmapButton(
             panel,
-            ID_prospectorMSFit,
+            ids.ID_prospectorMSFit,
             images.lib["prospectorMSFitOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -113,7 +109,7 @@ class panelProspector(wx.Frame):
 
         self.msTag_butt = wx.BitmapButton(
             panel,
-            ID_prospectorMSTag,
+            ids.ID_prospectorMSTag,
             images.lib["prospectorMSTagOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -123,7 +119,7 @@ class panelProspector(wx.Frame):
 
         self.query_butt = wx.BitmapButton(
             panel,
-            ID_prospectorQuery,
+            ids.ID_prospectorQuery,
             images.lib["prospectorQueryOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -169,7 +165,6 @@ class panelProspector(wx.Frame):
 
     def makeMSFitPanel(self):
         """Make controls for MS-Fit search form panel."""
-
         panel = wx.Panel(self, -1)
 
         # make info elements
@@ -229,20 +224,20 @@ class panelProspector(wx.Frame):
         # make masses elements
         paramMSFitProteinMass_label = wx.StaticText(panel, -1, "Protein mass:")
         self.paramMSFitProteinMassLow_value = wx.TextCtrl(
-            panel, -1, "0", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "0", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         self.paramMSFitProteinMassHigh_value = wx.TextCtrl(
-            panel, -1, "300", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "300", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         paramMSFitProteinMass_dash = wx.StaticText(panel, -1, "-")
         paramMSFitProteinMassUnits_label = wx.StaticText(panel, -1, "kDa")
 
         paramProteinPI_label = wx.StaticText(panel, -1, "Protein pI:")
         self.paramMSFitProteinPILow_value = wx.TextCtrl(
-            panel, -1, "0", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "0", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         self.paramMSFitProteinPIHigh_value = wx.TextCtrl(
-            panel, -1, "14", size=(50, -1), validator=mwx.validator("floatPos")
+            panel, -1, "14", size=(50, -1), validator=mwx.Validator("floatPos")
         )
         paramMSFitProteinPI_dash = wx.StaticText(panel, -1, "-")
 
@@ -252,7 +247,7 @@ class panelProspector(wx.Frame):
             -1,
             str(config.prospector["msfit"]["peptideTol"]),
             size=(50, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramMSFitPeptideTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -318,33 +313,33 @@ class panelProspector(wx.Frame):
         infoGrid.Add(self.paramMSFitTitle_value, (0, 1), flag=wx.EXPAND)
         infoGrid.AddGrowableCol(1)
 
-        sequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
-        sequenceGrid.Add(
+        SequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
+        SequenceGrid.Add(
             paramMSFitTaxonomy_label,
             (0, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSFitTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMSFitTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMSFitDatabase_label,
             (1, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSFitDatabase_choice, (1, 1), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMSFitDatabase_choice, (1, 1), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMSFitEnzyme_label,
             (1, 2),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSFitEnzyme_choice, (1, 3), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMSFitEnzyme_choice, (1, 3), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMSFitMiscleavages_label,
             (1, 4),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSFitMiscleavages_choice, (1, 5))
-        sequenceGrid.AddGrowableCol(1)
-        sequenceGrid.AddGrowableCol(3)
+        SequenceGrid.Add(self.paramMSFitMiscleavages_choice, (1, 5))
+        SequenceGrid.AddGrowableCol(1)
+        SequenceGrid.AddGrowableCol(3)
 
         modsGrid = wx.GridBagSizer(5, 20)
         modsGrid.Add(
@@ -461,7 +456,7 @@ class panelProspector(wx.Frame):
             wx.EXPAND | wx.LEFT | wx.RIGHT,
             mwx.PANEL_SPACE_MAIN,
         )
-        mainSizer.Add(sequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
+        mainSizer.Add(SequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
         mainSizer.Add(
             wx.StaticLine(panel),
             0,
@@ -494,7 +489,6 @@ class panelProspector(wx.Frame):
 
     def makeMSTagPanel(self):
         """Make controls for MS-Tag search form panel."""
-
         panel = wx.Panel(self, -1)
 
         # make info elements
@@ -554,7 +548,7 @@ class panelProspector(wx.Frame):
         # make masses elements
         paramMSTagPeptideMass_label = wx.StaticText(panel, -1, "Precursor m/z:")
         self.paramMSTagPeptideMass_value = wx.TextCtrl(
-            panel, -1, "", size=(145, -1), validator=mwx.validator("float")
+            panel, -1, "", size=(145, -1), validator=mwx.Validator("float")
         )
 
         paramMSTagPeptideCharge_label = wx.StaticText(panel, -1, "Precursor charge:")
@@ -574,7 +568,7 @@ class panelProspector(wx.Frame):
             -1,
             str(config.prospector["mstag"]["peptideTol"]),
             size=(50, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramMSTagPeptideTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -589,7 +583,7 @@ class panelProspector(wx.Frame):
             -1,
             str(config.prospector["mstag"]["msmsTol"]),
             size=(50, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.paramMSTagMSMSTolUnits_choice = wx.Choice(
             panel, -1, choices=["Da", "%", "ppm"], size=(80, mwx.CHOICE_HEIGHT)
@@ -644,33 +638,33 @@ class panelProspector(wx.Frame):
         infoGrid.Add(self.paramMSTagTitle_value, (0, 1), flag=wx.EXPAND)
         infoGrid.AddGrowableCol(1)
 
-        sequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
-        sequenceGrid.Add(
+        SequenceGrid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
+        SequenceGrid.Add(
             paramMSTagTaxonomy_label,
             (0, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSTagTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMSTagTaxonomy_choice, (0, 1), (1, 5), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMSTagDatabase_label,
             (1, 0),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSTagDatabase_choice, (1, 1), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMSTagDatabase_choice, (1, 1), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMSTagEnzyme_label,
             (1, 2),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSTagEnzyme_choice, (1, 3), flag=wx.EXPAND)
-        sequenceGrid.Add(
+        SequenceGrid.Add(self.paramMSTagEnzyme_choice, (1, 3), flag=wx.EXPAND)
+        SequenceGrid.Add(
             paramMSTagMiscleavages_label,
             (1, 4),
             flag=wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL,
         )
-        sequenceGrid.Add(self.paramMSTagMiscleavages_choice, (1, 5))
-        sequenceGrid.AddGrowableCol(1)
-        sequenceGrid.AddGrowableCol(3)
+        SequenceGrid.Add(self.paramMSTagMiscleavages_choice, (1, 5))
+        SequenceGrid.AddGrowableCol(1)
+        SequenceGrid.AddGrowableCol(3)
 
         modsGrid = wx.GridBagSizer(5, 20)
         modsGrid.Add(
@@ -788,7 +782,7 @@ class panelProspector(wx.Frame):
             wx.EXPAND | wx.LEFT | wx.RIGHT,
             mwx.PANEL_SPACE_MAIN,
         )
-        mainSizer.Add(sequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
+        mainSizer.Add(SequenceGrid, 0, wx.EXPAND | wx.ALL, mwx.PANEL_SPACE_MAIN)
         mainSizer.Add(
             wx.StaticLine(panel),
             0,
@@ -821,9 +815,8 @@ class panelProspector(wx.Frame):
 
     def makeQueryPanel(self):
         """Make controls for query."""
-
         # init panels
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
         pklPanel = wx.Panel(self, -1)
@@ -909,30 +902,25 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
-
         # delete temporary file
-        try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_prospector_search.html")
-            os.unlink(path)
-        except:
-            pass
+        path = pathlib.Path(tempfile.gettempdir()) / "mmass_prospector_search.html"
+        path.unlink(missing_ok=True)
 
         self.Destroy()
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_prospectorMSFit:
+            if evt.GetId() == ids.ID_prospectorMSFit:
                 tool = "msfit"
-            elif evt.GetId() == ID_prospectorMSTag:
+            elif evt.GetId() == ids.ID_prospectorMSTag:
                 tool = "mstag"
-            elif evt.GetId() == ID_prospectorQuery:
+            elif evt.GetId() == ids.ID_prospectorQuery:
                 tool = "query"
 
         # set current tool
@@ -978,34 +966,24 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def onModificationSelected(self, evt=None):
+    def onModificationSelected(self, evt=None) -> None:
         """Count and show number of selected modifications."""
-
         if self.paramMSFitFixedMods_label and self.paramMSFitVariableMods_label:
-            label = "Fixed modifications: (%d)" % len(
-                self.paramMSFitFixedMods_listbox.GetSelections()
-            )
+            label = f"Fixed modifications: ({len(self.paramMSFitFixedMods_listbox.GetSelections())})"
             self.paramMSFitFixedMods_label.SetLabel(label)
-            label = "Variable modifications: (%d)" % len(
-                self.paramMSFitVariableMods_listbox.GetSelections()
-            )
+            label = f"Variable modifications: ({len(self.paramMSFitVariableMods_listbox.GetSelections())})"
             self.paramMSFitVariableMods_label.SetLabel(label)
 
         if self.paramMSTagFixedMods_label and self.paramMSTagVariableMods_label:
-            label = "Fixed modifications: (%d)" % len(
-                self.paramMSTagFixedMods_listbox.GetSelections()
-            )
+            label = f"Fixed modifications: ({len(self.paramMSTagFixedMods_listbox.GetSelections())})"
             self.paramMSTagFixedMods_label.SetLabel(label)
-            label = "Variable modifications: (%d)" % len(
-                self.paramMSTagVariableMods_listbox.GetSelections()
-            )
+            label = f"Variable modifications: ({len(self.paramMSTagVariableMods_listbox.GetSelections())})"
             self.paramMSTagVariableMods_label.SetLabel(label)
 
     # ----
 
-    def onGetPeaklist(self, evt=None):
+    def onGetPeaklist(self, evt=None) -> None:
         """Get current peaklist according to specified filter."""
-
         # get filters
         filters = ""
         if self.filterAnnotations_check.GetValue():
@@ -1039,9 +1017,8 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def onSearch(self, evt):
+    def onSearch(self, evt) -> None:
         """Make query and send data to ProFound."""
-
         # get params
         if not self.getParams():
             return
@@ -1053,14 +1030,12 @@ class panelProspector(wx.Frame):
         # make temporary search file
         htmlData = self.makeSearchHTML()
         try:
-            path = os.path.join(tempfile.gettempdir(), "mmass_prospector_search.html")
-            htmlFile = open(path, "w")
-            htmlFile.write(htmlData.encode("utf-8"))
-            htmlFile.close()
-            webbrowser.open("file://" + path, autoraise=1)
-        except:
+            path = pathlib.Path(tempfile.gettempdir()) / "mmass_prospector_search.html"
+            path.write_text(htmlData, encoding="utf-8")
+            webbrowser.open(path.as_uri(), autoraise=1)
+        except Exception:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Unable to send data to ProFound server.",
                 message="Unknown error occured while creating the search page.",
@@ -1070,9 +1045,8 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set current document
         self.currentDocument = document
 
@@ -1100,9 +1074,8 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get dialog params."""
-
         try:
             # MS-Fit params
             if config.prospector["common"]["searchType"] == "msfit":
@@ -1271,15 +1244,14 @@ class panelProspector(wx.Frame):
 
                 return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def checkParams(self):
+    def checkParams(self) -> bool:
         """Check search parameters."""
-
         errors = ""
         form = config.prospector["common"]["searchType"]
 
@@ -1298,9 +1270,11 @@ class panelProspector(wx.Frame):
             errors += "- Up to 4 variable modifications can be selected.\n"
 
         # check precursor and MS/MS
-        if config.prospector["common"]["searchType"] == "msfit":
-            if not config.prospector["msfit"]["peptideTol"]:
-                errors += "- Peptide tolerance must be specified.\n"
+        if (
+            config.prospector["common"]["searchType"] == "msfit"
+            and not config.prospector["msfit"]["peptideTol"]
+        ):
+            errors += "- Peptide tolerance must be specified.\n"
 
         # check precursor and MS/MS
         if config.prospector["common"]["searchType"] == "mstag":
@@ -1318,7 +1292,7 @@ class panelProspector(wx.Frame):
         # show warning if errors
         if errors:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="You have the following errors in the search form.",
                 message=errors,
@@ -1331,9 +1305,8 @@ class panelProspector(wx.Frame):
 
     # ----
 
-    def updateForm(self):
+    def updateForm(self) -> None:
         """Update items."""
-
         # default server params
         self.currentParams = {
             "databases": [
@@ -1991,8 +1964,8 @@ class panelProspector(wx.Frame):
     # ----
 
     def makeSearchHTML(self):
+        # ruff: disable[E501]
         """Format data to profound html."""
-
         form = config.prospector["common"]["searchType"]
 
         # make html page
@@ -2026,9 +1999,7 @@ class panelProspector(wx.Frame):
 
         buff += '<body onload="runsearch()">\n'
         buff += "<body>\n"
-        buff += '  <form action="{}" id="mainSearch" method="post">\n'.format(
-            config.prospector["common"]["script"]
-        )
+        buff += f'  <form action="{config.prospector["common"]["script"]}" id="mainSearch" method="post">\n'
         buff += '    <div style="display:none;">\n\n'
 
         # common parameters
@@ -2045,9 +2016,7 @@ class panelProspector(wx.Frame):
         buff += '      <input type="text" name="accession_nums" value="" />\n'
         buff += '      <input type="text" name="names" value="" />\n'
         buff += '      <input type="text" name="add_accession_numbers" value="" />\n'
-        buff += (
-            '      <input type="text" name="data_source" value="Data Paste Area" />\n'
-        )
+        buff += '      <input type="text" name="data_source" value="Data Paste Area" />\n'
         buff += '      <input type="text" name="data_format" value="PP M/Z Intensity Charge" />\n'
         buff += '      <input type="text" name="ms_mass_exclusion" value="0" />\n'
         buff += '      <input type="text" name="ms_matrix_exclusion" value="0" />\n'
@@ -2058,31 +2027,13 @@ class panelProspector(wx.Frame):
         buff += '      <input type="text" name="msms_matrix_exclusion" value="0" />\n'
         buff += '      <input type="text" name="msms_peak_exclusion" value="0" />\n'
 
-        buff += '      <input type="text" name="database" value="{}" />\n'.format(
-            config.prospector[form]["database"]
-        )
-        buff += '      <input type="text" name="species" value="{}" />\n'.format(
-            config.prospector[form]["taxonomy"]
-        )
-        buff += '      <input type="text" name="enzyme" value="{}" />\n'.format(
-            config.prospector[form]["enzyme"]
-        )
-        buff += (
-            '      <input type="text" name="missed_cleavages" value="{}" />\n'.format(
-                config.prospector[form]["miscleavages"]
-            )
-        )
-        buff += '      <input type="text" name="comment" value="{}" />\n'.format(
-            self._escape(config.prospector[form]["title"])
-        )
-        buff += '      <input type="text" name="parent_mass_convert" value="{}" />\n'.format(
-            config.prospector[form]["massType"].lower()
-        )
-        buff += (
-            '      <input type="text" name="instrument_name" value="{}" />\n'.format(
-                config.prospector[form]["instrument"]
-            )
-        )
+        buff += f'      <input type="text" name="database" value="{config.prospector[form]["database"]}" />\n'
+        buff += f'      <input type="text" name="species" value="{config.prospector[form]["taxonomy"]}" />\n'
+        buff += f'      <input type="text" name="enzyme" value="{config.prospector[form]["enzyme"]}" />\n'
+        buff += f'      <input type="text" name="missed_cleavages" value="{config.prospector[form]["miscleavages"]}" />\n'
+        buff += f'      <input type="text" name="comment" value="{self._escape(config.prospector[form]["title"])}" />\n'
+        buff += f'      <input type="text" name="parent_mass_convert" value="{config.prospector[form]["massType"].lower()}" />\n'
+        buff += f'      <input type="text" name="instrument_name" value="{config.prospector[form]["instrument"]}" />\n'
 
         # MS-Fit parameters
         if config.prospector["common"]["searchType"] == "msfit":
@@ -2093,44 +2044,20 @@ class panelProspector(wx.Frame):
             buff += '      <input type="text" name="sort_type" value="Score Sort" />\n'
             buff += '      <input type="text" name="mowse_on" value="1" />\n'
             buff += '      <input type="text" name="parent_contaminant_masses" value="" />\n'
-            buff += (
-                '      <input type="text" name="min_parent_ion_matches" value="1" />\n'
-            )
+            buff += '      <input type="text" name="min_parent_ion_matches" value="1" />\n'
             buff += '      <input type="text" name="ms_search_type" value="" />\n'
             buff += '      <input type="text" name="ms_parent_mass_systematic_error" value="0" />\n'
             buff += '      <input type="text" name="ms_full_mw_range" value="0" />\n'
             buff += '      <input type="text" name="full_pi_range" value="0" />\n'
 
-            buff += (
-                '      <input type="text" name="mowse_pfactor" value="{}" />\n'.format(
-                    config.prospector["msfit"]["pfactor"]
-                )
-            )
-            buff += (
-                '      <input type="text" name="min_matches" value="{}" />\n'.format(
-                    config.prospector["msfit"]["minMatches"]
-                )
-            )
-            buff += (
-                '      <input type="text" name="ms_prot_low_mass" value="%s" />\n'
-                % (config.prospector["msfit"]["proteinMassLow"] * 1000)
-            )
-            buff += (
-                '      <input type="text" name="ms_prot_high_mass" value="%s" />\n'
-                % (config.prospector["msfit"]["proteinMassHigh"] * 1000)
-            )
-            buff += '      <input type="text" name="ms_parent_mass_tolerance" value="{}" />\n'.format(
-                config.prospector["msfit"]["peptideTol"]
-            )
-            buff += '      <input type="text" name="ms_parent_mass_tolerance_units" value="{}" />\n'.format(
-                config.prospector["msfit"]["peptideTolUnits"]
-            )
-            buff += '      <input type="text" name="ms_max_modifications" value="{}" />\n'.format(
-                config.prospector["msfit"]["maxMods"]
-            )
-            buff += '      <input type="text" name="ms_max_reported_hits" value="{}" />\n'.format(
-                config.prospector["msfit"]["report"]
-            )
+            buff += f'      <input type="text" name="mowse_pfactor" value="{config.prospector["msfit"]["pfactor"]}" />\n'
+            buff += f'      <input type="text" name="min_matches" value="{config.prospector["msfit"]["minMatches"]}" />\n'
+            buff += f'      <input type="text" name="ms_prot_low_mass" value="{config.prospector["msfit"]["proteinMassLow"] * 1000}" />\n'
+            buff += f'      <input type="text" name="ms_prot_high_mass" value="{config.prospector["msfit"]["proteinMassHigh"] * 1000}" />\n'
+            buff += f'      <input type="text" name="ms_parent_mass_tolerance" value="{config.prospector["msfit"]["peptideTol"]}" />\n'
+            buff += f'      <input type="text" name="ms_parent_mass_tolerance_units" value="{config.prospector["msfit"]["peptideTolUnits"]}" />\n'
+            buff += f'      <input type="text" name="ms_max_modifications" value="{config.prospector["msfit"]["maxMods"]}" />\n'
+            buff += f'      <input type="text" name="ms_max_reported_hits" value="{config.prospector["msfit"]["report"]}" />\n'
 
             buff += '      <select name="const_mod" multiple="multiple">\n'
             for mod in config.prospector["msfit"]["fixedMods"]:
@@ -2140,11 +2067,8 @@ class panelProspector(wx.Frame):
             for x, mod in enumerate(config.prospector["msfit"]["variableMods"]):
                 buff += f'      <input type="text" name="user{x + 1}_name" value="{mod}" />\n'
             buff += '      <select name="mod_AA" multiple="multiple">\n'
-            for x, mod in enumerate(config.prospector["msfit"]["variableMods"]):
-                buff += (
-                    '        <option selected="selected">User Defined %s</option>\n'
-                    % (x + 1)
-                )
+            for x, _mod in enumerate(config.prospector["msfit"]["variableMods"]):
+                buff += f'        <option selected="selected">User Defined {x + 1}</option>\n'
             buff += "      </select>\n"
 
             buff += f'      <textarea name="data">{self.paramQuery_value.GetValue()}</textarea>\n'
@@ -2155,9 +2079,7 @@ class panelProspector(wx.Frame):
             buff += '      <input type="text" name="search_name" value="mstag" />\n'
             buff += '      <input type="text" name="display_graph" value="1" />\n'
             buff += '      <input type="text" name="allow_non_specific" value="at 0 termini" />\n'
-            buff += (
-                '      <input type="text" name="expect_calc_method" value="None" />\n'
-            )
+            buff += '      <input type="text" name="expect_calc_method" value="None" />\n'
             buff += '      <input type="text" name="use_instrument_ion_types" value="1" />\n'
             buff += '      <input type="text" name="max_hits" value="9999999" />\n'
             buff += '      <input type="text" name="msms_search_type" value="" />\n'
@@ -2171,27 +2093,13 @@ class panelProspector(wx.Frame):
             buff += '      <input type="text" name="high_pi" value="14.0" />\n'
             buff += '      <input type="text" name="full_pi_range" value="1" />\n'
 
-            buff += '      <input type="text" name="msms_parent_mass_tolerance" value="{}" />\n'.format(
-                config.prospector["mstag"]["peptideTol"]
-            )
-            buff += '      <input type="text" name="msms_parent_mass_tolerance_units" value="{}" />\n'.format(
-                config.prospector["mstag"]["peptideTolUnits"]
-            )
-            buff += '      <input type="text" name="msms_precursor_charge" value="{}" />\n'.format(
-                config.prospector["mstag"]["peptideCharge"]
-            )
-            buff += '      <input type="text" name="fragment_masses_tolerance" value="{}" />\n'.format(
-                config.prospector["mstag"]["msmsTol"]
-            )
-            buff += '      <input type="text" name="fragment_masses_tolerance_units" value="{}" />\n'.format(
-                config.prospector["mstag"]["msmsTolUnits"]
-            )
-            buff += '      <input type="text" name="msms_max_modifications" value="{}" />\n'.format(
-                config.prospector["mstag"]["maxMods"]
-            )
-            buff += '      <input type="text" name="msms_max_reported_hits" value="{}" />\n'.format(
-                config.prospector["mstag"]["report"]
-            )
+            buff += f'      <input type="text" name="msms_parent_mass_tolerance" value="{config.prospector["mstag"]["peptideTol"]}" />\n'
+            buff += f'      <input type="text" name="msms_parent_mass_tolerance_units" value="{config.prospector["mstag"]["peptideTolUnits"]}" />\n'
+            buff += f'      <input type="text" name="msms_precursor_charge" value="{config.prospector["mstag"]["peptideCharge"]}" />\n'
+            buff += f'      <input type="text" name="fragment_masses_tolerance" value="{config.prospector["mstag"]["msmsTol"]}" />\n'
+            buff += f'      <input type="text" name="fragment_masses_tolerance_units" value="{config.prospector["mstag"]["msmsTolUnits"]}" />\n'
+            buff += f'      <input type="text" name="msms_max_modifications" value="{config.prospector["mstag"]["maxMods"]}" />\n'
+            buff += f'      <input type="text" name="msms_max_reported_hits" value="{config.prospector["mstag"]["report"]}" />\n'
 
             buff += '      <select name="const_mod" multiple="multiple">\n'
             for mod in config.prospector["mstag"]["fixedMods"]:
@@ -2209,28 +2117,23 @@ class panelProspector(wx.Frame):
             )
 
         buff += "    </div>\n\n"
-
         buff += '    <div id="info">\n'
         buff += "      <h1>mMass - Protein Prospector Search</h1>\n"
-        buff += (
-            '      <p id="sending">Sending data to Protein Prospector &hellip;</p>\n'
-        )
+        buff += '      <p id="sending">Sending data to Protein Prospector &hellip;</p>\n'
         buff += '      <p id="wait">Please wait &hellip;</p>\n'
         buff += '      <p id="note">Press the <strong>Search</strong> button if data was not sent automatically.</p>\n'
         buff += '      <p id="button"><input type="submit" value="Search" /></p>\n'
         buff += "    </div>\n\n"
-
         buff += "  </form>\n"
         buff += "</body>\n"
         buff += "</html>\n"
-
+        # ruff: enable[E501]
         return buff
 
     # ----
 
     def _escape(self, text):
         """Clear special characters such as <> etc."""
-
         text = text.strip()
         search = ("&", '"', "'", "<", ">")
         replace = ("&amp;", "&quot;", "&#39;", "&lt;", "&gt;")

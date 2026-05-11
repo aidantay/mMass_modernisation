@@ -30,10 +30,10 @@ from .mod_stopper import CHECK_FORCE_QUIT
 
 def locate(signal, x):
     """Find nearest higher index of searched x-value.
+
     signal (numpy array) - signal data points
     x (float) - x value
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -53,9 +53,9 @@ def locate(signal, x):
 
 def basepeak(signal):
     """Locate highest y-value in signal. Point index is returned.
+
     signal (numpy array) - signal data points
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -75,12 +75,12 @@ def basepeak(signal):
 
 def interpolate(p1, p2, x=None, y=None):
     """Calculates inner point between two points by linear interpolation.
+
     p1 (tuple of floats) - point 1
     p2 (tuple of floats) - point 2
     x (float) - x value (to interpolate y)
     y (float) - y value (to interpolate x)
     """
-
     # interpolate y point
     if x is not None:
         return calculations.signal_interpolate_y(
@@ -102,9 +102,9 @@ def interpolate(p1, p2, x=None, y=None):
 
 def boundaries(signal):
     """Calculates signal minima and maxima as (minX, minY, maxX, maxY).
+
     signal (numpy array) - signal data points
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -124,9 +124,9 @@ def boundaries(signal):
 
 def maxima(signal):
     """Find local maxima in signal.
+
     signal (numpy array) - signal data points
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -146,10 +146,10 @@ def maxima(signal):
 
 def intensity(signal, x):
     """Find corresponding y-value for searched x-value.
+
     signal (numpy array) - signal data points
     x (float) - x-value
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -169,11 +169,11 @@ def intensity(signal, x):
 
 def centroid(signal, x, height):
     """Find peak centroid for searched x-value measured at y-value.
+
     signal (numpy array) - signal data points
     x (float) - x-value
     height (float) - y-value for width determination
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -193,11 +193,11 @@ def centroid(signal, x, height):
 
 def width(signal, x, height):
     """Find peak width for searched x-value measured at y-value.
+
     signal (numpy array) - signal data points
     x (float) - x-value
     height (float) - y-value for width determination
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -217,12 +217,12 @@ def width(signal, x, height):
 
 def area(signal, minX=None, maxX=None, baseline=None):
     """Return area under signal curve.
+
     signal (numpy array) - signal data points
     minX (float) - starting m/z value
     maxX (float) - ending m/z value
     baseline (numpy array) - signal baseline
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -261,12 +261,12 @@ def area(signal, minX=None, maxX=None, baseline=None):
 
 def noise(signal, minX=None, maxX=None, x=None, window=0.1):
     """Calculates signal noise level and width.
+
     signal (numpy array) - signal data points
     minX, maxX (float) - x-axis range to use for calculation
     x (float) - x-value for which to calculate the noise +- window
     window (float) - x-axis range used for calculation, relative to given x (in %/100)
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -309,11 +309,11 @@ def noise(signal, minX=None, maxX=None, x=None, window=0.1):
 
 def baseline(signal, window=0.1, offset=0.0):
     """Return baseline data.
+
     signal (numpy array) - signal data points
     window (float or None) - noise calculation window (%/100)
     offset (float) - baseline offset, relative to noise width (in %/100)
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -348,7 +348,7 @@ def baseline(signal, window=0.1, offset=0.0):
     # calc baseline data
     levels = []
     widths = []
-    for i, x in enumerate(raster):
+    for x in raster:
         i1 = locate(signal, x - x * window)
         i2 = locate(signal, x + x * window)
         if i1 == i2:
@@ -379,11 +379,11 @@ def baseline(signal, window=0.1, offset=0.0):
 
 def crop(signal, minX, maxX):
     """Crop signal to given x-range. New array is returned.
+
     signal (numpy array) - signal data points
     minX (float) - minimum x-value
     maxX (float) - maximum x-value
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -405,11 +405,11 @@ def crop(signal, minX, maxX):
 
 def offset(signal, x=0.0, y=0.0):
     """Shift signal by offset. New array is returned.
+
     signal (numpy array) - signal data points
     x (float) - x-axis offset
     y (float) - y-axis offset
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -429,11 +429,11 @@ def offset(signal, x=0.0, y=0.0):
 
 def multiply(signal, x=1.0, y=1.0):
     """Multiply signal values by factor. New array is returned.
+
     signal (numpy array) - signal data points
     x (float) - x-axis multiplicator
     y (float) - y-axis multiplicator
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -453,9 +453,9 @@ def multiply(signal, x=1.0, y=1.0):
 
 def normalize(signal):
     """Normalize y-values of the signal to max 1. New array is returned.
+
     signal (numpy array) - signal data points
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -475,12 +475,12 @@ def normalize(signal):
 
 def smooth(signal, method, window, cycles=1):
     """Smooth signal by moving average filter. New array is returned.
+
     signal (numpy array) - signal data points
     method (MA GA SG) - smoothing method: MA - moving average, GA - Gaussian, SG - Savitzky-Golay
     window (float) - m/z window size for smoothing
     cycles (int) - number of repeating cycles
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -512,11 +512,11 @@ def smooth(signal, method, window, cycles=1):
 
 def movaver(signal, window, cycles=1, style="flat"):
     """Smooth signal by moving average filter. New array is returned.
+
     signal (numpy array) - signal data points
     window (float) - m/z window size for smoothing
     cycles (int) - number of repeating cycles
     """
-
     # approximate number of points within window
     window = int(window * len(signal) / (signal[-1][0] - signal[0][0]))
     window = min(window, len(signal))
@@ -560,12 +560,12 @@ def movaver(signal, window, cycles=1, style="flat"):
 
 def savgol(signal, window, cycles=1, order=3):
     """Smooth signal by Savitzky-Golay filter. New array is returned.
+
     signal (numpy array) - signal data points
     window (float) - m/z window size for smoothing
     cycles (int) - number of repeating cycles
     order (int) - order of polynom used
     """
-
     # approximate number of points within window
     window = int(window * len(signal) / (signal[-1][0] - signal[0][0]))
     if window <= order:
@@ -578,10 +578,10 @@ def savgol(signal, window, cycles=1, order=3):
     # coeficients
     orderRange = list(range(order + 1))
     halfWindow = (window - 1) // 2
-    b = numpy.asmatrix(
+    b = numpy.array(
         [[k**i for i in orderRange] for k in range(-halfWindow, halfWindow + 1)]
     )
-    m = numpy.linalg.pinv(b).A[0]
+    m = numpy.linalg.pinv(b)[0]
     window = len(m)
     halfWindow = (window - 1) // 2
 
@@ -624,10 +624,10 @@ def savgol(signal, window, cycles=1, order=3):
 
 def combine(signalA, signalB):
     """Unify x-raster and combine two arrays (y=yA+yB). New array is returned.
+
     signalA (numpy array) - signal A data points
     signalB (numpy array) - signal B data points
     """
-
     # check signal type
     if not isinstance(signalA, numpy.ndarray) or not isinstance(signalB, numpy.ndarray):
         raise TypeError("Signals must be NumPy arrays!")
@@ -647,10 +647,10 @@ def combine(signalA, signalB):
 
 def overlay(signalA, signalB):
     """Unify x-raster and overlay two arrays (y=max(yA,yB)). New array is returned.
+
     signalA (numpy array) - signal A data points
     signalB (numpy array) - signal B data points
     """
-
     # check signal type
     if not isinstance(signalA, numpy.ndarray) or not isinstance(signalB, numpy.ndarray):
         raise TypeError("Signals must be NumPy arrays!")
@@ -670,10 +670,10 @@ def overlay(signalA, signalB):
 
 def subtract(signalA, signalB):
     """Unify x-raster and subtract two arrays (y=yA-yB). New array is returned.
+
     signalA (numpy array) - signal A data points
     signalB (numpy array) - signal B data points
     """
-
     # check signal type
     if not isinstance(signalA, numpy.ndarray) or not isinstance(signalB, numpy.ndarray):
         raise TypeError("Signals must be NumPy arrays!")
@@ -693,10 +693,10 @@ def subtract(signalA, signalB):
 
 def subbase(signal, baseline):
     """Subtract baseline from signal withou chaning x-raster. New array is returned.
+
     signal (numpy array) - signal data points
     baseline (numpy array) - baseline data points
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray) or not isinstance(baseline, numpy.ndarray):
         raise TypeError("Signals must be NumPy arrays!")

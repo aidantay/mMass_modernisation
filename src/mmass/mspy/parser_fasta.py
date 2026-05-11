@@ -16,8 +16,10 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os.path
+from __future__ import annotations
+
 import re
+from pathlib import Path
 
 # load objects
 from . import obj_sequence
@@ -35,24 +37,23 @@ refPattern = re.compile(r"^(ref\|[A-Z]{2}_[0-9]+[\.0-9]*)\|(.*)")
 # -------------------------
 
 
-class parseFASTA:
+class ParseFASTA:
     """Parse data from FASTA."""
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
 
         # check path
-        if not os.path.exists(path):
-            raise OSError("File not found! --> " + self.path)
+        if not self.path.exists():
+            raise OSError(f"File not found! --> {self.path}")
 
     # ----
 
     def sequences(self):
         """Get sequences from document."""
-
         # open document
         try:
-            with open(self.path, encoding="utf-8") as document:
+            with self.path.open(encoding="utf-8") as document:
                 rawData = document.readlines()
         except OSError:
             return False
@@ -76,7 +77,7 @@ class parseFASTA:
                 # store previous sequence
                 if reading:
                     try:
-                        sequence = obj_sequence.sequence(
+                        sequence = obj_sequence.Sequence(
                             chain, title=title, accession=accession
                         )
                         data.append(sequence)
@@ -116,7 +117,7 @@ class parseFASTA:
         # store last sequence
         if reading:
             try:
-                sequence = obj_sequence.sequence(
+                sequence = obj_sequence.Sequence(
                     chain, title=title, accession=accession
                 )
                 data.append(sequence)

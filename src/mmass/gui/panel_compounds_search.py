@@ -22,17 +22,15 @@ import wx
 
 from mmass import mspy
 
-from . import config, doc, images, libs, mwx
-
 # load modules
-from .ids import *
-from .panel_match import panelMatch
+from . import config, doc, ids, images, libs, mwx
+from .panel_match import PanelMatch
 
 # FLOATING PANEL WITH COUPOUND SEARCH TOOL
 # ----------------------------------------
 
 
-class panelCompoundsSearch(wx.Frame):
+class PanelCompoundsSearch(wx.Frame):
     """Compounds search tool."""
 
     def __init__(self, parent: wx.Window, tool: str = "compounds") -> None:
@@ -67,7 +65,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
         controlbar = self.makeControlbar()
@@ -97,16 +94,15 @@ class panelCompoundsSearch(wx.Frame):
 
     def makeToolbar(self) -> wx.Panel:
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make tools
         self.compounds_butt = wx.BitmapButton(
             panel,
-            ID_compoundsSearchCompounds,
+            ids.ID_compoundsSearchCompounds,
             images.lib["compoundsSearchCompoundsOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -116,7 +112,7 @@ class panelCompoundsSearch(wx.Frame):
 
         self.formula_butt = wx.BitmapButton(
             panel,
-            ID_compoundsSearchFormula,
+            ids.ID_compoundsSearchFormula,
             images.lib["compoundsSearchFormulaOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -188,9 +184,8 @@ class panelCompoundsSearch(wx.Frame):
 
     def makeControlbar(self) -> wx.Panel:
         """Make controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -214,7 +209,7 @@ class panelCompoundsSearch(wx.Frame):
             -1,
             str(config.compoundsSearch["maxCharge"]),
             size=(30, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
         self.maxCharge_value.SetFont(wx.SMALL_FONT)
 
@@ -286,9 +281,8 @@ class panelCompoundsSearch(wx.Frame):
 
     def makeCompoundsList(self) -> None:
         """Make compounds list."""
-
         # init list
-        self.compoundsList = mwx.sortListCtrl(
+        self.compoundsList = mwx.SortListCtrl(
             self, -1, size=(721, 300), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.compoundsList.SetFont(wx.SMALL_FONT)
@@ -320,11 +314,10 @@ class panelCompoundsSearch(wx.Frame):
 
     def makeGaugePanel(self) -> wx.Panel:
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -349,7 +342,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onClose(self, evt: wx.Event) -> None:
         """Hide this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -366,7 +358,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onProcessing(self, status: bool = True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -388,7 +379,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onStop(self, evt: wx.Event) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -398,12 +388,11 @@ class panelCompoundsSearch(wx.Frame):
 
     def onToolSelected(self, evt: wx.Event = None, tool: str | None = None) -> None:
         """Selected tool."""
-
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_compoundsSearchCompounds:
+            if evt.GetId() == ids.ID_compoundsSearchCompounds:
                 tool = "compounds"
-            elif evt.GetId() == ID_compoundsSearchFormula:
+            elif evt.GetId() == ids.ID_compoundsSearchFormula:
                 tool = "formula"
 
         # set current tool
@@ -439,7 +428,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onItemSelected(self, evt: wx.Event) -> None:
         """Show selected mass in spectrum canvas."""
-
         mz = self.currentCompounds[evt.GetData()][1]
         self.parent.updateMassPoints([mz])
 
@@ -453,7 +441,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onItemSendToMassCalculator(self, evt: wx.Event) -> None:
         """Show isotopic pattern for selected compound."""
-
         # get data
         selected = self.compoundsList.getSelected()
         if selected:
@@ -479,7 +466,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onItemCopyFormula(self, evt: wx.Event) -> None:
         """Copy selected compound formula into clipboard."""
-
         # get data
         selected = self.compoundsList.getSelected()
         if selected:
@@ -502,7 +488,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onListKey(self, evt: wx.KeyEvent) -> None:
         """Export list if Ctrl+C."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -518,35 +503,34 @@ class panelCompoundsSearch(wx.Frame):
 
     def onListRMU(self, evt: wx.Event) -> None:
         """Show filter pop-up menu on lists."""
-
         # popup menu
         menu = wx.Menu()
-        menu.Append(ID_listViewAll, "Show All", "", wx.ITEM_RADIO)
-        menu.Append(ID_listViewMatched, "Show Matched Only", "", wx.ITEM_RADIO)
-        menu.Append(ID_listViewUnmatched, "Show Unmatched Only", "", wx.ITEM_RADIO)
+        menu.Append(ids.ID_listViewAll, "Show All", "", wx.ITEM_RADIO)
+        menu.Append(ids.ID_listViewMatched, "Show Matched Only", "", wx.ITEM_RADIO)
+        menu.Append(ids.ID_listViewUnmatched, "Show Unmatched Only", "", wx.ITEM_RADIO)
         menu.AppendSeparator()
-        menu.Append(ID_listSendToMassCalculator, "Show Isotopic Pattern", "")
+        menu.Append(ids.ID_listSendToMassCalculator, "Show Isotopic Pattern", "")
         menu.AppendSeparator()
-        menu.Append(ID_listCopyFormula, "Copy Formula")
-        menu.Append(ID_listCopy, "Copy List")
+        menu.Append(ids.ID_listCopyFormula, "Copy Formula")
+        menu.Append(ids.ID_listCopy, "Copy List")
 
         # check item
         if self._compoundsFilter == 1:
-            menu.Check(ID_listViewMatched, True)
+            menu.Check(ids.ID_listViewMatched, True)
         elif self._compoundsFilter == -1:
-            menu.Check(ID_listViewUnmatched, True)
+            menu.Check(ids.ID_listViewUnmatched, True)
         else:
-            menu.Check(ID_listViewAll, True)
+            menu.Check(ids.ID_listViewAll, True)
 
         # bind events
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewAll)
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewMatched)
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewUnmatched)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewAll)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewMatched)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewUnmatched)
         self.Bind(
-            wx.EVT_MENU, self.onItemSendToMassCalculator, id=ID_listSendToMassCalculator
+            wx.EVT_MENU, self.onItemSendToMassCalculator, id=ids.ID_listSendToMassCalculator
         )
-        self.Bind(wx.EVT_MENU, self.onItemCopyFormula, id=ID_listCopyFormula)
-        self.Bind(wx.EVT_MENU, self.onListCopy, id=ID_listCopy)
+        self.Bind(wx.EVT_MENU, self.onItemCopyFormula, id=ids.ID_listCopyFormula)
+        self.Bind(wx.EVT_MENU, self.onListCopy, id=ids.ID_listCopy)
 
         # show menu
         self.PopupMenu(menu)
@@ -557,11 +541,10 @@ class panelCompoundsSearch(wx.Frame):
 
     def onListFilter(self, evt: wx.Event) -> None:
         """Apply selected view filter on current list."""
-
         # set filter
-        if evt.GetId() == ID_listViewMatched:
+        if evt.GetId() == ids.ID_listViewMatched:
             self._compoundsFilter = 1
-        elif evt.GetId() == ID_listViewUnmatched:
+        elif evt.GetId() == ids.ID_listViewUnmatched:
             self._compoundsFilter = -1
         else:
             self._compoundsFilter = 0
@@ -579,7 +562,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onGenerate(self, evt: wx.Event = None) -> None:
         """Generate compounds ions."""
-
         # check processing
         if self.processing:
             return
@@ -606,7 +588,7 @@ class panelCompoundsSearch(wx.Frame):
             formula = self.formula_value.GetValue()
             if formula:
                 try:
-                    compounds[formula] = mspy.compound(formula)
+                    compounds[formula] = mspy.Compound(formula)
                 except Exception:
                     wx.Bell()
 
@@ -649,12 +631,11 @@ class panelCompoundsSearch(wx.Frame):
 
     def onMatch(self, evt: wx.Event = None) -> None:
         """Match data to current peaklist."""
-
         # init match panel
         match = True
         if not self.matchPanel:
             match = False
-            self.matchPanel = panelMatch(self, self.parent, "compounds")
+            self.matchPanel = PanelMatch(self, self.parent, "compounds")
             self.matchPanel.Centre()
             self.matchPanel.Show(True)
 
@@ -673,7 +654,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def onAnnotate(self, evt: wx.Event) -> None:
         """Annotate matched peaks."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -708,7 +688,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def setData(self, document: "doc.Document") -> None:
         """Set current document."""
-
         # set new document
         self.currentDocument = document
 
@@ -719,7 +698,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def getParams(self) -> bool:
         """Get generate params."""
-
         # try to get values
         try:
             config.compoundsSearch["massType"] = 0
@@ -755,7 +733,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def updateCompoundsList(self) -> None:
         """Update compounds mass list."""
-
         # clear previous data and set new
         self.compoundsList.DeleteAllItems()
         self.compoundsList.setDataMap(self.currentCompounds)
@@ -828,7 +805,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def updateMatches(self, resultList: list | None = None) -> None:
         """Update compounds list."""
-
         # update compounds list
         self.updateCompoundsList()
 
@@ -836,7 +812,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def clearMatches(self) -> None:
         """Clear matched data."""
-
         # update compounds panel
         if self.currentCompounds is not None:
             for item in self.currentCompounds:
@@ -852,7 +827,6 @@ class panelCompoundsSearch(wx.Frame):
 
     def runGenerateIons(self, compounds: dict) -> None:
         """Calculate compounds ions."""
-
         # run task
         try:
             # set adducts
@@ -915,7 +889,7 @@ class panelCompoundsSearch(wx.Frame):
                         elif item in ("-H2O"):
                             formula = f"{compound.expression}({adducts[item]})"
 
-                        formula = mspy.compound(formula)
+                        formula = mspy.Compound(formula)
                         if formula.isvalid():
                             mz = formula.mz(z * polarity)[
                                 config.compoundsSearch["massType"]
@@ -946,7 +920,7 @@ class panelCompoundsSearch(wx.Frame):
                                         adduct = f"{item1}{item2}"
                                         formula = f"{compound.expression}({adducts[item1]})({adducts[item2]})(H-1)"
 
-                                    formula = mspy.compound(formula)
+                                    formula = mspy.Compound(formula)
                                     if formula.isvalid():
                                         mz = formula.mz(z * polarity)[
                                             config.compoundsSearch["massType"]
@@ -964,7 +938,7 @@ class panelCompoundsSearch(wx.Frame):
                                         )
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentCompounds = []
             return
 

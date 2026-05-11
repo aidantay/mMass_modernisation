@@ -26,16 +26,15 @@ from mmass import mspy
 from . import images, mwx
 
 # load modules
-from .ids import *
 
 # FLOATING PANEL WITH PERIODIC TABLE OF ELEMENTS
 # ----------------------------------------------
 
 
-class panelPeriodicTable(wx.Frame):
+class PanelPeriodicTable(wx.Frame):
     """Periodic table of elements."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -267,9 +266,8 @@ class panelPeriodicTable(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -289,9 +287,8 @@ class panelPeriodicTable(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -364,7 +361,6 @@ class panelPeriodicTable(wx.Frame):
 
     def makeTablePanel(self):
         """Make periodic table panel."""
-
         elements = (
             ("H", (0, 0)),
             ("He", (0, 17)),
@@ -524,16 +520,14 @@ class panelPeriodicTable(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
-
         self.Destroy()
 
     # ----
 
-    def onHighlightGroup(self, evt=None):
+    def onHighlightGroup(self, evt=None) -> None:
         """Highlight elements group."""
-
         # clear previous
         self.currentGroup = None
         self.onElementSelected(None)
@@ -558,9 +552,8 @@ class panelPeriodicTable(wx.Frame):
 
     # ----
 
-    def onElementSelected(self, evt=None):
+    def onElementSelected(self, evt=None) -> None:
         """Show information for selected element."""
-
         # unselect previous element
         if (
             self.currentElement
@@ -609,9 +602,8 @@ class panelPeriodicTable(wx.Frame):
 
     # ----
 
-    def onIsotopes(self, evt=None):
+    def onIsotopes(self, evt=None) -> None:
         """Show isotopic pattern."""
-
         if self.currentElement:
             self.parent.onToolsMassCalculator(formula=self.currentElement)
         else:
@@ -619,9 +611,8 @@ class panelPeriodicTable(wx.Frame):
 
     # ----
 
-    def onWiki(self, evt):
+    def onWiki(self, evt) -> None:
         """Go to wikipedia."""
-
         # show selected element
         if self.currentElement:
             link = f"http://en.wikipedia.org/wiki/{mspy.elements[self.currentElement].name}"
@@ -657,14 +648,12 @@ class panelPeriodicTable(wx.Frame):
 
     # ----
 
-    def onPhotos(self, evt):
+    def onPhotos(self, evt) -> None:
         """Go to photographic periodic table of elements."""
-
         # show selected element
         if self.currentElement:
             link = (
-                "http://www.periodictable.com/Elements/%0.3d/index.html"
-                % mspy.elements[self.currentElement].atomicNumber
+                f"http://www.periodictable.com/Elements/{mspy.elements[self.currentElement].atomicNumber:03d}/index.html"
             )
             with contextlib.suppress(BaseException):
                 webbrowser.open(link, autoraise=1)

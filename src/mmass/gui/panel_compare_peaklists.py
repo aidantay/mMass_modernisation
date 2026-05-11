@@ -31,7 +31,7 @@ from . import config, images, mwx
 # ------------------------------------------
 
 
-class panelComparePeaklists(wx.Frame):
+class PanelComparePeaklists(wx.Frame):
     """Compare peaklists tool."""
 
     def __init__(self, parent: wx.Window) -> None:
@@ -62,7 +62,6 @@ class panelComparePeaklists(wx.Frame):
 
     def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -88,9 +87,8 @@ class panelComparePeaklists(wx.Frame):
 
     def makeToolbar(self) -> wx.Panel:
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbarNoBorder"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -118,7 +116,7 @@ class panelComparePeaklists(wx.Frame):
             str(config.comparePeaklists["tolerance"]),
             size=(60, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.tolerance_value.Bind(wx.EVT_TEXT_ENTER, self.onCompare)
 
@@ -151,7 +149,7 @@ class panelComparePeaklists(wx.Frame):
             -1,
             str(config.comparePeaklists["ratioThreshold"]),
             size=(50, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         self.compare_butt = wx.Button(
@@ -196,7 +194,6 @@ class panelComparePeaklists(wx.Frame):
 
     def makeMainPanel(self) -> wx.Panel:
         """Make main panel."""
-
         panel = wx.Panel(self, -1)
 
         # make grids
@@ -221,7 +218,6 @@ class panelComparePeaklists(wx.Frame):
 
     def makeDocumentsGrid(self, panel: wx.Panel) -> None:
         """Make documents grid."""
-
         # make table
         self.documentsGrid = wx.grid.Grid(
             panel, -1, size=(550, 500), style=mwx.GRID_STYLE
@@ -247,7 +243,6 @@ class panelComparePeaklists(wx.Frame):
 
     def makePeaklistGrid(self, panel: wx.Panel) -> None:
         """Make total peaklist grid."""
-
         # make table
         self.peaklistGrid = wx.grid.Grid(
             panel, -1, size=(225, 400), style=mwx.GRID_STYLE
@@ -273,7 +268,6 @@ class panelComparePeaklists(wx.Frame):
 
     def makeMatchesGrid(self, panel: wx.Panel) -> None:
         """Make matches grid."""
-
         # make table
         self.matchesGrid = wx.grid.Grid(
             panel, -1, size=(225, 400), style=mwx.GRID_STYLE
@@ -296,11 +290,10 @@ class panelComparePeaklists(wx.Frame):
 
     def makeGaugePanel(self) -> wx.Panel:
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -327,7 +320,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onClose(self, evt: wx.Event) -> None:
         """Hide this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -340,7 +332,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onProcessing(self, status: bool = True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -366,7 +357,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onStop(self, evt: wx.Event) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -376,7 +366,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onRatioCheckChanged(self, evt: wx.Event = None) -> None:
         """Disable ratio chacking options."""
-
         enabled = self.ratioCheck_check.IsChecked()
         self.ratioDirection_choice.Enable(enabled)
         self.ratioThreshold_value.Enable(enabled)
@@ -385,7 +374,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onDocumentsCellSelected(self, evt: wx.grid.GridEvent) -> None:
         """Show more info for selected cell."""
-
         evt.Skip()
 
         # check documents
@@ -424,7 +412,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onPeaklistCellSelected(self, evt: wx.grid.GridEvent) -> None:
         """Show more info for selected cell."""
-
         evt.Skip()
 
         # check documents
@@ -448,7 +435,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onDocumentsKey(self, evt: wx.KeyEvent) -> None:
         """Key pressed."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -464,7 +450,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onPeaklistKey(self, evt: wx.KeyEvent) -> None:
         """Key pressed."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -480,7 +465,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onMatchesKey(self, evt: wx.KeyEvent) -> None:
         """Key pressed."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -496,7 +480,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onCompare(self, evt: wx.Event) -> None:
         """Compare data."""
-
         # check processing
         if self.processing:
             return
@@ -536,7 +519,6 @@ class panelComparePeaklists(wx.Frame):
 
     def onUpdatePeaklist(self, evt: wx.Event = None) -> None:
         """Get relevant peaks lists."""
-
         # check processing
         if self.processing:
             return
@@ -580,7 +562,6 @@ class panelComparePeaklists(wx.Frame):
 
     def setData(self, documents: list["mspy.obj_document.Document"]) -> None:
         """Set data."""
-
         self.currentDocuments = []
         self.currentPeaklist = []
         self.currentMatches = []
@@ -597,7 +578,6 @@ class panelComparePeaklists(wx.Frame):
 
     def getParams(self) -> bool:
         """Get all params from dialog."""
-
         # try to get values
         try:
             config.comparePeaklists["tolerance"] = float(
@@ -635,7 +615,6 @@ class panelComparePeaklists(wx.Frame):
 
     def updateDocumentsGrid(self, recreate: bool = True) -> None:
         """Update current documents grid."""
-
         # make new grid
         if recreate or not self.currentPeaklist:
             # erase grid
@@ -703,7 +682,6 @@ class panelComparePeaklists(wx.Frame):
 
     def updatePeaklistGrid(self, recreate: bool = True) -> None:
         """Update current total peaklist grid."""
-
         # make new grid
         if recreate or not self.currentPeaklist:
             # erase grid
@@ -761,7 +739,6 @@ class panelComparePeaklists(wx.Frame):
 
     def updateMatchesGrid(self) -> None:
         """Update current matches."""
-
         # erase grid
         if self.matchesGrid.GetNumberCols():
             self.matchesGrid.DeleteCols(0, self.matchesGrid.GetNumberCols())
@@ -818,7 +795,6 @@ class panelComparePeaklists(wx.Frame):
 
     def runGetPeaklists(self) -> None:
         """Filter peaklists according to specified type."""
-
         # empty current data
         self.currentPeaklist = []
         self.currentMatches = []
@@ -898,7 +874,7 @@ class panelComparePeaklists(wx.Frame):
             self.currentPeaklist.sort()
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             self.currentPeaklist = []
             self._maxSize = 0
             return
@@ -907,14 +883,13 @@ class panelComparePeaklists(wx.Frame):
 
     def runCompare(self) -> None:
         """Compare all peaklists."""
-
         self.currentMatches = []
 
         # run task
         try:
             # erase previous matches
             count = len(self.currentDocuments)
-            for i, item in enumerate(self.currentPeaklist):
+            for item in self.currentPeaklist:
                 item[-1] = count * [False]
                 item[-1][item[1]] = True
 
@@ -971,14 +946,13 @@ class panelComparePeaklists(wx.Frame):
                         p2[-1][p1[1]] = True
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
     def compareSelected(self, pkIndex: int) -> None:
         """Compare selected mass only."""
-
         self.currentMatches = []
 
         # get current peak
@@ -1012,7 +986,6 @@ class panelComparePeaklists(wx.Frame):
 
     def copyDocuments(self) -> None:
         """Copy documents table into clipboard."""
-
         # get default bgr colour
         defaultColour = self.documentsGrid.GetDefaultCellBackgroundColour()
 
@@ -1044,7 +1017,6 @@ class panelComparePeaklists(wx.Frame):
 
     def copyPeaklist(self) -> None:
         """Copy total peaklist table into clipboard."""
-
         # get default bgr colour
         defaultColour = self.peaklistGrid.GetDefaultCellBackgroundColour()
 
@@ -1076,7 +1048,6 @@ class panelComparePeaklists(wx.Frame):
 
     def copyMatches(self) -> None:
         """Copy matches table into clipboard."""
-
         # get data
         buff = ""
         for row in range(self.matchesGrid.GetNumberRows()):

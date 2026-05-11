@@ -16,36 +16,33 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os.path
+from pathlib import Path
 
 # load stopper
-from .parser_mgf import parseMGF
-from .parser_mzdata import parseMZDATA
-from .parser_mzml import parseMZML
-from .parser_mzxml import parseMZXML
+from .parser_mgf import ParseMGF
+from .parser_mzdata import ParseMZData
+from .parser_mzml import ParseMZML
+from .parser_mzxml import ParseMZXML
 
 # load parsers
-from .parser_xy import parseXY
+from .parser_xy import ParseXY
 
 # UTILITIES
 # ---------
 
 
-def load(path, scanID=None, dataType="continuous"):
+def load(path: str | Path, scanID: int | None = None, dataType: str = "continuous"):
     """Load scan from given document."""
-
     # check path
-    if not os.path.exists(path):
-        raise OSError("File not found! --> " + path)
+    p = Path(path)
+    if not p.exists():
+        raise OSError("File not found! --> " + str(p))
 
-    # get filename and extension
-    _dirName, fileName = os.path.split(path)
-    baseName, extension = os.path.splitext(fileName)
-    fileName = fileName.lower()
-    baseName = baseName.lower()
-    extension = extension.lower()
+    # get extension
+    extension = p.suffix.lower()
 
     # get document type
+    docType = None
     if extension == ".mzdata":
         docType = "mzData"
     elif extension == ".mzxml":
@@ -57,7 +54,7 @@ def load(path, scanID=None, dataType="continuous"):
     elif extension in (".xy", ".txt", ".asc"):
         docType = "XY"
     elif extension == ".xml":
-        with open(path, encoding="utf-8", errors="ignore") as doc:
+        with p.open(encoding="utf-8", errors="ignore") as doc:
             data = doc.read(500)
             if "<mzData" in data:
                 docType = "mzData"
@@ -68,23 +65,23 @@ def load(path, scanID=None, dataType="continuous"):
 
     # check document type
     if not docType:
-        raise ValueError("Unknown document type! --> " + path)
+        raise ValueError("Unknown document type! --> " + str(p))
 
     # load document data
     if docType == "mzData":
-        parser = parseMZDATA(path)
+        parser = ParseMZData(p)
         scan = parser.scan(scanID)
     elif docType == "mzXML":
-        parser = parseMZXML(path)
+        parser = ParseMZXML(p)
         scan = parser.scan(scanID)
     elif docType == "mzML":
-        parser = parseMZML(path)
+        parser = ParseMZML(p)
         scan = parser.scan(scanID)
     elif docType == "MGF":
-        parser = parseMGF(path)
+        parser = ParseMGF(p)
         scan = parser.scan(scanID)
     elif docType == "XY":
-        parser = parseXY(path)
+        parser = ParseXY(p)
         scan = parser.scan(dataType)
 
     return scan
@@ -93,14 +90,12 @@ def load(path, scanID=None, dataType="continuous"):
 # ----
 
 
-def save(data, path):
-    """"""
-
+def save(data: list[list[float]], path: str | Path) -> None:
     buff = ""
     for point in data:
-        buff += "{:f}\t{:f}\n".format(*tuple(point))
+        buff += f"{point[0]:f}\t{point[1]:f}\n"
 
-    with open(path, "wb") as save_file:
+    with Path(path).open("wb") as save_file:
         save_file.write(buff.encode("utf-8"))
 
 

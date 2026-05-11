@@ -17,22 +17,21 @@
 
 # load libs
 import contextlib
-import os.path
+import pathlib
 import threading
 
 import wx
 
-from . import config, images, mwx
-from .ids import *
+from . import config, ids, images, mwx
 
 # FLOATING PANEL WITH EXPORTING TOOLS
 # -----------------------------------
 
 
-class panelDocumentExport(wx.Frame):
+class PanelDocumentExport(wx.Frame):
     """Document export tools."""
 
-    def __init__(self, parent, tool="image"):
+    def __init__(self, parent, tool="image") -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -57,9 +56,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -91,16 +89,15 @@ class panelDocumentExport(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make buttons
         self.image_butt = wx.BitmapButton(
             panel,
-            ID_documentExportImage,
+            ids.ID_documentExportImage,
             images.lib["documentExportImageOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -110,7 +107,7 @@ class panelDocumentExport(wx.Frame):
 
         self.peaklist_butt = wx.BitmapButton(
             panel,
-            ID_documentExportPeaklist,
+            ids.ID_documentExportPeaklist,
             images.lib["documentExportPeaklistOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -120,7 +117,7 @@ class panelDocumentExport(wx.Frame):
 
         self.spectrum_butt = wx.BitmapButton(
             panel,
-            ID_documentExportSpectrum,
+            ids.ID_documentExportSpectrum,
             images.lib["documentExportSpectrumOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -166,7 +163,6 @@ class panelDocumentExport(wx.Frame):
 
     def makeImagePanel(self):
         """Image export panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -176,7 +172,7 @@ class panelDocumentExport(wx.Frame):
             -1,
             str(config.export["imageWidth"]),
             size=(140, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         imageHeight_label = wx.StaticText(panel, -1, "Height:")
@@ -185,7 +181,7 @@ class panelDocumentExport(wx.Frame):
             -1,
             str(config.export["imageHeight"]),
             size=(140, -1),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
 
         self.imageUnits_choice = wx.Choice(
@@ -292,7 +288,6 @@ class panelDocumentExport(wx.Frame):
 
     def makePeaklistPanel(self):
         """Peaklist export panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -429,7 +424,6 @@ class panelDocumentExport(wx.Frame):
 
     def makeSpectrumPanel(self):
         """Spectrum export panel."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
@@ -483,11 +477,10 @@ class panelDocumentExport(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         # pack elements
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -503,9 +496,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Destroy this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -515,9 +507,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -525,11 +516,11 @@ class panelDocumentExport(wx.Frame):
 
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_documentExportImage:
+            if evt.GetId() == ids.ID_documentExportImage:
                 tool = "image"
-            elif evt.GetId() == ID_documentExportPeaklist:
+            elif evt.GetId() == ids.ID_documentExportPeaklist:
                 tool = "peaklist"
-            elif evt.GetId() == ID_documentExportSpectrum:
+            elif evt.GetId() == ids.ID_documentExportSpectrum:
                 tool = "spectrum"
 
         # set current tool
@@ -567,9 +558,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -589,9 +579,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onImageResolutionChanged(self, evt=None):
+    def onImageResolutionChanged(self, evt=None) -> None:
         """Get new image resolution."""
-
         # get resolution
         resolution = int(self.imageResolution_choice.GetStringSelection())
 
@@ -611,9 +600,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onPeaklistFormatChanged(self, evt=None):
+    def onPeaklistFormatChanged(self, evt=None) -> None:
         """Get new peaklist format."""
-
         # get format
         config.export["peaklistFormat"] = (
             self.peaklistFormat_choice.GetStringSelection()
@@ -639,9 +627,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onExport(self, evt):
+    def onExport(self, evt) -> None:
         """Export data."""
-
         # check processing
         if self.processing:
             return
@@ -662,9 +649,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onExportImage(self):
+    def onExportImage(self) -> None:
         """Export image."""
-
         # get format
         if config.export["imageFormat"] == "PNG":
             fileName = "spectrum.png"
@@ -687,7 +673,7 @@ class panelDocumentExport(wx.Frame):
         )
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            config.main["lastDir"] = os.path.split(path)[0]
+            config.main["lastDir"] = str(pathlib.Path(path).parent)
             dlg.Destroy()
         else:
             dlg.Destroy()
@@ -708,9 +694,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onExportPeaklist(self):
+    def onExportPeaklist(self) -> None:
         """Export peeaklist data."""
-
         # get format
         if config.export["peaklistFormat"] in ("ASCIIASCII with Headers"):
             fileName = "peaklist.txt"
@@ -730,7 +715,7 @@ class panelDocumentExport(wx.Frame):
         )
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            config.main["lastDir"] = os.path.split(path)[0]
+            config.main["lastDir"] = str(pathlib.Path(path).parent)
             dlg.Destroy()
         else:
             dlg.Destroy()
@@ -756,9 +741,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def onExportSpectrum(self):
+    def onExportSpectrum(self) -> None:
         """Export spectrum data."""
-
         # set default filename
         fileName = "spectrum.txt"
         fileType = "ASCII file|*.txt"
@@ -774,7 +758,7 @@ class panelDocumentExport(wx.Frame):
         )
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            config.main["lastDir"] = os.path.split(path)[0]
+            config.main["lastDir"] = str(pathlib.Path(path).parent)
             dlg.Destroy()
         else:
             dlg.Destroy()
@@ -800,9 +784,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool:
         """Get all params from dialog."""
-
         try:
             # image
             config.export["imageWidth"] = float(self.imageWidth_value.GetValue())
@@ -856,7 +839,7 @@ class panelDocumentExport(wx.Frame):
             ]
 
         # ring error bell if error
-        except:
+        except Exception:
             wx.Bell()
             return False
 
@@ -864,9 +847,8 @@ class panelDocumentExport(wx.Frame):
 
     # ----
 
-    def runExportImage(self, path):
+    def runExportImage(self, path) -> None:
         """Make spectrum image."""
-
         # get format
         if config.export["imageFormat"] == "PNG":
             fileFormat = wx.BITMAP_TYPE_PNG
@@ -908,14 +890,13 @@ class panelDocumentExport(wx.Frame):
         # save image
         try:
             image.SaveFile(path, fileFormat)
-        except:
+        except Exception:
             wx.Bell()
 
     # ----
 
-    def runExportPeaklist(self, path):
+    def runExportPeaklist(self, path) -> None:
         """Export peeaklist data."""
-
         # get peaklist
         selection = {"All Peaks": "", "Selected Peaks": "S"}
         filters = selection[self.peaklistSelect_choice.GetStringSelection()]
@@ -1003,16 +984,14 @@ class panelDocumentExport(wx.Frame):
 
         # save file
         try:
-            with open(path, "w", encoding="utf-8") as save:
-                save.write(buff)
+            pathlib.Path(path).write_text(buff, encoding="utf-8")
         except OSError:
             wx.Bell()
 
     # ----
 
-    def runExportSpectrum(self, path):
+    def runExportSpectrum(self, path) -> None:
         """Export spectrum data."""
-
         # get spectrum
         if self.spectrumRange_choice.GetStringSelection() == "Full Spectrum":
             spectrum = self.parent.getCurrentSpectrumPoints()
@@ -1036,8 +1015,7 @@ class panelDocumentExport(wx.Frame):
 
         # save file
         try:
-            with open(path, "w", encoding="utf-8") as save:
-                save.write(buff)
+            pathlib.Path(path).write_text(buff, encoding="utf-8")
         except OSError:
             wx.Bell()
 

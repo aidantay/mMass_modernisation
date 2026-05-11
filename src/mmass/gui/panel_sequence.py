@@ -22,21 +22,20 @@ import threading
 import wx
 
 from mmass import mspy
-from mmass.gui import config, images, libs, mwx
 
 # load modules
-from mmass.gui.ids import *
-from mmass.gui.panel_match import panelMatch
-from mmass.gui.panel_monomer_library import panelMonomerLibrary
+from mmass.gui import config, ids, images, libs, mwx
+from mmass.gui.panel_match import PanelMatch
+from mmass.gui.panel_monomer_library import PanelMonomerLibrary
 
 # FLOATING PANEL WITH SEQUENCE TOOLS
 # ----------------------------------
 
 
-class panelSequence(wx.Frame):
+class PanelSequence(wx.Frame):
     """Sequence tools."""
 
-    def __init__(self, parent, tool="editor"):
+    def __init__(self, parent, tool="editor") -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -53,7 +52,7 @@ class panelSequence(wx.Frame):
         self.processing = None
 
         self.currentTool = tool
-        self.currentSequence = mspy.sequence("")
+        self.currentSequence = mspy.Sequence("")
         self.currentDigest = None
         self.currentFragments = None
         self.currentSearch = None
@@ -70,9 +69,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -110,16 +108,15 @@ class panelSequence(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
         # make buttons
         self.editor_butt = wx.BitmapButton(
             panel,
-            ID_sequenceEditor,
+            ids.ID_sequenceEditor,
             images.lib["sequenceEditorOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -129,7 +126,7 @@ class panelSequence(wx.Frame):
 
         self.modifications_butt = wx.BitmapButton(
             panel,
-            ID_sequenceModifications,
+            ids.ID_sequenceModifications,
             images.lib["sequenceModificationsOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -139,7 +136,7 @@ class panelSequence(wx.Frame):
 
         self.digest_butt = wx.BitmapButton(
             panel,
-            ID_sequenceDigest,
+            ids.ID_sequenceDigest,
             images.lib["sequenceDigestOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -149,7 +146,7 @@ class panelSequence(wx.Frame):
 
         self.fragment_butt = wx.BitmapButton(
             panel,
-            ID_sequenceFragment,
+            ids.ID_sequenceFragment,
             images.lib["sequenceFragmentOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -159,7 +156,7 @@ class panelSequence(wx.Frame):
 
         self.search_butt = wx.BitmapButton(
             panel,
-            ID_sequenceSearch,
+            ids.ID_sequenceSearch,
             images.lib["sequenceSearchOff"],
             size=(mwx.TOOLBAR_TOOLSIZE),
             style=wx.BORDER_NONE,
@@ -223,7 +220,6 @@ class panelSequence(wx.Frame):
 
     def makeSequenceToolbar(self, panel):
         """Make toolbar for sequence panel."""
-
         # make elements
         self.monomerLibrary_butt = wx.BitmapButton(
             panel,
@@ -276,7 +272,6 @@ class panelSequence(wx.Frame):
 
     def makeModificationsToolbar(self, panel):
         """Make toolbar for modifications panel."""
-
         # make elements
         self.modsPresets_butt = wx.BitmapButton(
             panel,
@@ -323,7 +318,6 @@ class panelSequence(wx.Frame):
 
     def makeDigestToolbar(self, panel):
         """Make toolbar for digest panel."""
-
         # make elements
         digestMassType_label = wx.StaticText(panel, -1, "Mass:")
         digestMassType_label.SetFont(wx.SMALL_FONT)
@@ -344,7 +338,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["digest"]["maxCharge"]),
             size=(40, -1),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
 
         self.digestGenerate_butt = wx.Button(
@@ -386,7 +380,6 @@ class panelSequence(wx.Frame):
 
     def makeFragmentToolbar(self, panel):
         """Make toolbar for fragment panel."""
-
         # make elements
         self.fragmentPresets_butt = wx.BitmapButton(
             panel,
@@ -419,7 +412,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["fragment"]["maxCharge"]),
             size=(40, -1),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
 
         self.fragmentGenerate_butt = wx.Button(
@@ -465,7 +458,6 @@ class panelSequence(wx.Frame):
 
     def makeSearchToolbar(self, panel):
         """Make toolbar for search panel."""
-
         # make elements
         searchMassType_label = wx.StaticText(panel, -1, "Mass:")
         searchMassType_label.SetFont(wx.SMALL_FONT)
@@ -476,7 +468,7 @@ class panelSequence(wx.Frame):
             "",
             size=(100, -1),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.searchMass_value.Bind(wx.EVT_TEXT_ENTER, self.onSearch)
 
@@ -496,7 +488,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["search"]["charge"]),
             size=(40, -1),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
 
         self.searchGenerate_butt = wx.Button(
@@ -527,9 +519,8 @@ class panelSequence(wx.Frame):
 
     def makeSequencePanel(self):
         """Make compound summary panel."""
-
         # init panels
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
         panel = wx.Panel(self, -1)
@@ -554,15 +545,15 @@ class panelSequence(wx.Frame):
         )
         self.sequenceAccession_value.Bind(wx.EVT_TEXT, self.onSequenceAccession)
 
-        self.sequenceCanvas = sequenceCanvas(
+        self.SequenceCanvas = SequenceCanvas(
             panel, -1, sequence=self.currentSequence, size=(600, 200)
         )
-        self.sequenceCanvas.Bind(wx.EVT_KEY_DOWN, self.onSequence)
-        self.sequenceCanvas.Bind(wx.EVT_LEFT_DOWN, self.onSequence)
-        self.sequenceCanvas.Bind(wx.EVT_RIGHT_DOWN, self.onSequence)
-        self.sequenceCanvas.Bind(wx.EVT_MOTION, self.onSequence)
+        self.SequenceCanvas.Bind(wx.EVT_KEY_DOWN, self.onSequence)
+        self.SequenceCanvas.Bind(wx.EVT_LEFT_DOWN, self.onSequence)
+        self.SequenceCanvas.Bind(wx.EVT_RIGHT_DOWN, self.onSequence)
+        self.SequenceCanvas.Bind(wx.EVT_MOTION, self.onSequence)
 
-        self.sequenceGrid = sequenceGrid(
+        self.SequenceGrid = SequenceGrid(
             self,
             panel,
             sequence=self.currentSequence,
@@ -603,13 +594,13 @@ class panelSequence(wx.Frame):
                 mwx.PANEL_SPACE_MAIN,
             )
         self.sequenceEditorSizer.Add(
-            self.sequenceCanvas,
+            self.SequenceCanvas,
             1,
             wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
         )
         self.sequenceEditorSizer.Add(
-            self.sequenceGrid,
+            self.SequenceGrid,
             1,
             wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
             mwx.PANEL_SPACE_MAIN,
@@ -630,9 +621,8 @@ class panelSequence(wx.Frame):
 
     def makeModificationsPanel(self):
         """Make controls for sequence modifications."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -696,9 +686,8 @@ class panelSequence(wx.Frame):
 
     def makeDigestPanel(self):
         """Make controls for protein digest."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -724,7 +713,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["digest"]["miscl"]),
             size=(40, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("intPos"),
+            validator=mwx.Validator("intPos"),
         )
         digestMiscl_label.SetFont(wx.SMALL_FONT)
         self.digestMiscl_value.SetFont(wx.SMALL_FONT)
@@ -737,7 +726,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["digest"]["lowMass"]),
             size=(45, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("intPos"),
+            validator=mwx.Validator("intPos"),
         )
         self.digestLowMass_value.SetFont(wx.SMALL_FONT)
 
@@ -749,7 +738,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["digest"]["highMass"]),
             size=(45, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("intPos"),
+            validator=mwx.Validator("intPos"),
         )
         self.digestHighMass_value.SetFont(wx.SMALL_FONT)
 
@@ -796,9 +785,8 @@ class panelSequence(wx.Frame):
 
     def makeFragmentPanel(self):
         """Make controls for peptide fragmentation."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self,
             -1,
             images.lib["bgrControlbarDouble"],
@@ -999,9 +987,8 @@ class panelSequence(wx.Frame):
 
     def makeSearchPanel(self):
         """Make controls for sequence search."""
-
         # init panel
-        ctrlPanel = mwx.bgrPanel(
+        ctrlPanel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -1029,7 +1016,7 @@ class panelSequence(wx.Frame):
             -1,
             str(config.sequence["search"]["tolerance"]),
             size=(40, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.searchTolerance_value.SetFont(wx.SMALL_FONT)
 
@@ -1086,11 +1073,10 @@ class panelSequence(wx.Frame):
 
     def makeGaugePanel(self):
         """Make processing gauge."""
-
         panel = wx.Panel(self, -1)
 
         # make elements
-        self.gauge = mwx.gauge(panel, -1)
+        self.gauge = mwx.Gauge(panel, -1)
 
         stop_butt = wx.BitmapButton(
             panel, -1, images.lib["stopper"], style=wx.BORDER_NONE
@@ -1113,11 +1099,10 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def makeModificationsList(self):
+    def makeModificationsList(self) -> None:
         """Make modifications list."""
-
         # init peaklist
-        self.modificationsList = mwx.sortListCtrl(
+        self.modificationsList = mwx.SortListCtrl(
             self, -1, size=(671, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.modificationsList.SetFont(wx.SMALL_FONT)
@@ -1138,11 +1123,10 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def makeDigestList(self):
+    def makeDigestList(self) -> None:
         """Make digest list."""
-
         # init peaklist
-        self.digestList = mwx.sortListCtrl(
+        self.digestList = mwx.SortListCtrl(
             self, -1, size=(778, 300), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.digestList.SetFont(wx.SMALL_FONT)
@@ -1172,11 +1156,10 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def makeFragmentsList(self):
+    def makeFragmentsList(self) -> None:
         """Make fragments list."""
-
         # init peaklist
-        self.fragmentsList = mwx.sortListCtrl(
+        self.fragmentsList = mwx.SortListCtrl(
             self, -1, size=(801, 300), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.fragmentsList.SetFont(wx.SMALL_FONT)
@@ -1206,11 +1189,10 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def makeSearchList(self):
+    def makeSearchList(self) -> None:
         """Make search list."""
-
         # init peaklist
-        self.searchList = mwx.sortListCtrl(
+        self.searchList = mwx.SortListCtrl(
             self, -1, size=(656, 250), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.searchList.SetFont(wx.SMALL_FONT)
@@ -1238,9 +1220,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -1259,9 +1240,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onProcessing(self, status=True):
+    def onProcessing(self, status=True) -> None:
         """Show processing gauge."""
-
         self.gauge.SetValue(0)
 
         if status:
@@ -1282,9 +1262,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onStop(self, evt):
+    def onStop(self, evt) -> None:
         """Cancel current processing."""
-
         if self.processing and self.processing.is_alive():
             mspy.stop()
         else:
@@ -1292,9 +1271,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onPresets(self, evt):
+    def onPresets(self, evt) -> None:
         """Show selected presets."""
-
         # get presets
         if self.currentTool == "modifications":
             presets = list(libs.presets["modifications"].keys())
@@ -1318,9 +1296,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onPresetsSelected(self, evt):
+    def onPresetsSelected(self, evt) -> None:
         """Load selected modification presets."""
-
         # get presets name
         item = self.presets_popup.FindItemById(evt.GetId())
         name = item.GetText()
@@ -1333,9 +1310,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onPresetsSave(self, evt):
+    def onPresetsSave(self, evt) -> None:
         """Save current params as presets."""
-
         # save presets
         if self.currentTool == "modifications":
             self.saveModificationsPresets()
@@ -1344,9 +1320,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onToolSelected(self, evt=None, tool=None):
+    def onToolSelected(self, evt=None, tool=None) -> None:
         """Selected tool."""
-
         # check processing
         if self.processing is not None:
             wx.Bell()
@@ -1358,15 +1333,15 @@ class panelSequence(wx.Frame):
 
         # get the tool
         if evt is not None:
-            if evt.GetId() == ID_sequenceEditor:
+            if evt.GetId() == ids.ID_sequenceEditor:
                 tool = "editor"
-            elif evt.GetId() == ID_sequenceModifications:
+            elif evt.GetId() == ids.ID_sequenceModifications:
                 tool = "modifications"
-            elif evt.GetId() == ID_sequenceDigest:
+            elif evt.GetId() == ids.ID_sequenceDigest:
                 tool = "digest"
-            elif evt.GetId() == ID_sequenceFragment:
+            elif evt.GetId() == ids.ID_sequenceFragment:
                 tool = "fragment"
-            elif evt.GetId() == ID_sequenceSearch:
+            elif evt.GetId() == ids.ID_sequenceSearch:
                 tool = "search"
 
         # block some tools for cyclic or custom sequence
@@ -1383,7 +1358,7 @@ class panelSequence(wx.Frame):
             wx.Bell()
             title = "Selected tool is not available for custom-type sequences."
             message = "To enable this tool, check the sequence type specified in the editor\nand if possible, convert your sequence to use regular amino acids."
-            dlg = mwx.dlgMessage(self, title, message)
+            dlg = mwx.DlgMessage(self, title, message)
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -1395,7 +1370,7 @@ class panelSequence(wx.Frame):
             wx.Bell()
             title = "Selected tool is not available for cyclic sequences."
             message = "To enable this tool, linearize the sequence in the editor."
-            dlg = mwx.dlgMessage(self, title, message)
+            dlg = mwx.DlgMessage(self, title, message)
             dlg.ShowModal()
             dlg.Destroy()
             return
@@ -1462,9 +1437,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onMonomerLibrary(self, evt):
+    def onMonomerLibrary(self, evt) -> None:
         """Show monomers library."""
-
         # destroy panel
         if self.monomerLibraryPanel:
             self.monomerLibraryPanel.Close()
@@ -1485,7 +1459,7 @@ class panelSequence(wx.Frame):
 
         # init library panel
         if not self.monomerLibraryPanel:
-            self.monomerLibraryPanel = panelMonomerLibrary(
+            self.monomerLibraryPanel = PanelMonomerLibrary(
                 self, filterIn=filterIn, filterOut=filterOut, DnD=DnD
             )
             pos = self.GetPosition()
@@ -1498,9 +1472,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onSequenceType(self, evt):
+    def onSequenceType(self, evt) -> None:
         """Change sequence editor and chain type."""
-
         # get chain type
         if self.sequenceType_choice.GetStringSelection() == "Regular amino acids":
             chainType = "aminoacids"
@@ -1517,7 +1490,7 @@ class panelSequence(wx.Frame):
                 (wx.ID_CANCEL, "Cancel", 80, False, 15),
                 (wx.ID_OK, "Change", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() == wx.ID_OK:
                 dlg.Destroy()
             else:
@@ -1531,19 +1504,19 @@ class panelSequence(wx.Frame):
 
         # set editor
         if chainType == "aminoacids":
-            self.sequenceCanvas.setData(self.currentSequence)
-            self.sequenceGrid.setData(None)
+            self.SequenceCanvas.setData(self.currentSequence)
+            self.SequenceGrid.setData(None)
             self.sequenceEditorSizer.Hide(2)
             self.sequenceEditorSizer.Show(1)
         elif chainType == "custom":
-            self.sequenceGrid.setData(self.currentSequence)
-            self.sequenceCanvas.setData(None)
+            self.SequenceGrid.setData(self.currentSequence)
+            self.SequenceCanvas.setData(None)
             self.sequenceEditorSizer.Hide(1)
             self.sequenceEditorSizer.Show(2)
 
         # set editor status
-        self.sequenceCanvas.setModified(True)
-        self.sequenceGrid.setModified(True)
+        self.SequenceCanvas.setModified(True)
+        self.SequenceGrid.setModified(True)
 
         # update sequence info
         self.onSequenceChanged()
@@ -1562,52 +1535,48 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onSequenceCyclic(self, evt):
+    def onSequenceCyclic(self, evt) -> None:
         """Set current sequence cyclic or linear."""
-
         # make sequence cyclic/linear
         value = self.sequenceCyclic_check.IsChecked()
         self.currentSequence.cyclize(value)
 
         # set editor as modified
         if self.currentSequence.chainType != "aminoacids":
-            self.sequenceGrid.setModified(True)
-            self.sequenceGrid.refresh()
+            self.SequenceGrid.setModified(True)
+            self.SequenceGrid.refresh()
         else:
-            self.sequenceCanvas.setModified(True)
-            self.sequenceCanvas.refresh()
+            self.SequenceCanvas.setModified(True)
+            self.SequenceCanvas.refresh()
 
         # update sequence info
         self.onSequenceChanged()
 
     # ----
 
-    def onSequenceTitle(self, evt):
+    def onSequenceTitle(self, evt) -> None:
         """Update sequence title."""
-
         self.currentSequence.title = self.sequenceTitle_value.GetValue()
         self.parent.onDocumentChanged(items=("seqtitle"))
 
     # ----
 
-    def onSequenceAccession(self, evt):
+    def onSequenceAccession(self, evt) -> None:
         """Update sequence accession number."""
-
         self.currentSequence.accession = self.sequenceAccession_value.GetValue()
         self.parent.onDocumentChanged(items=("seqaccession"))
 
     # ----
 
-    def onSequence(self, evt):
+    def onSequence(self, evt) -> None:
         """Update gui."""
         evt.Skip()
         wx.CallAfter(self.onSequenceChanged)
 
     # ----
 
-    def onSequenceChanged(self):
+    def onSequenceChanged(self) -> None:
         """Update info and erase results if sequence has changed."""
-
         # update sequence info
         self.updateSequenceInfo()
 
@@ -1616,9 +1585,9 @@ class panelSequence(wx.Frame):
             return
 
         # set editor
-        editor = self.sequenceCanvas
+        editor = self.SequenceCanvas
         if self.currentSequence.chainType != "aminoacids":
-            editor = self.sequenceGrid
+            editor = self.SequenceGrid
 
         # skip if sequence has not changed - cursor move only
         if editor.ismodified():
@@ -1658,9 +1627,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onSequencePattern(self, evt):
+    def onSequencePattern(self, evt) -> None:
         """Show isotopic pattern for whole sequence."""
-
         # get formula
         if self.currentSequence:
             formula = self.currentSequence.formula()
@@ -1673,16 +1641,15 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onAddModification(self, evt):
+    def onAddModification(self, evt) -> None:
         """Get data and add modification."""
-
         # get data
         try:
             residue = self.modsResidue_choice.GetStringSelection()
             position = self.modsPosition_choice.GetStringSelection()
             modification = self.modsMod_choice.GetStringSelection()
             modtype = self.modsType_choice.GetStringSelection()
-        except:
+        except Exception:
             return
 
         # check data
@@ -1713,12 +1680,12 @@ class panelSequence(wx.Frame):
             config.sequence["digest"]["maxMods"],
         ):
             self.currentSequence.modify(modification, amino, modtype)
-            self.sequenceCanvas.setModified(True)
-            self.sequenceCanvas.refresh()
+            self.SequenceCanvas.setModified(True)
+            self.SequenceCanvas.refresh()
             self.onSequenceChanged()
         else:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Modification cannot be applied.",
                 message="Maximum number of modification was already applied\nto the same position.",
@@ -1728,9 +1695,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onRemoveModifications(self, evt):
+    def onRemoveModifications(self, evt) -> None:
         """Remove selected modifications."""
-
         # get selected
         selected = self.modificationsList.getSelected()
         if not selected:
@@ -1761,35 +1727,33 @@ class panelSequence(wx.Frame):
             self.currentSequence.unmodify(name, amino, modtype)
 
         # update gui
-        self.sequenceCanvas.setModified(True)
-        self.sequenceCanvas.refresh()
+        self.SequenceCanvas.setModified(True)
+        self.SequenceCanvas.refresh()
         self.onSequenceChanged()
 
     # ----
 
-    def onSpecifityFilter(self, evt):
+    def onSpecifityFilter(self, evt) -> None:
         """Update modifications according to specifity filter."""
         self.updateAvailableModifications()
 
     # ----
 
-    def onResidueSelected(self, evt):
+    def onResidueSelected(self, evt) -> None:
         """Update available positions and modifications."""
-
         self.updateAvailablePositions()
         self.updateAvailableModifications()
 
     # ----
 
-    def onPositionSelected(self, evt):
+    def onPositionSelected(self, evt) -> None:
         """Update available modifications for selected position."""
         self.updateAvailableModifications()
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Show selected mass in spectrum canvas."""
-
         # get mass
         if self.currentTool == "digest":
             mz = self.currentDigest[evt.GetData()][2]
@@ -1803,15 +1767,14 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onItemActivated(self, evt):
+    def onItemActivated(self, evt) -> None:
         """Show isotopic pattern for selected peptide/fragment."""
         self.onItemSendToMassCalculator(evt)
 
     # ----
 
-    def onItemSendToMassCalculator(self, evt):
+    def onItemSendToMassCalculator(self, evt) -> None:
         """Send selected item to Mass Calculator panel."""
-
         # get data
         if self.currentTool == "digest":
             selected = self.digestList.getSelected()
@@ -1846,9 +1809,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onItemSendToEnvelopeFit(self, evt):
+    def onItemSendToEnvelopeFit(self, evt) -> None:
         """Send selected item to envelope fit panel."""
-
         # get data
         if self.currentTool == "digest":
             selected = self.digestList.getSelected()
@@ -1876,9 +1838,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onItemCopySequence(self, evt):
+    def onItemCopySequence(self, evt) -> None:
         """Copy selected sequence into clipboard."""
-
         # get list
         if self.currentTool == "digest":
             selected = self.digestList.getSelected()
@@ -1914,9 +1875,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onItemCopyFormula(self, evt):
+    def onItemCopyFormula(self, evt) -> None:
         """Copy selected sequence formula into clipboard."""
-
         # get list
         if self.currentTool == "digest":
             selected = self.digestList.getSelected()
@@ -1952,9 +1912,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onListKey(self, evt):
+    def onListKey(self, evt) -> None:
         """Export list if Ctrl+C."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -1968,49 +1927,48 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onListRMU(self, evt):
+    def onListRMU(self, evt) -> None:
         """Show filter pop-up menu on lists."""
-
         # popup menu
         menu = wx.Menu()
         if self.currentTool in ("digest", "fragment"):
-            menu.Append(ID_listViewAll, "Show All", "", wx.ITEM_RADIO)
-            menu.Append(ID_listViewMatched, "Show Matched Only", "", wx.ITEM_RADIO)
-            menu.Append(ID_listViewUnmatched, "Show Unmatched Only", "", wx.ITEM_RADIO)
+            menu.Append(ids.ID_listViewAll, "Show All", "", wx.ITEM_RADIO)
+            menu.Append(ids.ID_listViewMatched, "Show Matched Only", "", wx.ITEM_RADIO)
+            menu.Append(ids.ID_listViewUnmatched, "Show Unmatched Only", "", wx.ITEM_RADIO)
             menu.AppendSeparator()
-        menu.Append(ID_listSendToMassCalculator, "Show Isotopic Pattern...", "")
+        menu.Append(ids.ID_listSendToMassCalculator, "Show Isotopic Pattern...", "")
         if self.currentTool in ("digest", "search"):
-            menu.Append(ID_listSendToEnvelopeFit, "Send to Envelope Fit...", "")
+            menu.Append(ids.ID_listSendToEnvelopeFit, "Send to Envelope Fit...", "")
         menu.AppendSeparator()
-        menu.Append(ID_listCopySequence, "Copy Sequence", "")
-        menu.Append(ID_listCopyFormula, "Copy Formula", "")
-        menu.Append(ID_listCopy, "Copy List")
+        menu.Append(ids.ID_listCopySequence, "Copy Sequence", "")
+        menu.Append(ids.ID_listCopyFormula, "Copy Formula", "")
+        menu.Append(ids.ID_listCopy, "Copy List")
 
         # check item
         if (self.currentTool == "digest" and self._digestFilter == 1) or (
             self.currentTool == "fragment" and self._fragmentsFilter == 1
         ):
-            menu.Check(ID_listViewMatched, True)
+            menu.Check(ids.ID_listViewMatched, True)
         elif (self.currentTool == "digest" and self._digestFilter == -1) or (
             self.currentTool == "fragment" and self._fragmentsFilter == -1
         ):
-            menu.Check(ID_listViewUnmatched, True)
+            menu.Check(ids.ID_listViewUnmatched, True)
         elif self.currentTool in ("digest", "fragment"):
-            menu.Check(ID_listViewAll, True)
+            menu.Check(ids.ID_listViewAll, True)
 
         # bind events
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewAll)
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewMatched)
-        self.Bind(wx.EVT_MENU, self.onListFilter, id=ID_listViewUnmatched)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewAll)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewMatched)
+        self.Bind(wx.EVT_MENU, self.onListFilter, id=ids.ID_listViewUnmatched)
         self.Bind(
-            wx.EVT_MENU, self.onItemSendToMassCalculator, id=ID_listSendToMassCalculator
+            wx.EVT_MENU, self.onItemSendToMassCalculator, id=ids.ID_listSendToMassCalculator
         )
         self.Bind(
-            wx.EVT_MENU, self.onItemSendToEnvelopeFit, id=ID_listSendToEnvelopeFit
+            wx.EVT_MENU, self.onItemSendToEnvelopeFit, id=ids.ID_listSendToEnvelopeFit
         )
-        self.Bind(wx.EVT_MENU, self.onItemCopySequence, id=ID_listCopySequence)
-        self.Bind(wx.EVT_MENU, self.onItemCopyFormula, id=ID_listCopyFormula)
-        self.Bind(wx.EVT_MENU, self.onListCopy, id=ID_listCopy)
+        self.Bind(wx.EVT_MENU, self.onItemCopySequence, id=ids.ID_listCopySequence)
+        self.Bind(wx.EVT_MENU, self.onItemCopyFormula, id=ids.ID_listCopyFormula)
+        self.Bind(wx.EVT_MENU, self.onListCopy, id=ids.ID_listCopy)
 
         # show menu
         self.PopupMenu(menu)
@@ -2019,17 +1977,16 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onListFilter(self, evt):
+    def onListFilter(self, evt) -> None:
         """Apply selected view filter on current list."""
-
         # set filter
-        if evt.GetId() == ID_listViewMatched and self.currentTool == "digest":
+        if evt.GetId() == ids.ID_listViewMatched and self.currentTool == "digest":
             self._digestFilter = 1
-        elif evt.GetId() == ID_listViewMatched and self.currentTool == "fragment":
+        elif evt.GetId() == ids.ID_listViewMatched and self.currentTool == "fragment":
             self._fragmentsFilter = 1
-        elif evt.GetId() == ID_listViewUnmatched and self.currentTool == "digest":
+        elif evt.GetId() == ids.ID_listViewUnmatched and self.currentTool == "digest":
             self._digestFilter = -1
-        elif evt.GetId() == ID_listViewUnmatched and self.currentTool == "fragment":
+        elif evt.GetId() == ids.ID_listViewUnmatched and self.currentTool == "fragment":
             self._fragmentsFilter = -1
         elif self.currentTool == "digest":
             self._digestFilter = 0
@@ -2044,9 +2001,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onListCopy(self, evt=None):
+    def onListCopy(self, evt=None) -> None:
         """Copy items of selected list into clipboard."""
-
         # copy data
         if self.currentTool == "digest":
             self.digestList.copyToClipboard()
@@ -2057,9 +2013,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onDigest(self, evt):
+    def onDigest(self, evt) -> None:
         """Digest sequence."""
-
         # check processing
         if self.processing:
             return
@@ -2114,9 +2069,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onFragment(self, evt):
+    def onFragment(self, evt) -> None:
         """Fragment sequence."""
-
         # check processing
         if self.processing:
             return
@@ -2169,9 +2123,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onSearch(self, evt):
+    def onSearch(self, evt) -> None:
         """Search for mass in sequence."""
-
         # check processing
         if self.processing:
             return
@@ -2210,14 +2163,13 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onMatch(self, evt=None):
+    def onMatch(self, evt=None) -> None:
         """Match data to current peaklist."""
-
         # init match panel
         match = True
         if not self.matchPanel:
             match = False
-            self.matchPanel = panelMatch(self, self.parent, self.currentTool)
+            self.matchPanel = PanelMatch(self, self.parent, self.currentTool)
             self.matchPanel.Centre()
             self.matchPanel.Show(True)
 
@@ -2238,9 +2190,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def onAnnotate(self, evt):
+    def onAnnotate(self, evt) -> None:
         """Store matches in document."""
-
         buff = []
 
         # get template
@@ -2290,9 +2241,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def setData(self, sequence=None):
+    def setData(self, sequence=None) -> None:
         """Set current sequence."""
-
         self.currentSequence = sequence
 
         # check sequence
@@ -2319,7 +2269,7 @@ class panelSequence(wx.Frame):
             or self.currentSequence.chainType == "aminoacids"
         ):
             self.sequenceType_choice.Select(0)
-            self.sequenceCanvas.setData(self.currentSequence)
+            self.SequenceCanvas.setData(self.currentSequence)
             self.sequenceEditorSizer.Hide(2)
             self.sequenceEditorSizer.Show(1)
             if self.monomerLibraryPanel:
@@ -2327,7 +2277,7 @@ class panelSequence(wx.Frame):
                 self.monomerLibraryPanel.enableDnD(False)
         else:
             self.sequenceType_choice.Select(1)
-            self.sequenceGrid.setData(self.currentSequence)
+            self.SequenceGrid.setData(self.currentSequence)
             self.sequenceEditorSizer.Hide(1)
             self.sequenceEditorSizer.Show(2)
             if self.monomerLibraryPanel:
@@ -2367,9 +2317,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             # digest
@@ -2489,15 +2438,14 @@ class panelSequence(wx.Frame):
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def updateSequenceInfo(self):
+    def updateSequenceInfo(self) -> None:
         """Update sequence info."""
-
         label = ""
 
         # check sequence
@@ -2517,11 +2465,11 @@ class panelSequence(wx.Frame):
                 label += f"     Formula: {formula}"
 
         # get length
-        label += "     Length: %d" % len(self.currentSequence)
+        label += f"     Length: {len(self.currentSequence)}"
 
         # get cursor position
         if len(self.currentSequence) and self.currentSequence.chainType == "aminoacids":
-            selection = self.sequenceCanvas.getSequenceSelection()
+            selection = self.SequenceCanvas.getSequenceSelection()
             if selection[0] == selection[1]:
                 label += "     Cursor: %s" % (selection[0] + 1)
             else:
@@ -2531,9 +2479,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateAvailableResidues(self):
+    def updateAvailableResidues(self) -> None:
         """Update available residues."""
-
         # clear
         self.modsResidue_choice.Clear()
         self.modsPosition_choice.Clear()
@@ -2561,9 +2508,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateAvailablePositions(self):
+    def updateAvailablePositions(self) -> None:
         """Update available positions."""
-
         # clear
         self.modsPosition_choice.Clear()
 
@@ -2591,9 +2537,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateAvailableModifications(self):
+    def updateAvailableModifications(self) -> None:
         """Update available modifications."""
-
         # clear
         self.modsMod_choice.Clear()
 
@@ -2601,7 +2546,7 @@ class panelSequence(wx.Frame):
         try:
             residue = self.modsResidue_choice.GetStringSelection()
             checkSpecifity = self.modsSpecifity_check.GetValue()
-        except:
+        except Exception:
             return
 
         # get corresponding modifications
@@ -2628,9 +2573,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateModificationsList(self):
+    def updateModificationsList(self) -> None:
         """Update current modifications."""
-
         # clear previous data
         self.modificationsList.DeleteAllItems()
 
@@ -2646,7 +2590,7 @@ class panelSequence(wx.Frame):
             name = mod[0]
 
             # format position
-            if type(mod[1]) == int:
+            if isinstance(mod[1], int):
                 position = f"{self.currentSequence[mod[1]]} {mod[1] + 1}"
             elif mod[1] == "nTerm":
                 position = "N-terminus"
@@ -2692,9 +2636,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateAvailableFragments(self, evt=None):
+    def updateAvailableFragments(self, evt=None) -> None:
         """Update available fragments."""
-
         # no sequence defined
         if self.currentSequence is None:
             self.fragmentIntA_check.Enable()
@@ -2731,9 +2674,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateDigestList(self):
+    def updateDigestList(self) -> None:
         """Update digest list."""
-
         # clear previous data and set new
         self.digestList.DeleteAllItems()
         self.digestList.setDataMap(self.currentDigest)
@@ -2794,9 +2736,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateFragmentsList(self):
+    def updateFragmentsList(self) -> None:
         """Update fragments list."""
-
         # clear previous data and set new
         self.fragmentsList.DeleteAllItems()
         self.fragmentsList.setDataMap(self.currentFragments)
@@ -2866,9 +2807,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateSearchList(self):
+    def updateSearchList(self) -> None:
         """Update search list."""
-
         # clear previous data and set new
         self.searchList.DeleteAllItems()
         self.searchList.setDataMap(self.currentSearch)
@@ -2907,9 +2847,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateMatches(self, resultList=None):
+    def updateMatches(self, resultList=None) -> None:
         """Update current list."""
-
         # choose current
         if not resultList:
             resultList = self.currentTool
@@ -2925,9 +2864,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def updateCoverage(self):
+    def updateCoverage(self) -> None:
         """Update coverage info for protein digest."""
-
         # clear previous value
         self.digestCoverage_label.SetLabel("")
         if not self.currentDigest:
@@ -2953,16 +2891,15 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def applyModificationsPresets(self, name):
+    def applyModificationsPresets(self, name) -> None:
         """Load selected modification presets."""
-
         # get presets
         presets = libs.presets["modifications"][name]
 
         # check sequence
         if not self.currentSequence:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="No sequence defined.",
                 message="Modifications cannot be applied on empty sequence.",
@@ -2978,7 +2915,7 @@ class panelSequence(wx.Frame):
                 message = (
                     f'Modification entitled "{mod[0]}" was not found in your database.'
                 )
-                dlg = mwx.dlgMessage(
+                dlg = mwx.DlgMessage(
                     self, title="Unknown modification found.", message=message
                 )
                 dlg.ShowModal()
@@ -2994,11 +2931,11 @@ class panelSequence(wx.Frame):
             title = "Modifications already applied!"
             message = "There are some modifications already applied to the sequence.\nYou can either replace previous or append new."
             buttons = [
-                (ID_dlgReplace, "Replace", 80, False, 15),
-                (ID_dlgAppend, "Append", 80, True, 0),
+                (ids.ID_dlgReplace, "Replace", 80, False, 15),
+                (ids.ID_dlgAppend, "Append", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
-            if dlg.ShowModal() == ID_dlgReplace:
+            dlg = mwx.DlgMessage(self, title, message, buttons)
+            if dlg.ShowModal() == ids.ID_dlgReplace:
                 self.currentSequence.unmodify(None)
 
         # check and apply modifications
@@ -3015,7 +2952,7 @@ class panelSequence(wx.Frame):
 
         if not valid:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Some of your modifications cannot be applied.",
                 message="Corresponding amino acid is not present in your sequence or\nthe maximum number of fixed modifications per single position\nwas already applied.",
@@ -3024,15 +2961,14 @@ class panelSequence(wx.Frame):
             dlg.Destroy()
 
         # update gui
-        self.sequenceCanvas.setModified(True)
-        self.sequenceCanvas.refresh()
+        self.SequenceCanvas.setModified(True)
+        self.SequenceCanvas.refresh()
         self.onSequenceChanged()
 
     # ----
 
-    def applyFragmentsPresets(self, name):
+    def applyFragmentsPresets(self, name) -> None:
         """Load fragments serie presets."""
-
         # get presets
         presets = libs.presets["fragments"][name]
 
@@ -3068,9 +3004,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def saveModificationsPresets(self):
+    def saveModificationsPresets(self) -> None:
         """Save applied global modifications as presets."""
-
         # check sequence
         if not self.currentSequence:
             wx.Bell()
@@ -3085,7 +3020,7 @@ class panelSequence(wx.Frame):
         # check presets
         if not modifications:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Presets cannot be saved.",
                 message="Global and N-terminal modifications can only be saved in presets.",
@@ -3095,7 +3030,7 @@ class panelSequence(wx.Frame):
             return
 
         # get presets name
-        dlg = dlgPresetsName(self)
+        dlg = DlgPresetsName(self)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -3111,16 +3046,15 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def saveFragmentsPresets(self):
+    def saveFragmentsPresets(self) -> None:
         """Save selected fragments as presets."""
-
         # check params
         if not self.getParams():
             wx.Bell()
             return
 
         # get presets name
-        dlg = dlgPresetsName(self)
+        dlg = DlgPresetsName(self)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -3134,9 +3068,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def clearMatches(self):
+    def clearMatches(self) -> None:
         """Clear matched data."""
-
         # update digest panel
         if self.currentDigest is not None:
             for item in self.currentDigest:
@@ -3162,9 +3095,8 @@ class panelSequence(wx.Frame):
 
     # ----
 
-    def runDigestion(self):
+    def runDigestion(self) -> None:
         """Perform protein digest."""
-
         # run task
         try:
             self.currentDigest = []
@@ -3231,14 +3163,13 @@ class panelSequence(wx.Frame):
             self.currentDigest = buff
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def runFragmentation(self):
+    def runFragmentation(self) -> None:
         """Perform peptide fragmentation."""
-
         # run task
         try:
             self.currentFragments = []
@@ -3302,7 +3233,7 @@ class panelSequence(wx.Frame):
                 maxLosses = config.sequence["fragment"]["maxLosses"]
 
             # generate basic fragments
-            fragments = mspy.fragment(
+            fragments = mspy.Fragment(
                 sequence=self.currentSequence, series=series, scrambling=scrambling
             )
 
@@ -3367,14 +3298,13 @@ class panelSequence(wx.Frame):
             self.currentFragments = buff
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def runSearch(self):
+    def runSearch(self) -> None:
         """Perform mass search."""
-
         # run task
         try:
             self.currentSearch = []
@@ -3420,23 +3350,22 @@ class panelSequence(wx.Frame):
             self.currentSearch = buff
 
         # task canceled
-        except mspy.ForceQuit:
+        except mspy.ForceQuitError:
             return
 
     # ----
 
-    def calibrateByMatches(self, references):
+    def calibrateByMatches(self, references) -> None:
         """Use matches for calibration."""
         self.parent.onToolsCalibration(references=references)
 
     # ----
 
-    def checkModifications(self, sequence, modification, maxMods):
+    def checkModifications(self, sequence, modification, maxMods) -> bool:
         """Do not allow multiple modifications on single residue."""
-
         # convert type
         if str(modification[1]).isdigit():
-            modification[1] = int(modification[1])
+            mspy.Modification[1] = int(modification[1])
 
         # check same modifications
         if modification in sequence.modifications:
@@ -3468,12 +3397,12 @@ class panelSequence(wx.Frame):
         # check combination
         for x in occupied:
             count = occupied.count(x)
-            if type(x) == int and count > maxMods:
+            if isinstance(x, int) and count > maxMods:
                 return False
             if type(x) in (str, str):
                 available = sequence.count(x)
                 for y in occupied:
-                    if type(y) == int and sequence[y] == x:
+                    if isinstance(y, int) and sequence[y] == x:
                         available -= 1
                 if count > (available * maxMods):
                     return False
@@ -3483,7 +3412,7 @@ class panelSequence(wx.Frame):
     # ----
 
 
-class sequenceCanvas(wx.TextCtrl):
+class SequenceCanvas(wx.TextCtrl):
     """Sequence editor canvas for amino acids."""
 
     def __init__(
@@ -3493,17 +3422,17 @@ class sequenceCanvas(wx.TextCtrl):
         sequence=None,
         size=(-1, -1),
         style=wx.TE_MULTILINE | wx.TE_RICH,
-    ):
+    ) -> None:
         wx.TextCtrl.__init__(self, parent, id, size=size, style=style)
 
         self.parent = parent
         self.modified = False
 
         # make sequence
-        if isinstance(sequence, mspy.sequence):
+        if isinstance(sequence, mspy.Sequence):
             self.currentSequence = sequence
         elif sequence is None:
-            self.currentSequence = mspy.sequence("")
+            self.currentSequence = mspy.Sequence("")
 
         # get regular amino acids
         self._aminoacids = []
@@ -3545,9 +3474,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onRMU(self, evt):
+    def _onRMU(self, evt) -> None:
         """Process right mouse button."""
-
         ID_CUT = wx.NewId()
         ID_COPY = wx.NewId()
         ID_PASTE = wx.NewId()
@@ -3585,9 +3513,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onKey(self, evt):
+    def _onKey(self, evt) -> None:
         """Check character and update sequence."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -3639,9 +3566,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onText(self, evt):
+    def _onText(self, evt) -> None:
         """Process text command."""
-
         char = chr(evt.GetKeyCode())
         char.upper()
 
@@ -3649,7 +3575,7 @@ class sequenceCanvas(wx.TextCtrl):
         seqSelection = self._positionEditorToSequence(curSelection)
 
         if char in self._aminoacids:
-            self.currentSequence[seqSelection[0] : seqSelection[1]] = mspy.sequence(
+            self.currentSequence[seqSelection[0] : seqSelection[1]] = mspy.Sequence(
                 char
             )
             self.refresh()
@@ -3661,9 +3587,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onCut(self, evt):
+    def _onCut(self, evt) -> None:
         """Process cut command."""
-
         curSelection = self.GetSelection()
         seqSelection = self._positionEditorToSequence(curSelection)
 
@@ -3673,15 +3598,14 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onCopy(self, evt):
+    def _onCopy(self, evt) -> None:
         """Process copy command."""
         self.Copy()
 
     # ----
 
-    def _onPaste(self, evt):
+    def _onPaste(self, evt) -> None:
         """Process paste command."""
-
         curSelection = self.GetSelection()
         seqSelection = self._positionEditorToSequence(curSelection)
 
@@ -3694,7 +3618,7 @@ class sequenceCanvas(wx.TextCtrl):
 
         else:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self.parent,
                 title="Sequence is not valid.",
                 message="Your clipboard contains characters which does not correspond\nto any defined amino acid. Please check your sequence.",
@@ -3705,9 +3629,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onRemove(self, evt):
+    def _onRemove(self, evt) -> None:
         """Process remove command."""
-
         curSelection = self.GetSelection()
         seqSelection = self._positionEditorToSequence(curSelection)
 
@@ -3716,9 +3639,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onDelete(self, evt):
+    def _onDelete(self, evt) -> None:
         """Process delete command."""
-
         curSelection = self.GetSelection()
         seqSelection = self._positionEditorToSequence(curSelection)
 
@@ -3733,9 +3655,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onBackspace(self, evt):
+    def _onBackspace(self, evt) -> None:
         """Process backspace command."""
-
         curSelection = self.GetSelection()
         seqSelection = self._positionEditorToSequence(curSelection)
 
@@ -3752,15 +3673,14 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def _onSelectAll(self, evt):
+    def _onSelectAll(self, evt) -> None:
         """Process select all command."""
         self.SetSelection(-1, -1)
 
     # ----
 
-    def _updateCanvas(self):
+    def _updateCanvas(self) -> None:
         """Show current sequence in canvas."""
-
         # check sequence
         if self.currentSequence is None:
             self.ChangeValue("")
@@ -3791,7 +3711,6 @@ class sequenceCanvas(wx.TextCtrl):
 
     def _positionEditorToSequence(self, selection):
         """Get sequence coordinates for editor selection."""
-
         selection = list(selection)
         selection[0] -= self.GetRange(0, selection[0]).count(" ")
         selection[1] -= self.GetRange(0, selection[1]).count(" ")
@@ -3802,7 +3721,6 @@ class sequenceCanvas(wx.TextCtrl):
 
     def _positionSequenceToEditor(self, selection):
         """Get editor coordinates for sequence selection."""
-
         selection = list(selection)
         selection[0] += divmod(selection[0], 10)[0]
         selection[1] += divmod(selection[1], 10)[0]
@@ -3813,7 +3731,6 @@ class sequenceCanvas(wx.TextCtrl):
 
     def _getSequenceFromClipboard(self):
         """Get sequence from clipboard."""
-
         # get data from clipboard
         success = False
         data = wx.TextDataObject()
@@ -3836,8 +3753,8 @@ class sequenceCanvas(wx.TextCtrl):
 
             # make sequence object
             try:
-                return mspy.sequence(data)
-            except:
+                return mspy.Sequence(data)
+            except Exception:
                 pass
 
         wx.Bell()
@@ -3845,9 +3762,8 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def setData(self, sequence):
+    def setData(self, sequence) -> None:
         """Set sequence object."""
-
         # set current sequence
         self.currentSequence = sequence
 
@@ -3858,7 +3774,7 @@ class sequenceCanvas(wx.TextCtrl):
             return
 
         # check sequence
-        if not isinstance(sequence, mspy.sequence):
+        if not isinstance(sequence, mspy.Sequence):
             raise TypeError("Sequence must be mspy.sequence object!")
 
         # update gui
@@ -3867,15 +3783,14 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def setInsertionPoint(self, pos):
+    def setInsertionPoint(self, pos) -> None:
         """Set insertion point in editor for current sequence position."""
-
         start, _stop = self._positionSequenceToEditor([pos, pos])
         self.SetInsertionPoint(start)
 
     # ----
 
-    def setModified(self, status=True):
+    def setModified(self, status=True) -> None:
         """Set modified status."""
         self.modified = status
 
@@ -3893,13 +3808,13 @@ class sequenceCanvas(wx.TextCtrl):
 
     # ----
 
-    def enable(self, enable=True):
+    def enable(self, enable=True) -> None:
         """Enable or disable editor."""
         self.Enable(enable)
 
     # ----
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Redraw current sequence."""
         self._updateCanvas()
 
@@ -3912,10 +3827,10 @@ class sequenceCanvas(wx.TextCtrl):
     # ----
 
 
-class sequenceGrid(wx.StaticBoxSizer):
+class SequenceGrid(wx.StaticBoxSizer):
     """Sequence editor for all monomers."""
 
-    def __init__(self, parent, panel, sequence=None, items=20):
+    def __init__(self, parent, panel, sequence=None, items=20) -> None:
         wx.StaticBoxSizer.__init__(self, wx.StaticBox(panel, -1, ""), wx.VERTICAL)
 
         self.parent = parent
@@ -3925,10 +3840,10 @@ class sequenceGrid(wx.StaticBoxSizer):
         self.items = []
 
         # make sequence
-        if isinstance(sequence, mspy.sequence):
+        if isinstance(sequence, mspy.Sequence):
             self.currentSequence = sequence
         elif sequence is None:
-            self.currentSequence = mspy.sequence("")
+            self.currentSequence = mspy.Sequence("")
 
         # make items grid
         items = max(items, len(self.currentSequence))
@@ -3936,9 +3851,8 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # --
 
-    def _onSequence(self, evt=None):
+    def _onSequence(self, evt=None) -> None:
         """Get current sequence from grid."""
-
         self.modified = True
 
         # get sequence
@@ -3962,7 +3876,7 @@ class sequenceGrid(wx.StaticBoxSizer):
             item.Refresh()
 
         # update sequence
-        self.currentSequence[:] = mspy.sequence(sequence, chainType="custom")
+        self.currentSequence[:] = mspy.Sequence(sequence, chainType="custom")
 
         # lock items
         self._lockItems()
@@ -3972,9 +3886,8 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def _makeGUI(self, items):
+    def _makeGUI(self, items) -> None:
         """Make monomer items."""
-
         # make items grid
         self.grid = wx.GridBagSizer(mwx.GRIDBAG_VSPACE, mwx.GRIDBAG_HSPACE)
 
@@ -3997,9 +3910,8 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def _updateGrid(self):
+    def _updateGrid(self) -> None:
         """Show current sequence in grid."""
-
         # clear items
         for item in self.items:
             item.ChangeValue("")
@@ -4015,9 +3927,8 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def _lockItems(self):
+    def _lockItems(self) -> None:
         """Disable unset items."""
-
         # check sequence
         if self.currentSequence is None:
             for item in self.items:
@@ -4057,9 +3968,8 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def setData(self, sequence):
+    def setData(self, sequence) -> None:
         """Set sequence object."""
-
         # set current sequence
         self.currentSequence = sequence
 
@@ -4070,7 +3980,7 @@ class sequenceGrid(wx.StaticBoxSizer):
             return
 
         # check sequence
-        if not isinstance(sequence, mspy.sequence):
+        if not isinstance(sequence, mspy.Sequence):
             raise TypeError("Sequence must be mspy.sequence object!")
 
         # check number of items
@@ -4083,7 +3993,7 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def setModified(self, status=True):
+    def setModified(self, status=True) -> None:
         """Set modified status."""
         self.modified = status
 
@@ -4095,15 +4005,14 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def addRow(self):
+    def addRow(self) -> None:
         """Append new row of items."""
-
         length = len(self.items)
         for x in range(5):
             # make item
             item = wx.TextCtrl(self.panel, -1, "", size=(85, -1))
             item.Bind(wx.EVT_TEXT, self._onSequence)
-            dropTarget = monomerDropTarget(item)
+            dropTarget = MonomerDropTarget(item)
             item.SetDropTarget(dropTarget)
             self.items.append(item)
 
@@ -4121,9 +4030,8 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def enable(self, enable=True):
+    def enable(self, enable=True) -> None:
         """Enable or disable editor."""
-
         for item in self.items:
             item.Enable(enable)
 
@@ -4132,7 +4040,7 @@ class sequenceGrid(wx.StaticBoxSizer):
 
     # ----
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Redraw current sequence."""
         self._updateGrid()
 
@@ -4145,10 +4053,10 @@ class sequenceGrid(wx.StaticBoxSizer):
     # ----
 
 
-class dlgPresetsName(wx.Dialog):
+class DlgPresetsName(wx.Dialog):
     """Set presets name."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, -1, "Preset Name", style=wx.DEFAULT_DIALOG_STYLE
@@ -4170,7 +4078,6 @@ class dlgPresetsName(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
 
         # make elements
@@ -4203,9 +4110,8 @@ class dlgPresetsName(wx.Dialog):
 
     # ----
 
-    def onOK(self, evt):
+    def onOK(self, evt) -> None:
         """Get name."""
-
         self.name = self.name_value.GetValue()
         if self.name:
             self.EndModal(wx.ID_OK)
@@ -4215,10 +4121,10 @@ class dlgPresetsName(wx.Dialog):
     # ----
 
 
-class monomerDropTarget(wx.TextDropTarget):
+class MonomerDropTarget(wx.TextDropTarget):
     """Monomer droptarget definition."""
 
-    def __init__(self, item):
+    def __init__(self, item) -> None:
         wx.TextDropTarget.__init__(self)
         self.item = item
 

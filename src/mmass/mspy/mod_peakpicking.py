@@ -20,13 +20,8 @@ import copy
 
 import numpy
 
-# load blocks
-# load objects
 # load modules
-from . import blocks, mod_basics, mod_signal, obj_compound, obj_peak, obj_peaklist
-
-# load stopper
-from .mod_stopper import CHECK_FORCE_QUIT
+from . import blocks, mod_basics, mod_signal, mod_stopper, obj_compound, obj_peak, obj_peaklist
 
 # BASIC CONSTANTS
 # ---------------
@@ -42,11 +37,11 @@ AVERAGE_BASE = {"C": 9.75, "H": 12.25, "N": 3.75, "O": 6, "P": 1}
 
 def labelpoint(signal, mz, baseline=None):
     """Return labeled peak at given x-value.
+
     signal (numpy array) - signal data points
     mz (float) - x-value to label
     baseline (numpy array) - signal baseline
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -100,7 +95,7 @@ def labelpoint(signal, mz, baseline=None):
     fwhm = mod_signal.width(signal, mz, height)
 
     # make peak object
-    return obj_peak.peak(mz=mz, ai=ai, base=base, sn=sn, fwhm=fwhm)
+    return obj_peak.Peak(mz=mz, ai=ai, base=base, sn=sn, fwhm=fwhm)
 
 
 # ----
@@ -108,6 +103,7 @@ def labelpoint(signal, mz, baseline=None):
 
 def labelpeak(signal, mz=None, minX=None, maxX=None, pickingHeight=0.75, baseline=None):
     """Return labeled peak in given m/z range.
+
     signal (numpy array) - signal data points
     mz (float) - x-value to label
     minX (float) - x-range start
@@ -115,7 +111,6 @@ def labelpeak(signal, mz=None, minX=None, maxX=None, pickingHeight=0.75, baselin
     pickingHeight (float) - centroiding height
     baseline (numpy array) - signal baseline
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -211,6 +206,7 @@ def labelscan(
     baseline=None,
 ):
     """Return centroided peaklist for given data points.
+
     signal (numpy array) - signal data points
     minX (float) - x-range start
     maxX (float) - x-range end
@@ -220,7 +216,6 @@ def labelscan(
     snThreshold (float) - signal to noise threshold
     baseline (numpy array) - signal baseline
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -237,7 +232,7 @@ def labelscan(
 
     # check data points
     if len(signal) == 0:
-        return obj_peaklist.peaklist([])
+        return obj_peaklist.Peaklist([])
 
     # get local maxima
     buff = []
@@ -247,7 +242,7 @@ def labelscan(
         if peak[1] >= threshold:
             buff.append([peak[0], peak[1], 0.0, None, None])  # mz, ai, base, sn, fwhm
 
-    CHECK_FORCE_QUIT()
+    mod_stopper.CHECK_FORCE_QUIT()
 
     # get peaks baseline and s/n
     basepeak = 0.0
@@ -269,7 +264,7 @@ def labelscan(
                 if intens > basepeak:
                     basepeak = intens
 
-    CHECK_FORCE_QUIT()
+    mod_stopper.CHECK_FORCE_QUIT()
 
     # remove peaks bellow threshold
     threshold = max(basepeak * relThreshold, absThreshold)
@@ -287,7 +282,7 @@ def labelscan(
         buff = []
         previous = None
         for peak in candidates:
-            CHECK_FORCE_QUIT()
+            mod_stopper.CHECK_FORCE_QUIT()
 
             # calc peak height
             h = ((peak[1] - peak[2]) * pickingHeight) + peak[2]
@@ -329,7 +324,7 @@ def labelscan(
         # store as candidates
         candidates = buff
 
-    CHECK_FORCE_QUIT()
+    mod_stopper.CHECK_FORCE_QUIT()
 
     # get peaks baseline and s/n
     basepeak = 0.0
@@ -351,7 +346,7 @@ def labelscan(
                 if intens > basepeak:
                     basepeak = intens
 
-    CHECK_FORCE_QUIT()
+    mod_stopper.CHECK_FORCE_QUIT()
 
     # remove peaks bellow threshold and calculate fwhm
     threshold = max(basepeak * relThreshold, absThreshold)
@@ -366,13 +361,13 @@ def labelscan(
                 signal, peak[0], (peak[2] + ((peak[1] - peak[2]) * 0.5))
             )
             centroides.append(
-                obj_peak.peak(
+                obj_peak.Peak(
                     mz=peak[0], ai=peak[1], base=peak[2], sn=peak[3], fwhm=peak[4]
                 )
             )
 
     # return peaklist object
-    return obj_peaklist.peaklist(centroides)
+    return obj_peaklist.Peaklist(centroides)
 
 
 # ----
@@ -380,11 +375,11 @@ def labelscan(
 
 def envcentroid(isotopes, pickingHeight=0.5, intensity="maximum"):
     """Calculate envelope centroid for given isotopes.
+
     isotopes (mspy.peaklist or list of mspy.peak) envelope isotopes
     pickingHeight (float) - centroiding height
     intensity (maximum | sum | average) envelope intensity type
     """
-
     # check isotopes
     if len(isotopes) == 0:
         return None
@@ -392,8 +387,8 @@ def envcentroid(isotopes, pickingHeight=0.5, intensity="maximum"):
         return isotopes[0]
 
     # check peaklist object
-    if not isinstance(isotopes, obj_peaklist.peaklist):
-        isotopes = obj_peaklist.peaklist(isotopes)
+    if not isinstance(isotopes, obj_peaklist.Peaklist):
+        isotopes = obj_peaklist.Peaklist(isotopes)
 
     # get sums
     sumMZ = 0.0
@@ -446,7 +441,7 @@ def envcentroid(isotopes, pickingHeight=0.5, intensity="maximum"):
         fwhm = abs(mz2 - mz1)
 
     # make peak
-    return obj_peak.peak(mz=mz, ai=ai, base=base, sn=sn, fwhm=fwhm)
+    return obj_peak.Peak(mz=mz, ai=ai, base=base, sn=sn, fwhm=fwhm)
 
 
 # ----
@@ -454,25 +449,25 @@ def envcentroid(isotopes, pickingHeight=0.5, intensity="maximum"):
 
 def envmono(isotopes, charge, intensity="maximum"):
     """Calculate envelope centroid for given isotopes.
+
     isotopes (mspy.peaklist or list of mspy.peak) - envelope isotopes
     charge (int) - peak charge
     intensity (maximum | sum | average) - envelope intensity type
     """
-
     # check isotopes
     if len(isotopes) == 0:
         return None
 
     # check peaklist object
-    if not isinstance(isotopes, obj_peaklist.peaklist):
-        isotopes = obj_peaklist.peaklist(isotopes)
+    if not isinstance(isotopes, obj_peaklist.Peaklist):
+        isotopes = obj_peaklist.Peaklist(isotopes)
 
     # calc averagine
     avFormula = averagine(
         isotopes.basepeak.mz, charge=charge, composition=AVERAGE_AMINO
     )
     avPattern = avFormula.pattern(fwhm=0.1, threshold=0.001, charge=charge)
-    avPattern = obj_peaklist.peaklist(avPattern)
+    avPattern = obj_peaklist.Peaklist(avPattern)
 
     # get envelope centroid
     points = numpy.array([(p.mz, p.intensity) for p in isotopes])
@@ -510,7 +505,7 @@ def envmono(isotopes, charge, intensity="maximum"):
         sn = (ai - base) * isotopes.basepeak.sn / (isotopes.basepeak.ai - base)
 
     # make peak
-    return obj_peak.peak(mz=mz, ai=ai, base=base, sn=sn, fwhm=fwhm, isotope=0)
+    return obj_peak.Peak(mz=mz, ai=ai, base=base, sn=sn, fwhm=fwhm, isotope=0)
 
 
 # ----
@@ -518,17 +513,17 @@ def envmono(isotopes, charge, intensity="maximum"):
 
 def deisotope(
     peaklist, maxCharge=1, mzTolerance=0.15, intTolerance=0.5, isotopeShift=0.0
-):
+) -> None:
     """Isotopes determination and calculation of peaks charge.
+
     peaklist (mspy.peaklist) - peaklist to process
     maxCharge (float) - max charge to be searched
     mzTolerance (float) - absolute m/z tolerance for isotopes distance
     intTolerance (float) - relative intensity tolerance for isotopes and model (in %/100)
     isotopeShift (float) - isotope distance correction (neutral mass) (for HDX etc.)
     """
-
     # check peaklist
-    if not isinstance(peaklist, obj_peaklist.peaklist):
+    if not isinstance(peaklist, obj_peaklist.Peaklist):
         raise TypeError("Peak list must be mspy.peaklist object!")
 
     # clear previous results
@@ -546,7 +541,7 @@ def deisotope(
     # walk in a peaklist
     maxIndex = len(peaklist)
     for x, parent in enumerate(peaklist):
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # skip assigned peaks
         if parent.isotope is not None:
@@ -623,14 +618,14 @@ def deisotope(
 
 def deconvolute(peaklist, massType=0):
     """Recalculate peaklist to singly charged.
+
     peaklist (mspy.peaklist) - peak list to deconvolute
     massType (0 or 1) - mass type used for m/z re-calculation, 0 = monoisotopic, 1 = average
     """
-
     # recalculate peaks
     buff = []
     for peak in copy.deepcopy(peaklist):
-        CHECK_FORCE_QUIT()
+        mod_stopper.CHECK_FORCE_QUIT()
 
         # uncharged peak
         if not peak.charge:
@@ -675,7 +670,7 @@ def deconvolute(peaklist, massType=0):
             peak.setbase(0.0)
 
     # update peaklist
-    return obj_peaklist.peaklist(buff)
+    return obj_peaklist.Peaklist(buff)
 
 
 # ----
@@ -687,11 +682,11 @@ def deconvolute(peaklist, massType=0):
 
 def averagine(mz, charge=0, composition=AVERAGE_AMINO):
     """Calculate average formula for given mass and building block composition.
+
     mz (float) - peak m/z
     charge (int) - peak charge
     composition (dict) - building block composition
     """
-
     # get average mass of block
     blockMass = 0.0
     for element in composition:
@@ -704,13 +699,13 @@ def averagine(mz, charge=0, composition=AVERAGE_AMINO):
     # make formula
     formula = ""
     for element in composition:
-        formula += "%s%d" % (element, int(composition[element] * count))
-    formula = obj_compound.compound(formula)
+        formula += f"{element}{int(composition[element] * count):d}"
+    formula = obj_compound.Compound(formula)
 
     # add some hydrogens to reach the mass
     hydrogens = round((neutralMass - formula.mass(1)) / blocks.elements["H"].mass[1])
     hydrogens = max(hydrogens, -1 * formula.count("H"))
-    formula += "H%d" % hydrogens
+    formula += f"H{hydrogens:d}"
 
     return formula
 
@@ -718,9 +713,8 @@ def averagine(mz, charge=0, composition=AVERAGE_AMINO):
 # ----
 
 
-def _gentable(highmass, step=200, composition=AVERAGE_AMINO, table="tuple"):
+def _gentable(highmass, step=200, composition=AVERAGE_AMINO, table="tuple") -> None:
     """Print pattern lookup table."""
-
     for mass in range(0, highmass, step):
         formula = averagine(mass, charge=0, composition=composition)
 
@@ -729,14 +723,14 @@ def _gentable(highmass, step=200, composition=AVERAGE_AMINO, table="tuple"):
             pattern += f"{abundance:.3f}, "
 
         if table == "tuple":
-            print("(%s), #%d" % (pattern[:-2], mass))
+            print(f"({pattern[:-2]}), #{mass:d}")
         elif table == "dict":
-            print("%d: (%s)," % (mass, pattern[:-2]))
+            print(f"{mass:d}: ({pattern[:-2]}),")
 
 
 # ----
 
-
+# ruff: disable[E501]
 # pattern lookup table for amino building block
 patternLookupTable = (
     (1.000, 0.059, 0.003),  # 0
@@ -762,933 +756,59 @@ patternLookupTable = (
     (0.392, 0.853, 1.000, 0.831, 0.543, 0.295, 0.136, 0.053, 0.017, 0.004),  # 4000
     (0.353, 0.812, 1.000, 0.869, 0.593, 0.336, 0.162, 0.067, 0.023, 0.006),  # 4200
     (0.321, 0.776, 1.000, 0.907, 0.644, 0.379, 0.190, 0.082, 0.030, 0.009),  # 4400
-    (
-        0.308,
-        0.760,
-        1.000,
-        0.924,
-        0.669,
-        0.401,
-        0.205,
-        0.090,
-        0.033,
-        0.011,
-        0.001,
-    ),  # 4600
-    (
-        0.282,
-        0.729,
-        1.000,
-        0.962,
-        0.723,
-        0.451,
-        0.239,
-        0.110,
-        0.042,
-        0.014,
-        0.003,
-    ),  # 4800
-    (
-        0.258,
-        0.699,
-        1.000,
-        1.000,
-        0.780,
-        0.504,
-        0.277,
-        0.132,
-        0.053,
-        0.018,
-        0.004,
-    ),  # 5000
-    (
-        0.228,
-        0.645,
-        0.962,
-        1.000,
-        0.809,
-        0.542,
-        0.308,
-        0.153,
-        0.065,
-        0.023,
-        0.007,
-    ),  # 5200
-    (
-        0.203,
-        0.598,
-        0.927,
-        1.000,
-        0.839,
-        0.581,
-        0.343,
-        0.176,
-        0.078,
-        0.029,
-        0.010,
-    ),  # 5400
-    (
-        0.192,
-        0.577,
-        0.911,
-        1.000,
-        0.854,
-        0.602,
-        0.361,
-        0.189,
-        0.086,
-        0.033,
-        0.011,
-    ),  # 5600
-    (
-        0.171,
-        0.536,
-        0.880,
-        1.000,
-        0.884,
-        0.644,
-        0.399,
-        0.216,
-        0.102,
-        0.040,
-        0.014,
-        0.003,
-    ),  # 5800
-    (
-        0.154,
-        0.501,
-        0.851,
-        1.000,
-        0.912,
-        0.686,
-        0.439,
-        0.244,
-        0.120,
-        0.050,
-        0.018,
-        0.004,
-    ),  # 6000
-    (
-        0.139,
-        0.468,
-        0.823,
-        1.000,
-        0.942,
-        0.730,
-        0.482,
-        0.278,
-        0.141,
-        0.062,
-        0.023,
-        0.007,
-    ),  # 6200
-    (
-        0.126,
-        0.441,
-        0.799,
-        1.000,
-        0.969,
-        0.772,
-        0.524,
-        0.310,
-        0.162,
-        0.073,
-        0.028,
-        0.009,
-    ),  # 6400
-    (
-        0.121,
-        0.427,
-        0.787,
-        1.000,
-        0.983,
-        0.794,
-        0.547,
-        0.328,
-        0.174,
-        0.080,
-        0.031,
-        0.011,
-    ),  # 6600
-    (
-        0.104,
-        0.381,
-        0.732,
-        0.971,
-        1.000,
-        0.848,
-        0.614,
-        0.390,
-        0.219,
-        0.109,
-        0.045,
-        0.016,
-        0.004,
-    ),  # 6800
-    (
-        0.092,
-        0.349,
-        0.691,
-        0.944,
-        1.000,
-        0.872,
-        0.648,
-        0.422,
-        0.244,
-        0.125,
-        0.054,
-        0.020,
-        0.006,
-    ),  # 7000
-    (
-        0.082,
-        0.321,
-        0.654,
-        0.919,
-        1.000,
-        0.894,
-        0.682,
-        0.456,
-        0.270,
-        0.143,
-        0.063,
-        0.024,
-        0.008,
-    ),  # 7200
-    (
-        0.073,
-        0.296,
-        0.620,
-        0.895,
-        1.000,
-        0.917,
-        0.718,
-        0.492,
-        0.299,
-        0.162,
-        0.077,
-        0.030,
-        0.011,
-    ),  # 7400
-    (
-        0.069,
-        0.284,
-        0.604,
-        0.884,
-        1.000,
-        0.929,
-        0.735,
-        0.509,
-        0.313,
-        0.172,
-        0.084,
-        0.033,
-        0.012,
-    ),  # 7600
-    (
-        0.062,
-        0.262,
-        0.573,
-        0.861,
-        1.000,
-        0.952,
-        0.772,
-        0.548,
-        0.345,
-        0.195,
-        0.098,
-        0.040,
-        0.015,
-        0.003,
-    ),  # 7800
-    (
-        0.056,
-        0.243,
-        0.544,
-        0.839,
-        1.000,
-        0.976,
-        0.811,
-        0.589,
-        0.380,
-        0.220,
-        0.114,
-        0.049,
-        0.019,
-        0.005,
-    ),  # 8000
-    (
-        0.051,
-        0.227,
-        0.521,
-        0.821,
-        1.000,
-        0.997,
-        0.846,
-        0.628,
-        0.413,
-        0.244,
-        0.130,
-        0.058,
-        0.022,
-        0.007,
-    ),  # 8200
-    (
-        0.045,
-        0.206,
-        0.486,
-        0.786,
-        0.980,
-        1.000,
-        0.869,
-        0.660,
-        0.444,
-        0.268,
-        0.147,
-        0.070,
-        0.027,
-        0.010,
-    ),  # 8400
-    (
-        0.042,
-        0.196,
-        0.468,
-        0.767,
-        0.968,
-        1.000,
-        0.879,
-        0.676,
-        0.460,
-        0.281,
-        0.156,
-        0.075,
-        0.030,
-        0.011,
-    ),  # 8600
-    (
-        0.038,
-        0.179,
-        0.437,
-        0.733,
-        0.947,
-        1.000,
-        0.899,
-        0.705,
-        0.491,
-        0.307,
-        0.173,
-        0.086,
-        0.036,
-        0.013,
-        0.002,
-    ),  # 8800
-    (
-        0.033,
-        0.163,
-        0.408,
-        0.701,
-        0.926,
-        1.000,
-        0.919,
-        0.736,
-        0.524,
-        0.335,
-        0.193,
-        0.099,
-        0.043,
-        0.016,
-        0.004,
-    ),  # 9000
-    (
-        0.030,
-        0.149,
-        0.382,
-        0.670,
-        0.906,
-        1.000,
-        0.938,
-        0.768,
-        0.558,
-        0.364,
-        0.215,
-        0.113,
-        0.051,
-        0.020,
-        0.006,
-    ),  # 9200
-    (
-        0.026,
-        0.132,
-        0.348,
-        0.629,
-        0.877,
-        1.000,
-        0.971,
-        0.823,
-        0.620,
-        0.420,
-        0.258,
-        0.143,
-        0.069,
-        0.028,
-        0.010,
-    ),  # 9400
-    (
-        0.024,
-        0.126,
-        0.337,
-        0.616,
-        0.868,
-        1.000,
-        0.981,
-        0.839,
-        0.638,
-        0.437,
-        0.271,
-        0.153,
-        0.074,
-        0.031,
-        0.011,
-    ),  # 9600
-    (
-        0.022,
-        0.116,
-        0.317,
-        0.592,
-        0.851,
-        1.000,
-        1.000,
-        0.872,
-        0.676,
-        0.472,
-        0.298,
-        0.172,
-        0.087,
-        0.037,
-        0.014,
-        0.002,
-    ),  # 9800
-    (
-        0.020,
-        0.106,
-        0.294,
-        0.561,
-        0.822,
-        0.983,
-        1.000,
-        0.888,
-        0.700,
-        0.498,
-        0.320,
-        0.188,
-        0.099,
-        0.043,
-        0.017,
-        0.004,
-    ),  # 10000
-    (
-        0.017,
-        0.096,
-        0.272,
-        0.529,
-        0.790,
-        0.965,
-        1.000,
-        0.905,
-        0.727,
-        0.526,
-        0.346,
-        0.207,
-        0.113,
-        0.050,
-        0.020,
-        0.006,
-    ),  # 10200
-    (
-        0.015,
-        0.087,
-        0.251,
-        0.499,
-        0.761,
-        0.946,
-        1.000,
-        0.922,
-        0.755,
-        0.556,
-        0.373,
-        0.227,
-        0.126,
-        0.061,
-        0.024,
-        0.008,
-    ),  # 10400
-    (
-        0.014,
-        0.083,
-        0.242,
-        0.486,
-        0.747,
-        0.937,
-        1.000,
-        0.930,
-        0.768,
-        0.570,
-        0.385,
-        0.237,
-        0.134,
-        0.065,
-        0.026,
-        0.009,
-    ),  # 10600
-    (
-        0.013,
-        0.075,
-        0.225,
-        0.459,
-        0.720,
-        0.920,
-        1.000,
-        0.947,
-        0.796,
-        0.602,
-        0.415,
-        0.260,
-        0.149,
-        0.075,
-        0.032,
-        0.012,
-        0.001,
-    ),  # 10800
-    (
-        0.012,
-        0.069,
-        0.208,
-        0.435,
-        0.695,
-        0.904,
-        1.000,
-        0.963,
-        0.824,
-        0.633,
-        0.443,
-        0.284,
-        0.165,
-        0.085,
-        0.037,
-        0.015,
-        0.002,
-    ),  # 11000
-    (
-        0.010,
-        0.063,
-        0.194,
-        0.412,
-        0.669,
-        0.888,
-        1.000,
-        0.980,
-        0.852,
-        0.667,
-        0.475,
-        0.309,
-        0.184,
-        0.098,
-        0.044,
-        0.018,
-        0.005,
-    ),  # 11200
-    (
-        0.009,
-        0.057,
-        0.180,
-        0.391,
-        0.646,
-        0.872,
-        1.000,
-        0.997,
-        0.882,
-        0.702,
-        0.509,
-        0.336,
-        0.204,
-        0.113,
-        0.052,
-        0.021,
-        0.006,
-    ),  # 11400
-    (
-        0.009,
-        0.054,
-        0.173,
-        0.379,
-        0.631,
-        0.861,
-        0.995,
-        1.000,
-        0.892,
-        0.717,
-        0.523,
-        0.350,
-        0.214,
-        0.119,
-        0.057,
-        0.023,
-        0.008,
-    ),  # 11600
-    (
-        0.008,
-        0.049,
-        0.160,
-        0.355,
-        0.602,
-        0.834,
-        0.980,
-        1.000,
-        0.906,
-        0.739,
-        0.548,
-        0.373,
-        0.231,
-        0.132,
-        0.066,
-        0.026,
-        0.010,
-    ),  # 11800
-    (
-        0.007,
-        0.042,
-        0.141,
-        0.321,
-        0.557,
-        0.791,
-        0.953,
-        1.000,
-        0.931,
-        0.781,
-        0.596,
-        0.417,
-        0.268,
-        0.158,
-        0.082,
-        0.037,
-        0.014,
-        0.002,
-    ),  # 12000
-    (
-        0.006,
-        0.038,
-        0.130,
-        0.301,
-        0.531,
-        0.767,
-        0.939,
-        1.000,
-        0.945,
-        0.805,
-        0.624,
-        0.443,
-        0.289,
-        0.174,
-        0.093,
-        0.043,
-        0.017,
-        0.004,
-    ),  # 12200
-    (
-        0.005,
-        0.035,
-        0.120,
-        0.283,
-        0.507,
-        0.744,
-        0.925,
-        1.000,
-        0.960,
-        0.830,
-        0.653,
-        0.470,
-        0.312,
-        0.191,
-        0.106,
-        0.051,
-        0.020,
-        0.006,
-    ),  # 12400
-    (
-        0.005,
-        0.033,
-        0.115,
-        0.274,
-        0.495,
-        0.732,
-        0.918,
-        1.000,
-        0.967,
-        0.842,
-        0.668,
-        0.485,
-        0.324,
-        0.200,
-        0.112,
-        0.054,
-        0.023,
-        0.007,
-    ),  # 12600
-    (
-        0.004,
-        0.030,
-        0.107,
-        0.257,
-        0.472,
-        0.710,
-        0.904,
-        1.000,
-        0.982,
-        0.868,
-        0.699,
-        0.515,
-        0.351,
-        0.219,
-        0.126,
-        0.063,
-        0.027,
-        0.010,
-    ),  # 12800
-    (
-        0.004,
-        0.027,
-        0.098,
-        0.242,
-        0.450,
-        0.689,
-        0.890,
-        1.000,
-        0.997,
-        0.894,
-        0.731,
-        0.547,
-        0.378,
-        0.241,
-        0.141,
-        0.072,
-        0.032,
-        0.012,
-        0.002,
-    ),  # 13000
-    (
-        0.003,
-        0.025,
-        0.090,
-        0.224,
-        0.426,
-        0.661,
-        0.867,
-        0.989,
-        1.000,
-        0.911,
-        0.756,
-        0.574,
-        0.402,
-        0.260,
-        0.155,
-        0.082,
-        0.037,
-        0.014,
-        0.003,
-    ),  # 13200
-    (
-        0.003,
-        0.022,
-        0.082,
-        0.208,
-        0.402,
-        0.633,
-        0.843,
-        0.975,
-        1.000,
-        0.925,
-        0.777,
-        0.598,
-        0.425,
-        0.279,
-        0.169,
-        0.092,
-        0.043,
-        0.017,
-        0.005,
-    ),  # 13400
-    (
-        0.003,
-        0.021,
-        0.079,
-        0.202,
-        0.392,
-        0.621,
-        0.833,
-        0.969,
-        1.000,
-        0.930,
-        0.786,
-        0.609,
-        0.435,
-        0.288,
-        0.176,
-        0.097,
-        0.046,
-        0.018,
-        0.006,
-    ),  # 13600
-    (
-        0.003,
-        0.019,
-        0.073,
-        0.188,
-        0.370,
-        0.595,
-        0.810,
-        0.955,
-        1.000,
-        0.943,
-        0.808,
-        0.634,
-        0.460,
-        0.309,
-        0.191,
-        0.108,
-        0.053,
-        0.022,
-        0.007,
-    ),  # 13800
-    (
-        0.002,
-        0.017,
-        0.067,
-        0.175,
-        0.350,
-        0.570,
-        0.787,
-        0.942,
-        1.000,
-        0.956,
-        0.831,
-        0.662,
-        0.487,
-        0.331,
-        0.209,
-        0.121,
-        0.062,
-        0.026,
-        0.010,
-    ),  # 14000
-    (
-        0.002,
-        0.016,
-        0.061,
-        0.163,
-        0.330,
-        0.547,
-        0.765,
-        0.929,
-        1.000,
-        0.968,
-        0.855,
-        0.690,
-        0.515,
-        0.356,
-        0.227,
-        0.135,
-        0.070,
-        0.031,
-        0.012,
-        0.002,
-    ),  # 14200
-    (
-        0.002,
-        0.014,
-        0.056,
-        0.151,
-        0.312,
-        0.524,
-        0.743,
-        0.916,
-        1.000,
-        0.982,
-        0.878,
-        0.718,
-        0.544,
-        0.382,
-        0.247,
-        0.149,
-        0.079,
-        0.037,
-        0.014,
-        0.003,
-    ),  # 14400
-    (
-        0.002,
-        0.013,
-        0.054,
-        0.146,
-        0.304,
-        0.514,
-        0.733,
-        0.909,
-        1.000,
-        0.989,
-        0.890,
-        0.733,
-        0.559,
-        0.395,
-        0.257,
-        0.156,
-        0.084,
-        0.039,
-        0.016,
-        0.004,
-    ),  # 14600
-    (
-        0.001,
-        0.012,
-        0.047,
-        0.131,
-        0.276,
-        0.478,
-        0.697,
-        0.881,
-        0.989,
-        1.000,
-        0.920,
-        0.777,
-        0.605,
-        0.437,
-        0.292,
-        0.182,
-        0.102,
-        0.051,
-        0.022,
-        0.007,
-    ),  # 14800
-    (
-        0.001,
-        0.010,
-        0.043,
-        0.121,
-        0.259,
-        0.454,
-        0.671,
-        0.859,
-        0.977,
-        1.000,
-        0.932,
-        0.797,
-        0.629,
-        0.460,
-        0.312,
-        0.197,
-        0.114,
-        0.058,
-        0.025,
-        0.008,
-        0.001,
-    ),  # 15000
+    (0.308, 0.760, 1.000, 0.924, 0.669, 0.401, 0.205, 0.090, 0.033, 0.011, 0.001),  # 4600
+    (0.282, 0.729, 1.000, 0.962, 0.723, 0.451, 0.239, 0.110, 0.042, 0.014, 0.003),  # 4800
+    (0.258, 0.699, 1.000, 1.000, 0.780, 0.504, 0.277, 0.132, 0.053, 0.018, 0.004),  # 5000
+    (0.228, 0.645, 0.962, 1.000, 0.809, 0.542, 0.308, 0.153, 0.065, 0.023, 0.007),  # 5200
+    (0.203, 0.598, 0.927, 1.000, 0.839, 0.581, 0.343, 0.176, 0.078, 0.029, 0.010),  # 5400
+    (0.192, 0.577, 0.911, 1.000, 0.854, 0.602, 0.361, 0.189, 0.086, 0.033, 0.011),  # 5600
+    (0.171, 0.536, 0.880, 1.000, 0.884, 0.644, 0.399, 0.216, 0.102, 0.040, 0.014, 0.003),  # 5800
+    (0.154, 0.501, 0.851, 1.000, 0.912, 0.686, 0.439, 0.244, 0.120, 0.050, 0.018, 0.004),  # 6000
+    (0.139, 0.468, 0.823, 1.000, 0.942, 0.730, 0.482, 0.278, 0.141, 0.062, 0.023, 0.007),  # 6200
+    (0.126, 0.441, 0.799, 1.000, 0.969, 0.772, 0.524, 0.310, 0.162, 0.073, 0.028, 0.009),  # 6400
+    (0.121, 0.427, 0.787, 1.000, 0.983, 0.794, 0.547, 0.328, 0.174, 0.080, 0.031, 0.011),  # 6600
+    (0.104, 0.381, 0.732, 0.971, 1.000, 0.848, 0.614, 0.390, 0.219, 0.109, 0.045, 0.016, 0.004),  # 6800
+    (0.092, 0.349, 0.691, 0.944, 1.000, 0.872, 0.648, 0.422, 0.244, 0.125, 0.054, 0.020, 0.006),  # 7000
+    (0.082, 0.321, 0.654, 0.919, 1.000, 0.894, 0.682, 0.456, 0.270, 0.143, 0.063, 0.024, 0.008),  # 7200
+    (0.073, 0.296, 0.620, 0.895, 1.000, 0.917, 0.718, 0.492, 0.299, 0.162, 0.077, 0.030, 0.011),  # 7400
+    (0.069, 0.284, 0.604, 0.884, 1.000, 0.929, 0.735, 0.509, 0.313, 0.172, 0.084, 0.033, 0.012),  # 7600
+    (0.062, 0.262, 0.573, 0.861, 1.000, 0.952, 0.772, 0.548, 0.345, 0.195, 0.098, 0.040, 0.015, 0.003),  # 7800
+    (0.056, 0.243, 0.544, 0.839, 1.000, 0.976, 0.811, 0.589, 0.380, 0.220, 0.114, 0.049, 0.019, 0.005),  # 8000
+    (0.051, 0.227, 0.521, 0.821, 1.000, 0.997, 0.846, 0.628, 0.413, 0.244, 0.130, 0.058, 0.022, 0.007),  # 8200
+    (0.045, 0.206, 0.486, 0.786, 0.980, 1.000, 0.869, 0.660, 0.444, 0.268, 0.147, 0.070, 0.027, 0.010),  # 8400
+    (0.042, 0.196, 0.468, 0.767, 0.968, 1.000, 0.879, 0.676, 0.460, 0.281, 0.156, 0.075, 0.030, 0.011),  # 8600
+    (0.038, 0.179, 0.437, 0.733, 0.947, 1.000, 0.899, 0.705, 0.491, 0.307, 0.173, 0.086, 0.036, 0.013, 0.002),  # 8800
+    (0.033, 0.163, 0.408, 0.701, 0.926, 1.000, 0.919, 0.736, 0.524, 0.335, 0.193, 0.099, 0.043, 0.016, 0.004),  # 9000
+    (0.030, 0.149, 0.382, 0.670, 0.906, 1.000, 0.938, 0.768, 0.558, 0.364, 0.215, 0.113, 0.051, 0.020, 0.006),  # 9200
+    (0.026, 0.132, 0.348, 0.629, 0.877, 1.000, 0.971, 0.823, 0.620, 0.420, 0.258, 0.143, 0.069, 0.028, 0.010),  # 9400
+    (0.024, 0.126, 0.337, 0.616, 0.868, 1.000, 0.981, 0.839, 0.638, 0.437, 0.271, 0.153, 0.074, 0.031, 0.011),  # 9600
+    (0.022, 0.116, 0.317, 0.592, 0.851, 1.000, 1.000, 0.872,0.676, 0.472, 0.298, 0.172, 0.087, 0.037, 0.014, 0.002),  # 9800
+    (0.020, 0.106, 0.294, 0.561, 0.822, 0.983, 1.000, 0.888, 0.700, 0.498, 0.320, 0.188, 0.099, 0.043, 0.017, 0.004),  # 10000
+    (0.017, 0.096, 0.272, 0.529, 0.790, 0.965, 1.000, 0.905, 0.727, 0.526, 0.346, 0.207, 0.113, 0.050, 0.020, 0.006),  # 10200
+    (0.015, 0.087, 0.251, 0.499, 0.761, 0.946, 1.000, 0.922, 0.755, 0.556, 0.373, 0.227, 0.126, 0.061, 0.024, 0.008),  # 10400
+    (0.014, 0.083, 0.242, 0.486, 0.747, 0.937, 1.000, 0.930, 0.768, 0.570, 0.385, 0.237, 0.134, 0.065, 0.026, 0.009),  # 10600
+    (0.013, 0.075, 0.225, 0.459, 0.720, 0.920, 1.000, 0.947, 0.796, 0.602, 0.415, 0.260, 0.149, 0.075, 0.032, 0.012, 0.001),  # 10800
+    (0.012, 0.069, 0.208, 0.435, 0.695, 0.904, 1.000, 0.963, 0.824, 0.633, 0.443, 0.284, 0.165, 0.085, 0.037, 0.015, 0.002),  # 11000
+    (0.010, 0.063, 0.194, 0.412, 0.669, 0.888, 1.000, 0.980, 0.852, 0.667, 0.475, 0.309, 0.184, 0.098, 0.044, 0.018, 0.005),  # 11200
+    (0.009, 0.057, 0.180, 0.391, 0.646, 0.872, 1.000, 0.997, 0.882, 0.702, 0.509, 0.336, 0.204, 0.113, 0.052, 0.021, 0.006),  # 11400
+    (0.009, 0.054, 0.173, 0.379, 0.631, 0.861, 0.995, 1.000, 0.892, 0.717, 0.523, 0.350, 0.214, 0.119, 0.057, 0.023, 0.008),  # 11600
+    (0.008, 0.049, 0.160, 0.355, 0.602, 0.834, 0.980, 1.000, 0.906, 0.739, 0.548, 0.373, 0.231, 0.132, 0.066, 0.026, 0.010),  # 11800
+    (0.007, 0.042, 0.141, 0.321, 0.557, 0.791, 0.953, 1.000, 0.931, 0.781, 0.596, 0.417, 0.268, 0.158, 0.082, 0.037, 0.014, 0.002),  # 12000
+    (0.006, 0.038, 0.130, 0.301, 0.531, 0.767, 0.939, 1.000, 0.945, 0.805, 0.624, 0.443, 0.289, 0.174, 0.093, 0.043, 0.017, 0.004),  # 12200
+    (0.005, 0.035, 0.120, 0.283, 0.507, 0.744, 0.925, 1.000, 0.960, 0.830, 0.653, 0.470, 0.312, 0.191, 0.106, 0.051, 0.020, 0.006),  # 12400
+    (0.005, 0.033, 0.115,0.274, 0.495, 0.732, 0.918, 1.000, 0.967, 0.842, 0.668, 0.485, 0.324, 0.200, 0.112, 0.054, 0.023, 0.007),  # 12600
+    (0.004, 0.030, 0.107, 0.257, 0.472, 0.710, 0.904, 1.000, 0.982, 0.868, 0.699, 0.515, 0.351, 0.219, 0.126, 0.063, 0.027, 0.010),  # 12800
+    (0.004, 0.027, 0.098, 0.242, 0.450, 0.689, 0.890, 1.000, 0.997, 0.894, 0.731, 0.547, 0.378, 0.241, 0.141, 0.072, 0.032, 0.012, 0.002),  # 13000
+    (0.003, 0.025, 0.090, 0.224, 0.426, 0.661, 0.867, 0.989, 1.000, 0.911, 0.756, 0.574, 0.402, 0.260, 0.155, 0.082, 0.037, 0.014, 0.003),  # 13200
+    (0.003, 0.022, 0.082, 0.208, 0.402, 0.633, 0.843, 0.975, 1.000, 0.925, 0.777, 0.598, 0.425, 0.279, 0.169, 0.092, 0.043, 0.017, 0.005),  # 13400
+    (0.003, 0.021, 0.079, 0.202, 0.392, 0.621, 0.833, 0.969, 1.000, 0.930, 0.786, 0.609, 0.435, 0.288, 0.176, 0.097, 0.046, 0.018, 0.006),  # 13600
+    (0.003, 0.019, 0.073, 0.188, 0.370, 0.595, 0.810, 0.955, 1.000, 0.943, 0.808, 0.634, 0.460, 0.309, 0.191, 0.108, 0.053, 0.022, 0.007),  # 13800
+    (0.002, 0.017, 0.067, 0.175, 0.350, 0.570, 0.787, 0.942, 1.000, 0.956, 0.831, 0.662, 0.487, 0.331, 0.209, 0.121, 0.062, 0.026, 0.010),  # 14000
+    (0.002, 0.016, 0.061, 0.163, 0.330, 0.547, 0.765, 0.929, 1.000, 0.968, 0.855, 0.690, 0.515, 0.356, 0.227, 0.135, 0.070, 0.031, 0.012, 0.002),  # 14200
+    (0.002, 0.014, 0.056, 0.151, 0.312, 0.524, 0.743, 0.916, 1.000, 0.982, 0.878, 0.718, 0.544, 0.382, 0.247, 0.149, 0.079, 0.037, 0.014, 0.003),  # 14400
+    (0.002, 0.013, 0.054, 0.146, 0.304, 0.514, 0.733, 0.909, 1.000, 0.989, 0.890, 0.733, 0.559, 0.395, 0.257, 0.156, 0.084, 0.039, 0.016, 0.004),  # 14600
+    (0.001, 0.012, 0.047, 0.131, 0.276, 0.478, 0.697, 0.881, 0.989, 1.000, 0.920, 0.777, 0.605, 0.437, 0.292, 0.182, 0.102, 0.051, 0.022, 0.007),  # 14800
+    (0.001, 0.010, 0.043, 0.121, 0.259, 0.454, 0.671, 0.859, 0.977, 1.000, 0.932, 0.797, 0.629, 0.460, 0.312, 0.197, 0.114, 0.058, 0.025, 0.008, 0.001),  # 15000
 )
+
+# ruff: enable[E501]

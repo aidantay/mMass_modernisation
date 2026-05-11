@@ -25,10 +25,10 @@ from . import config, mwx
 # -----------
 
 
-class dlgPreferences(wx.Dialog):
+class DlgPreferences(wx.Dialog):
     """Set mMass preferences."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, wx.ID_ANY, "Preferences", style=wx.DEFAULT_DIALOG_STYLE
@@ -48,7 +48,6 @@ class dlgPreferences(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         # init notebook
         self.notebook = wx.Notebook(self, wx.ID_ANY)
 
@@ -67,7 +66,6 @@ class dlgPreferences(wx.Dialog):
 
     def makeUpdatesPage(self):
         """Automatic updates panel."""
-
         panel = wx.Panel(self.notebook, wx.ID_ANY)
 
         # make elements
@@ -102,7 +100,6 @@ class dlgPreferences(wx.Dialog):
 
     def makeCompassPanel(self):
         """CompassXport panel."""
-
         panel = wx.Panel(self.notebook, wx.ID_ANY)
 
         # make elements
@@ -165,23 +162,21 @@ class dlgPreferences(wx.Dialog):
 
     # ----
 
-    def onUpdates(self, _evt):
+    def onUpdates(self, _evt) -> None:
         """Store settings for automatic updates."""
-
         # get values
         config.main["updatesEnabled"] = int(self.updatesEnabled_check.GetValue())
 
     # ----
 
-    def onUpdateNow(self, _evt):
+    def onUpdateNow(self, _evt) -> None:
         """Check for available updates now."""
         self.parent.onHelpUpdate()
 
     # ----
 
-    def onCompass(self, _evt):
+    def onCompass(self, _evt) -> None:
         """Store settings for compass conversion."""
-
         # get values
         config.main["compassMode"] = self.compassMode_choice.GetStringSelection()
         config.main["compassFormat"] = self.compassFormat_choice.GetStringSelection()

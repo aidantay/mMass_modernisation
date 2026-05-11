@@ -23,16 +23,15 @@ from mmass import mspy
 from . import images, mwx
 
 # load modules
-from .ids import *
 
 # FLOATING PANEL WITH MONOMER LIBRARY
 # -----------------------------------
 
 
-class panelMonomerLibrary(wx.Frame):
+class PanelMonomerLibrary(wx.Frame):
     """Monomer library."""
 
-    def __init__(self, parent, filterIn=None, filterOut=None, DnD=True):
+    def __init__(self, parent, filterIn=None, filterOut=None, DnD=True) -> None:
         if filterOut is None:
             filterOut = []
         if filterIn is None:
@@ -60,9 +59,8 @@ class panelMonomerLibrary(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
 
@@ -85,9 +83,8 @@ class panelMonomerLibrary(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbarNoBorder"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -129,11 +126,10 @@ class panelMonomerLibrary(wx.Frame):
 
     # ----
 
-    def makeMonomerList(self):
+    def makeMonomerList(self) -> None:
         """Make references list."""
-
         # init list
-        self.monomerList = mwx.sortListCtrl(
+        self.monomerList = mwx.SortListCtrl(
             self, -1, size=(231, 300), style=mwx.LISTCTRL_STYLE_SINGLE
         )
         self.monomerList.SetFont(wx.SMALL_FONT)
@@ -152,21 +148,20 @@ class panelMonomerLibrary(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Hide this frame."""
         self.Destroy()
 
     # ----
 
-    def onSearch(self, evt):
+    def onSearch(self, evt) -> None:
         """Search monomer library."""
         self.updateMonomerList()
 
     # ----
 
-    def onBeginDrag(self, evt):
+    def onBeginDrag(self, evt) -> None:
         """Start item drag."""
-
         # check if enabled
         if not self.DnD:
             evt.Veto()
@@ -191,9 +186,8 @@ class panelMonomerLibrary(wx.Frame):
 
     # ----
 
-    def setFilter(self, filterIn=None, filterOut=None):
+    def setFilter(self, filterIn=None, filterOut=None) -> None:
         """Set current group filter."""
-
         # set filters
         if filterOut is None:
             filterOut = []
@@ -207,15 +201,14 @@ class panelMonomerLibrary(wx.Frame):
 
     # ----
 
-    def enableDnD(self, enable):
+    def enableDnD(self, enable) -> None:
         """Enable / disable drag and drop."""
         self.DnD = enable
 
     # ----
 
-    def updateMonomerMap(self):
+    def updateMonomerMap(self) -> None:
         """Update items map."""
-
         self.monomerMap = []
 
         # get search
@@ -241,9 +234,8 @@ class panelMonomerLibrary(wx.Frame):
 
     # ----
 
-    def updateMonomerList(self):
+    def updateMonomerList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateMonomerMap()
         self.monomerList.DeleteAllItems()

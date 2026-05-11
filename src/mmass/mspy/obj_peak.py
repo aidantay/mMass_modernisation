@@ -26,7 +26,7 @@ from . import mod_basics
 # ----------------------
 
 
-class peak:
+class Peak:
     """Peak object definition."""
 
     def __init__(
@@ -40,7 +40,7 @@ class peak:
         fwhm=None,
         group="",
         **attr,
-    ):
+    ) -> None:
         self.mz = float(mz)
         self.ai = float(ai)
         self.base = float(base)
@@ -71,9 +71,13 @@ class peak:
 
     # ----
 
-    def reset(self):
-        """Clear peak buffers and set intensity and resolution."""
+    def __str__(self) -> str:
+        return f"Peak(mz={self.mz}, ai={self.ai}, base={self.base}, charge={self.charge}, isotope={self.isotope})"
 
+    # ----
+
+    def reset(self) -> None:
+        """Clear peak buffers and set intensity and resolution."""
         # clear mass buffer
         self._mass = None
 
@@ -91,7 +95,6 @@ class peak:
 
     def mass(self):
         """Get neutral peak mass."""
-
         # check charge
         if self.charge is None:
             return None
@@ -111,9 +114,8 @@ class peak:
 
     # SETTERS
 
-    def setmz(self, mz):
+    def setmz(self, mz) -> None:
         """Set new m/z value."""
-
         # update value
         self.mz = mz
 
@@ -127,9 +129,8 @@ class peak:
 
     # ----
 
-    def setai(self, ai):
+    def setai(self, ai) -> None:
         """Set new a.i. value."""
-
         # update value
         self.ai = ai
 
@@ -138,9 +139,8 @@ class peak:
 
     # ----
 
-    def setbase(self, base):
+    def setbase(self, base) -> None:
         """Set new baseline value."""
-
         # update value
         self.base = base
 
@@ -149,15 +149,14 @@ class peak:
 
     # ----
 
-    def setsn(self, sn):
+    def setsn(self, sn) -> None:
         """Set new s/n value."""
         self.sn = sn
 
     # ----
 
-    def setcharge(self, charge):
+    def setcharge(self, charge) -> None:
         """Set new charge value."""
-
         # update value
         self.charge = charge
 
@@ -166,15 +165,14 @@ class peak:
 
     # ----
 
-    def setisotope(self, isotope):
+    def setisotope(self, isotope) -> None:
         """Set new isotope value."""
         self.isotope = isotope
 
     # ----
 
-    def setfwhm(self, fwhm):
+    def setfwhm(self, fwhm) -> None:
         """Set new fwhm value."""
-
         # update value
         self.fwhm = fwhm
 
@@ -185,7 +183,7 @@ class peak:
 
     # ----
 
-    def setgroup(self, group):
+    def setgroup(self, group) -> None:
         """Set new group name value."""
         self.group = group
 

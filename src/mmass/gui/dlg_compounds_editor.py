@@ -17,25 +17,25 @@
 
 # load libs
 import copy
+import pathlib
 import xml.dom.minidom
+from typing import Any
 
 import wx
 
 from mmass import mspy
 
-from . import config, libs, mwx
-
 # load modules
-from .ids import *
+from . import config, ids, libs, mwx
 
 # COMPOUNDS EDITOR
 # ----------------
 
 
-class dlgCompoundsEditor(wx.Dialog):
+class DlgCompoundsEditor(wx.Dialog):
     """Edit compounds library."""
 
-    def __init__(self, parent):
+    def __init__(self, parent: wx.Window | None) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -44,8 +44,8 @@ class dlgCompoundsEditor(wx.Dialog):
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
 
-        self.group = None
-        self.itemsMap = []
+        self.group: str | None = None
+        self.itemsMap: list[tuple[str, str, float, float, str]] = []
 
         # make GUI
         sizer = self.makeGUI()
@@ -63,9 +63,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> wx.Sizer:
         """Make GUI elements."""
-
         # make GUI elements
         groups = self.makeGroupEditor()
         self.makeItemsList()
@@ -81,9 +80,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def makeGroupEditor(self):
+    def makeGroupEditor(self) -> wx.Sizer:
         """Make group editor."""
-
         # make elements
         self.groupName_choice = wx.Choice(self, -1, size=(-1, mwx.CHOICE_HEIGHT))
         self.groupName_choice.Bind(wx.EVT_CHOICE, self.onGroupSelected)
@@ -112,11 +110,10 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def makeItemsList(self):
+    def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, -1, size=(771, 250), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -138,9 +135,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def makeItemEditor(self):
+    def makeItemEditor(self) -> wx.Sizer:
         """Make items editor."""
-
         mainSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.VERTICAL)
 
         # make elements
@@ -151,7 +147,7 @@ class dlgCompoundsEditor(wx.Dialog):
         self.itemDescription_value = wx.TextCtrl(self, -1, "", size=(250, -1))
 
         itemFormula_label = wx.StaticText(self, -1, "Formula:")
-        self.itemFormula_value = mwx.formulaCtrl(self, -1, "", size=(250, -1))
+        self.itemFormula_value = mwx.FormulaCtrl(self, -1, "", size=(250, -1))
         self.itemFormula_value.Bind(wx.EVT_TEXT, self.onFormulaEdited)
 
         itemMoMass_label = wx.StaticText(self, -1, "Mo. mass:")
@@ -205,9 +201,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onGroupSelected(self, evt=None):
+    def onGroupSelected(self, _evt: wx.Event | None = None) -> None:
         """Update items for selected group."""
-
         # get selected group
         group = self.groupName_choice.GetStringSelection()
         if group in libs.compounds:
@@ -221,9 +216,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt: wx.Event) -> None:
         """Update item editor with selected item."""
-
         # get selected item
         name = evt.GetText()
         compound = libs.compounds[self.group][name]
@@ -235,9 +229,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onImport(self, evt):
+    def onImport(self, evt: wx.Event) -> None:
         """Import items from xml library."""
-
         # show open file dialog
         wildcard = "Library files|*.xml;*.XML"
         dlg = wx.FileDialog(
@@ -247,7 +240,7 @@ class dlgCompoundsEditor(wx.Dialog):
             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
         )
         if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
+            path = pathlib.Path(dlg.GetPath())
             dlg.Destroy()
         else:
             dlg.Destroy()
@@ -257,7 +250,7 @@ class dlgCompoundsEditor(wx.Dialog):
         importedItems = self.readLibraryXML(path)
         if not importedItems:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Unrecognized library format.",
                 message="Specified file is not a valid compounds library.",
@@ -267,7 +260,7 @@ class dlgCompoundsEditor(wx.Dialog):
             return
         if importedItems == {}:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="No data to import.",
                 message="Specified library contains no data.",
@@ -277,7 +270,7 @@ class dlgCompoundsEditor(wx.Dialog):
             return
 
         # select groups to import
-        dlg = dlgSelectItemsToImport(self, importedItems)
+        dlg = DlgSelectItemsToImport(self, importedItems)
         if dlg.ShowModal() == wx.ID_OK:
             selected = dlg.selected
             dlg.Destroy()
@@ -296,19 +289,19 @@ class dlgCompoundsEditor(wx.Dialog):
                 title = f'Group entitled "{item}"\nis already in you library. Do you want to replace it?'
                 message = "All compounds within this group will be lost."
                 buttons = [
-                    (ID_dlgReplaceAll, "Replace All", 120, False, 40),
-                    (ID_dlgSkip, "Skip", 80, False, 15),
-                    (ID_dlgReplace, "Replace", 80, True, 0),
+                    (ids.ID_dlgReplaceAll, "Replace All", 120, False, 40),
+                    (ids.ID_dlgSkip, "Skip", 80, False, 15),
+                    (ids.ID_dlgReplace, "Replace", 80, True, 0),
                 ]
-                dlg = mwx.dlgMessage(self, title, message, buttons)
+                dlg = mwx.DlgMessage(self, title, message, buttons)
                 ID = dlg.ShowModal()
-                if ID_dlgSkip == ID:
+                if ids.ID_dlgSkip == ID:
                     continue
-                if ID_dlgReplaceAll == ID:
+                if ids.ID_dlgReplaceAll == ID:
                     replaceAll = True
                     libs.compounds[item] = importedItems[item]
                     selectAfter = item
-                elif ID_dlgReplace == ID:
+                elif ids.ID_dlgReplace == ID:
                     libs.compounds[item] = importedItems[item]
                     selectAfter = item
 
@@ -319,11 +312,10 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onAddGroup(self, evt):
+    def onAddGroup(self, evt: wx.Event) -> None:
         """Add new group."""
-
         # get group name
-        dlg = dlgGroupName(self)
+        dlg = DlgGroupName(self)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -334,7 +326,7 @@ class dlgCompoundsEditor(wx.Dialog):
         # check group name
         if name in libs.compounds:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Group with the same name already exists.",
                 message="Type a different name.",
@@ -353,16 +345,15 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onRenameGroup(self, evt):
+    def onRenameGroup(self, evt: wx.Event) -> None:
         """Rename selected group."""
-
         # check group
         if not self.group:
             wx.Bell()
             return
 
         # get group name
-        dlg = dlgGroupName(self, self.group)
+        dlg = DlgGroupName(self, self.group)
         if dlg.ShowModal() == wx.ID_OK:
             name = dlg.name
             dlg.Destroy()
@@ -375,7 +366,7 @@ class dlgCompoundsEditor(wx.Dialog):
             return
         if name in libs.compounds:
             wx.Bell()
-            dlg = mwx.dlgMessage(
+            dlg = mwx.DlgMessage(
                 self,
                 title="Group with the same name already exists.",
                 message="Type a different name.",
@@ -396,9 +387,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onDeleteGroup(self, evt):
+    def onDeleteGroup(self, evt: wx.Event) -> None:
         """Delete selected group."""
-
         # check group
         if not self.group:
             wx.Bell()
@@ -411,7 +401,7 @@ class dlgCompoundsEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -427,9 +417,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onAddItem(self, evt):
+    def onAddItem(self, evt: wx.Event) -> None:
         """Add/replace item."""
-
         # check group
         if not self.group:
             wx.Bell()
@@ -443,13 +432,15 @@ class dlgCompoundsEditor(wx.Dialog):
         # check name
         if itemData.name in libs.compounds[self.group]:
             wx.Bell()
-            title = "Compound with the same name already exists.\nDo you want to replace it?"
+            title = (
+                "Compound with the same name already exists.\nDo you want to replace it?"
+            )
             message = "Old compound definition will be lost."
             buttons = [
                 (wx.ID_CANCEL, "Cancel", 80, False, 15),
                 (wx.ID_OK, "Replace", 80, True, 0),
             ]
-            dlg = mwx.dlgMessage(self, title, message, buttons)
+            dlg = mwx.DlgMessage(self, title, message, buttons)
             if dlg.ShowModal() != wx.ID_OK:
                 dlg.Destroy()
                 return
@@ -464,9 +455,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onDeleteItem(self, evt):
+    def onDeleteItem(self, evt: wx.Event) -> None:
         """Remove selected items."""
-
         # check group
         if not self.group:
             wx.Bell()
@@ -479,7 +469,7 @@ class dlgCompoundsEditor(wx.Dialog):
             (wx.ID_CANCEL, "Cancel", 80, False, 15),
             (wx.ID_OK, "Delete", 80, True, 0),
         ]
-        dlg = mwx.dlgMessage(self, title, message, buttons)
+        dlg = mwx.DlgMessage(self, title, message, buttons)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
@@ -497,16 +487,15 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def onFormulaEdited(self, evt):
+    def onFormulaEdited(self, evt: wx.Event) -> None:
         """Update formula mass while editing."""
         evt.Skip()
         wx.CallAfter(self.updateFormulaMass)
 
     # ----
 
-    def updateGroups(self):
+    def updateGroups(self) -> None:
         """Update groups combo."""
-
         # clear groups
         self.groupName_choice.Clear()
 
@@ -520,9 +509,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsMap(self):
+    def updateItemsMap(self) -> None:
         """Update items map."""
-
         self.itemsMap = []
 
         # check group
@@ -544,9 +532,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def updateItemsList(self):
+    def updateItemsList(self) -> None:
         """Update items list."""
-
         # clear previous data and set new
         self.updateItemsMap()
         self.itemsList.DeleteAllItems()
@@ -576,15 +563,14 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def updateFormulaMass(self):
+    def updateFormulaMass(self) -> None:
         """Update formula mass."""
-
         # get formula
         formula = self.itemFormula_value.GetValue()
 
         # show formula masses
         try:
-            formula = mspy.compound(formula)
+            formula = mspy.Compound(formula)
             mass = formula.mass()
             self.itemMoMass_value.SetValue(str(mass[0]))
             self.itemAvMass_value.SetValue(str(mass[1]))
@@ -595,9 +581,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def clearEditor(self):
+    def clearEditor(self) -> None:
         """Clear item editor."""
-
         # update editor
         self.itemName_value.SetValue("")
         self.itemDescription_value.SetValue("")
@@ -605,9 +590,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def getItemData(self):
+    def getItemData(self) -> mspy.Compound | bool:
         """Get formated item data."""
-
         # get data
         name = self.itemName_value.GetValue()
         description = self.itemDescription_value.GetValue()
@@ -620,7 +604,7 @@ class dlgCompoundsEditor(wx.Dialog):
 
         # make compound
         try:
-            compound = mspy.compound(formula)
+            compound = mspy.Compound(formula)
             compound.name = name
             compound.description = description
         except Exception:
@@ -631,14 +615,13 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def readLibraryXML(self, path):
+    def readLibraryXML(self, path: pathlib.Path) -> dict[str, dict[str, mspy.Compound]] | bool:
         """Read xml library."""
-
         compounds = {}
 
         # parse XML file
         try:
-            document = xml.dom.minidom.parse(path)
+            document = xml.dom.minidom.parse(str(path))
         except Exception:
             return False
 
@@ -656,7 +639,7 @@ class dlgCompoundsEditor(wx.Dialog):
                     for compoundTag in compoundTags:
                         try:
                             name = compoundTag.getAttribute("name")
-                            compound = mspy.compound(
+                            compound = mspy.Compound(
                                 compoundTag.getAttribute("formula")
                             )
                             compound.description = self._getNodeText(compoundTag)
@@ -668,9 +651,8 @@ class dlgCompoundsEditor(wx.Dialog):
 
     # ----
 
-    def _getNodeText(self, node):
+    def _getNodeText(self, node: xml.dom.minidom.Node) -> str:
         """Get text from node list."""
-
         buff = ""
         for node in node.childNodes:
             if node.nodeType == node.TEXT_NODE:
@@ -681,10 +663,10 @@ class dlgCompoundsEditor(wx.Dialog):
     # ----
 
 
-class dlgGroupName(wx.Dialog):
+class DlgGroupName(wx.Dialog):
     """Set group name."""
 
-    def __init__(self, parent, name=""):
+    def __init__(self, parent: wx.Window | None, name: str = "") -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self, parent, -1, "Group Name", style=wx.DEFAULT_DIALOG_STYLE
@@ -704,9 +686,8 @@ class dlgGroupName(wx.Dialog):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> wx.Sizer:
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.HORIZONTAL)
 
         # make elements
@@ -739,9 +720,8 @@ class dlgGroupName(wx.Dialog):
 
     # ----
 
-    def onOK(self, evt):
+    def onOK(self, evt: wx.Event) -> None:
         """Get name."""
-
         self.name = self.name_value.GetValue()
         if self.name:
             self.EndModal(wx.ID_OK)
@@ -751,10 +731,10 @@ class dlgGroupName(wx.Dialog):
     # ----
 
 
-class dlgSelectItemsToImport(wx.Dialog):
+class DlgSelectItemsToImport(wx.Dialog):
     """Select items to import."""
 
-    def __init__(self, parent, items):
+    def __init__(self, parent: wx.Window | None, items: dict[str, Any]) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -764,8 +744,8 @@ class dlgSelectItemsToImport(wx.Dialog):
         )
 
         self.items = items
-        self.itemsMap = []
-        self.selected = None
+        self.itemsMap: list[tuple[str, int]] = []
+        self.selected: list[str] | None = None
 
         # make GUI
         sizer = self.makeGUI()
@@ -782,9 +762,8 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> wx.Sizer:
         """Make GUI elements."""
-
         # make GUI elements
         self.makeItemsList()
         buttons = self.makeButtons()
@@ -803,9 +782,8 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def makeButtons(self):
+    def makeButtons(self) -> wx.Sizer:
         """Make buttons."""
-
         # make items
         cancel_butt = wx.Button(self, wx.ID_CANCEL, "Cancel")
         import_butt = wx.Button(self, wx.ID_OK, "Import")
@@ -820,11 +798,10 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def makeItemsList(self):
+    def makeItemsList(self) -> None:
         """Make list for items."""
-
         # init list
-        self.itemsList = mwx.sortListCtrl(
+        self.itemsList = mwx.SortListCtrl(
             self, -1, size=(461, 200), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.itemsList.SetFont(wx.SMALL_FONT)
@@ -843,9 +820,8 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def updateItemsList(self):
+    def updateItemsList(self) -> None:
         """Set data to items list."""
-
         # set data map
         self.itemsMap = []
         for _x, item in enumerate(self.items):
@@ -863,17 +839,15 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def onItemActivated(self, evt):
+    def onItemActivated(self, evt: wx.Event) -> None:
         """Import selected item."""
-
         self.selected = self.getSelecedItems()
         self.EndModal(wx.ID_OK)
 
     # ----
 
-    def onImport(self, evt):
+    def onImport(self, evt: wx.Event) -> None:
         """Check selected items and quit."""
-
         # get selection
         self.selected = self.getSelecedItems()
         if self.selected:
@@ -883,9 +857,8 @@ class dlgSelectItemsToImport(wx.Dialog):
 
     # ----
 
-    def getSelecedItems(self):
+    def getSelecedItems(self) -> list[str]:
         """Get selected items."""
-
         # get selected items
         keys = []
         for item in self.itemsList.getSelected():

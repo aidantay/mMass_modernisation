@@ -24,16 +24,15 @@ from mmass.mspy import plot
 from . import config, images, mwx
 
 # load modules
-from .ids import *
 
 # FLOATING PANEL WITH MASS DEFECT PLOT
 # ------------------------------------
 
 
-class panelMassDefectPlot(wx.Frame):
+class PanelMassDefectPlot(wx.Frame):
     """Mass defect plot tool."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Frame.__init__(
             self,
             parent,
@@ -53,9 +52,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make panel gui."""
-
         # make toolbar
         toolbar = self.makeToolbar()
         controlbar = self.makeControlbar()
@@ -79,9 +77,8 @@ class panelMassDefectPlot(wx.Frame):
 
     def makeToolbar(self):
         """Make toolbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrToolbar"], size=(-1, mwx.TOOLBAR_HEIGHT)
         )
 
@@ -117,7 +114,7 @@ class panelMassDefectPlot(wx.Frame):
 
         kendrickFormula_label = wx.StaticText(panel, -1, "Kendrick formula:")
         kendrickFormula_label.SetFont(wx.SMALL_FONT)
-        self.kendrickFormula_value = mwx.formulaCtrl(
+        self.kendrickFormula_value = mwx.FormulaCtrl(
             panel, -1, config.massDefectPlot["kendrickFormula"], size=(80, -1)
         )
 
@@ -156,9 +153,8 @@ class panelMassDefectPlot(wx.Frame):
 
     def makeControlbar(self):
         """Make controlbar."""
-
         # init toolbar
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrControlbar"], size=(-1, mwx.CONTROLBAR_HEIGHT)
         )
 
@@ -172,7 +168,7 @@ class panelMassDefectPlot(wx.Frame):
             -1,
             str(config.massDefectPlot["relIntCutoff"] * 100),
             size=(50, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         self.relIntCutoff_value.SetFont(wx.SMALL_FONT)
 
@@ -219,14 +215,13 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def makePlotCanvas(self):
+    def makePlotCanvas(self) -> None:
         """Make plot canvas and set defalt parameters."""
-
         # init canvas
-        self.plotCanvas = plot.canvas(
+        self.plotCanvas = plot.Canvas(
             self, size=(650, 300), style=mwx.PLOTCANVAS_STYLE_PANEL
         )
-        self.plotCanvasContainer = plot.container([])
+        self.plotCanvasContainer = plot.Container([])
 
         # set default params
         self.plotCanvas.setProperties(xLabel="m/z")
@@ -264,17 +259,15 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def onClose(self, evt):
+    def onClose(self, evt) -> None:
         """Destroy this frame."""
-
         # close self
         self.Destroy()
 
     # ----
 
-    def onPlot(self, evt=None):
+    def onPlot(self, evt=None) -> None:
         """Calculate and show mass defect plot."""
-
         # clear previous data
         self.plotCanvasContainer.empty()
 
@@ -294,9 +287,9 @@ class panelMassDefectPlot(wx.Frame):
                     buff.append((item.mz, item.charge))
 
             points = self.makeDataPoints(
-                mspy.peaklist(buff), self.currentDocument.spectrum.polarity
+                mspy.Peaklist(buff), self.currentDocument.spectrum.polarity
             )
-            obj = plot.points(
+            obj = plot.Points(
                 points, pointColour=(255, 0, 0), showPoints=True, showLines=False
             )
             self.plotCanvasContainer.append(obj)
@@ -308,7 +301,7 @@ class panelMassDefectPlot(wx.Frame):
                     points = self.makeDataPoints(
                         docData.spectrum.peaklist, docData.spectrum.polarity
                     )
-                    obj = plot.points(
+                    obj = plot.Points(
                         points,
                         pointColour=docData.colour,
                         showPoints=True,
@@ -322,7 +315,7 @@ class panelMassDefectPlot(wx.Frame):
                 self.currentDocument.spectrum.peaklist,
                 self.currentDocument.spectrum.polarity,
             )
-            obj = plot.points(
+            obj = plot.Points(
                 points, pointColour=(0, 255, 0), showPoints=True, showLines=False
             )
             self.plotCanvasContainer.append(obj)
@@ -333,9 +326,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def onPlotCanvasLMU(self, evt):
+    def onPlotCanvasLMU(self, evt) -> None:
         """Highlight selected point in spectrum."""
-
         # check document
         if self.currentDocument is None:
             evt.Skip()
@@ -356,9 +348,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def onAxisChanged(self, evt=None):
+    def onAxisChanged(self, evt=None) -> None:
         """Enable / disable Kendrick formula field."""
-
         # get current selection
         yAxis = self.yAxis_choice.GetStringSelection()
 
@@ -374,9 +365,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def onShowNotations(self, evt):
+    def onShowNotations(self, evt) -> None:
         """Show / hide annotated points."""
-
         # get value
         config.massDefectPlot["showNotations"] = self.showNotations_check.GetValue()
 
@@ -385,9 +375,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def onShowAllDocuments(self, evt):
+    def onShowAllDocuments(self, evt) -> None:
         """Show current document or all visible."""
-
         # get value
         config.massDefectPlot["showAllDocuments"] = (
             self.showAllDocuments_check.GetValue()
@@ -398,9 +387,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set current document."""
-
         # set new document
         self.currentDocument = document
 
@@ -409,9 +397,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def getParams(self):
+    def getParams(self) -> bool | None:
         """Get all params from dialog."""
-
         # try to get values
         try:
             choices = ["fraction", "standard", "relative", "kendrick"]
@@ -433,22 +420,21 @@ class panelMassDefectPlot(wx.Frame):
             )
 
             formula = self.kendrickFormula_value.GetValue()
-            cmpd = mspy.compound(formula)
+            cmpd = mspy.Compound(formula)
             config.massDefectPlot["kendrickFormula"] = str(formula)
             if config.massDefectPlot["yAxis"] == "kendrick" and cmpd.mass(0) == 0:
                 raise ValueError
 
             return True
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
     # ----
 
-    def updateDocuments(self):
+    def updateDocuments(self) -> None:
         """Reload all visible documents."""
-
         # skip if current document only is shown
         if not config.massDefectPlot["showAllDocuments"]:
             return
@@ -458,9 +444,8 @@ class panelMassDefectPlot(wx.Frame):
 
     # ----
 
-    def updatePlotCanvasLabels(self):
+    def updatePlotCanvasLabels(self) -> None:
         """Update plot canvas axes labels."""
-
         xLabel = "m/z"
         yLabel = "mass defect"
 
@@ -489,7 +474,6 @@ class panelMassDefectPlot(wx.Frame):
 
     def makeDataPoints(self, peaklist, polarity=1):
         """Make plot points for spectrum peaklist."""
-
         # get spectrum polarity
         if not polarity:
             polarity = 1
@@ -518,11 +502,10 @@ class panelMassDefectPlot(wx.Frame):
 
     def calcDataPoints(self, peaks, polarity=1):
         """Calculate requested mass and mass defect."""
-
         buff = []
 
         # init Kendrick formula
-        kendrickFormula = mspy.compound(config.massDefectPlot["kendrickFormula"])
+        kendrickFormula = mspy.Compound(config.massDefectPlot["kendrickFormula"])
 
         # calculate data points
         for peak in peaks:

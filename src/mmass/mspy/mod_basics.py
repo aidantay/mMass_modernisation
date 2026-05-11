@@ -54,11 +54,11 @@ ELEMENT_PATTERN = re.compile(
 
 def delta(measuredMass, countedMass, units="ppm"):
     """Calculate error between measured Mass and counted Mass in specified units.
+
     measuredMass (float) - measured mass
     countedMass (float) - counted mass
     units (Da, ppm or %) - error units
     """
-
     if units == "ppm":
         return (measuredMass - countedMass) / countedMass * 1000000
     if units == "Da":
@@ -73,6 +73,7 @@ def delta(measuredMass, countedMass, units="ppm"):
 
 def mz(mass, charge, currentCharge=0, agentFormula="H", agentCharge=1, massType=0):
     """Calculate m/z value for given mass and charge.
+
     mass (tuple of (Mo, Av) or float) - current mass
     charge (int) - final charge of ion
     currentCharge (int) - current mass charge
@@ -80,13 +81,12 @@ def mz(mass, charge, currentCharge=0, agentFormula="H", agentCharge=1, massType=
     agentCharge (int) - charging agent unit charge
     massType (0 or 1) - used mass type if mass value is float, 0 = monoisotopic, 1 = average
     """
-
     # check agent formula
     if agentFormula != "e":
         from . import obj_compound
 
-        if not isinstance(agentFormula, obj_compound.compound):
-            agentFormula = obj_compound.compound(agentFormula)
+        if not isinstance(agentFormula, obj_compound.Compound):
+            agentFormula = obj_compound.Compound(agentFormula)
 
     # get agent mass
     if agentFormula == "e":
@@ -124,12 +124,12 @@ def mz(mass, charge, currentCharge=0, agentFormula="H", agentCharge=1, massType=
 
 def md(mass, mdType="standard", kendrickFormula="CH2", rounding="floor"):
     """Calculate mass defect for given monoisotopic mass.
+
     mass (float) - monoisotopic mass
     mdType (fraction | standard | relative | kendrick) - mass defect type
     kendrickFormula (str) - kendrick group formula
     rounding (floor | ceil | round) - nominal mass rounding function
     """
-
     # return fractional part
     if mdType == "fraction":
         return mass - math.floor(mass)
@@ -146,8 +146,8 @@ def md(mass, mdType="standard", kendrickFormula="CH2", rounding="floor"):
     if mdType == "kendrick":
         from . import obj_compound
 
-        if not isinstance(kendrickFormula, obj_compound.compound):
-            kendrickFormula = obj_compound.compound(kendrickFormula)
+        if not isinstance(kendrickFormula, obj_compound.Compound):
+            kendrickFormula = obj_compound.Compound(kendrickFormula)
 
         kendrickF = kendrickFormula.nominalmass() / kendrickFormula.mass(0)
 
@@ -162,10 +162,10 @@ def md(mass, mdType="standard", kendrickFormula="CH2", rounding="floor"):
 
 def nominalmass(mass, rounding="floor"):
     """Calculate for given monoisotopic mass and rounding function.
+
     mass (float) - monoisotopic mass
     rounding (floor | ceil | round) - nominal mass rounding function
     """
-
     if rounding == "floor":
         return math.floor(mass)
 
@@ -188,14 +188,14 @@ def nominalmass(mass, rounding="floor"):
 
 def rdbe(compound):
     """Get RDBE (Range or Double Bonds Equivalents) of a given compound.
-    compound (str or mspy.compound) - compound
-    """
 
+    Compound (str or mspy.compound) - compound
+    """
     # check compound
     from . import blocks, obj_compound
 
-    if not isinstance(compound, obj_compound.compound):
-        compound = obj_compound.compound(compound)
+    if not isinstance(compound, obj_compound.Compound):
+        compound = obj_compound.Compound(compound)
 
     # get composition
     comp = compound.composition()
@@ -228,22 +228,22 @@ def frules(
     HC=(0.1, 3.0),
     NOPSC=(4, 3, 2, 3),
     RDBE=(-1, 40),
-):
+) -> bool:
     """Check formula rules for a given compound.
-    compound (str or mspy.compound) - compound
+
+    Compound (str or mspy.compound) - compound
     rules (list of str) - rules to be checked
     HC (tuple) - H/C limits
     NOPSC (tuple) - NOPS/C max values
     RDBE (tuple) - RDBE limits
     """
-
     # check compound
     if rules is None:
         rules = ["HC", "NOPSC", "NOPS", "RDBE", "RDBEInt"]
     from . import obj_compound
 
-    if not isinstance(compound, obj_compound.compound):
-        compound = obj_compound.compound(compound)
+    if not isinstance(compound, obj_compound.Compound):
+        compound = obj_compound.Compound(compound)
 
     # get element counts
     countC = float(compound.count("C", groupIsotopes=True))
@@ -282,40 +282,51 @@ def frules(
         return False
 
     # check NOPS all > 1 rule
-    if "NOPS" in rules and (countN > 1 and countO > 1 and countP > 1 and countS > 1):
-        if countN >= 10 or countO >= 20 or countP >= 4 or countS >= 3:
-            return False
+    if (
+        "NOPS" in rules
+        and (countN > 1 and countO > 1 and countP > 1 and countS > 1)
+        and (countN >= 10 or countO >= 20 or countP >= 4 or countS >= 3)
+    ):
+        return False
 
     # check NOP all > 3 rule
-    if "NOPS" in rules and (countN > 3 and countO > 3 and countP > 3):
-        if countN >= 11 or countO >= 22 or countP >= 6:
-            return False
+    if (
+        "NOPS" in rules
+        and (countN > 3 and countO > 3 and countP > 3)
+        and (countN >= 11 or countO >= 22 or countP >= 6)
+    ):
+        return False
 
     # check NOS all > 1 rule
-    if "NOPS" in rules and (countN > 1 and countO > 1 and countS > 1):
-        if countN >= 19 or countO >= 14 or countS >= 8:
-            return False
+    if (
+        "NOPS" in rules
+        and (countN > 1 and countO > 1 and countS > 1)
+        and (countN >= 19 or countO >= 14 or countS >= 8)
+    ):
+        return False
 
     # check NPS all > 1 rule
-    if "NOPS" in rules and (countN > 1 and countP > 1 and countS > 1):
-        if countN >= 3 or countP >= 3 or countS >= 3:
-            return False
+    if (
+        "NOPS" in rules
+        and (countN > 1 and countP > 1 and countS > 1)
+        and (countN >= 3 or countP >= 3 or countS >= 3)
+    ):
+        return False
 
     # check OPS all > 1 rule
-    if "NOPS" in rules and (countO > 1 and countP > 1 and countS > 1):
-        if countO >= 14 or countP >= 3 or countS >= 3:
-            return False
+    if (
+        "NOPS" in rules
+        and (countO > 1 and countP > 1 and countS > 1)
+        and (countO >= 14 or countP >= 3 or countS >= 3)
+    ):
+        return False
 
     # check RDBE range
     if "RDBE" in rules and (rdbeValue < RDBE[0] or rdbeValue > RDBE[1]):
         return False
 
-    # check integer RDBE
-    if "RDBEInt" in rules and rdbeValue % 1:
-        return False
-
-    # all ok
-    return True
+    # check integer RDBE and return
+    return not ("RDBEInt" in rules and rdbeValue % 1)
 
 
 # ----

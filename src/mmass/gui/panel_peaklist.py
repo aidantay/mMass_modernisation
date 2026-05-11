@@ -20,20 +20,18 @@ import wx
 
 from mmass import mspy
 
-from . import config, doc, images, mwx
-from .dlg_notation import dlgNotation
-
 # load modules
-from .ids import *
+from . import config, doc, ids, images, mwx
+from .dlg_notation import DlgNotation
 
 # PEAKLIST PANEL
 # --------------
 
 
-class panelPeaklist(wx.Panel):
+class PanelPeaklist(wx.Panel):
     """Make peaklist panel."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Panel.__init__(
             self, parent, -1, size=(150, -1), style=wx.NO_FULL_REPAINT_ON_RESIZE
         )
@@ -49,9 +47,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> None:
         """Make GUI elements."""
-
         # make peaklist list
         self.makePeakList()
 
@@ -78,9 +75,8 @@ class panelPeaklist(wx.Panel):
 
     def makeToolbar(self):
         """Make bottom toolbar."""
-
         # init toolbar panel
-        panel = mwx.bgrPanel(
+        panel = mwx.BgrPanel(
             self, -1, images.lib["bgrBottombar"], size=(-1, mwx.BOTTOMBAR_HEIGHT)
         )
 
@@ -163,11 +159,10 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def makePeakList(self):
+    def makePeakList(self) -> None:
         """Make peaklist list."""
-
         # init peaklist
-        self.peakList = mwx.sortListCtrl(
+        self.peakList = mwx.SortListCtrl(
             self, -1, size=(201, -1), style=mwx.LISTCTRL_STYLE_MULTI
         )
         self.peakList.SetFont(wx.SMALL_FONT)
@@ -189,14 +184,13 @@ class panelPeaklist(wx.Panel):
         self.makePeakListColumns()
 
         # set DnD
-        dropTarget = fileDropTarget(self.parent.onDocumentDropped)
+        dropTarget = FileDropTarget(self.parent.onDocumentDropped)
         self.peakList.SetDropTarget(dropTarget)
 
     # ----
 
-    def makePeakListColumns(self):
+    def makePeakListColumns(self) -> None:
         """Make peaklist columns according to config."""
-
         # delete current columns
         self.peakList.deleteColumns()
 
@@ -265,9 +259,8 @@ class panelPeaklist(wx.Panel):
 
     def makeEditor(self):
         """Make panel for peak editing."""
-
         # init panel
-        panel = mwx.bgrPanel(self, -1, images.lib["bgrPeakEditor"])
+        panel = mwx.BgrPanel(self, -1, images.lib["bgrPeakEditor"])
 
         # make elements
         peakMz_label = wx.StaticText(panel, -1, "m/z:")
@@ -276,7 +269,7 @@ class panelPeaklist(wx.Panel):
             -1,
             "",
             size=(80, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         peakMz_label.SetFont(wx.SMALL_FONT)
         self.peakMz_value.SetFont(wx.SMALL_FONT)
@@ -287,7 +280,7 @@ class panelPeaklist(wx.Panel):
             -1,
             "",
             size=(80, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         peakAi_label.SetFont(wx.SMALL_FONT)
         self.peakAi_value.SetFont(wx.SMALL_FONT)
@@ -299,7 +292,7 @@ class panelPeaklist(wx.Panel):
             "",
             size=(80, mwx.SMALL_TEXTCTRL_HEIGHT),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         peakBase_label.SetFont(wx.SMALL_FONT)
         self.peakBase_value.SetFont(wx.SMALL_FONT)
@@ -310,7 +303,7 @@ class panelPeaklist(wx.Panel):
             -1,
             "",
             size=(80, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         peakSN_label.SetFont(wx.SMALL_FONT)
         self.peakSN_value.SetFont(wx.SMALL_FONT)
@@ -321,7 +314,7 @@ class panelPeaklist(wx.Panel):
             -1,
             "",
             size=(80, mwx.SMALL_TEXTCTRL_HEIGHT),
-            validator=mwx.validator("int"),
+            validator=mwx.Validator("int"),
         )
         peakCharge_label.SetFont(wx.SMALL_FONT)
         self.peakCharge_value.SetFont(wx.SMALL_FONT)
@@ -333,7 +326,7 @@ class panelPeaklist(wx.Panel):
             "",
             size=(80, mwx.SMALL_TEXTCTRL_HEIGHT),
             style=wx.TE_PROCESS_ENTER,
-            validator=mwx.validator("floatPos"),
+            validator=mwx.Validator("floatPos"),
         )
         peakFwhm_label.SetFont(wx.SMALL_FONT)
         self.peakFwhm_value.SetFont(wx.SMALL_FONT)
@@ -407,9 +400,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onItemSelected(self, evt):
+    def onItemSelected(self, evt) -> None:
         """Highlight selected peak in the spectrum and refresh peak editor."""
-
         evt.Skip()
 
         # get selected peak
@@ -426,15 +418,14 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onItemActivated(self, evt):
+    def onItemActivated(self, evt) -> None:
         """Create annotation for activated peak."""
         self.onAnnotate()
 
     # ----
 
-    def onItemRMU(self, evt):
+    def onItemRMU(self, evt) -> None:
         """Show item pop-up menu."""
-
         evt.Skip()
 
         # check document and selected peak
@@ -443,14 +434,14 @@ class panelPeaklist(wx.Panel):
 
         # popup menu
         menu = wx.Menu()
-        menu.Append(ID_peaklistAnnotate, "Annotate Peak...", "")
+        menu.Append(ids.ID_peaklistAnnotate, "Annotate peak...", "")
         menu.AppendSeparator()
-        menu.Append(ID_peaklistSendToMassToFormula, "Send to Mass to Formula...", "")
+        menu.Append(ids.ID_peaklistSendToMassToFormula, "Send to Mass to Formula...", "")
 
         # bind events
-        self.Bind(wx.EVT_MENU, self.onAnnotate, id=ID_peaklistAnnotate)
+        self.Bind(wx.EVT_MENU, self.onAnnotate, id=ids.ID_peaklistAnnotate)
         self.Bind(
-            wx.EVT_MENU, self.onSendToMassToFormula, id=ID_peaklistSendToMassToFormula
+            wx.EVT_MENU, self.onSendToMassToFormula, id=ids.ID_peaklistSendToMassToFormula
         )
 
         # show menu
@@ -460,90 +451,89 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onColumnRMU(self, evt):
+    def onColumnRMU(self, evt) -> None:
         """Show column popup menu."""
-
         menu = wx.Menu()
-        menu.Append(ID_viewPeaklistColumnMz, "m/z", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnAi, "a.i", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnInt, "Intensity", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnBase, "Baseline", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnRel, "Rel. Intensity", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnSn, "s/n", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnZ, "Charge", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnMass, "Mass", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnFwhm, "FWHM", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnResol, "Resolution", "", wx.ITEM_CHECK)
-        menu.Append(ID_viewPeaklistColumnGroup, "Group", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnMz, "m/z", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnAi, "a.i", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnInt, "Intensity", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnBase, "Baseline", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnRel, "Rel. Intensity", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnSn, "s/n", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnZ, "Charge", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnMass, "Mass", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnFwhm, "FWHM", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnResol, "Resolution", "", wx.ITEM_CHECK)
+        menu.Append(ids.ID_viewPeaklistColumnGroup, "Group", "", wx.ITEM_CHECK)
 
         menu.Check(
-            ID_viewPeaklistColumnMz, bool("mz" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnMz, bool("mz" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnAi, bool("ai" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnAi, bool("ai" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnInt, bool("int" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnInt, bool("int" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnBase, bool("base" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnBase, bool("base" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnRel, bool("rel" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnRel, bool("rel" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnSn, bool("sn" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnSn, bool("sn" in config.main["peaklistColumns"])
         )
-        menu.Check(ID_viewPeaklistColumnZ, bool("z" in config.main["peaklistColumns"]))
+        menu.Check(ids.ID_viewPeaklistColumnZ, bool("z" in config.main["peaklistColumns"]))
         menu.Check(
-            ID_viewPeaklistColumnMass, bool("mass" in config.main["peaklistColumns"])
-        )
-        menu.Check(
-            ID_viewPeaklistColumnFwhm, bool("fwhm" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnMass, bool("mass" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnResol, bool("resol" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnFwhm, bool("fwhm" in config.main["peaklistColumns"])
         )
         menu.Check(
-            ID_viewPeaklistColumnGroup, bool("group" in config.main["peaklistColumns"])
+            ids.ID_viewPeaklistColumnResol, bool("resol" in config.main["peaklistColumns"])
+        )
+        menu.Check(
+            ids.ID_viewPeaklistColumnGroup, bool("group" in config.main["peaklistColumns"])
         )
 
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnMz
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnMz
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnAi
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnAi
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnInt
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnInt
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnBase
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnBase
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnRel
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnRel
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnSn
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnSn
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnZ
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnZ
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnMass
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnMass
         )
         self.Bind(
-            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ID_viewPeaklistColumnFwhm
+            wx.EVT_MENU, self.parent.onViewPeaklistColumns, id=ids.ID_viewPeaklistColumnFwhm
         )
         self.Bind(
             wx.EVT_MENU,
             self.parent.onViewPeaklistColumns,
-            id=ID_viewPeaklistColumnResol,
+            id=ids.ID_viewPeaklistColumnResol,
         )
         self.Bind(
             wx.EVT_MENU,
             self.parent.onViewPeaklistColumns,
-            id=ID_viewPeaklistColumnGroup,
+            id=ids.ID_viewPeaklistColumnGroup,
         )
 
         self.PopupMenu(menu)
@@ -552,9 +542,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onListKey(self, evt):
+    def onListKey(self, evt) -> None:
         """Key pressed."""
-
         # get key
         key = evt.GetKeyCode()
 
@@ -579,9 +568,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onAdd(self, evt):
+    def onAdd(self, evt) -> None:
         """Plus button pressed."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -598,9 +586,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onDelete(self, evt):
+    def onDelete(self, evt) -> None:
         """Minus button pressed."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -627,9 +614,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onAnnotate(self, evt=None):
+    def onAnnotate(self, evt=None) -> None:
         """Annotate selected peak."""
-
         # check document and selected peak
         if self.currentDocument is None or self.selectedPeak is None:
             wx.Bell()
@@ -637,12 +623,12 @@ class panelPeaklist(wx.Panel):
 
         # make annotation
         peak = self.currentDocument.spectrum.peaklist[self.selectedPeak]
-        annot = doc.annotation(
+        annot = doc.Annotation(
             label="", mz=peak.mz, ai=peak.ai, base=peak.base, charge=peak.charge
         )
 
         # get annotation label
-        dlg = dlgNotation(self.parent, annot, button="Add")
+        dlg = DlgNotation(self.parent, annot, button="Add")
         if dlg.ShowModal() == wx.ID_OK:
             dlg.Destroy()
         else:
@@ -656,9 +642,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onEdit(self, evt):
+    def onEdit(self, evt) -> None:
         """Show / hide peak editing panel."""
-
         # hide peak editing panel
         if self.mainSizer.IsShown(1):
             self.editPeak_butt.SetBitmapLabel(images.lib["peaklistEditorOff"])
@@ -673,9 +658,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onDeleteSelected(self, evt=None):
+    def onDeleteSelected(self, evt=None) -> None:
         """Delete selected peaks."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -693,16 +677,15 @@ class panelPeaklist(wx.Panel):
 
     # ---
 
-    def onDeleteByThreshold(self, evt=None):
+    def onDeleteByThreshold(self, evt=None) -> None:
         """Delete peaks by selected threshold."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
             return
 
         # show threshold dialog
-        dlg = dlgThreshold(self.parent)
+        dlg = DlgThreshold(self.parent)
         if dlg.ShowModal() == wx.ID_OK:
             threshold, thresholdType = dlg.getData()
             dlg.Destroy()
@@ -752,9 +735,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onDeleteAll(self, evt=None):
+    def onDeleteAll(self, evt=None) -> None:
         """Delete all peaks."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -767,9 +749,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onAddPeak(self, evt):
+    def onAddPeak(self, evt) -> None:
         """Get peak data and add peak."""
-
         # check document
         if self.currentDocument is None:
             wx.Bell()
@@ -787,9 +768,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onReplacePeak(self, evt):
+    def onReplacePeak(self, evt) -> None:
         """Get peak data and refresh current peak."""
-
         # check selection
         if self.selectedPeak is None:
             wx.Bell()
@@ -804,9 +784,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def onSendToMassToFormula(self, evt=None):
+    def onSendToMassToFormula(self, evt=None) -> None:
         """Send selected peak to mass to formula tool."""
-
         # check document and selected peak
         if self.currentDocument is None or self.selectedPeak is None:
             wx.Bell()
@@ -820,9 +799,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def setData(self, document):
+    def setData(self, document) -> None:
         """Set new document."""
-
         # set new data
         self.currentDocument = document
 
@@ -831,18 +809,16 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def updatePeaklistColumns(self):
+    def updatePeaklistColumns(self) -> None:
         """Set new peaklist columns and update."""
-
         self.makePeakListColumns()
         self.Layout()
         self.updatePeakList()
 
     # ----
 
-    def updatePeakList(self):
+    def updatePeakList(self) -> None:
         """Refresh peaklist."""
-
         # clear previous data
         self.peakList.DeleteAllItems()
         self.selectedPeak = None
@@ -856,7 +832,7 @@ class panelPeaklist(wx.Panel):
             return
 
         # update peaks count
-        count = "%d" % len(self.currentDocument.spectrum.peaklist)
+        count = f"{len(self.currentDocument.spectrum.peaklist)}"
         if count != "0":
             self.peaksCount.SetLabel(count)
         else:
@@ -910,9 +886,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def updatePeakListItem(self, row, item, insert=False):
+    def updatePeakListItem(self, row, item, insert=False) -> None:
         """Refresh item data in the list."""
-
         # set formats
         mzFormat = "%0." + repr(config.main["mzDigits"]) + "f"
         intFormat = "%0." + repr(config.main["intDigits"]) + "f"
@@ -971,9 +946,8 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def updatePeakEditor(self, peak=None):
+    def updatePeakEditor(self, peak=None) -> None:
         """Refresh peak editing panel."""
-
         # empty data
         self.peakMz_value.SetValue("")
         self.peakAi_value.SetValue("")
@@ -1008,7 +982,6 @@ class panelPeaklist(wx.Panel):
 
     def getPeakEditorData(self):
         """Get data of edited peak."""
-
         try:
             # get data
             mz = self.peakMz_value.GetValue()
@@ -1041,7 +1014,7 @@ class panelPeaklist(wx.Panel):
             isotope = 0 if monoisotope else None
 
             # make peak
-            return mspy.peak(
+            return mspy.Peak(
                 mz=mz,
                 ai=ai,
                 base=base,
@@ -1052,7 +1025,7 @@ class panelPeaklist(wx.Panel):
                 group=group,
             )
 
-        except:
+        except Exception:
             wx.Bell()
             return False
 
@@ -1060,7 +1033,6 @@ class panelPeaklist(wx.Panel):
 
     def getSelectedPeaks(self):
         """Get selected peaks."""
-
         # get peaklist
         peaklist = []
         for item in self.peakList.getSelected():
@@ -1073,16 +1045,15 @@ class panelPeaklist(wx.Panel):
 
     # ----
 
-    def copyToClipboard(self):
+    def copyToClipboard(self) -> None:
         """Copy current selection to clipboard."""
-
         # get selected
         selection = self.peakList.getSelected()
         if not selection:
             return
 
         # show copy dialog
-        dlg = dlgCopy(self.parent)
+        dlg = DlgCopy(self.parent)
         if dlg.ShowModal() == wx.ID_OK:
             dlg.getData()
             dlg.Destroy()
@@ -1134,10 +1105,10 @@ class panelPeaklist(wx.Panel):
     # ----
 
 
-class dlgThreshold(wx.Dialog):
+class DlgThreshold(wx.Dialog):
     """Set threshold."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -1162,13 +1133,12 @@ class dlgThreshold(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.VERTICAL)
 
         # make elements
         threshold_label = wx.StaticText(self, -1, "Minimal value:")
         self.threshold_value = wx.TextCtrl(
-            self, -1, "", size=(150, -1), validator=mwx.validator("floatPos")
+            self, -1, "", size=(150, -1), validator=mwx.Validator("floatPos")
         )
         self.threshold_value.Bind(wx.EVT_TEXT, self.onChange)
 
@@ -1214,20 +1184,18 @@ class dlgThreshold(wx.Dialog):
 
     # ----
 
-    def onChange(self, evt):
+    def onChange(self, evt) -> None:
         """Check data."""
-
         # get data
         try:
             self.threshold = float(self.threshold_value.GetValue())
-        except:
+        except Exception:
             self.threshold = None
 
     # ----
 
-    def onDelete(self, evt):
+    def onDelete(self, evt) -> None:
         """Delete."""
-
         # check value and end
         if self.threshold is not None:
             self.EndModal(wx.ID_OK)
@@ -1243,10 +1211,10 @@ class dlgThreshold(wx.Dialog):
     # ----
 
 
-class dlgCopy(wx.Dialog):
+class DlgCopy(wx.Dialog):
     """Set coumns to copy."""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Dialog.__init__(
             self,
             parent,
@@ -1270,7 +1238,6 @@ class dlgCopy(wx.Dialog):
 
     def makeGUI(self):
         """Make GUI elements."""
-
         staticSizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, ""), wx.VERTICAL)
 
         # make elements
@@ -1364,9 +1331,8 @@ class dlgCopy(wx.Dialog):
 
     # ----
 
-    def getData(self):
+    def getData(self) -> None:
         """Set selected columns to export presets."""
-
         # get data
         config.export["peaklistColumns"] = []
         if self.peaklistColumnMz_check.IsChecked():
@@ -1395,16 +1361,16 @@ class dlgCopy(wx.Dialog):
     # ----
 
 
-class fileDropTarget(wx.FileDropTarget):
+class FileDropTarget(wx.FileDropTarget):
     """Generic drop target for files."""
 
-    def __init__(self, fn):
+    def __init__(self, fn) -> None:
         wx.FileDropTarget.__init__(self)
         self.fn = fn
 
     # ----
 
-    def OnDropFiles(self, x, y, paths):
+    def OnDropFiles(self, x, y, paths) -> None:
         """Open dropped files."""
         self.fn(paths=paths)
 

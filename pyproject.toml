@@ -16,6 +16,20 @@ dependencies = [
     "wxpython>=4.2",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "hypothesis>=6.152.5",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
+    "pytest-randomly>=3.15.0",
+    "pytest-timeout>=2.4.0",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.15.13",
+    "mypy>=2.0.0",
+    "types-setuptools>=82.0.0.20260508",
+]
+
 [tool.setuptools]
 include-package-data = true
 
@@ -35,30 +49,35 @@ select = [
     "E",    # pycodestyle errors
     "W",    # pycodestyle warnings
     "F",    # pyflakes
+    "D",    # pydocstyle
     "I",    # isort
     "B",    # flake8-bugbear
     "C4",   # flake8-comprehensions
+    "PT",   # flake8-pytest-style
+    "RET",  # flake8-return
+    "ANN",  # flake8-annotations
     "UP",   # pyupgrade
     "ARG",  # Clean signatures
     "SIM",  # Simplified logic
     "TCH",  # Optimized type imports
     "PTH",  # Modern path handling (i.e., use pathlib instead of os.path)
     "RUF",  # Ruff-specific power rules
-    "PT",   # flake8-pytest-style
-    "RET",  # flake8-return
     "N",    # pep8-naming
 ]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex (we'll address this gradually)
-    "B904",  # raise from None (legacy code compatibility)
-    "N802",  # function name should be lowercase
-    "N803",  # argument name should be lowercase
-    "N806",  # variable in function should be lowercase
-    "N815",  # variable in class scope should not be mixedCase
-    "N816",  # variable in global scope should not be mixedCase
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",   # Allow 'assert' in tests
+    "ARG",    # Unused argument (common for pytest fixtures)
+    "ANN",    # Missing type hints
+    "E501",   # Long lines
 ]
+"**/__init__.py" = [
+    "F401"  # Allow unused imports in __init__.py (common for API exports)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # Options: "google", "numpy", "pep257"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -78,3 +97,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true

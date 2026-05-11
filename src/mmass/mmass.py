@@ -16,37 +16,29 @@
 # -------------------------------------------------------------------------
 
 # load libs
-import os
-import sys
-
-# Add 'src' to sys.path to allow absolute imports from 'mmass' package
-src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
 import contextlib
 import socket
 import socketserver
+import sys
 import threading
 
 import wx
 
 # load modules
 from mmass.gui import config, mwx
-from mmass.gui.main_frame import mainFrame
+from mmass.gui.main_frame import MainFrame
 
 
-class mMass(wx.App):
+class MMass(wx.App):
     """Run mMass run..."""
 
-    def OnInit(self):
+    def OnInit(self) -> bool:
         """Init application."""
-
         # set some special wx params
         mwx.appInit()
 
         # init frame
-        self.frame = mainFrame(None, -1, "mMass")
+        self.frame = MainFrame(None, -1, "mMass")
 
         # bind main app frame to server
         if server is not None:
@@ -65,26 +57,23 @@ class mMass(wx.App):
 
     # ----
 
-    def OnExit(self):
+    def OnExit(self) -> int:
         """Exit application."""
-
         # delete instance lock file
         # del self.instance
         return 0
 
     # ----
 
-    def MacOpenFile(self, path):
-        """ "Enable drag/drop under Mac."""
-
+    def MacOpenFile(self, path) -> None:
+        """Enable drag/drop under Mac."""
         if path != "mmass.py":
             self.frame.onDocumentOpen(path=path)
 
     # ----
 
-    def MacReopenApp(self):
+    def MacReopenApp(self) -> None:
         """Called when the doc icon is clicked."""
-
         with contextlib.suppress(BaseException):
             self.GetTopWindow().Raise()
 
@@ -94,7 +83,7 @@ class mMass(wx.App):
 class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     """TCP communication server."""
 
-    def __init__(self, server_address, RequestHandlerClass):
+    def __init__(self, server_address, RequestHandlerClass) -> None:
         self.allow_reuse_address = True
         self.stopped = False
         socketserver.TCPServer.__init__(
@@ -103,13 +92,13 @@ class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
     # ----
 
-    def serve_forever(self):
+    def serve_forever(self) -> None:
         while not self.stopped:
             self.handle_request()
 
     # ----
 
-    def force_stop(self):
+    def force_stop(self) -> None:
         self.server_close()
         self.stopped = True
 
@@ -119,7 +108,7 @@ class TCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class TCPServerHandler(socketserver.BaseRequestHandler):
     """TCP communication server handler."""
 
-    def handle(self):
+    def handle(self) -> None:
         # get command
         command = self.request.recv(1024)
         if isinstance(command, bytes):
@@ -169,10 +158,10 @@ if __name__ == "__main__":
         server_thread.daemon = True
         server_thread.start()
 
-        app = mMass(0)
+        app = MMass(0)
         app.MainLoop()
 
     # skip server
     else:
-        app = mMass(0)
+        app = MMass(0)
         app.MainLoop()

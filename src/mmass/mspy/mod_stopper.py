@@ -16,48 +16,48 @@
 # -------------------------------------------------------------------------
 
 # stop exception
-class ForceQuit(Exception):
+class ForceQuitError(Exception):
     """Force quit all processing."""
 
     pass
 
 
 # define stopper class
-class stopper:
+class Stopper:
     """Deffinition of processing stopper class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.value = False
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.value)
 
-    def enable(self):
+    def enable(self) -> None:
         self.value = True
 
-    def disable(self):
+    def disable(self) -> None:
         self.value = False
 
-    def check(self):
+    def check(self) -> None:
         if self.value:
             self.value = False
-            raise ForceQuit
+            raise ForceQuitError
 
 
 # init stopper
-STOPPER = stopper()
+STOPPER = Stopper()
 CHECK_FORCE_QUIT = STOPPER.check
 
 
 # mspy stopper functions
-def stop():
+def stop() -> None:
     """Set stopper to stop."""
     STOPPER.enable()
 
 
-def start():
+def start() -> None:
     """Set stopper to start."""
     STOPPER.disable()

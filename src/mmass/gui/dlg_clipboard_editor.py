@@ -25,10 +25,10 @@ from . import mwx
 # -----------------------
 
 
-class dlgClipboardEditor(wx.Dialog):
+class DlgClipboardEditor(wx.Dialog):
     """Clipboard data editor for document import."""
 
-    def __init__(self, parent, data):
+    def __init__(self, parent: wx.Window | None, data: str) -> None:
         # initialize document frame
         wx.Dialog.__init__(
             self,
@@ -56,9 +56,8 @@ class dlgClipboardEditor(wx.Dialog):
 
     # ----
 
-    def makeGUI(self):
+    def makeGUI(self) -> wx.Sizer:
         """Make GUI elements."""
-
         # make elements
         self.data_value = wx.TextCtrl(
             self, -1, "Reading data...", size=(250, 300), style=wx.TE_MULTILINE
@@ -98,9 +97,8 @@ class dlgClipboardEditor(wx.Dialog):
 
     # ----
 
-    def onOK(self, evt):
+    def onOK(self, _evt: wx.Event) -> None:
         """Get name."""
-
         # get data
         self.data = self.data_value.GetValue()
 

@@ -20,8 +20,6 @@ import math
 
 import numpy
 
-# load blocks
-# load objects
 # load modules
 from . import (
     blocks,
@@ -29,12 +27,10 @@ from . import (
     mod_basics,
     mod_peakpicking,
     mod_signal,
+    mod_stopper,
     obj_compound,
     obj_peaklist,
 )
-
-# load stopper
-from .mod_stopper import CHECK_FORCE_QUIT
 
 # ISOTOPIC PATTERN FUNCTIONS
 # --------------------------
@@ -51,7 +47,8 @@ def pattern(
     model="gaussian",
 ):
     """Calculate isotopic pattern for given compound.
-    compound (str or mspy.compound) - compound
+
+    Compound (str or mspy.compound) - compound
     fwhm (float) - gaussian peak width
     threshold (float) - relative intensity threshold for isotopes (in %/100)
     charge (int) - charge to be calculated
@@ -60,21 +57,20 @@ def pattern(
     real (bool) - get real peaks from calculated profile
     model (gaussian, lorentzian, gausslorentzian) - peak shape function
     """
-
     # check compound
-    if not isinstance(compound, obj_compound.compound):
-        compound = obj_compound.compound(compound)
+    if not isinstance(compound, obj_compound.Compound):
+        compound = obj_compound.Compound(compound)
 
     # check agent formula
-    if agentFormula != "e" and not isinstance(agentFormula, obj_compound.compound):
-        agentFormula = obj_compound.compound(agentFormula)
+    if agentFormula != "e" and not isinstance(agentFormula, obj_compound.Compound):
+        agentFormula = obj_compound.Compound(agentFormula)
 
     # add charging agent to compound
     if charge and agentFormula != "e":
         formula = compound.formula()
         for atom, count in list(agentFormula.composition().items()):
-            formula += "%s%d" % (atom, count * (charge // agentCharge))
-        compound = obj_compound.compound(formula)
+            formula += f"{atom}{count * (charge // agentCharge):d}"
+        compound = obj_compound.Compound(formula)
 
     # get composition and check for negative atom counts
     composition = compound.composition()
@@ -101,13 +97,13 @@ def pattern(
             isotope = blocks.elements[symbol].isotopes[int(massNumber)]
             atomPattern.append([isotope[0], 1.0])  # [mass, abundance]
         else:
-            for massNumber, isotope in list(blocks.elements[atom].isotopes.items()):
+            for _, isotope in list(blocks.elements[atom].isotopes.items()):
                 if isotope[1] > 0.0:
                     atomPattern.append(list(isotope))  # [mass, abundance]
 
         # add atoms
-        for i in range(atomCount):
-            CHECK_FORCE_QUIT()
+        for _ in range(atomCount):
+            mod_stopper.CHECK_FORCE_QUIT()
 
             # if pattern is empty (first atom) add current atom pattern
             if len(finalPattern) == 0:
@@ -167,13 +163,13 @@ def pattern(
 
 def gaussian(x, minY, maxY, fwhm=0.1, points=500):
     """Make Gaussian peak.
+
     mz (float) - peak m/z value
     minY (float) - min y-value
     maxY (float) - max y-value
     fwhm (float) - peak fwhm value
     points (int) - number of points
     """
-
     # make gaussian
     return calculations.signal_gaussian(
         float(x), float(minY), float(maxY), float(fwhm), int(points)
@@ -185,13 +181,13 @@ def gaussian(x, minY, maxY, fwhm=0.1, points=500):
 
 def lorentzian(x, minY, maxY, fwhm=0.1, points=500):
     """Make Lorentzian peak.
+
     mz (float) - peak m/z value
     minY (float) - min y-value
     maxY (float) - max y-value
     fwhm (float) - peak fwhm value
     points (int) - number of points
     """
-
     # make gaussian
     return calculations.signal_lorentzian(
         float(x), float(minY), float(maxY), float(fwhm), int(points)
@@ -203,13 +199,13 @@ def lorentzian(x, minY, maxY, fwhm=0.1, points=500):
 
 def gausslorentzian(x, minY, maxY, fwhm=0.1, points=500):
     """Make half-Gaussian half-Lorentzian peak.
+
     mz (float) - peak m/z value
     minY (float) - min y-value
     maxY (float) - max y-value
     fwhm (float) - peak fwhm value
     points (int) - number of points
     """
-
     # make gaussian
     return calculations.signal_gausslorentzian(
         float(x), float(minY), float(maxY), float(fwhm), int(points)
@@ -229,7 +225,8 @@ def profile(
     model="gaussian",
 ):
     """Make profile spectrum for given peaklist.
-    peaklist (mspy.peaklist) - peaklist
+
+    Peaklist (mspy.peaklist) - peaklist
     fwhm (float) - default peak fwhm
     points (int) - default number of points per peak width (not used if raster is given)
     noise (float) - random noise width
@@ -237,10 +234,9 @@ def profile(
     forceFwhm (bool) - use default fwhm for all peaks
     model (gaussian, lorentzian, gausslorentzian) - peak shape function
     """
-
     # check peaklist type
-    if not isinstance(peaklist, obj_peaklist.peaklist):
-        peaklist = obj_peaklist.peaklist(peaklist)
+    if not isinstance(peaklist, obj_peaklist.Peaklist):
+        peaklist = obj_peaklist.Peaklist(peaklist)
 
     # check raster type
     if raster is not None and not isinstance(raster, numpy.ndarray):
@@ -287,12 +283,12 @@ def profile(
 
 def matchpattern(signal, pattern, pickingHeight=0.75, baseline=None):
     """Compare signal with given isotopic pattern.
+
     signal (numpy array) - signal data points
     pattern (list of [mz,intens]) - theoretical pattern to compare
     pickingHeight (float) - centroiding height
     baseline (numpy array) - signal baseline
     """
-
     # check signal type
     if not isinstance(signal, numpy.ndarray):
         raise TypeError("Signal must be NumPy array!")
@@ -338,10 +334,10 @@ def matchpattern(signal, pattern, pickingHeight=0.75, baseline=None):
 
 def _consolidate(isotopes, window):
     """Group peaks within specified window.
+
     isotopes: (list of [mass, abundance]) isotopes list
     window: (float) grouping window
     """
-
     if isinstance(isotopes, numpy.ndarray):
         isotopes = isotopes.tolist()
 
@@ -373,7 +369,6 @@ def _consolidate(isotopes, window):
 
 def _normalize(data):
     """Normalize data."""
-
     # get maximum Y
     maximum = data[0][1]
     for item in data:
