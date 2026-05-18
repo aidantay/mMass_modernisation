@@ -22,7 +22,7 @@ import random
 
 import wx
 
-from mmass.mspy import plot
+from mmass.viewmodel import plot
 
 # load modules
 from . import config, mwx

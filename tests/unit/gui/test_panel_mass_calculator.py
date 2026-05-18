@@ -10,7 +10,8 @@ if not hasattr(wx, "RESIZE_BOX"):
 import contextlib
 
 from mmass.gui import config, doc, ids, images, panel_mass_calculator
-from mmass.mspy import mod_signal, plot_objects
+from mmass.mspy import mod_signal
+from mmass.viewmodel import plot_objects
 
 
 def safe_updateTmpSpectrum(self):
@@ -58,8 +59,8 @@ def patched_config(mocker):
 def calculator_panel(wx_app, mock_parent, patched_config, mocker):
     """Fixture for PanelMassCalculator instance."""
     # wx_app is a session fixture from conftest.py
-    # Patch mspy.plot.Canvas to avoid wxAssertionError in headless environment
-    mocker.patch("mmass.mspy.plot.Canvas")
+    # Patch mmass.viewmodel.plot.Canvas to avoid wxAssertionError in headless environment
+    mocker.patch("mmass.viewmodel.plot.Canvas")
     panel = panel_mass_calculator.PanelMassCalculator(mock_parent)
 
     # Patch updateTmpSpectrum to avoid numpy comparison ValueError (using 'is' instead of '==')
@@ -367,7 +368,7 @@ def test_updatePatternCanvas(calculator_panel, patched_config, mocker):
     mock_draw = mocker.patch.object(calculator_panel.patternCanvas, "draw")
     calculator_panel.updatePatternCanvas()
     assert mock_draw.called
-    # Check if first argument is mspy.plot.Container
+    # Check if first argument is plot_objects.Container
     args, _ = mock_draw.call_args
     assert isinstance(args[0], plot_objects.Container)
 

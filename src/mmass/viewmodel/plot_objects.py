@@ -23,7 +23,7 @@ import numpy as np
 import wx
 
 # load modules
-from . import calculations, mod_signal
+from mmass.mspy import calculations, mod_signal
 
 # MAIN PLOT OBJECTS
 # -----------------

@@ -4,8 +4,14 @@ import sys
 import pytest
 import wx
 
-from mmass.gui import config, panel_spectrum_generator
+from mmass.gui import config
 from mmass.mspy import obj_peak
+
+# Helper to get the PanelSpectrumGenerator class
+def get_panel_spectrum_generator():
+    from mmass.gui import panel_spectrum_generator
+
+    return panel_spectrum_generator
 
 # Constants for GUI layout that might be needed early
 if not hasattr(wx, "RESIZE_BOX"):
@@ -14,7 +20,7 @@ if not hasattr(wx, "MAXIMIZE_BOX"):
     wx.MAXIMIZE_BOX = 0
 
 
-# Fixture to mock images, mwx and mspy.plot modules needed for importing PanelSpectrumGenerator
+# Fixture to mock images, mwx and plot modules needed for importing PanelSpectrumGenerator
 @pytest.fixture(autouse=True)
 def mock_dependencies(mocker):
     class MockImageLib:
@@ -67,7 +73,6 @@ def mock_dependencies(mocker):
     mock_plot.container.return_value = mock_container_inst
 
     mock_mspy = mocker.Mock()
-    mock_mspy.plot = mock_plot
 
     mocker.patch.dict(
         sys.modules,
@@ -77,7 +82,7 @@ def mock_dependencies(mocker):
             "mwx": mock_mwx,
             "mmass.gui.mwx": mock_mwx,
             "mmass.mspy": mock_mspy,
-            "mmass.mspy.plot": mock_plot,
+            "mmass.viewmodel.plot": mock_plot,
         },
     )
     return
@@ -85,6 +90,9 @@ def mock_dependencies(mocker):
 
 @pytest.fixture
 def panel(wx_app, mocker):
+    from mmass.gui import config
+
+    panel_spectrum_generator = get_panel_spectrum_generator()
     config.spectrumGenerator.update(
         {
             "fwhm": 0.1,
@@ -160,7 +168,7 @@ def test_onStop_idle(panel, mocker):
 
 
 def test_onStop_processing(panel, mocker):
-
+    panel_spectrum_generator = get_panel_spectrum_generator()
     panel.processing = mocker.Mock()
     panel.processing.is_alive.return_value = True
     mock_stop = mocker.patch.object(panel_spectrum_generator.mspy, "stop")
@@ -169,6 +177,7 @@ def test_onStop_processing(panel, mocker):
 
 
 def test_getParams_happy(panel, mocker):
+    from mmass.gui import config
     mocker.patch.object(panel.fwhm_value, "GetValue", return_value="0.5")
     mocker.patch.object(panel.points_value, "GetValue", return_value="20")
     mocker.patch.object(panel.noise_value, "GetValue", return_value="0.123")
@@ -186,6 +195,7 @@ def test_getParams_happy(panel, mocker):
 
 
 def test_getParams_asymmetrical(panel, mocker):
+    from mmass.gui import config
     mocker.patch.object(
         panel.peakShape_choice, "GetStringSelection", return_value="Asymmetrical"
     )
@@ -195,6 +205,7 @@ def test_getParams_asymmetrical(panel, mocker):
 
 
 def test_onShowPeaks(panel, mocker):
+    from mmass.gui import config
     mocker.patch.object(panel, "updateSpectrumCanvas")
     mocker.patch.object(panel.showPeaks_check, "GetValue", return_value=True)
 
@@ -203,6 +214,7 @@ def test_onShowPeaks(panel, mocker):
 
 
 def test_onShowOverlay(panel, mocker):
+    from mmass.gui import config
     mocker.patch.object(panel, "updateSpectrumOverlay")
     mocker.patch.object(panel.showOverlay_check, "GetValue", return_value=True)
 
@@ -211,6 +223,7 @@ def test_onShowOverlay(panel, mocker):
 
 
 def test_onShowFlipped(panel, mocker):
+    from mmass.gui import config
     mocker.patch.object(panel, "updateSpectrumOverlay")
     mocker.patch.object(panel.showFlipped_check, "GetValue", return_value=True)
 
@@ -241,6 +254,7 @@ def test_onApply_happy_no_profile(panel, mocker):
 
 
 def test_onApply_with_profile_cancel(panel, mocker):
+    panel_spectrum_generator = get_panel_spectrum_generator()
     doc = MockDocument(mocker)
     doc.spectrum._has_profile = True
     panel.currentDocument = doc
@@ -258,6 +272,7 @@ def test_onApply_with_profile_cancel(panel, mocker):
 
 
 def test_updateSpectrumOverlay(panel, mocker):
+    from mmass.gui import config
     panel.currentProfile = [1, 2, 3]
     config.spectrumGenerator["showOverlay"] = True
     config.spectrumGenerator["showFlipped"] = False
@@ -266,6 +281,8 @@ def test_updateSpectrumOverlay(panel, mocker):
 
 
 def test_runSpectrumGenerator_gaussian(panel, mocker):
+    from mmass.gui import config
+    panel_spectrum_generator = get_panel_spectrum_generator()
     doc = MockDocument(mocker)
     peak = obj_peak.Peak(100.0, 1000.0)
     peak.fwhm = 0.5
@@ -284,6 +301,8 @@ def test_runSpectrumGenerator_gaussian(panel, mocker):
 
 
 def test_runSpectrumGenerator_lorentzian(panel, mocker):
+    from mmass.gui import config
+    panel_spectrum_generator = get_panel_spectrum_generator()
     doc = MockDocument(mocker)
     peak = obj_peak.Peak(100.0, 1000.0)
     peak.fwhm = 0.5

@@ -98,7 +98,7 @@ def dlg(wx_app, mock_scans, mocker):
         side_effect=lambda *a, **k: mock_list_ctrl_factory(mocker, *a, **k),
     )
 
-    # Patch mspy.plot.Canvas to return a real Panel but with mock methods
+    # Patch plot.Canvas to return a real Panel but with mock methods
     mocker.patch(
         "mmass.gui.dlg_select_scans.plot.Canvas",
         side_effect=lambda *a, **k: mock_canvas_factory(mocker, *a, **k),

@@ -40,7 +40,7 @@ def mock_dependencies(wx_app, mocker):
     mock_mwx.BgrPanel = lambda parent, id, bitmap, size: wx.Panel(parent, id, size=size)
     mock_mwx.Validator = lambda name: wx.DefaultValidator
 
-    # Mock mspy and mspy.plot
+    # Mock mspy and plot modules
     mock_plot = mocker.Mock()
 
     def mock_canvas_class(parent, *args, **kwargs):
@@ -97,7 +97,6 @@ def mock_dependencies(wx_app, mocker):
     )
 
     mock_mspy = mocker.Mock()
-    mock_mspy.plot = mock_plot
     mock_mspy.mz = mocker.Mock(side_effect=lambda mz, charge, currentCharge: mz)
     mock_mspy.labelpeak = mocker.Mock()
     mock_mspy.labelpoint = mocker.Mock()
@@ -105,18 +104,16 @@ def mock_dependencies(wx_app, mocker):
     mock_mspy.envcentroid = mocker.Mock()
     mock_mspy.peak = mocker.Mock()
 
-    # Apply the mocks to sys.modules BEFORE any other imports
-    mocker.patch.dict(
-        sys.modules,
-        {
-            "images": mock_images,
-            "mmass.gui.images": mock_images,
-            "mwx": mock_mwx,
-            "mmass.gui.mwx": mock_mwx,
-            "mmass.mspy": mock_mspy,
-            "mmass.mspy.plot": mock_plot,
-        },
-    )
+    # Directly patch the module's attributes to ensure our mocks are used
+    # even if the module was already imported elsewhere.
+    import mmass.gui.panel_spectrum as mod
+
+    mocker.patch.object(mod, "images", mock_images)
+    mocker.patch.object(mod, "mwx", mock_mwx)
+    mocker.patch.object(mod, "mspy", mock_mspy)
+    mocker.patch.object(mod, "plot", mock_plot)
+
+    return
 
 
 # Helper to get the PanelSpectrum class, ensuring it's imported after mocks are set up

@@ -17,8 +17,8 @@
 
 
 # load objects
-from .plot_canvas import Canvas, Printout, contextlib
-from .plot_objects import (
+from mmass.viewmodel.plot_canvas import Canvas, Printout, contextlib
+from mmass.viewmodel.plot_objects import (
     Annotations,
     Container,
     Points,

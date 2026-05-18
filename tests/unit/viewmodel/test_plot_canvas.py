@@ -3,16 +3,9 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from mmass.mspy import plot_canvas
+from mmass.viewmodel import plot_canvas
 
 wx = pytest.importorskip("wx")
-
-
-@pytest.fixture(scope="session")
-def wx_app():
-    """Session-scoped fixture to initialize wx.App for headless UI testing."""
-    return wx.App(False)
-    # No explicit app.MainLoop() or app.Exit() needed for these tests
 
 
 @pytest.fixture

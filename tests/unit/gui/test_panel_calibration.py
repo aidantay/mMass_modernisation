@@ -14,7 +14,7 @@ if not hasattr(wx, "RESIZE_BOX"):
 
 @pytest.fixture
 def mock_mspy_dependencies(monkeypatch, mocker):
-    """Mock mspy.calibration, mspy.delta, and mspy.plot."""
+    """Mock mspy.calibration, mspy.delta, and plot."""
     # Mock mspy.calibration
     mock_calib_fn = mocker.Mock(side_effect=lambda params, mz: mz + 0.1)
     mock_calib = mocker.Mock(return_value=(mock_calib_fn, [1.0, 0.1]))
@@ -29,7 +29,7 @@ def mock_mspy_dependencies(monkeypatch, mocker):
     mock_delta = mocker.Mock(side_effect=delta_side_effect)
     monkeypatch.setattr(mod_basics, "delta", mock_delta)
 
-    # Mock mspy.plot.Canvas to return a real wx.Panel that looks like a canvas
+    # Mock plot.Canvas to return a real wx.Panel that looks like a canvas
     def canvas_side_effect(parent, *args, **kwargs):
         c = wx.Panel(parent, -1)
         c.setProperties = mocker.Mock()
@@ -37,12 +37,12 @@ def mock_mspy_dependencies(monkeypatch, mocker):
         c.draw = mocker.Mock()
         return c
 
-    monkeypatch.setattr(
-        panel_calibration.plot, "Canvas", mocker.Mock(side_effect=canvas_side_effect)
+    mocker.patch.object(
+        panel_calibration.plot, "Canvas", side_effect=canvas_side_effect
     )
 
-    # Mock mspy.plot.Container
-    monkeypatch.setattr(panel_calibration.plot, "Container", mocker.Mock())
+    # Mock plot.Container
+    mocker.patch.object(panel_calibration.plot, "Container")
 
     return mock_calib, mock_delta
 

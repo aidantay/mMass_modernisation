@@ -110,9 +110,9 @@ def mock_config(mocker):
 @pytest.fixture
 def panel(wx_app, mock_parent, mock_config, mock_images, mocker):
     """Fixture that instantiates PanelEnvelopeFit."""
-    # Mock mspy.plot.Canvas and container to avoid actual plotting during init
-    mock_canvas = mocker.patch("mmass.mspy.plot.Canvas")
-    mock_container = mocker.patch("mmass.mspy.plot.Container")
+    # Mock mmass.viewmodel.plot.Canvas and container to avoid actual plotting during init
+    mock_canvas = mocker.patch("mmass.viewmodel.plot.Canvas")
+    mock_container = mocker.patch("mmass.viewmodel.plot.Container")
 
     def canvas_side_effect(parent, *args, **kwargs):
         canvas = wx.Window(parent)
@@ -355,7 +355,7 @@ def test_update_spectrum_canvas(panel, mocker):
     panel.currentFit.model = [7, 8, 9]
     panel.currentFit.envelope.return_value = [10, 11, 12]
 
-    mocker.patch("mmass.mspy.plot.Points")
+    mocker.patch("mmass.viewmodel.plot.Points")
     mock_append = mocker.patch.object(panel.spectrumContainer, "append")
     mock_draw.reset_mock()
 

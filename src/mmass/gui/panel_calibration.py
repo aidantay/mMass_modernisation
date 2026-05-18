@@ -23,7 +23,7 @@ import numpy
 import wx
 
 from mmass import mspy
-from mmass.mspy import plot
+from mmass.viewmodel import plot
 
 # load modules
 from . import config, ids, images, libs, mwx

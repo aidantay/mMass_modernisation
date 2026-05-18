@@ -7,7 +7,7 @@ from hypothesis.extra.numpy import arrays
 from mmass.mspy.obj_peak import Peak
 from mmass.mspy.obj_peaklist import Peaklist
 from mmass.mspy.obj_scan import Scan
-from mmass.mspy.plot_objects import (
+from mmass.viewmodel.plot_objects import (
     Annotations,
     Container,
     Points,
@@ -18,16 +18,6 @@ from mmass.mspy.plot_objects import (
 )
 
 wx = pytest.importorskip("wx")
-
-# SESSION-SCOPED WX.APP FIXTURE
-# ==============================
-
-
-@pytest.fixture(scope="session")
-def wx_app():
-    """Session-scoped fixture to initialize wx.App for headless UI testing."""
-    return wx.App(False)
-
 
 # DATA FIXTURES
 # =============

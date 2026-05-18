@@ -596,8 +596,6 @@ def test_deisotope_isotope_cluster():
 
     # Should find isotope pattern
     assert peaklist[0].isotope is not None or peaklist[0].charge is None
-    # assert peaks[0].__str__() == 'A'
-    assert peaklist.__str__() == 'A'
 
 
 def test_deisotope_charge_2_cluster():

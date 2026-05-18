@@ -22,7 +22,7 @@ import threading
 import wx
 
 from mmass import mspy
-from mmass.mspy import plot
+from mmass.viewmodel import plot
 
 from . import config, images, mwx
 

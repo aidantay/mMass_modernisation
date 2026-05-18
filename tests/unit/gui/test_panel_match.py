@@ -77,10 +77,10 @@ def panel(wx_app, mock_parentTool, mock_mainFrame, mocker):
     mocker.patch.dict(config.main, mock_config_main, clear=True)
     mocker.patch.dict(config.spectrum, mock_config_spectrum, clear=True)
     mocker.patch.dict(images.lib, mock_images_lib, clear=True)
-    mocker.patch("mmass.mspy.plot.Canvas", side_effect=create_mock_canvas)
-    mocker.patch("mmass.mspy.plot.Container")
-    mocker.patch("mmass.mspy.plot.Points")
-    mocker.patch("mmass.mspy.plot.Spectrum")
+    mocker.patch("mmass.viewmodel.plot.Canvas", side_effect=create_mock_canvas)
+    mocker.patch("mmass.viewmodel.plot.Container")
+    mocker.patch("mmass.viewmodel.plot.Points")
+    mocker.patch("mmass.viewmodel.plot.Spectrum")
 
     # Instantiate panel
     p = panel_match.PanelMatch(mock_parentTool, mock_mainFrame, "massfilter")
@@ -123,7 +123,7 @@ def test_init(wx_app, mock_mainFrame, mocker):
         return p
 
     mocker.patch.dict(images.lib, mock_images_lib, clear=True)
-    mocker.patch("mmass.mspy.plot.Canvas", side_effect=create_mock_canvas)
+    mocker.patch("mmass.viewmodel.plot.Canvas", side_effect=create_mock_canvas)
 
     for module, expected_title in list(modules.items()):
         p = panel_match.PanelMatch(parent, mock_mainFrame, module)
@@ -557,9 +557,9 @@ def test_updateErrorCanvas(panel, mocker):
     panel.currentErrors = [[100.0, 0.1], [200.0, 0.2]]
     panel.currentPeaklist = [obj_peak.Peak(mz=100.0, ai=1000)]
 
-    mock_container = mocker.patch("mmass.mspy.plot.Container")
-    mock_points = mocker.patch("mmass.mspy.plot.Points")
-    mock_spectrum = mocker.patch("mmass.mspy.plot.Spectrum")
+    mock_container = mocker.patch("mmass.viewmodel.plot.Container")
+    mock_points = mocker.patch("mmass.viewmodel.plot.Points")
+    mock_spectrum = mocker.patch("mmass.viewmodel.plot.Spectrum")
     mocker.patch.object(panel, "makeCurrentPeaklist", return_value=[])
 
     # Reset mock to ignore calls during setup

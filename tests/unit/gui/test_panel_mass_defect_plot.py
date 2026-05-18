@@ -19,8 +19,8 @@ def mock_parent(wx_app):
 def panel(wx_app, mock_parent, mocker):
     """Fixture to provide a PanelMassDefectPlot instance."""
     # Mock canvas methods that cause issues in headless/unrealized state
-    mocker.patch("mmass.mspy.plot_canvas.Canvas.onSize", return_value=None)
-    mocker.patch("mmass.mspy.plot_canvas.Canvas.draw", return_value=None)
+    mocker.patch("mmass.viewmodel.plot_canvas.Canvas.onSize", return_value=None)
+    mocker.patch("mmass.viewmodel.plot_canvas.Canvas.draw", return_value=None)
     p = panel_mass_defect_plot.PanelMassDefectPlot(mock_parent)
     # Ensure plotBuffer exists because canvas expects it
     p.plotCanvas.plotBuffer = wx.Bitmap(1, 1)
